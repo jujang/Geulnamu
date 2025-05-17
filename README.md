@@ -56,7 +56,6 @@
 
 🔗 [ERD 보기 (ERDCloud)](https://www.erdcloud.com/d/mgGNCamYYs28DYphr)
 
-![ERD 스키마](./docs/db-schema.png)
 
 ### 주요 테이블 요약
 
