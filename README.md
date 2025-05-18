@@ -70,6 +70,37 @@
 
 ---
 
+## 🌿 브랜치 전략 (Git Flow)
+
+* **main**: 프로덕션(배포) 브랜치
+* **dev**: 통합 개발 브랜치
+* **feature/**: 기능 개발 (dev → PR → dev Merge)
+* **hotfix/**: 긴급 수정 (main → PR → main & dev Merge)
+
+> **브랜치 네이밍 가이드라인**: 소문자 영문, 숫자, 하이픈(`-`)만 사용하고, 한글이나 공백, 특수문자 사용은 제한함.
+
+### Quick Start
+
+```bash
+# dev 최신화
+git switch dev && git pull origin dev
+
+# 기능 브랜치 생성
+git switch -c feature/로그인
+
+# 개발 → 커밋 → 푸시 → GitHub PR → dev Merge
+```
+
+### Auto Back-Merge
+
+* prod의 최신 변경사항을 dev에 자동으로 반영해 일관된 브랜치 이력 유지
+
+* prod(main) 브랜치에 PR이 **머지**될 때 자동으로 dev에 Back-merge PR을 생성
+
+* `.github/workflows/backmerge.yml` 참고
+
+---
+
 ## ✏️ 커밋 컨벤션
 
 프로젝트에서는 다음과 같은 커밋 메시지 규칙을 사용합니다.
@@ -92,15 +123,6 @@ feat: 로그인 기능 추가
 fix: 출석 이력 조회 오류 수정
 docs: README에 커밋 전략 추가
 ```
-
----
-
-## 🌿 브랜치 전략
-
-- `prod` ← 운영용 메인 브랜치  
-- `dev` ← 개발용 브랜치
-
-> 모든 개발 작업은 `dev` 브랜치에서 수행 후, 검토를 거쳐 `prod` 브랜치로 병합합니다.
 
 ---
 
