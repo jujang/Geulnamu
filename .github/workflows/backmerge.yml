@@ -2,8 +2,6 @@
 name: Back-merge prod into dev
 
 # prod 브랜치에 새 병합(merge)이 있을 때마다 동작
-name: Back-merge prod into dev
-
 on:
   pull_request:
     types: [closed]
