@@ -2,34 +2,34 @@
 name: Back-merge prod into dev
 
 # prod 브랜치에 새 병합(merge)이 있을 때마다 동작
+name: Back-merge prod into dev
+
 on:
   pull_request:
-    types: 
-      - closed
-    branches:
-      - prod
+    types: [closed]
+    branches: [prod]
 
 jobs:
   backmerge:
     if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout prod branch
         uses: actions/checkout@v3
         with:
-          # 모든 브랜치/태그 이력 가져오기
+          # prod 브랜치 전체 이력과 함께 가져오기
           fetch-depth: 0
+          ref: prod
 
       - name: Create Back-merge Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
           # 자동 생성될 PR의 베이스와 헤드        
           base: dev
-          head: prod
+          branch: backmerge-prod-into-dev    # PR용 브랜치 이름
           title: '🔄 Back-merge prod into dev'
           body: |
             자동으로 `prod`의 최신 변경사항을 `dev`에 반영하기 위한 PR입니다.
           commit-message: 'chore: back-merge prod into dev'
           labels: back-merge
-          # 브랜치 삭제 옵션 (prod는 삭제하지 않음)          
           delete-branch: false
