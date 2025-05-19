@@ -8,10 +8,11 @@
 ## 🛠️ 주요 기능
 
 ### 📌 공통 기능 (일반 사용자)
+
 - 로그인 (U)
 - 모임별 개인 출석 이력 확인 (R)
 - 출석 처리 (U)
-  - (추후 개발 기능) GPS 연동 출석 처리 
+  - (추후 개발 기능) GPS 연동 출석 처리
 - (추후 개발 기능) 토론 참여 알림 (R)
 - (추후 개발 기능) 모임별 본인 토론 조 확인 (R)
 - (추후 개발 기능) 오늘의 발제 작성 (C)
@@ -19,9 +20,11 @@
 - (추후 개발 기능) 모임별 조별 발제 조회 (R)
 
 ### 👑 모임장·부모임장·관리자
+
 - 회원 등급 수정 (U)
 
 ### 🛡 운영진·준운영진
+
 - 모임 생성 (C)
 - 모임 목록 조회 (R)
 - 모임 출석용 QR 생성 및 조회 (R)
@@ -58,15 +61,14 @@
 
 🔗 [ERD 보기 (ERDCloud)](https://www.erdcloud.com/d/mgGNCamYYs28DYphr)
 
-
 ### 주요 테이블 요약
 
-| 테이블 | 설명 |
-|--------|------|
-| `Member` | 사용자 정보 및 권한 등 |
-| `Meeting` | 모임 정보 (정기/번개/특수 등) |
+| 테이블              | 설명                          |
+| ------------------- | ----------------------------- |
+| `Member`            | 사용자 정보 및 권한 등        |
+| `Meeting`           | 모임 정보 (정기/번개/특수 등) |
 | `MeetingAttendance` | 모임 회차별 출석 및 그룹 정보 |
-| `BookQuestion` | 발제 내용 |
+| `BookQuestion`      | 발제 내용                     |
 
 > 상세한 컬럼 정보는 ERDCloud 링크를 통해 확인할 수 있습니다.
 
@@ -74,10 +76,13 @@
 
 ## 🌿 브랜치 전략 (Git Flow)
 
-* **main**: 프로덕션(배포) 브랜치
-* **dev**: 통합 개발 브랜치
-* **feature/**: 기능 개발 (dev → PR → dev Merge)
-* **hotfix/**: 긴급 수정 (main → PR → main & dev Merge)
+- **main**: 프로덕션(배포) 브랜치
+- **dev**: 통합 개발 브랜치
+- **feature/backend/**: 백엔드 기능 개발 (dev → PR → dev Merge)
+- **feature/frontend/**: 프론트엔드 기능 개발 (dev → PR → dev Merge)
+- **feature/common/**: BE/FE 구분 없는 공통 수정 (문서·설정 등)
+- **chore/**: 잡무(빌드·설정·문서 등)
+- **hotfix/**: 긴급 수정 (main → PR → main & dev Merge)
 
 > **브랜치 네이밍 가이드라인**: 소문자 영문, 숫자, 하이픈(`-`)만 사용하고, 한글이나 공백, 특수문자 사용은 제한함.
 
@@ -88,7 +93,7 @@
 git switch dev && git pull origin dev
 
 # 기능 브랜치 생성
-git switch -c feature/로그인
+git switch -c feature/backend/login
 
 # 개발 → 커밋 → 푸시 → GitHub PR → dev Merge
 ```
@@ -99,23 +104,52 @@ git switch -c feature/로그인
 
 프로젝트에서는 다음과 같은 커밋 메시지 규칙을 사용합니다.
 
+---
+
+### ✅ 커밋 형식
+
+```
+
+<type>(<scope>): <subject>
+
+```
+
+- **type**: feat, fix, docs, refactor, test, chore
+- **scope** (선택):
+  - `be` (backend)
+  - `fe` (frontend)
+  - `common` (공통 문서·설정)
+- **subject**: 명령형/현재 시제, 50자 이내, 마침표 생략
+
+---
+
 ### ✅ 커밋 타입
 
-| 타입 | 설명 |
-|------|------|
-| `feat` | 새로운 기능 추가 |
-| `fix` | 버그 수정 |
-| `docs` | 문서 수정 (README 등) |
+| 타입       | 설명                                |
+| ---------- | ----------------------------------- |
+| `feat`     | 새로운 기능 추가                    |
+| `fix`      | 버그 수정                           |
+| `docs`     | 문서 수정 (README 등)               |
 | `refactor` | 리팩토링 (기능 변화 없이 코드 개선) |
-| `test` | 테스트 코드 추가 또는 수정 |
-| `chore` | 설정 파일 수정 등 기타 작업 |
+| `test`     | 테스트 코드 추가 또는 수정          |
+| `chore`    | 설정 파일 수정 등 기타 작업         |
+
+### ✅ 커밋 스코프
+
+커밋 메시지에서 `scope`는 변경 대상 영역을 나타냅니다.
+
+- `be` (backend): 백엔드 관련 변경
+- `fe` (frontend): 프론트엔드 관련 변경
+- `common`: 공통 문서·설정 등 프론트/백엔드 구분 없는 변경
+- 생략 가능 (범위가 명확하지 않거나 전체에 영향이 있을 때)
 
 ### ✅ 커밋 메시지 예시
 
 ```bash
-feat: 로그인 기능 추가
-fix: 출석 이력 조회 오류 수정
-docs: README에 커밋 전략 추가
+feat(be): 로그인 기능 추가
+fix(fe): 로그인 페이지 오류 수정
+docs(common): 커밋 전략 README 업데이트
+chore: CI 설정 정리        # 범위가 따로 없을 때는 생략 가능
 ```
 
 ---
