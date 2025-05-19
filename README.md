@@ -104,14 +104,10 @@ git switch -c feature/backend/login
 
 프로젝트에서는 다음과 같은 커밋 메시지 규칙을 사용합니다.
 
----
-
 ### ✅ 커밋 형식
 
 ```
-
 <type>(<scope>): <subject>
-
 ```
 
 - **type**: feat, fix, docs, refactor, test, chore
@@ -120,8 +116,6 @@ git switch -c feature/backend/login
   - `fe` (frontend)
   - `common` (공통 문서·설정)
 - **subject**: 명령형/현재 시제, 50자 이내, 마침표 생략
-
----
 
 ### ✅ 커밋 타입
 
