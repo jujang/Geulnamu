@@ -27,8 +27,7 @@ jobs:
           branch: backmerge-prod-into-dev    # PR용 브랜치 이름
           title: '🔄 Back-merge prod into dev'
           body: |
-           prod 변경사항을 dev에 반영하는 빈 커밋 PR입니다.
+           자동으로 `prod`의 최신 변경사항을 `dev`에 반영하기 위한 PR입니다.
           commit-message: 'chore: back-merge prod into dev'
           labels: back-merge
-          allow-empty-commit: true        # ⭐ 빈 커밋 허용 옵션
           delete-branch: false
