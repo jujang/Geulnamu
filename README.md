@@ -93,14 +93,6 @@ git switch -c feature/로그인
 # 개발 → 커밋 → 푸시 → GitHub PR → dev Merge
 ```
 
-### Auto Back-Merge
-
-* prod의 최신 변경사항을 dev에 자동으로 반영해 일관된 브랜치 이력 유지
-
-* prod(main) 브랜치에 PR이 **머지**될 때 자동으로 dev에 Back-merge PR을 생성
-
-* `.github/workflows/backmerge.yml` 참고
-
 ---
 
 ## ✏️ 커밋 컨벤션
@@ -132,4 +124,3 @@ docs: README에 커밋 전략 추가
 
 - 기능 관련 추가 내용 및 기술 스택, 배포 환경에 대한 내용은 추후 추가 예정입니다.
 - 프론트는 범용성 및 향후 개발 스텍을 고려해 플러터를 사용해서, 서버는 사용량을 고려하여 firebase를 사용해서, 웹앱의 형태로 제작 예정입니다.
-- a
