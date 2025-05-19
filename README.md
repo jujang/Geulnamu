@@ -76,13 +76,13 @@
 
 ## 🌿 브랜치 전략 (Git Flow)
 
-- **main**: 프로덕션(배포) 브랜치
+- **prod**: 프로덕션(배포) 브랜치
 - **dev**: 통합 개발 브랜치
 - **feature/backend/**: 백엔드 기능 개발 (dev → PR → dev Merge)
 - **feature/frontend/**: 프론트엔드 기능 개발 (dev → PR → dev Merge)
 - **feature/common/**: BE/FE 구분 없는 공통 수정 (문서·설정 등)
 - **chore/**: 잡무(빌드·설정·문서 등)
-- **hotfix/**: 긴급 수정 (main → PR → main & dev Merge)
+- **hotfix/**: 긴급 수정 (prod → PR → prod & prod Merge)
 
 > **브랜치 네이밍 가이드라인**: 소문자 영문, 숫자, 하이픈(`-`)만 사용하고, 한글이나 공백, 특수문자 사용은 제한함.
 
