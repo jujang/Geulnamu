@@ -3,17 +3,20 @@ package com.geulnamu.domain.member;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.meetingAttendance.MeetingAttendance;
 import com.geulnamu.domain.shared.DateColumn;
+import com.geulnamu.domain.shared.MemberStatus;
+import com.geulnamu.domain.shared.RoleConverter;
+import com.geulnamu.infrastructure.exception.ExistDataException;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 
 @Getter
+@Builder
 @Entity(name = "members")
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends DateColumn {
 
@@ -25,11 +28,12 @@ public class Member extends DateColumn {
     @Column(name = "name", length = 10)
     private String name;
 
+    @Convert(converter = RoleConverter.class)
     @Column(name = "role", length = 10)
     private Role role;
 
     @Column(name = "gender", length = 6)
-    private Gender gender;
+    private String gender;
 
     @Column(name = "birth_date", length = 6)
     private String birthDate;
@@ -48,4 +52,24 @@ public class Member extends DateColumn {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+
+    public void updateMemberRole(Role role) {
+        this.role = role;
+    }
+
+    public void changeStatus(MemberStatus targetStatus) {
+        boolean isCurrentlyActive = this.deletedAt == null;
+        boolean wantToActivate = targetStatus.equals(MemberStatus.ACTIVE);
+
+        if (isCurrentlyActive == wantToActivate) {
+            throw new ExistDataException();
+        }
+
+        if (wantToActivate) {
+            this.deletedAt = null;
+        } else {
+            this.deletedAt = LocalDateTime.now();
+        }
+    }
 }

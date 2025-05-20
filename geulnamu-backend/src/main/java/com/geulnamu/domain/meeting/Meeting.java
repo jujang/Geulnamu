@@ -3,6 +3,7 @@ package com.geulnamu.domain.meeting;
 import com.geulnamu.domain.meetingAttendance.MeetingAttendance;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.DateColumn;
+import com.geulnamu.domain.shared.MeetingTypeConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class Meeting extends DateColumn {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Convert(converter = MeetingTypeConverter.class)
     @Column(name = "meeting_type", length = 7)
     private MeetingType meetingType;
 

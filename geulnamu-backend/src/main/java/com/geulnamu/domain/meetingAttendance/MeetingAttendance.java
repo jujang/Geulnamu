@@ -4,6 +4,7 @@ import com.geulnamu.domain.bookQuestion.BookQuestion;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.DateColumn;
+import com.geulnamu.domain.shared.DiscussionGroupConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class MeetingAttendance extends DateColumn {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Convert(converter = DiscussionGroupConverter.class)
     @Column(name = "discussion_group", length = 1)
     private DiscussionGroup discussionGroup;
 
