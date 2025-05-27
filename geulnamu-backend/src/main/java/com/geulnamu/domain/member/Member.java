@@ -36,7 +36,7 @@ public class Member extends DateColumn {
     private String nickname;
 
     @Convert(converter = RoleConverter.class)
-    @Column(name = "role", length = 10, nullable = false)
+    @Column(name = "role", length = 11, nullable = false)
     private Role role;
 
     @Convert(converter = GenderConverter.class)
