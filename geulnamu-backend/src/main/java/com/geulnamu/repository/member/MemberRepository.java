@@ -9,4 +9,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByIdAndDeletedAtIsNull(Long id);
 
+    Optional<Member> findByKakaoUserId(String kakaoUserId);
+
 }

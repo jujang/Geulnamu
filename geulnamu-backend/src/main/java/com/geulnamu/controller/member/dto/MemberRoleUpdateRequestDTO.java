@@ -1,6 +1,6 @@
 package com.geulnamu.controller.member.dto;
 
-import com.geulnamu.domain.member.Role;
+import com.geulnamu.domain.shared.enums.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 

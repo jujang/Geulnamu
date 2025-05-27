@@ -5,9 +5,14 @@ import com.geulnamu.global.response.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 
 @Slf4j
 @RestControllerAdvice
@@ -19,6 +24,26 @@ public class GlobalExceptionHandler {
     public BaseResponse serverExceptionHandler(ServerException exception) {
         log.error("message: {} ", exception.getMessage());
         return BaseResponse.ofFail(exception.getCode(), exception.getMessage(), exception.getField());
+    }
+
+    /**
+     * 입력값으로 LocalDate를 올바른 형식으로 입력하지 않았을 경우
+     * HttpStatus 400
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public BaseResponse DateTimeParseExceptionHandler(HttpMessageNotReadableException exception) {
+        log.error("message: {} ", exception.getMessage());
+        return BaseResponse.ofFail(400, ResponseMessage.BIRTH_DATE_NOT_VALIDATE, null);
+    }
+
+    /**
+     * Refresh Token 필요한 요청에서 Refresh Token 발견하지 못했을 경우
+     * HttpStatus 401
+     */
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public BaseResponse missingRequestCookieException(MissingRequestCookieException exception){
+        log.error("message : {} : {}", ResponseMessage.NOT_FOUND_REFRESH_TOKEN, exception.getMessage());
+        return BaseResponse.ofFail(401, ResponseMessage.NOT_FOUND_REFRESH_TOKEN, null);
     }
 
     /**

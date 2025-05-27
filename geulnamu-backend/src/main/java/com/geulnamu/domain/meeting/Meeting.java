@@ -3,7 +3,7 @@ package com.geulnamu.domain.meeting;
 import com.geulnamu.domain.meetingAttendance.MeetingAttendance;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.DateColumn;
-import com.geulnamu.domain.shared.MeetingTypeConverter;
+import com.geulnamu.domain.shared.converter.MeetingTypeConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

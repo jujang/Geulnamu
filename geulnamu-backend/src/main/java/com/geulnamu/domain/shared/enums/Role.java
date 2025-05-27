@@ -1,4 +1,4 @@
-package com.geulnamu.domain.member;
+package com.geulnamu.domain.shared.enums;
 
 public enum Role {
     MEMBER,         // 일반 회원
