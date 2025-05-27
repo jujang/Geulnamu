@@ -2,13 +2,17 @@ package com.geulnamu.domain.member;
 
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.meetingAttendance.MeetingAttendance;
-import com.geulnamu.domain.shared.DateColumn;
-import com.geulnamu.domain.shared.MemberStatus;
-import com.geulnamu.domain.shared.RoleConverter;
+import com.geulnamu.domain.shared.*;
+import com.geulnamu.domain.shared.converter.GenderConverter;
+import com.geulnamu.domain.shared.converter.RoleConverter;
+import com.geulnamu.domain.shared.enums.Gender;
+import com.geulnamu.domain.shared.enums.MemberStatus;
+import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.exception.ExistDataException;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,11 +39,12 @@ public class Member extends DateColumn {
     @Column(name = "role", length = 10, nullable = false)
     private Role role;
 
+    @Convert(converter = GenderConverter.class)
     @Column(name = "gender", length = 6)
-    private String gender;
+    private Gender gender;
 
-    @Column(name = "birth_date", length = 6)
-    private String birthDate;
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<Meeting> meetings;
@@ -65,12 +70,12 @@ public class Member extends DateColumn {
         this.role = role;
     }
 
-    public void updateMemberBirthDate(String birthDate) {
+    public void updateMemberBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
     }
 
     public void updateMemberGender(String gender) {
-        this.gender = gender;
+        this.gender = Gender.valueOf(gender);
     }
 
     public void updateMemberRefreshToken(String refreshToken) {

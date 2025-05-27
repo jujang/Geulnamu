@@ -54,9 +54,6 @@ public class SecurityConfig {
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
             )
             .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-//                .requestMatchers("/member/**").permitAll()
-//                .requestMatchers("/oauth/**").permitAll()
-//                .requestMatchers("/error").permitAll() // 향후 개발 완료 후 해당 코드 지워주고 요청들 잘 받아지는지 확인해 볼 것
                 .requestMatchers(AUTH_ALL).hasAnyRole("MEMBER", "VICE_STAFF", "STAFF", "VICE_LEADER", "LEADER", "ADMIN")
                 .requestMatchers(AUTH_FOR_STAFF).hasAnyRole("VICE_STAFF", "STAFF", "VICE_LEADER", "LEADER", "ADMIN")
                 .requestMatchers(AUTH_FOR_ADMIN).hasAnyRole("VICE_LEADER", "LEADER", "ADMIN")
@@ -64,7 +61,6 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .with(new JwtSecurityConfig(jwtTokenUtil), Customizer.withDefaults());
-//            .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }

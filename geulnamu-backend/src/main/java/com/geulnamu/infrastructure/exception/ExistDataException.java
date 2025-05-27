@@ -5,7 +5,7 @@ import com.geulnamu.global.response.ResponseMessage;
 public class ExistDataException extends ServerException {
 
     public ExistDataException() {
-        super(409, ResponseMessage.DUPLICATE_DATA_EXIST);
+        super(422, ResponseMessage.NO_CHANGE_DETECTED);
     }
 
     public ExistDataException(String message) {

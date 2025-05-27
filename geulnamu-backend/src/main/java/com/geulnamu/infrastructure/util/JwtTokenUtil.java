@@ -1,8 +1,8 @@
 package com.geulnamu.infrastructure.util;
 
-import com.geulnamu.domain.member.Role;
+import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.domain.shared.TokenInfo;
-import com.geulnamu.domain.shared.TokenType;
+import com.geulnamu.domain.shared.enums.TokenType;
 import com.geulnamu.global.response.ResponseMessage;
 import com.geulnamu.infrastructure.exception.TokenException;
 import io.jsonwebtoken.*;

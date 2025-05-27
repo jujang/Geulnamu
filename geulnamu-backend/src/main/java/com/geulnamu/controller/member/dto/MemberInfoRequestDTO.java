@@ -1,8 +1,13 @@
 package com.geulnamu.controller.member.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
+
+import java.time.LocalDate;
 
 @Getter
 public class MemberInfoRequestDTO {
@@ -12,11 +17,12 @@ public class MemberInfoRequestDTO {
     private String name;
 
     @NotBlank(message = "성별 필수 입력")
-    @Pattern(regexp = "남자|여자", message = "성별은 '남자' 또는 '여자'만 가능합니다.")
+    @Pattern(regexp = "MALE|FEMALE", message = "성별은 'MALE' 또는 'FEMALE' 만 가능합니다.")
     private String gender;
 
-    @NotBlank(message = "생일 필수 입력")
-    @Pattern(regexp = "[0-9]{6}", message = "생년월일은 숫자만으로 6자리를 입력해주세요.")
-    private String birthDate;
+    @NotNull(message = "생일 필수 입력")
+    @Past(message = "생년월일은 과거 날짜여야 합니다.")
+    @JsonFormat(pattern = "yyyyMMdd")
+    private LocalDate birthDate;
 
 }

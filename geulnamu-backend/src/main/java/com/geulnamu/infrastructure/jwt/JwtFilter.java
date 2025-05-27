@@ -1,21 +1,16 @@
 package com.geulnamu.infrastructure.jwt;
 
 import com.geulnamu.domain.shared.TokenInfo;
-import com.geulnamu.domain.shared.TokenType;
-import com.geulnamu.global.response.BaseResponse;
-import com.geulnamu.global.response.ResponseMessage;
-import com.geulnamu.infrastructure.exception.TokenException;
+import com.geulnamu.domain.shared.enums.TokenType;
 import com.geulnamu.infrastructure.util.JwtTokenUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;

@@ -4,7 +4,7 @@ import com.geulnamu.domain.bookQuestion.BookQuestion;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.DateColumn;
-import com.geulnamu.domain.shared.DiscussionGroupConverter;
+import com.geulnamu.domain.shared.converter.DiscussionGroupConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

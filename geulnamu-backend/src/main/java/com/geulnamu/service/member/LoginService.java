@@ -1,9 +1,9 @@
 package com.geulnamu.service.member;
 
 import com.geulnamu.domain.member.Member;
-import com.geulnamu.domain.member.Role;
+import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.domain.shared.TokenInfo;
-import com.geulnamu.domain.shared.TokenType;
+import com.geulnamu.domain.shared.enums.TokenType;
 import com.geulnamu.global.response.ResponseMessage;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.HttpCommunicationErrorException;
@@ -14,6 +14,7 @@ import com.geulnamu.repository.member.MemberRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +35,8 @@ public class LoginService {
     private final MemberRepository memberRepository;
     private final JwtTokenUtil jwtTokenUtil;
 
-//    @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
-    private String kakaoClientId = "bc5e63f81610fcc3b3952b6b5e834f6f"; // TODO: 얘도 final 처리 해도 될 것 같은데... 나중에 환경변수 처리하고선 확인해 볼 것
+    @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
+    private String kakaoClientId;
 
     public HashMap<String, Object> findOAuthUserInfoFromKakao(String authorizationCode) {
         String sNSAccessToken = getKakaoAccessToken(authorizationCode);
@@ -138,8 +139,6 @@ public class LoginService {
         // oAuthCode를 기반으로 유저를 찾는데, 없으면 신규 생성 & 가져오기 / 있으면 유저 정보 가져오기
         if(memberOptional.isEmpty()) {
             log.info("멤버 엔티티 없음");
-            log.info(userInfo.toString()); // TODO: 지워야 함!
-            System.out.println(userInfo.get("properties").toString());
             String properties = userInfo.get("properties").toString();
             member = Member.builder()
                 .role(Role.MEMBER)

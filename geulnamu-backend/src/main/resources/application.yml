@@ -15,6 +15,12 @@ spring:
   jwt:
     accessTokenKey: ${JWT_ACCESS_TOKEN_KEY}
     refreshTokenKey: ${JWT_REFRESH_TOKEN_KEY}
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
 
 # (선택) 콘솔 접속 보안·Actuator 연동
 management:

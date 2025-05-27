@@ -17,7 +17,6 @@ public class LoginController {
 
     private final LoginService loginService;
 
-
     // TODO: redirect_uri를 프론트엔드에서 받아서 POST로 code를 전달하는 방식으로 변경할 것
     // 계정이 없었다면 생성 후 토큰 발급, 있었다면 바로 토큰 발급
     @GetMapping(value = "/oauth/kakao", name = "로그인 redirect url")
