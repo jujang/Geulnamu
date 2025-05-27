@@ -14,6 +14,7 @@ public class MemberInfoResponseDTO {
 
     private Long memberId;
     private String name;
+    private String nickname;
     private Role role;
     private String gender;
     private String birthDate;
@@ -23,7 +24,7 @@ public class MemberInfoResponseDTO {
     private LocalDateTime deletedAt;
 
     public static MemberInfoResponseDTO of(Member member) {
-        return new MemberInfoResponseDTO(member.getId(), member.getName(), member.getRole(), member.getGender(), member.getBirthDate(), member.getCreatedAt(), member.getDeletedAt());
+        return new MemberInfoResponseDTO(member.getId(), member.getName(), member.getNickname(), member.getRole(), member.getGender(), member.getBirthDate(), member.getCreatedAt(), member.getDeletedAt());
     }
 
 }

@@ -4,7 +4,6 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: ${MYSQL_SERVER_PASSWORD} # 여기에 실제 설정한 MySQL 비밀번호 입력
-
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
@@ -13,6 +12,9 @@ spring:
     show-sql: false
     properties:
       hibernate.format_sql: true
+  jwt:
+    accessTokenKey: ${JWT_ACCESS_TOKEN_KEY}
+    refreshTokenKey: ${JWT_REFRESH_TOKEN_KEY}
 
 # (선택) 콘솔 접속 보안·Actuator 연동
 management:
@@ -24,3 +26,10 @@ management:
 logging:
   level:
     org.hibernate.SQL: DEBUG
+
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
