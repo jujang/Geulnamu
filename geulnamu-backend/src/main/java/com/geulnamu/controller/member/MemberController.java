@@ -34,7 +34,7 @@ public class MemberController {
 
     @AccessLevel(Level.AUTHENTICATED)
     @PatchMapping(value = "/info", name = "회원 정보 수정")
-    public BaseResponse EnterMemberInfo(@AuthToken String accessToken, @Valid @RequestBody MemberInfoRequestDTO requestDTO) {
+    public BaseResponse updateMemberInfo(@AuthToken String accessToken, @Valid @RequestBody MemberInfoRequestDTO requestDTO) {
         memberService.updateMemberInfo(accessToken, requestDTO);
         return BaseResponse.ofSuccess();
     }
@@ -55,8 +55,8 @@ public class MemberController {
 
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/status", name = "회원 활성화/비활성화")
-    public BaseResponse changeMemberStatus(@PathVariable Long memberId, @Valid @RequestBody MemberStatusChangeRequestDTO request) {
-        memberService.changeMemberStatus(memberId, request.getStatus());
+    public BaseResponse updateMemberStatus(@PathVariable Long memberId, @Valid @RequestBody MemberStatusUpdateRequestDTO request) {
+        memberService.updateMemberStatus(memberId, request.getStatus());
         return BaseResponse.ofSuccess();
     }
 

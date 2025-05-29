@@ -3,7 +3,9 @@ package com.geulnamu.controller.member.dto;
 import com.geulnamu.domain.shared.enums.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public class MemberRoleUpdateRequestDTO {
 
     @NotBlank(message = "변경할 등급 필수 입력")

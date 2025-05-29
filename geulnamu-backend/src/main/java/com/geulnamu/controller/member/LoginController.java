@@ -23,7 +23,7 @@ public class LoginController {
     // 계정이 없었다면 생성 후 토큰 발급, 있었다면 바로 토큰 발급
     @AccessLevel(Level.PUBLIC)
     @GetMapping(value = "/oauth/kakao", name = "로그인 redirect url")
-    public BaseResponse kakaoRedirectDestination(@RequestParam("code") String authorizationCode, HttpServletResponse servletResponse) {
+    public BaseResponse processKakaoLogin(@RequestParam("code") String authorizationCode, HttpServletResponse servletResponse) {
         HashMap<String, Object> userInfo = loginService.findOAuthUserInfoFromKakao(authorizationCode);
         HashMap<String, Object> loginInfo = loginService.findUserAndCreateAccessToken(userInfo, servletResponse);
         return BaseResponse.ofSuccess(loginInfo);
@@ -38,8 +38,8 @@ public class LoginController {
 
     @AccessLevel(Level.PUBLIC)
     @PostMapping(value = "/re-issue/accessToken", name = "엑세스 토큰 재발급")
-    public BaseResponse tokenReIssue(@CookieValue("refreshToken") String refreshToken, HttpServletResponse servletResponse) {
-        String accessToken = loginService.accessTokenReIssue(refreshToken, servletResponse);
+    public BaseResponse reIssueAccessToken(@CookieValue("refreshToken") String refreshToken, HttpServletResponse servletResponse) {
+        String accessToken = loginService.reissueAccessToken(refreshToken, servletResponse);
         return BaseResponse.ofSuccess(accessToken);
     }
 
