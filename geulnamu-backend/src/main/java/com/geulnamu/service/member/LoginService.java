@@ -39,9 +39,9 @@ public class LoginService {
     private String kakaoClientId;
 
     public HashMap<String, Object> findOAuthUserInfoFromKakao(String authorizationCode) {
-        String sNSAccessToken = getKakaoAccessToken(authorizationCode);
-        HashMap<String, Object> userInfo = findUserInfoFromKakao(sNSAccessToken);
-        oAuthKakaoLogout(sNSAccessToken);
+        String kakaoAccessToken = getKakaoAccessToken(authorizationCode);
+        HashMap<String, Object> userInfo = findUserInfoFromKakao(kakaoAccessToken);
+        logoutFromKakao(kakaoAccessToken);
         return userInfo;
     }
 
@@ -108,13 +108,13 @@ public class LoginService {
         return userInfo;
     }
 
-    public void oAuthKakaoLogout(String sNSAccessToken) {
+    public void logoutFromKakao(String kakaoAccessToken) {
         try {
             RestTemplate restTemplate = new RestTemplate();
 
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-type", "application/x-www-urlencoded");
-            headers.add("Authorization", "Bearer " + sNSAccessToken);
+            headers.add("Authorization", "Bearer " + kakaoAccessToken);
 
             HttpEntity<MultiValueMap<String, String>> restEntityMap = new HttpEntity<>(headers);
 
@@ -191,7 +191,7 @@ public class LoginService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public String accessTokenReIssue(String refreshToken, HttpServletResponse servletResponse) {
+    public String reissueAccessToken(String refreshToken, HttpServletResponse servletResponse) {
         if(!jwtTokenUtil.validateToken(refreshToken, TokenType.RefreshToken)){
             throw new TokenException(ResponseMessage.REFRESH_TOKEN_NOT_VALIDATE);
         }

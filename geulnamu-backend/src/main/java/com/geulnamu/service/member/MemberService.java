@@ -64,7 +64,7 @@ public class MemberService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void changeMemberStatus(Long memberId, MemberStatus targetStatus) {
+    public void updateMemberStatus(Long memberId, MemberStatus targetStatus) {
         Member member = memberRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
         member.changeStatus(targetStatus);
     }
