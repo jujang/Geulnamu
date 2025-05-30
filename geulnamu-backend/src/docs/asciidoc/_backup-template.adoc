@@ -1,0 +1,63 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+// 코드 하이라이팅
+:toc: left
+:toclevels: 2
+:sectlinks:
+:operation-http-request-title: Example Request
+:operation-http-response-title: Example Response
+// ifndef::snippets-custom[]
+// :snippets-custom: ../../../src/docs/custom
+
+
+// [[title]]
+// = Login API Guide
+
+// == link:index.html[Index 페이지로 이동]
+
+// == GET
+
+// === 목록 조회
+//
+
+// ==== request
+// include::{snippets}/login/oauth/kakao/http-request.adoc[]
+
+// ==== request-cookies
+// include::{snippets}/login/oauth/kakao/request-cookies.adoc[]
+
+// ==== request-headers
+// include::{snippets}/login/oauth/kakao/request-headers.adoc[]
+
+// ==== path-parameters
+// include::{snippets}/login/oauth/kakao/path-parameters.adoc[]
+
+// ==== query-parameters
+// include::{snippets}/login/oauth/kakao/query-parameters.adoc[]
+
+// ==== request-fields
+// include::{snippets}/login/oauth/kakao/request-fields.adoc[]
+
+// ==== request-part
+// include::{snippets}/login/oauth/kakao/request-parts.adoc[]
+
+// ==== request-part-fields
+// include::{snippets}/login/oauth/kakao/request-part-request-fields.adoc[]
+
+// ==== response
+// include::{snippets}/login/oauth/kakao/http-response.adoc[]
+
+// ==== response-headers
+// include::{snippets}/login/oauth/kakao/response-headers.adoc[]
+
+// ==== response-fields
+// include::{snippets}/login/oauth/kakao/response-fields.adoc[]
+
+//==== Error case
+//
+
+//---

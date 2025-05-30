@@ -1,25 +1,35 @@
 package com.geulnamu.controller.member;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geulnamu.controller.shared.ControllerTest;
 import com.geulnamu.domain.shared.TokenInfo;
 import com.geulnamu.global.response.ResponseMessage;
 import com.geulnamu.service.member.LoginService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.HashMap;
 
+import static com.geulnamu.common.ApiDocumentUtils.getDocumentRequest;
+import static com.geulnamu.common.ApiDocumentUtils.getDocumentResponse;
+import static com.geulnamu.infrastructure.format.DocumentOptionalGenerator.setAttributes;
 import static org.mockito.Mockito.doNothing;
+import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
+import static org.springframework.restdocs.cookies.CookieDocumentation.requestCookies;
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -28,10 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(value = LoginController.class)
 public class LoginControllerTest extends ControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
     @MockitoBean
     private LoginService loginService;
 
@@ -42,7 +48,7 @@ public class LoginControllerTest extends ControllerTest {
         String accessToken = "Bearer accessToken";
         HashMap<String, Object> loginInfo = new HashMap<>();
         loginInfo.put("AccessToken", accessToken);
-        loginInfo.put("UserAlreadyPresent", true);
+        loginInfo.put("MemberAlreadyPresent", true);
         Cookie cookie = new Cookie("refreshToken", "random_refreshToken_code");
         cookie.setMaxAge((int) (TokenInfo.REFRESH_TOKEN_VALID_TIME/1000));
         cookie.setPath("/");
@@ -73,7 +79,25 @@ public class LoginControllerTest extends ControllerTest {
             .andExpect(cookie().value(cookie.getName(), cookie.getValue()))
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
-            .andExpect(jsonPath("data").value(loginInfo));
+            .andExpect(jsonPath("data.MemberAlreadyPresent").value(loginInfo.get("MemberAlreadyPresent")))
+            .andExpect(jsonPath("data.AccessToken").value(loginInfo.get("AccessToken")))
+            .andDo(document(
+                "login/oauth/kakao",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                responseHeaders(
+                    headerWithName(HttpHeaders.SET_COOKIE).description("리프레시 토큰")
+                ),
+                queryParameters(
+                    parameterWithName("code").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("카카오 oauth를 통해 받은 code")).description("kakao oauth code")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data.MemberAlreadyPresent").type(JsonFieldType.BOOLEAN).description("멤버 기존 존재 여부"),
+                    fieldWithPath("data.AccessToken").type(JsonFieldType.STRING).description("액세스 토큰 값")
+                )
+            ));
     }
 
     @Test
@@ -115,7 +139,22 @@ public class LoginControllerTest extends ControllerTest {
             .andExpect(cookie().value(reseponseCookie.getName(), reseponseCookie.getValue()))
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
-            .andExpect(jsonPath("data").value(accessToken));
+            .andExpect(jsonPath("data").value(accessToken))
+            .andDo(document("/login/re-issue/accessToken",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestCookies(
+                    cookieWithName("refreshToken").description("리프레시 토큰")
+                ),
+                responseHeaders(
+                    headerWithName(HttpHeaders.SET_COOKIE).description("새로 발급된 리프레시 토큰")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.STRING).description("신규 발급 액세스 토큰")
+                )
+            ));
     }
 
     @Test
@@ -139,7 +178,20 @@ public class LoginControllerTest extends ControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
-            .andExpect(jsonPath("data").value((Object) null));
+            .andExpect(jsonPath("data").value((Object) null))
+            .andDo(document(
+                "login/logout",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("-")
+                )
+            ));
     }
 
 }

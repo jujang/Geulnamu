@@ -14,7 +14,7 @@ public class ResponseMessage {
 
     public static final String BIRTH_DATE_NOT_VALIDATE = "생년월일이 yyyyMMdd 형식이 아닙니다.";
 
-    public static final String ACCESS_TOKEN_NOT_VALIDATE = "엑세스 토큰이 유효하지 않습니다."; // 401
+    public static final String ACCESS_TOKEN_NOT_VALIDATE = "액세스 토큰이 유효하지 않습니다."; // 401
     public static final String REFRESH_TOKEN_NOT_VALIDATE = "리프레시 토큰이 유효하지 않습니다. 다시 로그인 해 주세요."; // 401
     public static final String NOT_FOUND_ACCESS_TOKEN = "액세스 토큰을 발견하지 못했습니다."; // 401
     public static final String NOT_FOUND_REFRESH_TOKEN = "리프레시 토큰을 발견하지 못했습니다."; // 401
