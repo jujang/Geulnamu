@@ -39,7 +39,7 @@ public class AuthTokenResolver implements HandlerMethodArgumentResolver {
 
         String[] authHeaderSplit = authHeader.split(" ");
         if(authHeaderSplit.length !=2) {
-            log.error("엑세스 토큰이 올바른 형식이 아닙니다.");
+            log.error("액세스 토큰이 올바른 형식이 아닙니다.");
             throw new TokenException(ResponseMessage.ACCESS_TOKEN_NOT_VALIDATE);
         }
         return authHeaderSplit[1];

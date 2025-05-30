@@ -37,7 +37,7 @@ public class LoginController {
     }
 
     @AccessLevel(Level.PUBLIC)
-    @PostMapping(value = "/re-issue/accessToken", name = "엑세스 토큰 재발급")
+    @PostMapping(value = "/re-issue/accessToken", name = "액세스 토큰 재발급")
     public BaseResponse reIssueAccessToken(@CookieValue("refreshToken") String refreshToken, HttpServletResponse servletResponse) {
         String accessToken = loginService.reissueAccessToken(refreshToken, servletResponse);
         return BaseResponse.ofSuccess(accessToken);

@@ -32,7 +32,7 @@ public class JwtFilter extends GenericFilterBean {
 
         if(StringUtils.hasText(jwt)) {
             if(jwtTokenUtil.validateToken(jwt, TokenType.AccessToken)) {
-                log.info("값이 유효한 엑세스 토큰이 들어왔습니다.");
+                log.info("값이 유효한 액세스 토큰이 들어왔습니다.");
                 Authentication authentication = jwtTokenUtil.getAuthentication(jwt, TokenType.AccessToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
@@ -40,7 +40,7 @@ public class JwtFilter extends GenericFilterBean {
                 servletRequest.setAttribute("TOKEN_ERROR_TYPE", "INVALID"); // 해당 속성은 에러 응답을 할 경우에만 쓰임
             }
         } else {
-            log.info("Bearer가 붙은 엑세스 토큰이 전달되지 않았습니다.");
+            log.info("Bearer가 붙은 액세스 토큰이 전달되지 않았습니다.");
             servletRequest.setAttribute("TOKEN_ERROR_TYPE", "MISSING"); // 해당 속성은 에러 응답을 할 경우에만 쓰임
         }
 

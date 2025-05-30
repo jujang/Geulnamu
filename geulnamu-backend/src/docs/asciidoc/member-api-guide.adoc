@@ -1,0 +1,107 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+// 코드 하이라이팅
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+
+[[title]]
+= Member API Guide
+
+== link:index.html[Index 페이지로 이동]
+
+== GET
+
+=== 모임원 정보 입력 여부 확인
+
+==== request
+include::{snippets}/member/info/view/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/member/info/view/request-headers.adoc[]
+
+==== response
+include::{snippets}/member/info/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/member/info/view/response-fields.adoc[]
+
+==== Error case
+
+
+== PATCH
+
+=== 모임원 정보 수정
+
+==== request
+include::{snippets}/member/info/modify/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/member/info/modify/request-headers.adoc[]
+
+==== request-fields
+include::{snippets}/member/info/modify/request-fields.adoc[]
+
+==== response
+include::{snippets}/member/info/modify/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/member/info/modify/response-fields.adoc[]
+
+==== Error case
+
+
+---
+
+=== 모임원 등급 변경 - 해당 모임원 재로그인 필요
+
+==== request
+include::{snippets}/member/role/modify/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/member/role/modify/request-headers.adoc[]
+
+==== path-parameters
+include::{snippets}/member/role/modify/path-parameters.adoc[]
+
+==== request-fields
+include::{snippets}/member/role/modify/request-fields.adoc[]
+
+==== response
+include::{snippets}/member/role/modify/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/member/role/modify/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 모임원 활성화/비활성화
+
+==== request
+include::{snippets}/member/status/modify/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/member/status/modify/request-headers.adoc[]
+
+==== path-parameters
+include::{snippets}/member/status/modify/path-parameters.adoc[]
+
+==== request-fields
+include::{snippets}/member/status/modify/request-fields.adoc[]
+
+==== response
+include::{snippets}/member/status/modify/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/member/status/modify/response-fields.adoc[]
+
+==== Error case
+
+---
