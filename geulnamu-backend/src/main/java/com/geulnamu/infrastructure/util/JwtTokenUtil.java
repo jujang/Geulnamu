@@ -58,6 +58,15 @@ public class JwtTokenUtil {
             .compact();
     }
 
+    public boolean checkRefreshTokenValidTimeOverHalf(String refreshToken) {
+        Long validTime = getValidTimeToLong(refreshToken, TokenType.RefreshToken);
+        if(validTime < TokenInfo.REFRESH_TOKEN_VALID_TIME/2) {
+            log.info("리프레시 토큰의 유효시간이 반도 안 남았기에 교체해줍니다.");
+            return true;
+        }
+        return false;
+    }
+
     // 토큰 내부 값 반환
     public Claims getClaims(String token, TokenType tokenType) {
         Key secretKey = tokenType.equals(TokenType.AccessToken) ? accessTokenKey : refreshTokenKey;

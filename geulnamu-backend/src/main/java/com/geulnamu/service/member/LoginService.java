@@ -140,11 +140,7 @@ public class LoginService {
         if(memberOptional.isEmpty()) {
             log.info("멤버 엔티티 없음");
             String properties = userInfo.get("properties").toString();
-            member = Member.builder()
-                .role(Role.MEMBER)
-                .nickname(userInfo.get("properties").toString().substring(properties.indexOf('=') + 1, properties.lastIndexOf("}")))
-                .kakaoUserId(kakaoUserId)
-                .build();
+            member = Member.createFromKakaoInfo(kakaoUserId, Member.extractNickName(userInfo));
             memberRepository.save(member);
             loginInfo.put("MemberAlreadyPresent", false);
         } else {
@@ -202,7 +198,7 @@ public class LoginService {
         // 액세스 토큰 생성
         String newAccessToken = jwtTokenUtil.createToken(memberId, role, TokenType.AccessToken);
         // 리프레시 토큰 확인해서 기간이 반 이하일 경우, 리프레시 토큰도 재발행하기
-        if(checkRefreshTokenValidTimeOverHalf(refreshToken)) {
+        if(jwtTokenUtil.checkRefreshTokenValidTimeOverHalf(refreshToken)) {
             refreshToken = putRefreshTokenInCookie(member, servletResponse);
             member.updateMemberRefreshToken(refreshToken);
         }
@@ -217,15 +213,6 @@ public class LoginService {
         member.updateMemberRefreshToken(null);
     }
 
-
-    private boolean checkRefreshTokenValidTimeOverHalf(String refreshToken) {
-        Long validTime = jwtTokenUtil.getValidTimeToLong(refreshToken, TokenType.RefreshToken);
-        if(validTime < TokenInfo.REFRESH_TOKEN_VALID_TIME/2) {
-            log.info("리프레시 토큰의 유효시간이 반도 안 남았기에 교체해줍니다.");
-            return true;
-        }
-        return false;
-    }
 
     // 리프레시 토큰을 만들어서 쿠키에 붙임 + 해당 리프레시 토큰 반환
     private String putRefreshTokenInCookie(Member member, HttpServletResponse servletResponse) {

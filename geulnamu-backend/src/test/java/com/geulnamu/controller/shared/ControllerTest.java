@@ -3,7 +3,7 @@ package com.geulnamu.controller.shared;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geulnamu.infrastructure.jwt.JwtAccessDeniedHandler;
 import com.geulnamu.infrastructure.jwt.JwtAuthenticationEntryPoint;
-import com.geulnamu.infrastructure.security.SecurityConfig;
+import com.geulnamu.infrastructure.config.security.SecurityConfig;
 import com.geulnamu.infrastructure.util.JwtTokenUtil;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

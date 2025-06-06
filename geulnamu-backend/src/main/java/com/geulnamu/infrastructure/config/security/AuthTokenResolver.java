@@ -1,4 +1,4 @@
-package com.geulnamu.infrastructure.security;
+package com.geulnamu.infrastructure.config.security;
 
 import com.geulnamu.domain.shared.TokenInfo;
 import com.geulnamu.global.response.ResponseMessage;

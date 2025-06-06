@@ -1,5 +1,6 @@
-package com.geulnamu.infrastructure.security;
+package com.geulnamu.infrastructure.config.web;
 
+import com.geulnamu.infrastructure.config.security.AuthTokenResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;

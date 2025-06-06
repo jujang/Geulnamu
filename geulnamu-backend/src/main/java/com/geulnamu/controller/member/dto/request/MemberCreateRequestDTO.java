@@ -1,4 +1,4 @@
-package com.geulnamu.controller.member.dto;
+package com.geulnamu.controller.member.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

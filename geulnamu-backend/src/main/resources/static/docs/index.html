@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>Geulnamu API 문서 (종합)</title>
+<title>📚 글나무 출석부 시스템 API 문서</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -440,21 +440,78 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
-<h1>Geulnamu API 문서 (종합)</h1>
+<h1>📚 글나무 출석부 시스템 API 문서</h1>
 <div class="details">
 <span id="revnumber">version 0.0.1-SNAPSHOT</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_error_code_list">Error Code List</a></li>
-<li><a href="#_api_목록">API 목록</a>
+<li><a href="#_문서_개요">1. 📖 문서 개요</a>
 <ul class="sectlevel2">
-<li><a href="#_로그인">로그인</a></li>
-<li><a href="#_모임원">모임원</a></li>
-<li><a href="#_모임">모임</a></li>
-<li><a href="#_모임별_출석">모임별 출석</a></li>
-<li><a href="#_발제">발제</a></li>
+<li><a href="#_시스템_소개">1.1. 시스템 소개</a></li>
+<li><a href="#_버전_정보">1.2. 버전 정보</a></li>
+</ul>
+</li>
+<li><a href="#_인증_및_권한">2. 🔐 인증 및 권한</a>
+<ul class="sectlevel2">
+<li><a href="#_인증_방식">2.1. 인증 방식</a></li>
+<li><a href="#_권한_레벨">2.2. 권한 레벨</a></li>
+</ul>
+</li>
+<li><a href="#_에러_코드">3. ❌ 에러 코드</a>
+<ul class="sectlevel2">
+<li><a href="#_http_상태_코드">3.1. HTTP 상태 코드</a></li>
+<li><a href="#_응답_구조">3.2. 응답 구조</a></li>
+</ul>
+</li>
+<li><a href="#_api_목록">4. 📋 API 목록</a>
+<ul class="sectlevel2">
+<li><a href="#_인증_관리">4.1. 🔑 인증 관리</a>
+<ul class="sectlevel3">
+<li><a href="#_로그인_api">4.1.1. 로그인 API</a></li>
+</ul>
+</li>
+<li><a href="#_회원_관리">4.2. 👤 회원 관리</a>
+<ul class="sectlevel3">
+<li><a href="#_회원_api">4.2.1. 회원 API</a></li>
+</ul>
+</li>
+<li><a href="#_모임_관리">4.3. 📅 모임 관리</a>
+<ul class="sectlevel3">
+<li><a href="#_모임_api">4.3.1. 모임 API</a></li>
+</ul>
+</li>
+<li><a href="#_출석_관리">4.4. ✅ 출석 관리</a>
+<ul class="sectlevel3">
+<li><a href="#_출석_api">4.4.1. 출석 API</a></li>
+</ul>
+</li>
+<li><a href="#_발제_관리">4.5. 📝 발제 관리</a>
+<ul class="sectlevel3">
+<li><a href="#_발제_api">4.5.1. 발제 API</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_시작하기">5. 🚀 시작하기</a>
+<ul class="sectlevel2">
+<li><a href="#_1단계_인증">5.1. 1단계: 인증</a></li>
+<li><a href="#_2단계_기본_정보_입력">5.2. 2단계: 기본 정보 입력</a></li>
+<li><a href="#_3단계_기능_이용">5.3. 3단계: 기능 이용</a></li>
+</ul>
+</li>
+<li><a href="#_개발자_참고사항">6. 🔧 개발자 참고사항</a>
+<ul class="sectlevel2">
+<li><a href="#_요청_헤더">6.1. 요청 헤더</a></li>
+<li><a href="#_페이지네이션">6.2. 페이지네이션</a></li>
+<li><a href="#_에러_처리_예시">6.3. 에러 처리 예시</a></li>
+</ul>
+</li>
+<li><a href="#_지원_및_문의">7. 📞 지원 및 문의</a>
+<ul class="sectlevel2">
+<li><a href="#_개발팀_연락처">7.1. 개발팀 연락처</a></li>
+<li><a href="#_변경_이력">7.2. 변경 이력</a></li>
 </ul>
 </li>
 </ul>
@@ -462,74 +519,432 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_error_code_list"><a class="link" href="#_error_code_list">Error Code List</a></h2>
+<h2 id="_문서_개요"><a class="link" href="#_문서_개요">1. 📖 문서 개요</a></h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_시스템_소개"><a class="link" href="#_시스템_소개">1.1. 시스템 소개</a></h3>
+<div class="paragraph">
+<p>글나무 출석부 시스템은 모임 출석을 효율적으로 관리하기 위한 웹 기반 시스템입니다.<br>
+사용자 권한에 따라 다양한 출석 관리 기능을 제공합니다.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_버전_정보"><a class="link" href="#_버전_정보">1.2. 버전 정보</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>문서 버전</strong>: v1.0.0</p>
+</li>
+<li>
+<p><strong>베이스 URL</strong>: <code>아직 없음</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_인증_및_권한"><a class="link" href="#_인증_및_권한">2. 🔐 인증 및 권한</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_인증_방식"><a class="link" href="#_인증_방식">2.1. 인증 방식</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>OAuth 2.0</strong>: 카카오 소셜 로그인</p>
+</li>
+<li>
+<p><strong>JWT Token</strong>: 액세스 토큰 기반 인증</p>
+</li>
+<li>
+<p><strong>Refresh Token</strong>: 쿠키 기반 토큰 갱신</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_권한_레벨"><a class="link" href="#_권한_레벨">2.2. 권한 레벨</a></h3>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
 </colgroup>
 <thead>
 <tr>
-<th class="tableblock halign-left valign-top">Error Code</th>
-<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">권한</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">접근 가능 기능</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">400 - Bad Request Error</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">요청값이 잘못된 경우 (아래의 경우에 해당하지 않는 모든 경우)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">PUBLIC</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모든 사용자</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">로그인, 토큰 재발급</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">401 - Unauthorized Error</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">토큰을 통한 보안 인가가 불가한 경우</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AUTHENTICATED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">인증된 사용자</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">개인 정보 조회/수정, 출석 처리, 로그아웃</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">403 - Forbidden Error</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">(토큰을 통한) 접근이 금지된 경우</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STAFF</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">운영진</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 생성/관리, 출석 현황 조회</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">404 - Not Found Error</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">요청한 자원이 존재하지 않는 경우</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">417 - Expectation Failed</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">요청값 중 유효성 검사를 실패한 값이 있는 경우</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">422 - Unprocessable Content</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">요청한 처리를 진행할 수 없는 경우</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ADMIN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">관리자</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모든 기능 + 회원 권한 관리, 이름 변경</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<h1 id="_api_목록" class="sect0"><a class="link" href="#_api_목록">API 목록</a></h1>
+</div>
+<div class="sect1">
+<h2 id="_에러_코드"><a class="link" href="#_에러_코드">3. ❌ 에러 코드</a></h2>
+<div class="sectionbody">
 <div class="sect2">
-<h3 id="_로그인"><a class="link" href="#_로그인"><a href="login-api-guide.html">로그인</a></a></h3>
-
+<h3 id="_http_상태_코드"><a class="link" href="#_http_상태_코드">3.1. HTTP 상태 코드</a></h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">상태 코드</th>
+<th class="tableblock halign-left valign-top">설명</th>
+<th class="tableblock halign-left valign-top">발생 상황</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">200</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">성공</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">요청이 정상적으로 처리됨</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">400</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">잘못된 요청</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">요청 파라미터가 잘못되었거나 누락됨</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">401</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">인증 실패</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">토큰이 유효하지 않거나 만료됨</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">403</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">권한 없음</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">해당 기능에 대한 접근 권한이 없음</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">404</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">리소스 없음</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">요청한 자원이 존재하지 않음</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">417</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">유효성 검사 실패</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">입력값의 형식이나 제약조건에 맞지 않음</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">422</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">처리 불가능</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">요청은 올바르지만 현재 상태에서 처리할 수 없음</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">500</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">서버 오류</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">서버 내부에서 오류가 발생함</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="sect2">
-<h3 id="_모임원"><a class="link" href="#_모임원"><a href="member-api-guide.html">모임원</a></a></h3>
-
+<h3 id="_응답_구조"><a class="link" href="#_응답_구조">3.2. 응답 구조</a></h3>
+<div class="paragraph">
+<p>모든 API는 다음과 같은 공통 응답 구조를 가집니다:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+    "code": 200,
+    "message": "Success",
+    "data": { /* 실제 응답 데이터 */ }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_api_목록"><a class="link" href="#_api_목록">4. 📋 API 목록</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_인증_관리"><a class="link" href="#_인증_관리">4.1. 🔑 인증 관리</a></h3>
+<div class="sect3">
+<h4 id="_로그인_api"><a class="link" href="#_로그인_api">4.1.1. <a href="login-api-guide.html">로그인 API</a></a></h4>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>카카오 OAuth 로그인</strong>: 소셜 로그인을 통한 인증</p>
+</li>
+<li>
+<p><strong>토큰 재발급</strong>: 만료된 액세스 토큰 갱신</p>
+</li>
+<li>
+<p><strong>로그아웃</strong>: 사용자 리프레시 토큰 말소</p>
+</li>
+</ul>
+</div>
+<hr>
+</div>
 </div>
 <div class="sect2">
-<h3 id="_모임"><a class="link" href="#_모임"><a href="meeting-api-guide.html">모임</a></a></h3>
-
+<h3 id="_회원_관리"><a class="link" href="#_회원_관리">4.2. 👤 회원 관리</a></h3>
+<div class="sect3">
+<h4 id="_회원_api"><a class="link" href="#_회원_api">4.2.1. <a href="member-api-guide.html">회원 API</a></a></h4>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>회원 정보 조회</strong>: 개인 정보 입력 여부 확인</p>
+</li>
+<li>
+<p><strong>회원 정보 수정</strong>: 이름, 성별, 생년월일 변경</p>
+</li>
+<li>
+<p><strong>회원 권한 변경</strong>: 관리자 전용 권한 수정 기능</p>
+</li>
+<li>
+<p><strong>회원 상태 변경</strong>: 관리자 전용 계정 활성화/비활성화</p>
+</li>
+</ul>
+</div>
+<hr>
+</div>
 </div>
 <div class="sect2">
-<h3 id="_모임별_출석"><a class="link" href="#_모임별_출석"><a href="meeting-attendances-api-guide.html">모임별 출석</a></a></h3>
-
+<h3 id="_모임_관리"><a class="link" href="#_모임_관리">4.3. 📅 모임 관리</a></h3>
+<div class="sect3">
+<h4 id="_모임_api"><a class="link" href="#_모임_api">4.3.1. <a href="meeting-api-guide.html">모임 API</a></a></h4>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>모임 생성</strong>: 새로운 모임 등록</p>
+</li>
+<li>
+<p><strong>모임 목록 조회</strong>: 진행 중인 모임 리스트</p>
+</li>
+<li>
+<p><strong>모임 상세 정보</strong>: 특정 모임의 세부 정보</p>
+</li>
+<li>
+<p><strong>QR 코드 생성</strong>: 출석용 QR 코드 발급</p>
+</li>
+</ul>
+</div>
+<hr>
+</div>
 </div>
 <div class="sect2">
-<h3 id="_발제"><a class="link" href="#_발제"><a href="book-question-api-guide.html">발제</a></a></h3>
+<h3 id="_출석_관리"><a class="link" href="#_출석_관리">4.4. ✅ 출석 관리</a></h3>
+<div class="sect3">
+<h4 id="_출석_api"><a class="link" href="#_출석_api">4.4.1. <a href="meeting-attendance-api-guide.html">출석 API</a></a></h4>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>출석 처리</strong>: QR 코드 또는 GPS 기반 출석</p>
+</li>
+<li>
+<p><strong>출석 현황 조회</strong>: 개인별/모임별 출석 이력</p>
+</li>
+<li>
+<p><strong>지각자 조회</strong>: 운영진 전용 지각자 명단</p>
+</li>
+<li>
+<p><strong>토론 그룹 관리</strong>: 모임별 토론 조 편성</p>
+</li>
+</ul>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_발제_관리"><a class="link" href="#_발제_관리">4.5. 📝 발제 관리</a></h3>
+<div class="sect3">
+<h4 id="_발제_api"><a class="link" href="#_발제_api">4.5.1. <a href="book-question-api-guide.html">발제 API</a></a></h4>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>발제 작성</strong>: 오늘의 발제 등록</p>
+</li>
+<li>
+<p><strong>발제 조회</strong>: 조별/모임별 발제 목록</p>
+</li>
+<li>
+<p><strong>맞춤법 검사</strong>: 발제문 자동 교정</p>
+</li>
+<li>
+<p><strong>발제 승인</strong>: 운영진의 발제 검토 및 승인</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_시작하기"><a class="link" href="#_시작하기">5. 🚀 시작하기</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_1단계_인증"><a class="link" href="#_1단계_인증">5.1. 1단계: 인증</a></h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>카카오 로그인</strong>: <a href="login-api-guide.html#카카오-oauth-로그인">GET /login/oauth/kakao</a> 호출</p>
+</li>
+<li>
+<p><strong>토큰 저장</strong>: 응답에서 받은 액세스 토큰을 Authorization 헤더에 포함</p>
+</li>
+<li>
+<p><strong>토큰 갱신</strong>: 토큰 만료 시 <a href="login-api-guide.html#액세스-토큰-재발급">POST /login/re-issue/accessToken</a> 호출</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_2단계_기본_정보_입력"><a class="link" href="#_2단계_기본_정보_입력">5.2. 2단계: 기본 정보 입력</a></h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>정보 입력 여부 확인</strong>: <a href="member-api-guide.html#모임원-정보-입력-여부-확인">GET /member/info</a></p>
+</li>
+<li>
+<p><strong>정보 미입력 시</strong>: <a href="member-api-guide.html#모임원-정보-수정">PATCH /member/info</a>로 개인정보 등록</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3단계_기능_이용"><a class="link" href="#_3단계_기능_이용">5.3. 3단계: 기능 이용</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>출석</strong>: QR 코드 스캔 또는 GPS 기반 출석 처리</p>
+</li>
+<li>
+<p><strong>모임 참여</strong>: 배정된 토론 그룹 확인 및 발제 작성</p>
+</li>
+<li>
+<p><strong>이력 조회</strong>: 개인 출석 현황 및 참여 이력 확인</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_개발자_참고사항"><a class="link" href="#_개발자_참고사항">6. 🔧 개발자 참고사항</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_요청_헤더"><a class="link" href="#_요청_헤더">6.1. 요청 헤더</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">Content-Type: application/json
+Authorization: Bearer {access_token}
+Accept: application/json</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_페이지네이션"><a class="link" href="#_페이지네이션">6.2. 페이지네이션</a></h3>
+<div class="paragraph">
+<p>목록 조회 API는 다음 파라미터를 지원합니다:
+- <code>page</code>: 페이지 번호 (기본값: 0)
+- <code>size</code>: 페이지 크기 (기본값: 20, 최대: 100)
+- <code>sort</code>: 정렬 조건 (예: createdAt,desc)</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_에러_처리_예시"><a class="link" href="#_에러_처리_예시">6.3. 에러 처리 예시</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">try {
+  const response = await fetch('/api/member/info', {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
 
+  const result = await response.json();
+
+  if (result.code !== 200) {
+    throw new Error(result.message);
+  }
+
+  return result.data;
+} catch (error) {
+  console.error('API 오류:', error.message);
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_지원_및_문의"><a class="link" href="#_지원_및_문의">7. 📞 지원 및 문의</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_개발팀_연락처"><a class="link" href="#_개발팀_연락처">7.1. 개발팀 연락처</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>이메일</strong>: <a href="mailto:jeongookjang@naver.com">jeongookjang@naver.com</a></p>
+</li>
+<li>
+<p><strong>GitHub</strong>: <a href="https://github.com/jujang/Geulnamu" class="bare">https://github.com/jujang/Geulnamu</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_변경_이력"><a class="link" href="#_변경_이력">7.2. 변경 이력</a></h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">버전</th>
+<th class="tableblock halign-left valign-top">날짜</th>
+<th class="tableblock halign-left valign-top">변경 내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">v1.0.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2025-05-30</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">초기 버전 출시</p></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<div class="paragraph">
+<p><strong>💡 팁</strong>: 각 API 문서 페이지에서는 실제 요청/응답 예시와 함께 더 자세한 정보를 확인할 수 있습니다.</p>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-05-30 15:26:52 +0900
+Last updated 2025-05-30 19:46:22 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
