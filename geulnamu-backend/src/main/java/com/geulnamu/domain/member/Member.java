@@ -4,17 +4,18 @@ import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.meetingAttendance.MeetingAttendance;
 import com.geulnamu.domain.shared.*;
 import com.geulnamu.domain.shared.converter.GenderConverter;
-import com.geulnamu.domain.shared.converter.RoleConverter;
 import com.geulnamu.domain.shared.enums.Gender;
-import com.geulnamu.domain.shared.enums.MemberStatus;
 import com.geulnamu.domain.shared.enums.Role;
+import com.geulnamu.global.response.ResponseMessage;
 import com.geulnamu.infrastructure.exception.ExistDataException;
+import com.geulnamu.infrastructure.exception.TokenException;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 
 @Getter
@@ -35,7 +36,7 @@ public class Member extends DateColumn {
     @Column(name = "nickname", length = 20)
     private String nickname;
 
-    @Convert(converter = RoleConverter.class)
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 11, nullable = false)
     private Role role;
 
@@ -62,38 +63,65 @@ public class Member extends DateColumn {
     private LocalDateTime deletedAt;
 
 
-    public void updateMemberName(String name) {
-        this.name = name;
+    public static Member createFromKakaoInfo(String kakaoUserId, String nickname) {
+        return Member.builder()
+            .role(Role.MEMBER)
+            .nickname(nickname)
+            .kakaoUserId(kakaoUserId)
+            .build();
     }
 
-    public void updateMemberRole(Role role) {
-        this.role = role;
+    public void updateMemberName(String newName) {
+        if(this.name != null && this.name.equals(newName)) {
+            throw new ExistDataException();
+        }
+        this.name = newName;
+    }
+
+    public static String extractNickName(Map<String, Object> userInfo) {
+        String properties = userInfo.get("properties").toString();
+        return properties.substring(properties.indexOf('=') + 1, properties.lastIndexOf("}"));
+    }
+
+    public void updateMemberRole(Role newRole) {
+        if(this.role.equals(newRole)) {
+            throw new ExistDataException();
+        }
+        this.role = newRole;
+        this.refreshToken = null; // 역할에 따라 권한이 다르기에 재접속을 강제하기 위해 리프레시 토큰 말소시킴
     }
 
     public void updateMemberBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
     }
 
-    public void updateMemberGender(String gender) {
-        this.gender = Gender.valueOf(gender);
+    public void updateMemberGender(Gender gender) {
+        this.gender = gender;
     }
 
     public void updateMemberRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
 
-    public void changeStatus(MemberStatus targetStatus) {
-        boolean isCurrentlyActive = this.deletedAt == null;
-        boolean wantToActivate = targetStatus.equals(MemberStatus.ACTIVE);
-
-        if (isCurrentlyActive == wantToActivate) {
+    public void activate() {
+        if(this.deletedAt == null) {
             throw new ExistDataException();
         }
+        this.deletedAt = null;
+    }
 
-        if (wantToActivate) {
-            this.deletedAt = null;
-        } else {
-            this.deletedAt = LocalDateTime.now();
+    public void deactivate() {
+        if(this.deletedAt != null) {
+            throw new ExistDataException();
+        }
+        this.refreshToken = null; // 비활성화 계정 강제 로그아웃을 위한 설정
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public void checkIfRoleWasAdjustedAndReLoginRequired() {
+        if(this.refreshToken == null) {
+            throw new TokenException(ResponseMessage.REFRESH_TOKEN_NOT_VALIDATE);
+            // TODO: 프론트에서 알림과 함께, 강제 로그아웃 시킬 것
         }
     }
 }

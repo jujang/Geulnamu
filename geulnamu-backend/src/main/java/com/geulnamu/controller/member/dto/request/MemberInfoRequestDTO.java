@@ -1,4 +1,4 @@
-package com.geulnamu.controller.member.dto;
+package com.geulnamu.controller.member.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;

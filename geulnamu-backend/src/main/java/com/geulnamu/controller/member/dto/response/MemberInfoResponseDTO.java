@@ -1,4 +1,4 @@
-package com.geulnamu.controller.member.dto;
+package com.geulnamu.controller.member.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.geulnamu.domain.member.Member;
@@ -16,18 +16,16 @@ public class MemberInfoResponseDTO {
 
     private Long memberId;
     private String name;
-    private String nickname;
-    private Role role;
     private Gender gender;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:SS", timezone = "Asia/Seoul")
-    private LocalDateTime createdAt;
+    private String nickname;
+    private Role role;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:SS", timezone = "Asia/Seoul")
     private LocalDateTime deletedAt;
 
     public static MemberInfoResponseDTO of(Member member) {
-        return new MemberInfoResponseDTO(member.getId(), member.getName(), member.getNickname(), member.getRole(), member.getGender(), member.getBirthDate(), member.getCreatedAt(), member.getDeletedAt());
+        return new MemberInfoResponseDTO(member.getId(), member.getName(), member.getGender(), member.getBirthDate(), member.getNickname(), member.getRole(), member.getDeletedAt());
     }
 
 }
