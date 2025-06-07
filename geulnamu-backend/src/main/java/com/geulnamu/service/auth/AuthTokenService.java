@@ -1,4 +1,4 @@
-package com.geulnamu.service.member;
+package com.geulnamu.service.auth;
 
 import com.geulnamu.domain.shared.TokenInfo;
 import com.geulnamu.domain.shared.TokenPair;

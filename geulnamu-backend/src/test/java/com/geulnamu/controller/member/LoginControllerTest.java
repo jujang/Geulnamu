@@ -1,10 +1,11 @@
 package com.geulnamu.controller.member;
 
-import com.geulnamu.controller.member.dto.response.LoginResponseDTO;
+import com.geulnamu.controller.auth.LoginController;
+import com.geulnamu.controller.auth.dto.response.LoginResponseDTO;
 import com.geulnamu.controller.shared.ControllerTest;
 import com.geulnamu.domain.shared.TokenInfo;
 import com.geulnamu.global.response.ResponseMessage;
-import com.geulnamu.service.member.LoginFacade;
+import com.geulnamu.service.auth.LoginFacade;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

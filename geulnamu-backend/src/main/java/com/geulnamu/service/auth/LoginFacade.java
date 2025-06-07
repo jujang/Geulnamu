@@ -1,6 +1,6 @@
-package com.geulnamu.service.member;
+package com.geulnamu.service.auth;
 
-import com.geulnamu.controller.member.dto.response.LoginResponseDTO;
+import com.geulnamu.controller.auth.dto.response.LoginResponseDTO;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.TokenPair;
 import com.geulnamu.domain.shared.TokenReissueResult;

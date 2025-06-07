@@ -1,4 +1,4 @@
-package com.geulnamu.service.member;
+package com.geulnamu.service.auth;
 
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.HttpCommunicationErrorException;
