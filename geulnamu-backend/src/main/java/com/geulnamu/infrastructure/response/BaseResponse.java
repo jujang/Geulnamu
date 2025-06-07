@@ -1,4 +1,4 @@
-package com.geulnamu.global.response;
+package com.geulnamu.infrastructure.response;
 
 import com.geulnamu.infrastructure.util.JsonUtils;
 import jakarta.servlet.http.HttpServletResponse;

@@ -6,7 +6,7 @@ import com.geulnamu.domain.shared.*;
 import com.geulnamu.domain.shared.converter.GenderConverter;
 import com.geulnamu.domain.shared.enums.Gender;
 import com.geulnamu.domain.shared.enums.Role;
-import com.geulnamu.global.response.ResponseMessage;
+import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.exception.ExistDataException;
 import com.geulnamu.infrastructure.exception.TokenException;
 import jakarta.persistence.*;
@@ -15,7 +15,6 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 
 @Getter

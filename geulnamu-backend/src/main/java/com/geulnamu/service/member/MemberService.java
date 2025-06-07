@@ -3,14 +3,11 @@ package com.geulnamu.service.member;
 import com.geulnamu.controller.member.dto.response.MemberInfoResponseDTO;
 import com.geulnamu.controller.member.dto.response.MemberListResponseDTO;
 import com.geulnamu.domain.shared.enums.Gender;
-import com.geulnamu.domain.shared.paging.PagingRequest;
-import com.geulnamu.domain.shared.paging.PagingResponse;
+import com.geulnamu.infrastructure.response.paging.PagingRequest;
+import com.geulnamu.infrastructure.response.paging.PagingResponse;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.Role;
-import com.geulnamu.domain.shared.enums.MemberStatus;
-import com.geulnamu.domain.shared.enums.TokenType;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
-import com.geulnamu.infrastructure.util.JwtTokenUtil;
 import com.geulnamu.repository.member.MemberDslRepository;
 import com.geulnamu.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +25,6 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final MemberDslRepository memberDslRepository;
-    private final JwtTokenUtil jwtTokenUtil;
 
 
     @Transactional(rollbackFor = Exception.class)

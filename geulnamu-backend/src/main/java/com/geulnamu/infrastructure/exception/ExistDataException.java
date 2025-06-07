@@ -1,6 +1,6 @@
 package com.geulnamu.infrastructure.exception;
 
-import com.geulnamu.global.response.ResponseMessage;
+import com.geulnamu.infrastructure.response.ResponseMessage;
 
 public class ExistDataException extends ServerException {
 

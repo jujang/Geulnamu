@@ -1,8 +1,8 @@
 package com.geulnamu.infrastructure.config.security;
 
-import com.geulnamu.domain.shared.TokenInfo;
-import com.geulnamu.domain.shared.enums.TokenType;
-import com.geulnamu.global.response.ResponseMessage;
+import com.geulnamu.infrastructure.security.token.TokenInfo;
+import com.geulnamu.infrastructure.security.token.TokenType;
+import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.exception.TokenException;
 import com.geulnamu.infrastructure.util.JwtTokenUtil;

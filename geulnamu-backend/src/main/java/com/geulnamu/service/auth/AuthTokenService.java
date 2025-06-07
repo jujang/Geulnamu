@@ -1,17 +1,17 @@
 package com.geulnamu.service.auth;
 
-import com.geulnamu.domain.shared.TokenInfo;
-import com.geulnamu.domain.shared.TokenPair;
-import com.geulnamu.domain.shared.TokenReissueResult;
+import com.geulnamu.infrastructure.response.ResponseMessage;
+import com.geulnamu.infrastructure.security.token.TokenInfo;
+import com.geulnamu.infrastructure.security.token.TokenPair;
+import com.geulnamu.infrastructure.security.token.TokenReissueResult;
 import com.geulnamu.domain.shared.enums.Role;
-import com.geulnamu.domain.shared.enums.TokenType;
+import com.geulnamu.infrastructure.security.token.TokenType;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.util.JwtTokenUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -87,7 +87,7 @@ public class AuthTokenService {
             return (String) properties.get("nickname");
         } catch (Exception e) {
             log.error("카카오 닉네임 추출 중 예외 발생: {}", e.getMessage(), e);
-            throw new BadRequestException("카카오 닉네임 추출 중 예외 발생");
+            throw new BadRequestException(ResponseMessage.KAKAO_NICKNAME_PARSE_ISSUE);
         }
     }
 

@@ -2,6 +2,7 @@ package com.geulnamu.service.auth;
 
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.HttpCommunicationErrorException;
+import com.geulnamu.infrastructure.response.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,9 +66,9 @@ public class KakaoOAuthService {
             HashMap<String, String> responseBody = (HashMap) accessTokenResponse.getBody();
             accessToken = responseBody.get("access_token");
         } catch (HttpClientErrorException e) {
-            throw new BadRequestException("OAuth 서버 요청에 문제가 있습니다.", e.getMessage());
+            throw new BadRequestException(ResponseMessage.OAUTH_SERVER_REQUEST_ISSUE, e.getMessage());
         } catch (Exception e) {
-            throw new HttpCommunicationErrorException("OAuth 서버 요청에 문제가 있습니다.", e.getMessage());
+            throw new HttpCommunicationErrorException(ResponseMessage.OAUTH_SERVER_REQUEST_ISSUE, e.getMessage());
         }
 
         return accessToken;
@@ -96,9 +97,9 @@ public class KakaoOAuthService {
 
             userInfo = (HashMap) userInfoResponse.getBody();
         } catch (HttpClientErrorException e) {
-            throw new BadRequestException("OAuth 서버 요청에 문제가 있습니다.", e.getMessage());
+            throw new BadRequestException(ResponseMessage.OAUTH_SERVER_REQUEST_ISSUE, e.getMessage());
         } catch (Exception e) {
-            throw new HttpCommunicationErrorException("OAuth 서버 요청에 문제가 있습니다.", e.getMessage());
+            throw new HttpCommunicationErrorException(ResponseMessage.OAUTH_SERVER_REQUEST_ISSUE, e.getMessage());
         }
 
         return userInfo;
@@ -125,7 +126,7 @@ public class KakaoOAuthService {
                 Map.class
             );
         } catch (Exception e) {
-            throw new HttpCommunicationErrorException("OAuth 로그아웃 과정에 문제가 있습니다.", e.getMessage());
+            throw new HttpCommunicationErrorException(ResponseMessage.OAUTH_SERVER_LOGOUT_ISSUE, e.getMessage());
         }
     }
 

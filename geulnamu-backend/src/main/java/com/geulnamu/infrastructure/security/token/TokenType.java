@@ -1,4 +1,4 @@
-package com.geulnamu.domain.shared.enums;
+package com.geulnamu.infrastructure.security.token;
 
 public enum TokenType {
     AccessToken,

@@ -2,9 +2,8 @@ package com.geulnamu.controller.auth;
 
 import com.geulnamu.controller.auth.dto.response.LoginResponseDTO;
 import com.geulnamu.domain.shared.enums.Level;
-import com.geulnamu.global.response.BaseResponse;
+import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
-import com.geulnamu.infrastructure.annotation.AuthToken;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.service.auth.LoginFacade;
 import jakarta.servlet.http.HttpServletResponse;

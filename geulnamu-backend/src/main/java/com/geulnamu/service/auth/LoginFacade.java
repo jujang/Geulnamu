@@ -2,11 +2,11 @@ package com.geulnamu.service.auth;
 
 import com.geulnamu.controller.auth.dto.response.LoginResponseDTO;
 import com.geulnamu.domain.member.Member;
-import com.geulnamu.domain.shared.TokenPair;
-import com.geulnamu.domain.shared.TokenReissueResult;
+import com.geulnamu.infrastructure.security.token.TokenPair;
+import com.geulnamu.infrastructure.security.token.TokenReissueResult;
 import com.geulnamu.domain.shared.enums.Role;
-import com.geulnamu.domain.shared.enums.TokenType;
-import com.geulnamu.global.response.ResponseMessage;
+import com.geulnamu.infrastructure.security.token.TokenType;
+import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.infrastructure.exception.TokenException;
 import com.geulnamu.infrastructure.util.JwtTokenUtil;
