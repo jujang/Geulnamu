@@ -38,16 +38,14 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public Boolean isMemberInfoRegistered(String accessToken) {
-        Long memberId = jwtTokenUtil.getMemberId(accessToken, TokenType.AccessToken);
+    public Boolean isMemberInfoRegistered(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
         member.checkIfRoleWasAdjustedAndReLoginRequired(); // 등급 조정(=리프레시 토큰 말소)에 의한 강제 로그아웃이 필요한지 체크
         return member.getName() != null; // true면 등록된 상태, false면 미등록 상태  // 위 구문에 의한 에러 발생 시, 재로그인 필요
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateMemberInfo(String accessToken, String targetName, String targetGender, LocalDate targetBirthDate) {
-        Long memberId = jwtTokenUtil.getMemberId(accessToken, TokenType.AccessToken);
+    public void updateMemberInfo(Long memberId, String targetName, String targetGender, LocalDate targetBirthDate) {
         Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
         member.updateMemberName(targetName);
         member.updateMemberGender(Gender.valueOf(targetGender));

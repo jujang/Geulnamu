@@ -86,9 +86,8 @@ public class LoginFacade {
      * 로그아웃 플로우
      */
     @Transactional(rollbackFor = Exception.class)
-    public void logout(String accessToken, HttpServletResponse response) {
-        // 1. 액세스 토큰에서 회원 정보 추출
-        Long memberId = jwtTokenUtil.getMemberId(accessToken, TokenType.AccessToken);
+    public void logout(Long memberId, HttpServletResponse response) {
+        // 1. 멤버 조회
         Member member = memberRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
 
         // 2. DB 에서 리프레시 토큰 삭제

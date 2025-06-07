@@ -6,6 +6,7 @@ import com.geulnamu.controller.member.dto.response.MemberListResponseDTO;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.domain.shared.paging.PagingRequest;
 import com.geulnamu.global.response.BaseResponse;
+import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.annotation.AuthToken;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.service.member.MemberService;
@@ -30,15 +31,15 @@ public class MemberController {
 
     @AccessLevel(Level.AUTHENTICATED)
     @GetMapping(value = "/info", name = "개인 정보 입력 여부 확인")
-    public BaseResponse<Boolean> checkMemberInfoRegister(@AuthToken String accessToken) {
-        Boolean response = memberService.isMemberInfoRegistered(accessToken);
+    public BaseResponse<Boolean> checkMemberInfoRegister(@AuthMemberId Long memberId) {
+        Boolean response = memberService.isMemberInfoRegistered(memberId);
         return BaseResponse.ofSuccess(response);
     }
 
     @AccessLevel(Level.AUTHENTICATED)
     @PatchMapping(value = "/info", name = "개인 정보 수정")
-    public BaseResponse<Void> updateMemberInfo(@AuthToken String accessToken, @Valid @RequestBody MemberInfoRequestDTO requestDTO) {
-        memberService.updateMemberInfo(accessToken, requestDTO.getName(), requestDTO.getGender(), requestDTO.getBirthDate());
+    public BaseResponse<Void> updateMemberInfo(@AuthMemberId Long memberId, @Valid @RequestBody MemberInfoRequestDTO requestDTO) {
+        memberService.updateMemberInfo(memberId, requestDTO.getName(), requestDTO.getGender(), requestDTO.getBirthDate());
         return BaseResponse.ofSuccess();
     }
 

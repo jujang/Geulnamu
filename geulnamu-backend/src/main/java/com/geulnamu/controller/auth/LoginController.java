@@ -3,6 +3,7 @@ package com.geulnamu.controller.auth;
 import com.geulnamu.controller.auth.dto.response.LoginResponseDTO;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.global.response.BaseResponse;
+import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.annotation.AuthToken;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.service.auth.LoginFacade;
@@ -44,8 +45,8 @@ public class LoginController {
 
     @AccessLevel(Level.AUTHENTICATED)
     @PostMapping(value = "/logout", name = "로그아웃")
-    public BaseResponse<Void> logout(@AuthToken String accessToken, HttpServletResponse response) {
-        loginFacade.logout(accessToken, response);
+    public BaseResponse<Void> logout(@AuthMemberId Long memberId, HttpServletResponse response) {
+        loginFacade.logout(memberId, response);
         return BaseResponse.ofSuccess();
     }
 
