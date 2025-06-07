@@ -78,7 +78,7 @@ dependencies {
 def generated = 'build/generated/querydsl'
 
 // querydsl QClass 파일 생성 위치를 지정
-tasks.withType(JavaCompile) {
+compileJava{
 	options.generatedSourceOutputDirectory = file(generated)
 }
 

@@ -10,31 +10,31 @@ import java.io.IOException;
 
 @Getter
 @RequiredArgsConstructor(staticName = "of")
-public class BaseResponse {
+public class BaseResponse<D> {
 
     private final int code;
     private final String message;
-    private final Object data;
+    private final D data;
 
     // success default response
-    public static BaseResponse ofSuccess() {
-        return new BaseResponse(200, ResponseMessage.SUCCESS, null);
+    public static BaseResponse<Void> ofSuccess() {
+        return new BaseResponse<>(200, ResponseMessage.SUCCESS, null);
     }
 
     // success response with data
-    public static BaseResponse ofSuccess(Object data) {
-        return new BaseResponse(200, ResponseMessage.SUCCESS, data);
+    public static <D> BaseResponse<D> ofSuccess(D data) {
+        return new BaseResponse<>(200, ResponseMessage.SUCCESS, data);
     }
 
     // success response with message and data
-    public static BaseResponse ofSuccess(String message, Object data) {
-        return new BaseResponse(200, message, data);
+    public static <D> BaseResponse<D> ofSuccess(String message, D data) {
+        return new BaseResponse<>(200, message, data);
     }
 
 
     // fail default response with a message
-    public static BaseResponse ofFail(HttpStatus httpStatus, String message) {
-        return new BaseResponse(httpStatus.value(), message, null);
+    public static BaseResponse<Void> ofFail(HttpStatus httpStatus, String message) {
+        return new BaseResponse<>(httpStatus.value(), message, null);
     }
 
 //    public static BaseResponse ofFail(HttpStatus httpStatus, String message, Object data) {
@@ -42,8 +42,8 @@ public class BaseResponse {
 //    }
 
     // fail default response with httpStatus and message and data
-    public static BaseResponse ofFail(int code, String message, Object data) {
-        return new BaseResponse(code, message, data);
+    public static <D> BaseResponse<D> ofFail(int code, String message, D data) {
+        return new BaseResponse<>(code, message, data);
     }
 
 //    // fail default response with httpStatus and message and data

@@ -1,9 +1,10 @@
 package com.geulnamu.controller.member;
 
+import com.geulnamu.controller.member.dto.response.LoginResponseDTO;
 import com.geulnamu.controller.shared.ControllerTest;
 import com.geulnamu.domain.shared.TokenInfo;
 import com.geulnamu.global.response.ResponseMessage;
-import com.geulnamu.service.member.LoginService;
+import com.geulnamu.service.member.LoginFacade;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,8 +15,6 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
-
-import java.util.HashMap;
 
 import static com.geulnamu.common.ApiDocumentUtils.getDocumentRequest;
 import static com.geulnamu.common.ApiDocumentUtils.getDocumentResponse;
@@ -39,16 +38,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class LoginControllerTest extends ControllerTest {
 
     @MockitoBean
-    private LoginService loginService;
+    private LoginFacade loginFacade;
 
 
     @Test
     public void processKakaoLoginTest() throws Exception {
         // given
         String accessToken = "Bearer accessToken";
-        HashMap<String, Object> loginInfo = new HashMap<>();
-        loginInfo.put("AccessToken", accessToken);
-        loginInfo.put("MemberAlreadyPresent", true);
+        LoginResponseDTO loginResponseDTO = new LoginResponseDTO(accessToken, true);
         Cookie cookie = new Cookie("refreshToken", "random_refreshToken_code");
         cookie.setMaxAge((int) (TokenInfo.REFRESH_TOKEN_VALID_TIME/1000));
         cookie.setPath("/");
@@ -58,8 +55,7 @@ public class LoginControllerTest extends ControllerTest {
 
         String authorizationCode = "random_code";
 
-        given(loginService.findOAuthUserInfoFromKakao(any())).willReturn(new HashMap<>());
-        given(loginService.findUserAndCreateAccessToken(any(HashMap.class), any())).willReturn(loginInfo);
+        given(loginFacade.loginWithKakao(any(), any())).willReturn(loginResponseDTO);
 
         // when
         ResultActions actions =
@@ -79,8 +75,8 @@ public class LoginControllerTest extends ControllerTest {
             .andExpect(cookie().value(cookie.getName(), cookie.getValue()))
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
-            .andExpect(jsonPath("data.MemberAlreadyPresent").value(loginInfo.get("MemberAlreadyPresent")))
-            .andExpect(jsonPath("data.AccessToken").value(loginInfo.get("AccessToken")))
+            .andExpect(jsonPath("data.accessToken").value(loginResponseDTO.accessToken()))
+            .andExpect(jsonPath("data.newMember").value(loginResponseDTO.newMember()))
             .andDo(document(
                 "login/oauth/kakao",
                 getDocumentRequest(),
@@ -94,8 +90,8 @@ public class LoginControllerTest extends ControllerTest {
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
-                    fieldWithPath("data.MemberAlreadyPresent").type(JsonFieldType.BOOLEAN).description("멤버 기존 존재 여부"),
-                    fieldWithPath("data.AccessToken").type(JsonFieldType.STRING).description("액세스 토큰 값")
+                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰 값"),
+                    fieldWithPath("data.newMember").type(JsonFieldType.BOOLEAN).description("멤버 신규 여부")
                 )
             ));
     }
@@ -112,7 +108,7 @@ public class LoginControllerTest extends ControllerTest {
         requestCookie.setHttpOnly(true);
         requestCookie.setSecure(true);
 
-        given(loginService.reissueAccessToken(any(), any())).willReturn(accessToken);
+        given(loginFacade.reissueAccessToken(any(), any())).willReturn(accessToken);
 
         // when
         ResultActions actions =
@@ -163,7 +159,7 @@ public class LoginControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        doNothing().when(loginService).logoutMember(any());
+        doNothing().when(loginFacade).logout(any(), any());
 
         // when
         ResultActions actions =
