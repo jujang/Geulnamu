@@ -73,23 +73,9 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-
-// 생성 디렉토리 지정
-def generated = 'build/generated/querydsl'
-
-// querydsl QClass 파일 생성 위치를 지정
-compileJava{
-	options.generatedSourceOutputDirectory = file(generated)
-}
-
-// java source set에 queryDSL QClass 위치 추가
+// QueryDSL 설정
 sourceSets {
-	main.java.srcDirs += [generated]
-}
-
-// gradle clean 시에 QClass 디렉토리 삭제
-clean {
-	delete file(generated)
+	main.java.srcDirs += ['build/generated/sources/annotationProcessor/java/main']
 }
 
 // RestDocs 설정 (단순화)

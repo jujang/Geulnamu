@@ -125,7 +125,7 @@ public class LoginFacade {
 
         if(memberOptional.isEmpty()) {
             log.info("신규 회원 생성: kakaoUserId={}", kakaoUserId);
-            String nickname = Member.extractNickName(userInfo);
+            String nickname = authTokenService.extractNickname(userInfo);
             Member newMember = Member.createFromKakaoInfo(kakaoUserId, nickname);
             Member savedMember = memberRepository.save(newMember);
             return new MemberResult(savedMember, true);

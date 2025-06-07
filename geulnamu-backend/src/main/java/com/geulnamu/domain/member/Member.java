@@ -78,11 +78,6 @@ public class Member extends DateColumn {
         this.name = newName;
     }
 
-    public static String extractNickName(Map<String, Object> userInfo) {
-        String properties = userInfo.get("properties").toString();
-        return properties.substring(properties.indexOf('=') + 1, properties.lastIndexOf("}"));
-    }
-
     public void updateMemberRole(Role newRole) {
         if(this.role.equals(newRole)) {
             throw new ExistDataException();

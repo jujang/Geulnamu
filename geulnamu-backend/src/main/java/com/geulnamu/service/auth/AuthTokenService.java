@@ -5,12 +5,16 @@ import com.geulnamu.domain.shared.TokenPair;
 import com.geulnamu.domain.shared.TokenReissueResult;
 import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.domain.shared.enums.TokenType;
+import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.util.JwtTokenUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -74,6 +78,17 @@ public class AuthTokenService {
             .sameSite("None")
             .build();
         response.setHeader("Set-Cookie", cookie.toString());
+    }
+
+    public String extractNickname(Map<String, Object> userInfo) {
+        try {
+            Object propertiesObj = userInfo.get("properties");
+            Map<String, Object> properties = (Map<String, Object>) propertiesObj;
+            return (String) properties.get("nickname");
+        } catch (Exception e) {
+            log.error("카카오 닉네임 추출 중 예외 발생: {}", e.getMessage(), e);
+            throw new BadRequestException("카카오 닉네임 추출 중 예외 발생");
+        }
     }
 
     /**
