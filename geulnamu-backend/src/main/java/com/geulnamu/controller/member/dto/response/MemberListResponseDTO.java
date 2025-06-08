@@ -1,6 +1,6 @@
 package com.geulnamu.controller.member.dto.response;
 
-import com.geulnamu.domain.shared.paging.PagingResponse;
+import com.geulnamu.infrastructure.response.paging.PagingResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

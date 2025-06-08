@@ -1,4 +1,4 @@
-package com.geulnamu.domain.shared;
+package com.geulnamu.infrastructure.security.token;
 
 public class TokenInfo {
 

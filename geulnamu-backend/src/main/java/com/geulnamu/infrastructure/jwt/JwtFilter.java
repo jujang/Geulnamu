@@ -1,7 +1,7 @@
 package com.geulnamu.infrastructure.jwt;
 
-import com.geulnamu.domain.shared.TokenInfo;
-import com.geulnamu.domain.shared.enums.TokenType;
+import com.geulnamu.infrastructure.security.token.TokenInfo;
+import com.geulnamu.infrastructure.security.token.TokenType;
 import com.geulnamu.infrastructure.util.JwtTokenUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

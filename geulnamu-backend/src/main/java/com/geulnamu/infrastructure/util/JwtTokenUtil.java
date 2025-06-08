@@ -1,9 +1,9 @@
 package com.geulnamu.infrastructure.util;
 
 import com.geulnamu.domain.shared.enums.Role;
-import com.geulnamu.domain.shared.TokenInfo;
-import com.geulnamu.domain.shared.enums.TokenType;
-import com.geulnamu.global.response.ResponseMessage;
+import com.geulnamu.infrastructure.security.token.TokenInfo;
+import com.geulnamu.infrastructure.security.token.TokenType;
+import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.exception.TokenException;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
@@ -41,14 +41,7 @@ public class JwtTokenUtil {
         long addTokenTime = (tokenType.equals(TokenType.AccessToken)) ? TokenInfo.LOGIN_VALID_TIME : TokenInfo.REFRESH_TOKEN_VALID_TIME;
         Date validity = new Date((new Date()).getTime() + addTokenTime);
         Claims claims = Jwts.claims().setSubject(String.valueOf(memberId));
-        switch(role) {
-            case MEMBER -> claims.put("roles", String.valueOf(Role.MEMBER));
-            case VICE_STAFF -> claims.put("roles", String.valueOf(Role.VICE_STAFF));
-            case STAFF -> claims.put("roles", String.valueOf(Role.STAFF));
-            case VICE_LEADER -> claims.put("roles", String.valueOf(Role.VICE_LEADER));
-            case LEADER -> claims.put("roles", String.valueOf(Role.LEADER));
-            case ADMIN -> claims.put("roles", String.valueOf(Role.ADMIN));
-        }
+        claims.put("roles", role.toString());
 
         return Jwts.builder()
             .setClaims(claims)

@@ -1,10 +1,13 @@
 package com.geulnamu.infrastructure.config.security;
 
 import com.geulnamu.infrastructure.security.token.TokenInfo;
+import com.geulnamu.infrastructure.security.token.TokenType;
 import com.geulnamu.infrastructure.response.ResponseMessage;
-import com.geulnamu.infrastructure.annotation.AuthToken;
+import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.exception.TokenException;
+import com.geulnamu.infrastructure.util.JwtTokenUtil;
 import io.micrometer.common.util.StringUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -16,11 +19,15 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 @Slf4j
 @Component
-public class AuthTokenResolver implements HandlerMethodArgumentResolver {
+@RequiredArgsConstructor
+public class MemberIdResolver implements HandlerMethodArgumentResolver {
+
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(AuthToken.class);
+        return parameter.hasParameterAnnotation(AuthMemberId.class) &&
+            parameter.getParameterType().equals(Long.class);
     }
 
     @Override
@@ -37,12 +44,13 @@ public class AuthTokenResolver implements HandlerMethodArgumentResolver {
             throw new TokenException(ResponseMessage.ACCESS_TOKEN_NOT_VALIDATE);
         }
 
-        String[] authHeaderSplit = authHeader.split(" ");
-        if(authHeaderSplit.length !=2) {
-            log.error("액세스 토큰이 올바른 형식이 아닙니다.");
+        String accessToken = authHeader.substring(TokenInfo.TOKEN_PREFIX.length());
+
+        try {
+            return jwtTokenUtil.getMemberId(accessToken, TokenType.AccessToken);
+        } catch (Exception e) {
             throw new TokenException(ResponseMessage.ACCESS_TOKEN_NOT_VALIDATE);
         }
-        return authHeaderSplit[1];
     }
 
 }

@@ -1,4 +1,4 @@
-package com.geulnamu.domain.shared.paging;
+package com.geulnamu.infrastructure.response.paging;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

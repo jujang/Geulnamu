@@ -1,4 +1,4 @@
-package com.geulnamu.domain.shared.paging;
+package com.geulnamu.infrastructure.response.paging;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

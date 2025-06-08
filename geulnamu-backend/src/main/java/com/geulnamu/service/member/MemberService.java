@@ -3,14 +3,11 @@ package com.geulnamu.service.member;
 import com.geulnamu.controller.member.dto.response.MemberInfoResponseDTO;
 import com.geulnamu.controller.member.dto.response.MemberListResponseDTO;
 import com.geulnamu.domain.shared.enums.Gender;
-import com.geulnamu.domain.shared.paging.PagingRequest;
-import com.geulnamu.domain.shared.paging.PagingResponse;
+import com.geulnamu.infrastructure.response.paging.PagingRequest;
+import com.geulnamu.infrastructure.response.paging.PagingResponse;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.Role;
-import com.geulnamu.domain.shared.enums.MemberStatus;
-import com.geulnamu.domain.shared.enums.TokenType;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
-import com.geulnamu.infrastructure.util.JwtTokenUtil;
 import com.geulnamu.repository.member.MemberDslRepository;
 import com.geulnamu.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +25,6 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final MemberDslRepository memberDslRepository;
-    private final JwtTokenUtil jwtTokenUtil;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -38,16 +34,14 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public Boolean isMemberInfoRegistered(String accessToken) {
-        Long memberId = jwtTokenUtil.getMemberId(accessToken, TokenType.AccessToken);
+    public Boolean isMemberInfoRegistered(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
         member.checkIfRoleWasAdjustedAndReLoginRequired(); // 등급 조정(=리프레시 토큰 말소)에 의한 강제 로그아웃이 필요한지 체크
         return member.getName() != null; // true면 등록된 상태, false면 미등록 상태  // 위 구문에 의한 에러 발생 시, 재로그인 필요
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateMemberInfo(String accessToken, String targetName, String targetGender, LocalDate targetBirthDate) {
-        Long memberId = jwtTokenUtil.getMemberId(accessToken, TokenType.AccessToken);
+    public void updateMemberInfo(Long memberId, String targetName, String targetGender, LocalDate targetBirthDate) {
         Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
         member.updateMemberName(targetName);
         member.updateMemberGender(Gender.valueOf(targetGender));

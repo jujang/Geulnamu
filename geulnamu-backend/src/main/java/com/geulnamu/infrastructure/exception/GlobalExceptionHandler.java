@@ -1,7 +1,7 @@
 package com.geulnamu.infrastructure.exception;
 
-import com.geulnamu.global.response.BaseResponse;
-import com.geulnamu.global.response.ResponseMessage;
+import com.geulnamu.infrastructure.response.BaseResponse;
+import com.geulnamu.infrastructure.response.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -10,9 +10,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.time.format.DateTimeParseException;
-import java.util.Arrays;
 
 @Slf4j
 @RestControllerAdvice

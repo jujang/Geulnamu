@@ -513,7 +513,7 @@ Content-Type: application/x-www-form-urlencoded</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
 Content-Type: application/json;charset=UTF-8
-Set-Cookie: refreshToken=random_refreshToken_code_2; Path=/; Max-Age=15552000; Expires=Wed, 03 Dec 2025 17:15:32 GMT; Secure; HttpOnly
+Set-Cookie: refreshToken=random_refreshToken_code_2; Path=/; Max-Age=15552000; Expires=Thu, 04 Dec 2025 19:34:08 GMT; Secure; HttpOnly
 
 {
   "code" : 200,
@@ -745,14 +745,14 @@ Host: docs.api.com</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
 Content-Type: application/json;charset=UTF-8
-Set-Cookie: refreshToken=random_refreshToken_code; Path=/; Max-Age=15552000; Expires=Wed, 03 Dec 2025 17:15:31 GMT; Secure; HttpOnly
+Set-Cookie: refreshToken=random_refreshToken_code; Path=/; Max-Age=15552000; Expires=Thu, 04 Dec 2025 19:34:08 GMT; Secure; HttpOnly
 
 {
   "code" : 200,
   "message" : "API 호출에 성공했습니다.",
   "data" : {
-    "AccessToken" : "Bearer accessToken",
-    "MemberAlreadyPresent" : true
+    "accessToken" : "Bearer accessToken",
+    "newMember" : true
   }
 }</code></pre>
 </div>
@@ -814,18 +814,18 @@ Set-Cookie: refreshToken=random_refreshToken_code; Path=/; Max-Age=15552000; Exp
 <td class="tableblock halign-left valign-top"><p class="tableblock">결과 메세지</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.MemberAlreadyPresent</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">멤버 기존 존재 여부</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.AccessToken</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.accessToken</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">액세스 토큰 값</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.newMember</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">멤버 신규 여부</p></td>
 </tr>
 </tbody>
 </table>

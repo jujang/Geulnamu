@@ -1,8 +1,8 @@
 package com.geulnamu.infrastructure.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.geulnamu.global.response.BaseResponse;
-import com.geulnamu.global.response.ResponseMessage;
+import com.geulnamu.infrastructure.response.BaseResponse;
+import com.geulnamu.infrastructure.response.ResponseMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

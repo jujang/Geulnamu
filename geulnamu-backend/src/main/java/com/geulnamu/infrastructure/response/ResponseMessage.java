@@ -1,4 +1,4 @@
-package com.geulnamu.global.response;
+package com.geulnamu.infrastructure.response;
 
 public class ResponseMessage {
     public static final String SUCCESS = "API 호출에 성공했습니다."; // 200
@@ -18,5 +18,10 @@ public class ResponseMessage {
     public static final String REFRESH_TOKEN_NOT_VALIDATE = "리프레시 토큰이 유효하지 않습니다. 다시 로그인 해 주세요."; // 401
     public static final String NOT_FOUND_ACCESS_TOKEN = "액세스 토큰을 발견하지 못했습니다."; // 401
     public static final String NOT_FOUND_REFRESH_TOKEN = "리프레시 토큰을 발견하지 못했습니다."; // 401
+
+    public static final String KAKAO_NICKNAME_PARSE_ISSUE = "카카오 닉네임 추출 중 예외 발생";
+
+    public static final String OAUTH_SERVER_REQUEST_ISSUE = "OAuth 서버 요청에 문제가 있습니다.";
+    public static final String OAUTH_SERVER_LOGOUT_ISSUE = "OAuth 로그아웃 과정에 문제가 있습니다.";
 
 }
