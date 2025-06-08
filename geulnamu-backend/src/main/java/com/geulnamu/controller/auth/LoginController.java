@@ -30,13 +30,6 @@ public class LoginController {
     }
 
     @AccessLevel(Level.PUBLIC)
-    @PostMapping(value = "/{memberId}/direct", name = "서버 직접 로그인 - 실 운영시 없어질 기능")
-    public BaseResponse<LoginResponseDTO> login(@PathVariable @Min(value = 1) Long memberId, HttpServletResponse response) {
-        LoginResponseDTO loginResponseDTO = loginFacade.loginForDevelopment(memberId, response);
-        return BaseResponse.ofSuccess(loginResponseDTO);
-    }
-
-    @AccessLevel(Level.PUBLIC)
     @PostMapping(value = "/re-issue/accessToken", name = "액세스 토큰 재발급")
     public BaseResponse<String> reIssueAccessToken(@CookieValue("refreshToken") String refreshToken, HttpServletResponse response) {
         String accessToken = loginFacade.reissueAccessToken(refreshToken, response);
@@ -48,6 +41,13 @@ public class LoginController {
     public BaseResponse<Void> logout(@AuthMemberId Long memberId, HttpServletResponse response) {
         loginFacade.logout(memberId, response);
         return BaseResponse.ofSuccess();
+    }
+
+    @AccessLevel(Level.PUBLIC)
+    @PostMapping(value = "/{memberId}/direct", name = "서버 직접 로그인 - 실 운영시 없어질 기능")
+    public BaseResponse<LoginResponseDTO> login(@PathVariable @Min(value = 1) Long memberId, HttpServletResponse response) {
+        LoginResponseDTO loginResponseDTO = loginFacade.loginForDevelopment(memberId, response);
+        return BaseResponse.ofSuccess(loginResponseDTO);
     }
 
 }

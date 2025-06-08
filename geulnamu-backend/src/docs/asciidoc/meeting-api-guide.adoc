@@ -1,0 +1,182 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+// 코드 하이라이팅
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+
+[[title]]
+= Meeting API Guide
+
+== link:index.html[Index 페이지로 이동]
+
+== POST
+
+=== 모임 생성
+접근 가능 권한 레벨: STAFF / 미래 시간만 생성 가능
+
+==== request
+include::{snippets}/meeting/open/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/meeting/open/request-headers.adoc[]
+
+==== request-fields
+include::{snippets}/meeting/open/request-fields.adoc[]
+
+==== response
+include::{snippets}/meeting/open/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/meeting/open/response-fields.adoc[]
+
+==== Error case
+
+
+== GET
+
+=== 모임 목록 조회
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/meeting/list/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/meeting/list/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/meeting/list/query-parameters.adoc[]
+
+==== response
+include::{snippets}/meeting/list/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/meeting/list/response-fields.adoc[]
+
+==== Error case
+
+
+---
+
+=== 모임 목록 조회 (관리자용)
+접근 가능 권한 레벨: ADMIN
+
+==== request
+include::{snippets}/meeting/list/admin/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/meeting/list/admin/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/meeting/list/admin/query-parameters.adoc[]
+
+==== response
+include::{snippets}/meeting/list/admin/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/meeting/list/admin/response-fields.adoc[]
+
+==== Error case
+
+
+== PATCH
+
+=== 모임 수정
+접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 미래 시간으로만 수정 가능
+
+==== request
+include::{snippets}/meeting/modify/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/meeting/modify/request-headers.adoc[]
+
+==== path-parameters
+include::{snippets}/meeting/modify/path-parameters.adoc[]
+
+==== request-fields
+include::{snippets}/meeting/modify/request-fields.adoc[]
+
+==== response
+include::{snippets}/meeting/modify/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/meeting/modify/response-fields.adoc[]
+
+==== Error case
+
+
+---
+
+=== 지난 모임 비공개 처리
+접근 가능 권한 레벨: ADMIN / 모임 익일부터 처리 가능
+
+==== request
+include::{snippets}/meeting/private/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/meeting/private/request-headers.adoc[]
+
+==== path-parameters
+include::{snippets}/meeting/private/path-parameters.adoc[]
+
+==== response
+include::{snippets}/meeting/private/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/meeting/private/response-fields.adoc[]
+
+==== Error case
+
+
+---
+
+=== 비공개 모임 공개 처리
+접근 가능 권한 레벨: ADMIN
+
+==== request
+include::{snippets}/meeting/public/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/meeting/public/request-headers.adoc[]
+
+==== path-parameters
+include::{snippets}/meeting/public/path-parameters.adoc[]
+
+==== response
+include::{snippets}/meeting/public/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/meeting/public/response-fields.adoc[]
+
+==== Error case
+
+
+== DELETE
+
+=== 개설한 모임 삭제
+접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 모임 시작 6시간 전까지만 가능
+
+==== request
+include::{snippets}/meeting/remove/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/meeting/remove/request-headers.adoc[]
+
+==== path-parameters
+include::{snippets}/meeting/remove/path-parameters.adoc[]
+
+==== response
+include::{snippets}/meeting/remove/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/meeting/remove/response-fields.adoc[]
+
+==== Error case
+
+
+---

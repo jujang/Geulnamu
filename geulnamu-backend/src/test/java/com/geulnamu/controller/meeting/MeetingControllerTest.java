@@ -196,7 +196,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/meeting/list",
+                "/meeting/list/admin",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(

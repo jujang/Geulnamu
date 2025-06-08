@@ -18,6 +18,7 @@ endif::[]
 == POST
 
 === 액세스 토큰 재발급
+접근 가능 권한 레벨: PUBLIC
 
 ==== request
 include::{snippets}/login/re-issue/accessToken/http-request.adoc[]
@@ -39,6 +40,7 @@ include::{snippets}/login/re-issue/accessToken/response-fields.adoc[]
 ---
 
 === 로그아웃
+접근 가능 권한 레벨: MEMBER
 
 ==== request
 include::{snippets}/login/logout/http-request.adoc[]
@@ -58,6 +60,7 @@ include::{snippets}/login/logout/response-fields.adoc[]
 == GET
 
 === 카카오 OAuth 로그인
+접근 가능 권한 레벨: PUBLIC
 
 ==== request
 include::{snippets}/login/oauth/kakao/http-request.adoc[]

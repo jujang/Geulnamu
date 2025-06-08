@@ -35,14 +35,6 @@ public class MemberController {
         return BaseResponse.ofSuccess(response);
     }
 
-    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
-    @AccessLevel(Level.MEMBER)
-    @PatchMapping(value = "/info", name = "개인 정보 수정")
-    public BaseResponse<Void> updateMemberInfo(@AuthMemberId Long memberId, @Valid @RequestBody MemberInfoRequestDTO requestDTO) {
-        memberService.updateMemberInfo(memberId, requestDTO.getName(), requestDTO.getGender(), requestDTO.getBirthDate());
-        return BaseResponse.ofSuccess();
-    }
-
     @AccessLevel(Level.ADMIN)
     @GetMapping(value = "/{memberId}", name = "모임원 조회 (임시 기능)")
     public BaseResponse<MemberInfoResponseDTO> findMember(@PathVariable @Min(value = 1) Long memberId) {
@@ -55,6 +47,14 @@ public class MemberController {
     public BaseResponse<MemberListResponseDTO> getMembers(@Valid PagingRequest pagingRequest) {
         MemberListResponseDTO memberListResponseDTO = memberService.getMembers(pagingRequest);
         return BaseResponse.ofSuccess(memberListResponseDTO);
+    }
+
+    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
+    @AccessLevel(Level.MEMBER)
+    @PatchMapping(value = "/info", name = "개인 정보 수정")
+    public BaseResponse<Void> updateMemberInfo(@AuthMemberId Long memberId, @Valid @RequestBody MemberInfoRequestDTO requestDTO) {
+        memberService.updateMemberInfo(memberId, requestDTO.getName(), requestDTO.getGender(), requestDTO.getBirthDate());
+        return BaseResponse.ofSuccess();
     }
 
     // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
