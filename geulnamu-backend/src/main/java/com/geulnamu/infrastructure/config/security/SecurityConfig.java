@@ -34,13 +34,21 @@ public class SecurityConfig {
 
     private static final String[] AUTH_ALL = {
         "/login/logout",
-        "/member/info"
+        "/member/info",
+        "/meeting/list"
     };
 
-    private static final String[] AUTH_FOR_STAFF = {};
+    private static final String[] AUTH_FOR_STAFF = {
+        "/meeting",
+        "/meeting/{meetingId}"
+    };
 
     private static final String[] AUTH_FOR_ADMIN = {
-        "/member/{memberId}/**"
+        "/member/{memberId}/**",
+        "/member/list",
+        "/meeting/list/admin",
+        "/meeting/{meetingId}/private",
+        "/meeting/{meetingId}/public"
     };
 
 

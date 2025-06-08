@@ -21,7 +21,7 @@ public class MemberInfoResponseDTO {
     private LocalDate birthDate;
     private String nickname;
     private Role role;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:SS", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:SS")
     private LocalDateTime deletedAt;
 
     public static MemberInfoResponseDTO of(Member member) {

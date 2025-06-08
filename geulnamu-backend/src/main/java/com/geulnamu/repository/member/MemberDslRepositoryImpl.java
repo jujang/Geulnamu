@@ -22,12 +22,10 @@ public class MemberDslRepositoryImpl implements MemberDslRepository{
 
     @Override
     public Page<MemberInfoResponseDTO> findMembers(Pageable pageable) {
-        // 카운트 쿼리 (orderBy 제거)
         JPAQuery<Long> count = queryFactory
             .select(member.count())
             .from(member);
 
-        // 데이터 조회 쿼리 (orderBy 추가)
         List<MemberInfoResponseDTO> content = queryFactory
             .select(Projections.constructor(MemberInfoResponseDTO.class,
                 member.id, member.name, member.gender, member.birthDate, member.nickname, member.role, member.deletedAt))

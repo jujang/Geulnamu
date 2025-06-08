@@ -1,17 +1,14 @@
-package com.geulnamu.controller.member;
+package com.geulnamu.controller.meeting;
 
-import com.geulnamu.controller.member.dto.request.MemberInfoRequestDTO;
-import com.geulnamu.controller.member.dto.request.MemberNameUpdateRequestDTO;
-import com.geulnamu.controller.member.dto.request.MemberRoleUpdateRequestDTO;
-import com.geulnamu.controller.member.dto.response.MemberInfoResponseDTO;
-import com.geulnamu.controller.member.dto.response.MemberListResponseDTO;
+import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequestDTO;
+import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequestDTO;
+import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponseDTO;
+import com.geulnamu.controller.meeting.dto.response.MeetingListResponseDTO;
 import com.geulnamu.controller.shared.ControllerTest;
-import com.geulnamu.domain.shared.enums.Gender;
-import com.geulnamu.domain.shared.enums.Role;
-import com.geulnamu.infrastructure.response.paging.PagingRequest;
-import com.geulnamu.infrastructure.response.paging.PagingResponse;
+import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.infrastructure.response.ResponseMessage;
-import com.geulnamu.service.member.MemberService;
+import com.geulnamu.infrastructure.response.paging.PagingResponse;
+import com.geulnamu.service.meeting.MeetingService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -21,7 +18,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,74 +31,33 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.snippet.Attributes.key;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-@WebMvcTest(value = MemberController.class)
-public class MemberControllerTest extends ControllerTest {
+@WebMvcTest(value = MeetingController.class)
+public class MeetingControllerTest extends ControllerTest {
 
     @MockitoBean
-    private MemberService memberService;
-
+    private MeetingService meetingService;
 
     @Test
-    @WithMockUser(roles = "MEMBER")
-    public void checkMemberInfoRegisterTest() throws Exception {
+    @WithMockUser(roles = "STAFF")
+    public void createMeetingTest() throws Exception {
         // given
-        Boolean response = true;
         String accessToken = "Bearer access_token";
+        MeetingCreateRequestDTO requestDTO = new MeetingCreateRequestDTO(
+            "REGULAR", "제 200회 정기모임", LocalDateTime.of(2126, 6, 14, 10, 30), "늦지 않게 오세요~");
 
-        given(memberService.isMemberInfoRegistered(any())).willReturn(response);
+        doNothing().when(meetingService).createMeeting(any(), any(), any(), any(), any());
 
         // when
         ResultActions actions =
             mockMvc.perform(
-                get("/member/info")
-                    .header("Authorization", accessToken)
-                    .accept(MediaType.APPLICATION_JSON)
-            );
-
-        // then
-        actions
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("code").value(200))
-            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
-            .andExpect(jsonPath("data").value(response))
-            .andDo(document(
-                "member/info/view",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                requestHeaders(
-                    headerWithName("Authorization").description("액세스 토큰")
-                ),
-                responseFields(
-                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
-                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
-                    fieldWithPath("data").type(JsonFieldType.BOOLEAN).description(response)
-                )
-            ));
-    }
-
-    @Test
-    @WithMockUser(roles = "MEMBER")
-    public void updateMemberInfoTest() throws Exception {
-        // given
-        String accessToken = "Bearer access_token";
-        MemberInfoRequestDTO requestDTO = new MemberInfoRequestDTO("나뭉이", "MALE", LocalDate.of(2022, 1, 1));
-
-        doNothing().when(memberService).updateMemberInfo(any(), any(), any(), any());
-
-        // when
-        ResultActions actions =
-            mockMvc.perform(
-                patch("/member/info")
+                post("/meeting")
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -116,16 +71,17 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/info/modify",
+                "meeting/open",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
                     headerWithName("Authorization").description("액세스 토큰")
                 ),
                 requestFields(
-                    fieldWithPath("name").type(JsonFieldType.STRING).attributes(key("format").value("특수 문자를 제외한 2자 이상, 10자 이하 문자열")).description("이름"),
-                    fieldWithPath("gender").type(JsonFieldType.STRING).attributes(key("format").value("'MALE', 'FEMALE' 중 하나의 값")).description("성별"),
-                    fieldWithPath("birthDate").type(JsonFieldType.STRING).attributes(key("format").value("yyyyMMdd 형식의 숫자값")).description("생년월일")
+                    fieldWithPath("meetingType").type(JsonFieldType.STRING).attributes(key("format").value("'REGULAR', 'FLASH', 'SPECIAL' 중 하나의 값")).description("모임 종류"),
+                    fieldWithPath("meetingName").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ -)만으로 사용한 1자 이상, 70자 이하")).description("모임 제목"),
+                    fieldWithPath("meetingDate").type(JsonFieldType.STRING).attributes(key("format").value("yyyyMMdd HH:mm 형식으로 이뤄진 미래 시간대의 문자열")).description("모임 개최일자"),
+                    fieldWithPath("description").type(JsonFieldType.STRING).attributes(key("format").value("형식, 길이 제한 없는 문자열")).description("상세 내용").optional()
                 ),
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
@@ -136,34 +92,32 @@ public class MemberControllerTest extends ControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    public void getMembersTest() throws Exception {
+    @WithMockUser(roles = "MEMBER")
+    public void getMeetingListTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
 
-        MemberInfoResponseDTO memberInfoResponseDTO_1 = new MemberInfoResponseDTO(
-            1L, "나뭉일", Gender.valueOf("MALE"), LocalDate.of(2022, 1, 1), "namu_1", Role.LEADER, LocalDateTime.of(2022, 1, 3, 11, 30, 0)
-        );
-        MemberInfoResponseDTO memberInfoResponseDTO_2 = new MemberInfoResponseDTO(
-            2L, "나뭉이", Gender.valueOf("FEMALE"), LocalDate.of(2022, 1, 2), "namu_2", Role.VICE_STAFF, null
-        );
-        List<MemberInfoResponseDTO> memberInfoResponseDTOList = new ArrayList<>();
-        memberInfoResponseDTOList.add(memberInfoResponseDTO_1);
-        memberInfoResponseDTOList.add(memberInfoResponseDTO_2);
+        MeetingInfoResponseDTO meetingInfoResponseDTO_01 = new MeetingInfoResponseDTO(
+            1L, "나뭉이", MeetingType.REGULAR, LocalDateTime.of(2025, 5, 31, 10, 45),
+            "~~", LocalDateTime.of(2025, 5, 1, 12, 30), false);
+        MeetingInfoResponseDTO meetingInfoResponseDTO_02 = new MeetingInfoResponseDTO(
+            2L, "나뭉이", MeetingType.FLASH, LocalDateTime.of(2025, 6, 3, 18, 30),
+            "~~", LocalDateTime.of(2025, 5, 1, 12, 31), false);
+        List<MeetingInfoResponseDTO> meetingInfoResponseDTOList = new ArrayList<>();
+        meetingInfoResponseDTOList.add(meetingInfoResponseDTO_01);
+        meetingInfoResponseDTOList.add(meetingInfoResponseDTO_02);
 
         PagingResponse pagingResponse = new PagingResponse(
-            1, 3, 6
-        );
+            1, 3, 6);
 
-        MemberListResponseDTO memberListResponseDTO = new MemberListResponseDTO(pagingResponse, memberInfoResponseDTOList);
+        MeetingListResponseDTO meetingListResponseDTO = new MeetingListResponseDTO(pagingResponse, meetingInfoResponseDTOList);
 
-
-        given(memberService.getMembers(any())).willReturn(memberListResponseDTO);
+        given(meetingService.getMeetingList(any())).willReturn(meetingListResponseDTO);
 
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.get("/member/list?page={page}&size={size}", 1, 2)
+                RestDocumentationRequestBuilders.get("/meeting/list?page={page}&size={size}", 1, 2)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -175,7 +129,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/member/list",
+                "/meeting/list",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -192,31 +146,99 @@ public class MemberControllerTest extends ControllerTest {
                     fieldWithPath("data.pagingResponse.pageNumber").type(JsonFieldType.NUMBER).description("현재 페이지"),
                     fieldWithPath("data.pagingResponse.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
                     fieldWithPath("data.pagingResponse.totalElements").type(JsonFieldType.NUMBER).description("전체 데이터 수"),
-                    fieldWithPath("data.memberList[]").type(JsonFieldType.ARRAY).description("데이터 정보"),
-                    fieldWithPath("data.memberList[].memberId").type(JsonFieldType.NUMBER).description("멤버 고유번호"),
-                    fieldWithPath("data.memberList[].name").type(JsonFieldType.STRING).description("이름"),
-                    fieldWithPath("data.memberList[].gender").type(JsonFieldType.STRING).description("성별"),
-                    fieldWithPath("data.memberList[].birthDate").type(JsonFieldType.STRING).description("생년월일"),
-                    fieldWithPath("data.memberList[].nickname").type(JsonFieldType.STRING).description("닉네임(카카오 닉네임)"),
-                    fieldWithPath("data.memberList[].role").type(JsonFieldType.STRING).description("권한 등급"),
-                    fieldWithPath("data.memberList[].deletedAt").type(JsonFieldType.STRING).optional().description("삭제일자 (삭제되지 않은 경우 null)")
+                    fieldWithPath("data.meetingList[]").type(JsonFieldType.ARRAY).description("데이터 정보"),
+                    fieldWithPath("data.meetingList[].meetingId").type(JsonFieldType.NUMBER).description("모임 고유번호"),
+                    fieldWithPath("data.meetingList[].meetingCreatorName").type(JsonFieldType.STRING).description("모임 개설자 이름"),
+                    fieldWithPath("data.meetingList[].meetingType").type(JsonFieldType.STRING).description("모임 개설자 이름"),
+                    fieldWithPath("data.meetingList[].meetingDateTime").type(JsonFieldType.STRING).description("모임 개최일자"),
+                    fieldWithPath("data.meetingList[].description").type(JsonFieldType.STRING).description("모임 상세내용").optional(),
+                    fieldWithPath("data.meetingList[].createdAt").type(JsonFieldType.STRING).optional().description("모임 개설일자"),
+                    fieldWithPath("data.meetingList[].isPrivateMeeting").type(JsonFieldType.BOOLEAN).description("비공개 여부")
                 )
             ));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void updateMemberRoleTest() throws Exception {
+    public void getMeetingListForAdminLevelTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        MemberRoleUpdateRequestDTO requestDTO = new MemberRoleUpdateRequestDTO("STAFF");
 
-        doNothing().when(memberService).updateMemberRole(any(), any());
+        MeetingInfoResponseDTO meetingInfoResponseDTO_01 = new MeetingInfoResponseDTO(
+            1L, "나뭉이", MeetingType.REGULAR, LocalDateTime.of(2025, 5, 31, 10, 45),
+            "~~", LocalDateTime.of(2025, 5, 1, 12, 30), false);
+        MeetingInfoResponseDTO meetingInfoResponseDTO_02 = new MeetingInfoResponseDTO(
+            2L, "나뭉이", MeetingType.FLASH, LocalDateTime.of(2025, 6, 3, 18, 30),
+            "~~", LocalDateTime.of(2025, 5, 1, 12, 31), false);
+        List<MeetingInfoResponseDTO> meetingInfoResponseDTOList = new ArrayList<>();
+        meetingInfoResponseDTOList.add(meetingInfoResponseDTO_01);
+        meetingInfoResponseDTOList.add(meetingInfoResponseDTO_02);
+
+        PagingResponse pagingResponse = new PagingResponse(
+            1, 3, 6);
+
+        MeetingListResponseDTO meetingListResponseDTO = new MeetingListResponseDTO(pagingResponse, meetingInfoResponseDTOList);
+
+        given(meetingService.getMeetingListForAdmin(any())).willReturn(meetingListResponseDTO);
 
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/member/{memberId}/role", 1L)
+                RestDocumentationRequestBuilders.get("/meeting/list/admin?page={page}&size={size}", 1, 2)
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andDo(document(
+                "/meeting/list",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                queryParameters(
+                    parameterWithName("page").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("페이지"),
+                    parameterWithName("size").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("사이즈")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data.pagingResponse").type(JsonFieldType.OBJECT).description("페이지 정보"),
+                    fieldWithPath("data.pagingResponse.pageNumber").type(JsonFieldType.NUMBER).description("현재 페이지"),
+                    fieldWithPath("data.pagingResponse.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                    fieldWithPath("data.pagingResponse.totalElements").type(JsonFieldType.NUMBER).description("전체 데이터 수"),
+                    fieldWithPath("data.meetingList[]").type(JsonFieldType.ARRAY).description("데이터 정보"),
+                    fieldWithPath("data.meetingList[].meetingId").type(JsonFieldType.NUMBER).description("모임 고유번호"),
+                    fieldWithPath("data.meetingList[].meetingCreatorName").type(JsonFieldType.STRING).description("모임 개설자 이름"),
+                    fieldWithPath("data.meetingList[].meetingType").type(JsonFieldType.STRING).description("모임 개설자 이름"),
+                    fieldWithPath("data.meetingList[].meetingDateTime").type(JsonFieldType.STRING).description("모임 개최일자"),
+                    fieldWithPath("data.meetingList[].description").type(JsonFieldType.STRING).description("모임 상세내용").optional(),
+                    fieldWithPath("data.meetingList[].createdAt").type(JsonFieldType.STRING).optional().description("모임 개설일자"),
+                    fieldWithPath("data.meetingList[].isPrivateMeeting").type(JsonFieldType.BOOLEAN).description("비공개 여부")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "STAFF")
+    public void updateMeetingTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+        MeetingUpdateRequestDTO requestDTO = new MeetingUpdateRequestDTO(
+            null, null, null, "늦지 않게 오세요~");
+
+        doNothing().when(meetingService).updateMeeting(any(), any(), any(), any(), any(), any(), any());
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                RestDocumentationRequestBuilders.patch("/meeting/{meetingId}", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -230,17 +252,20 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/role/modify",
+                "meeting/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
-                    parameterWithName("memberId").attributes(key("format").value("1 이상의 정수")).description("모임원 고유번호")
+                    parameterWithName("meetingId").attributes(key("format").value("1 이상의 정수")).description("모임 고유번호")
                 ),
                 requestHeaders(
                     headerWithName("Authorization").description("액세스 토큰")
                 ),
                 requestFields(
-                    fieldWithPath("role").type(JsonFieldType.STRING).attributes(key("format").value("'MEMBER', 'VICE_STAFF', 'STAFF', 'VICE_LEADER', 'LEADER', 'ADMIN' 중 하나의 값")).description("변경할 등급")
+                    fieldWithPath("meetingType").type(JsonFieldType.STRING).attributes(key("format").value("'REGULAR', 'FLASH', 'SPECIAL' 중 하나의 값")).description("모임 종류").optional(),
+                    fieldWithPath("meetingName").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ -)만으로 사용한 1자 이상, 70자 이하")).description("모임 제목").optional(),
+                    fieldWithPath("meetingDate").type(JsonFieldType.STRING).attributes(key("format").value("yyyyMMdd HH:mm 형식으로 이뤄진 미래 시간대의 문자열")).description("모임 개최일자").optional(),
+                    fieldWithPath("description").type(JsonFieldType.STRING).attributes(key("format").value("형식, 길이 제한 없는 문자열")).description("상세 내용").optional()
                 ),
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
@@ -252,62 +277,16 @@ public class MemberControllerTest extends ControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void updateMemberNameTest() throws Exception {
+    public void makeMeetingPrivateTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        MemberNameUpdateRequestDTO requestDTO = new MemberNameUpdateRequestDTO("나뭉이");
 
-        doNothing().when(memberService).updateMemberName(any(), any());
+        doNothing().when(meetingService).makeMeetingPrivate(any());
 
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/member/{memberId}/name", 1L)
-                    .header("Authorization", accessToken)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(requestDTO))
-            );
-
-        // then
-        actions
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("code").value(200))
-            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
-            .andExpect(jsonPath("data").value((Object) null))
-            .andDo(document(
-                "member/name/modify",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                pathParameters(
-                    parameterWithName("memberId").attributes(key("format").value("1 이상의 정수")).description("모임원 고유번호")
-                ),
-                requestHeaders(
-                    headerWithName("Authorization").description("액세스 토큰")
-                ),
-                requestFields(
-                    fieldWithPath("name").type(JsonFieldType.STRING).attributes(key("format").value("특수 문자를 제외한 2자 이상, 10자 이하 문자열")).description("이름")
-                ),
-                responseFields(
-                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
-                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
-                    fieldWithPath("data").type(JsonFieldType.NULL).description("-")
-                )
-            ));
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    public void activateMemberTest() throws Exception {
-        // given
-        String accessToken = "Bearer access_token";
-
-        doNothing().when(memberService).activateMember(any());
-
-        // when
-        ResultActions actions =
-            mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/member/{memberId}/activate", 1L)
+                RestDocumentationRequestBuilders.patch("/meeting/{meetingId}/private", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -320,11 +299,11 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/activate",
+                "meeting/private",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
-                    parameterWithName("memberId").attributes(key("format").value("1 이상의 정수")).description("모임원 고유번호")
+                    parameterWithName("meetingId").attributes(key("format").value("1 이상의 정수")).description("모임 고유번호")
                 ),
                 requestHeaders(
                     headerWithName("Authorization").description("액세스 토큰")
@@ -339,16 +318,16 @@ public class MemberControllerTest extends ControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void deactivateMember() throws Exception {
+    public void makeMeetingPublicTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
 
-        doNothing().when(memberService).deactivateMember(any());
+        doNothing().when(meetingService).makeMeetingPublic(any());
 
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/member/{memberId}/deactivate", 1L)
+                RestDocumentationRequestBuilders.patch("/meeting/{meetingId}/public", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -361,11 +340,52 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/deactivate",
+                "meeting/public",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
-                    parameterWithName("memberId").attributes(key("format").value("1 이상의 정수")).description("모임원 고유번호")
+                    parameterWithName("meetingId").attributes(key("format").value("1 이상의 정수")).description("모임 고유번호")
+                ),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("-")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "STAFF")
+    public void removeMeetingTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+
+        doNothing().when(meetingService).removeMeeting(any(), any(), any());
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                RestDocumentationRequestBuilders.delete("/meeting/{meetingId}", 1L)
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andExpect(jsonPath("data").value((Object) null))
+            .andDo(document(
+                "meeting/remove",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("meetingId").attributes(key("format").value("1 이상의 정수")).description("모임 고유번호")
                 ),
                 requestHeaders(
                     headerWithName("Authorization").description("액세스 토큰")

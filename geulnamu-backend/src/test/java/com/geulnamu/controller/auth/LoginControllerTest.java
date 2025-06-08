@@ -1,6 +1,5 @@
-package com.geulnamu.controller.member;
+package com.geulnamu.controller.auth;
 
-import com.geulnamu.controller.auth.LoginController;
 import com.geulnamu.controller.auth.dto.response.LoginResponseDTO;
 import com.geulnamu.controller.shared.ControllerTest;
 import com.geulnamu.infrastructure.security.token.TokenInfo;
