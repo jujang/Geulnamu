@@ -4,8 +4,8 @@ import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface MeetingDslRepository {
+public interface MeetingQueryRepositoryCustom {
+    Page<MeetingInfoResponseDTO> findMeetingsWithPaging(Pageable pageable);
+    Page<MeetingInfoResponseDTO> findMeetingsForAdminWithPaging(Pageable pageable);
 
-    Page<MeetingInfoResponseDTO> findMeetings(Pageable pageable);
-    Page<MeetingInfoResponseDTO> findMeetingsForAdmin(Pageable pageable);
 }

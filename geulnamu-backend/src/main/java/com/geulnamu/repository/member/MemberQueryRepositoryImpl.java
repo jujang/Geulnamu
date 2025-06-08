@@ -15,13 +15,13 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class MemberDslRepositoryImpl implements MemberDslRepository{
+public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
     private final QMember member = QMember.member;
 
     @Override
-    public Page<MemberInfoResponseDTO> findMembers(Pageable pageable) {
+    public Page<MemberInfoResponseDTO> findMembersWithPaging(Pageable pageable) {
         JPAQuery<Long> count = queryFactory
             .select(member.count())
             .from(member);

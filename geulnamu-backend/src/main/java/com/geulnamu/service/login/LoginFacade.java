@@ -1,6 +1,6 @@
-package com.geulnamu.service.auth;
+package com.geulnamu.service.login;
 
-import com.geulnamu.controller.auth.dto.response.LoginResponseDTO;
+import com.geulnamu.controller.login.dto.response.LoginResponseDTO;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.infrastructure.security.token.TokenPair;
 import com.geulnamu.infrastructure.security.token.TokenReissueResult;
@@ -10,7 +10,8 @@ import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.infrastructure.exception.TokenException;
 import com.geulnamu.infrastructure.util.JwtTokenUtil;
-import com.geulnamu.repository.member.MemberRepository;
+import com.geulnamu.repository.member.MemberCommandRepository;
+import com.geulnamu.repository.member.MemberQueryRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,7 +30,8 @@ public class LoginFacade {
 
     private final KakaoOAuthService kakaoOAuthService;
     private final AuthTokenService authTokenService;
-    private final MemberRepository memberRepository;
+    private final MemberQueryRepository memberQueryRepository;
+    private final MemberCommandRepository memberCommandRepository;
     private final JwtTokenUtil jwtTokenUtil;
 
     /**
@@ -67,7 +69,7 @@ public class LoginFacade {
 
         // 2. 토큰에서 회원 정보 추출
         Long memberId = jwtTokenUtil.getMemberId(refreshToken, TokenType.RefreshToken);
-        Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
         Role role = jwtTokenUtil.getRole(refreshToken, TokenType.RefreshToken);
 
         // 3. 토큰 재발급 (리프레시 토큰 재발급 여부 확인 함께 진행)
@@ -88,7 +90,7 @@ public class LoginFacade {
     @Transactional(rollbackFor = Exception.class)
     public void logout(Long memberId, HttpServletResponse response) {
         // 1. 멤버 조회
-        Member member = memberRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
 
         // 2. DB 에서 리프레시 토큰 삭제
         member.updateMemberRefreshToken(null);
@@ -103,7 +105,7 @@ public class LoginFacade {
      */
     @Transactional(rollbackFor = Exception.class)
     public LoginResponseDTO loginForDevelopment(Long memberId, HttpServletResponse response) {
-        Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
 
         TokenPair tokenPair = authTokenService.createTokensAndSetCookie(
             member.getId(), member.getRole(), response);
@@ -120,13 +122,13 @@ public class LoginFacade {
     private MemberResult findOrCreateMember(Map<String, Object> userInfo) {
         String kakaoUserId = userInfo.get("id").toString();
         System.out.println("kakaoUserId: " + kakaoUserId);
-        Optional<Member> memberOptional = memberRepository.findByKakaoUserId(kakaoUserId);
+        Optional<Member> memberOptional = memberQueryRepository.findByKakaoUserId(kakaoUserId);
 
         if(memberOptional.isEmpty()) {
             log.info("신규 회원 생성: kakaoUserId={}", kakaoUserId);
             String nickname = authTokenService.extractNickname(userInfo);
             Member newMember = Member.createFromKakaoInfo(kakaoUserId, nickname);
-            Member savedMember = memberRepository.save(newMember);
+            Member savedMember = memberCommandRepository.save(newMember);
             return new MemberResult(savedMember, true);
         } else {
             log.info("기존 회원 로그인: kakaoUserId={}", kakaoUserId);

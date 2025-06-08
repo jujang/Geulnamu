@@ -1,6 +1,6 @@
 package com.geulnamu.domain.shared.converter;
 
-import com.geulnamu.domain.shared.enums.Gender;
+import com.geulnamu.domain.member.Gender;
 
 public class GenderConverter extends EnumConverter<Gender> {
 

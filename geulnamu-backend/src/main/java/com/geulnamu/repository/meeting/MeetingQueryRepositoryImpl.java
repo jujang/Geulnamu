@@ -15,13 +15,13 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class MeetingDslRepositoryImpl implements MeetingDslRepository{
+public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
     private final QMeeting meeting = QMeeting.meeting;
 
     @Override
-    public Page<MeetingInfoResponseDTO> findMeetings(Pageable pageable) {
+    public Page<MeetingInfoResponseDTO> findMeetingsWithPaging(Pageable pageable) {
         JPAQuery<Long> count = queryFactory
             .select(meeting.count())
             .from(meeting)
@@ -42,7 +42,7 @@ public class MeetingDslRepositoryImpl implements MeetingDslRepository{
     }
 
     @Override
-    public Page<MeetingInfoResponseDTO> findMeetingsForAdmin(Pageable pageable) {
+    public Page<MeetingInfoResponseDTO> findMeetingsForAdminWithPaging(Pageable pageable) {
         JPAQuery<Long> count = queryFactory
             .select(meeting.count())
             .from(meeting);

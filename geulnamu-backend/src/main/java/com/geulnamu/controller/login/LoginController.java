@@ -1,11 +1,11 @@
-package com.geulnamu.controller.auth;
+package com.geulnamu.controller.login;
 
-import com.geulnamu.controller.auth.dto.response.LoginResponseDTO;
+import com.geulnamu.controller.login.dto.response.LoginResponseDTO;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
-import com.geulnamu.service.auth.LoginFacade;
+import com.geulnamu.service.login.LoginFacade;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;

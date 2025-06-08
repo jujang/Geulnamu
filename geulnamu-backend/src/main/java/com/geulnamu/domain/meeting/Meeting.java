@@ -4,11 +4,15 @@ import com.geulnamu.domain.meetingAttendance.MeetingAttendance;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.DateColumn;
 import com.geulnamu.domain.shared.converter.MeetingTypeConverter;
+import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.ExistDataException;
+import com.geulnamu.infrastructure.exception.ForbiddenException;
+import com.geulnamu.infrastructure.response.ResponseMessage;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Getter
@@ -45,9 +49,6 @@ public class Meeting extends DateColumn {
 
     @Column(name = "private_at")
     private LocalDateTime privateAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 
 
     public static Meeting createMeeting(Member member, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, String description) {
@@ -94,6 +95,18 @@ public class Meeting extends DateColumn {
             throw new ExistDataException();
         }
         this.privateAt = null;
+    }
+
+    public void validateTimeForDeleteMeeting() {
+        if(LocalDateTime.now().plusHours(6).isAfter(this.meetingDate)) {
+            throw new BadRequestException(ResponseMessage.MEETING_DELETION_TIME_EXPIRED);
+        }
+    }
+
+    public void validateTimeForPrivateMeeting() {
+        if(LocalDateTime.now().isBefore(this.meetingDate.plusDays(1).with(LocalTime.MIN))) {
+            throw new BadRequestException(ResponseMessage.MEETING_PRIVACY_TIME_RESTRICTION);
+        }
     }
 
 }

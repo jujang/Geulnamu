@@ -1,4 +1,4 @@
-package com.geulnamu.domain.shared.enums;
+package com.geulnamu.domain.member;
 
 public enum MemberStatus {
     ACTIVE,

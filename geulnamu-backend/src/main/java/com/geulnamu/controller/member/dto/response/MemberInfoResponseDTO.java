@@ -2,7 +2,7 @@ package com.geulnamu.controller.member.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.geulnamu.domain.member.Member;
-import com.geulnamu.domain.shared.enums.Gender;
+import com.geulnamu.domain.member.Gender;
 import com.geulnamu.domain.shared.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
