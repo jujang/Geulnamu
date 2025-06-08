@@ -4,12 +4,14 @@ import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @Slf4j
 @RestControllerAdvice
@@ -30,7 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public BaseResponse DateTimeParseExceptionHandler(HttpMessageNotReadableException exception) {
         log.error("message: {} ", exception.getMessage());
-        return BaseResponse.ofFail(400, ResponseMessage.BIRTH_DATE_NOT_VALIDATE, null);
+        return BaseResponse.ofFail(400, ResponseMessage.DATE_NOT_VALIDATE, null);
     }
 
     /**
@@ -58,11 +60,29 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Validation 실패 (Method Parameter)
+     * HttpStatus 417
+     */
+    @ExceptionHandler({HandlerMethodValidationException.class})
+    public BaseResponse handlerMethodValidationException(HandlerMethodValidationException exception) {
+        log.error("HandlerMethodValidationException: {} ", exception.getMessage());
+        
+        // 실제 검증 에러 메시지 추출 (최신 버전)
+        String errorMessage = exception.getAllErrors().stream()
+            .findFirst()
+            .map(MessageSourceResolvable::getDefaultMessage)
+            .orElse("Method parameter validation failed");
+            
+        return BaseResponse.ofFail(417, ResponseMessage.INVALID_REQ_VALUE, errorMessage);
+    }
+
+    /**
      * 다뤄주지 않은 에러 발생 시, TODO: slack 채널로 에러 전송
      */
     @ExceptionHandler(Exception.class)
     public BaseResponse handleException(Exception exception) {
         log.error("message : {}", exception.getMessage());
+        log.error(exception.toString());
 
 //        slackSendMessage(exception);
 

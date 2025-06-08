@@ -28,18 +28,11 @@ public class MemberController {
         return BaseResponse.ofSuccess();
     }
 
-    @AccessLevel(Level.AUTHENTICATED)
+    @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/info", name = "개인 정보 입력 여부 확인")
     public BaseResponse<Boolean> checkMemberInfoRegister(@AuthMemberId Long memberId) {
         Boolean response = memberService.isMemberInfoRegistered(memberId);
         return BaseResponse.ofSuccess(response);
-    }
-
-    @AccessLevel(Level.AUTHENTICATED)
-    @PatchMapping(value = "/info", name = "개인 정보 수정")
-    public BaseResponse<Void> updateMemberInfo(@AuthMemberId Long memberId, @Valid @RequestBody MemberInfoRequestDTO requestDTO) {
-        memberService.updateMemberInfo(memberId, requestDTO.getName(), requestDTO.getGender(), requestDTO.getBirthDate());
-        return BaseResponse.ofSuccess();
     }
 
     @AccessLevel(Level.ADMIN)
@@ -50,12 +43,21 @@ public class MemberController {
     }
 
     @AccessLevel(Level.ADMIN)
-    @GetMapping(name = "모임원 목록 조회")
-    public BaseResponse<MemberListResponseDTO> getMembers(@Valid PagingRequest listRequest) {
-        MemberListResponseDTO memberListResponseDTO = memberService.getMembers(listRequest);
+    @GetMapping(value = "/list", name = "모임원 목록 조회")
+    public BaseResponse<MemberListResponseDTO> getMembers(@Valid PagingRequest pagingRequest) {
+        MemberListResponseDTO memberListResponseDTO = memberService.getMembers(pagingRequest);
         return BaseResponse.ofSuccess(memberListResponseDTO);
     }
 
+    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
+    @AccessLevel(Level.MEMBER)
+    @PatchMapping(value = "/info", name = "개인 정보 수정")
+    public BaseResponse<Void> updateMemberInfo(@AuthMemberId Long memberId, @Valid @RequestBody MemberInfoRequestDTO requestDTO) {
+        memberService.updateMemberInfo(memberId, requestDTO.getName(), requestDTO.getGender(), requestDTO.getBirthDate());
+        return BaseResponse.ofSuccess();
+    }
+
+    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/role", name = "모임원 등급 변경 - 해당 모임원 재로그인 필요")
     public BaseResponse<Void> updateMemberRole(@PathVariable @Min(value = 1) Long memberId, @Valid @RequestBody MemberRoleUpdateRequestDTO request) {
@@ -63,6 +65,7 @@ public class MemberController {
         return BaseResponse.ofSuccess();
     }
 
+    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/name", name = "모임원 이름 변경")
     public BaseResponse<Void> updateMemberName(@PathVariable @Min(value = 1) Long memberId, @Valid @RequestBody MemberNameUpdateRequestDTO request) {
@@ -70,6 +73,7 @@ public class MemberController {
         return BaseResponse.ofSuccess();
     }
 
+    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/activate", name = "모임원 활성화")
     public BaseResponse<Void> activateMember(@PathVariable @Min(value = 1) Long memberId) {
@@ -77,6 +81,7 @@ public class MemberController {
         return BaseResponse.ofSuccess();
     }
 
+    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/deactivate", name = "모임원 비활성화")
     public BaseResponse<Void> deactivateMember(@PathVariable @Min(value = 1) Long memberId) {

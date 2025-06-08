@@ -1,15 +1,11 @@
 package com.geulnamu.repository.member;
 
 import com.geulnamu.domain.member.Member;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
-
+public interface MemberQueryRepository extends JpaRepository<Member, Long>, MemberQueryRepositoryCustom {
     Optional<Member> findByIdAndDeletedAtIsNull(Long id);
     Optional<Member> findByKakaoUserId(String kakaoUserId);
-
 }

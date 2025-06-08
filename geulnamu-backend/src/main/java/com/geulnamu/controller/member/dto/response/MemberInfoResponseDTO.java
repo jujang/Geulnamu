@@ -2,7 +2,7 @@ package com.geulnamu.controller.member.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.geulnamu.domain.member.Member;
-import com.geulnamu.domain.shared.enums.Gender;
+import com.geulnamu.domain.member.Gender;
 import com.geulnamu.domain.shared.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +21,7 @@ public class MemberInfoResponseDTO {
     private LocalDate birthDate;
     private String nickname;
     private Role role;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:SS", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:SS")
     private LocalDateTime deletedAt;
 
     public static MemberInfoResponseDTO of(Member member) {

@@ -1,4 +1,4 @@
-package com.geulnamu.service.auth;
+package com.geulnamu.service.login;
 
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.security.token.TokenInfo;

@@ -4,7 +4,6 @@ import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.meetingAttendance.MeetingAttendance;
 import com.geulnamu.domain.shared.*;
 import com.geulnamu.domain.shared.converter.GenderConverter;
-import com.geulnamu.domain.shared.enums.Gender;
 import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.exception.ExistDataException;

@@ -9,6 +9,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AccessLevel {
 
-    Level value() default Level.AUTHENTICATED;
+    Level value() default Level.MEMBER;
 
 }

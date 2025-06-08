@@ -12,7 +12,10 @@ public class ResponseMessage {
     public static final String INTERNAL_SERVER_ERROR = "Unknown error"; // 500
 
 
-    public static final String BIRTH_DATE_NOT_VALIDATE = "생년월일이 yyyyMMdd 형식이 아닙니다.";
+    public static final String DATE_NOT_VALIDATE = "날짜값이 유효한 형식의 값이 아닙니다.";
+
+    public static final String MEETING_PRIVACY_TIME_RESTRICTION  = "모임이 이뤄진 당일까지는 비공개 처리할 수 없습니다.";
+    public static final String MEETING_DELETION_TIME_EXPIRED = "모임 시작 6시간 전부터는 삭제할 수 없습니다.";
 
     public static final String ACCESS_TOKEN_NOT_VALIDATE = "액세스 토큰이 유효하지 않습니다."; // 401
     public static final String REFRESH_TOKEN_NOT_VALIDATE = "리프레시 토큰이 유효하지 않습니다. 다시 로그인 해 주세요."; // 401
