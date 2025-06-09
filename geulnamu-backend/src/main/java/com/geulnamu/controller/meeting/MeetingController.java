@@ -2,6 +2,7 @@ package com.geulnamu.controller.meeting;
 
 import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequestDTO;
 import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequestDTO;
+import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponseDTO;
 import com.geulnamu.controller.meeting.dto.response.MeetingListResponseDTO;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.domain.shared.enums.Role;
@@ -30,6 +31,13 @@ public class MeetingController {
         meetingService.createMeeting(memberId, requestDTO.getMeetingName(), requestDTO.getMeetingType(),
             requestDTO.getMeetingDate(), requestDTO.getDescription());
         return BaseResponse.ofSuccess();
+    }
+
+    @AccessLevel(Level.STAFF)
+    @GetMapping(value = "/{meetingId}", name = "모임 단일 조회")
+    public BaseResponse<MeetingInfoResponseDTO> findMeeting(@PathVariable @Min(value = 1) Long meetingId) {
+        MeetingInfoResponseDTO meetingInfoResponseDTO = meetingService.findMeeting(meetingId);
+        return BaseResponse.ofSuccess(meetingInfoResponseDTO);
     }
 
     @AccessLevel(Level.MEMBER)

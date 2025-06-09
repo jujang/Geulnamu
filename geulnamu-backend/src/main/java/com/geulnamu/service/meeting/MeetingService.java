@@ -42,6 +42,12 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
+    public MeetingInfoResponseDTO findMeeting(Long meetingId) {
+        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
+        return MeetingInfoResponseDTO.of(meeting);
+    }
+
+    @Transactional(readOnly = true)
     public MeetingListResponseDTO getMeetingList(PagingRequest pagingRequest) {
         Pageable pageable = pagingRequest.of();
         Page<MeetingInfoResponseDTO> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(pageable);

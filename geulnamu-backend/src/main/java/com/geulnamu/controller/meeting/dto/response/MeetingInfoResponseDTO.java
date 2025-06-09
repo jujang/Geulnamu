@@ -15,6 +15,7 @@ public class MeetingInfoResponseDTO {
     private Long meetingId;
     private String meetingCreatorName;
     private MeetingType meetingType;
+    private String meetingName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     private LocalDateTime meetingDateTime;
     private String description;
@@ -24,8 +25,8 @@ public class MeetingInfoResponseDTO {
 
     public static MeetingInfoResponseDTO of(Meeting meeting) {
         return new MeetingInfoResponseDTO(meeting.getId(), meeting.getMember().getName(),
-            meeting.getMeetingType(), meeting.getMeetingDate(), meeting.getDescription(),
-            meeting.getCreatedAt(), meeting.getPrivateAt() != null);
+            meeting.getMeetingType(), meeting.getMeetingName(), meeting.getMeetingDate(),
+            meeting.getDescription(), meeting.getCreatedAt(), meeting.getPrivateAt() != null);
     }
 
 }
