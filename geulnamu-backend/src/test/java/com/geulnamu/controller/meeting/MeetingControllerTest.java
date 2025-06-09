@@ -92,16 +92,67 @@ public class MeetingControllerTest extends ControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "STAFF")
+    public void findMeeting() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+
+        MeetingInfoResponseDTO meetingInfoResponseDTO_01 = new MeetingInfoResponseDTO(
+            1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임", LocalDateTime.of(2025, 5, 31, 10, 45),
+            "~~", LocalDateTime.of(2025, 5, 1, 12, 30), false);
+
+        given(meetingService.findMeeting(any())).willReturn(meetingInfoResponseDTO_01);
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                RestDocumentationRequestBuilders.get("/meeting/{meetingId}", 1)
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andDo(document(
+                "/meeting/view",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("meetingId").attributes(key("format").value("1 이상의 정수")).description("모임 고유번호")
+                ),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data.meetingId").type(JsonFieldType.NUMBER).description("모임 고유번호"),
+                    fieldWithPath("data.meetingCreatorName").type(JsonFieldType.STRING).description("모임 개설자 이름"),
+                    fieldWithPath("data.meetingType").type(JsonFieldType.STRING).description("모임 유형"),
+                    fieldWithPath("data.meetingName").type(JsonFieldType.STRING).description("모임 제목"),
+                    fieldWithPath("data.meetingDateTime").type(JsonFieldType.STRING).description("모임 개최일자"),
+                    fieldWithPath("data.description").type(JsonFieldType.STRING).description("모임 상세내용").optional(),
+                    fieldWithPath("data.createdAt").type(JsonFieldType.STRING).optional().description("모임 개설일자"),
+                    fieldWithPath("data.isPrivateMeeting").type(JsonFieldType.BOOLEAN).description("비공개 여부")
+                )
+            ));
+    }
+
+    @Test
     @WithMockUser(roles = "MEMBER")
     public void getMeetingListTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
 
         MeetingInfoResponseDTO meetingInfoResponseDTO_01 = new MeetingInfoResponseDTO(
-            1L, "나뭉이", MeetingType.REGULAR, LocalDateTime.of(2025, 5, 31, 10, 45),
+            1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임", LocalDateTime.of(2025, 5, 31, 10, 45),
             "~~", LocalDateTime.of(2025, 5, 1, 12, 30), false);
         MeetingInfoResponseDTO meetingInfoResponseDTO_02 = new MeetingInfoResponseDTO(
-            2L, "나뭉이", MeetingType.FLASH, LocalDateTime.of(2025, 6, 3, 18, 30),
+            2L, "나뭉이", MeetingType.FLASH, "금요 독서벙", LocalDateTime.of(2025, 6, 3, 18, 30),
             "~~", LocalDateTime.of(2025, 5, 1, 12, 31), false);
         List<MeetingInfoResponseDTO> meetingInfoResponseDTOList = new ArrayList<>();
         meetingInfoResponseDTOList.add(meetingInfoResponseDTO_01);
@@ -149,7 +200,8 @@ public class MeetingControllerTest extends ControllerTest {
                     fieldWithPath("data.meetingList[]").type(JsonFieldType.ARRAY).description("데이터 정보"),
                     fieldWithPath("data.meetingList[].meetingId").type(JsonFieldType.NUMBER).description("모임 고유번호"),
                     fieldWithPath("data.meetingList[].meetingCreatorName").type(JsonFieldType.STRING).description("모임 개설자 이름"),
-                    fieldWithPath("data.meetingList[].meetingType").type(JsonFieldType.STRING).description("모임 개설자 이름"),
+                    fieldWithPath("data.meetingList[].meetingType").type(JsonFieldType.STRING).description("모임 유형"),
+                    fieldWithPath("data.meetingList[].meetingName").type(JsonFieldType.STRING).description("모임 제목"),
                     fieldWithPath("data.meetingList[].meetingDateTime").type(JsonFieldType.STRING).description("모임 개최일자"),
                     fieldWithPath("data.meetingList[].description").type(JsonFieldType.STRING).description("모임 상세내용").optional(),
                     fieldWithPath("data.meetingList[].createdAt").type(JsonFieldType.STRING).optional().description("모임 개설일자"),
@@ -165,10 +217,10 @@ public class MeetingControllerTest extends ControllerTest {
         String accessToken = "Bearer access_token";
 
         MeetingInfoResponseDTO meetingInfoResponseDTO_01 = new MeetingInfoResponseDTO(
-            1L, "나뭉이", MeetingType.REGULAR, LocalDateTime.of(2025, 5, 31, 10, 45),
+            1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임", LocalDateTime.of(2025, 5, 31, 10, 45),
             "~~", LocalDateTime.of(2025, 5, 1, 12, 30), false);
         MeetingInfoResponseDTO meetingInfoResponseDTO_02 = new MeetingInfoResponseDTO(
-            2L, "나뭉이", MeetingType.FLASH, LocalDateTime.of(2025, 6, 3, 18, 30),
+            2L, "나뭉이", MeetingType.FLASH, "금요 독서벙", LocalDateTime.of(2025, 6, 3, 18, 30),
             "~~", LocalDateTime.of(2025, 5, 1, 12, 31), false);
         List<MeetingInfoResponseDTO> meetingInfoResponseDTOList = new ArrayList<>();
         meetingInfoResponseDTOList.add(meetingInfoResponseDTO_01);
@@ -216,7 +268,8 @@ public class MeetingControllerTest extends ControllerTest {
                     fieldWithPath("data.meetingList[]").type(JsonFieldType.ARRAY).description("데이터 정보"),
                     fieldWithPath("data.meetingList[].meetingId").type(JsonFieldType.NUMBER).description("모임 고유번호"),
                     fieldWithPath("data.meetingList[].meetingCreatorName").type(JsonFieldType.STRING).description("모임 개설자 이름"),
-                    fieldWithPath("data.meetingList[].meetingType").type(JsonFieldType.STRING).description("모임 개설자 이름"),
+                    fieldWithPath("data.meetingList[].meetingType").type(JsonFieldType.STRING).description("모임 유형"),
+                    fieldWithPath("data.meetingList[].meetingName").type(JsonFieldType.STRING).description("모임 제목"),
                     fieldWithPath("data.meetingList[].meetingDateTime").type(JsonFieldType.STRING).description("모임 개최일자"),
                     fieldWithPath("data.meetingList[].description").type(JsonFieldType.STRING).description("모임 상세내용").optional(),
                     fieldWithPath("data.meetingList[].createdAt").type(JsonFieldType.STRING).optional().description("모임 개설일자"),

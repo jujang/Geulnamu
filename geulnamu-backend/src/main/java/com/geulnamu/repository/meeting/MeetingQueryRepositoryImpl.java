@@ -29,7 +29,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
 
         List<MeetingInfoResponseDTO> content = queryFactory
             .select(Projections.constructor(MeetingInfoResponseDTO.class,
-                meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingDate,
+                meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingName, meeting.meetingDate,
                 meeting.description, meeting.createdAt, meeting.privateAt.isNotNull()))
             .from(meeting)
             .where(meeting.privateAt.isNull())
@@ -49,7 +49,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
 
         List<MeetingInfoResponseDTO> content = queryFactory
             .select(Projections.constructor(MeetingInfoResponseDTO.class,
-                meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingDate,
+                meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingName, meeting.meetingDate,
                 meeting.description, meeting.createdAt, meeting.privateAt.isNotNull()))
             .from(meeting)
             .orderBy(meeting.id.desc())
