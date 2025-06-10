@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class MemberRoleUpdateRequestDTO {
+public class MemberRoleUpdateRequest {
 
     @NotBlank(message = "변경할 등급 필수 입력")
     @Pattern(regexp = "MEMBER|VICE_STAFF|STAFF|VICE_LEADER|LEADER|ADMIN", message = "role은 'MEMBER', 'VICE_STAFF', 'STAFF', 'VICE_LEADER', 'LEADER', 'ADMIN' 중 하나만 가능합니다.")

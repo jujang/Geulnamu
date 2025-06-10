@@ -8,9 +8,9 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class MemberListResponseDTO {
+public class MemberListResponse {
 
     private PagingResponse pagingResponse;
-    private List<MemberInfoResponseDTO> memberList;
+    private List<MemberInfoResponse> memberList;
 
 }

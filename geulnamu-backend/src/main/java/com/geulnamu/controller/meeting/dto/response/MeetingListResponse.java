@@ -8,8 +8,8 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class MeetingListResponseDTO {
+public class MeetingListResponse {
 
     private PagingResponse pagingResponse;
-    private List<MeetingInfoResponseDTO> meetingList;
+    private List<MeetingInfoResponse> meetingList;
 }

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class MeetingCreateRequestDTO {
+public class MeetingCreateRequest {
 
     @NotBlank(message = "모임 종류 필수 입력")
     @Pattern(regexp = "REGULAR|FLASH|SPECIAL", message = "모임 종류는 'REGULAR', 'FLASH', 'SPECIAL' 중 하나만 가능합니다.")

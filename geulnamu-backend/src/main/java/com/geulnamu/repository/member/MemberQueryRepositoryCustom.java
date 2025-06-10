@@ -1,9 +1,9 @@
 package com.geulnamu.repository.member;
 
-import com.geulnamu.controller.member.dto.response.MemberInfoResponseDTO;
+import com.geulnamu.controller.member.dto.response.MemberInfoResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface MemberQueryRepositoryCustom {
-    Page<MemberInfoResponseDTO> findMembersWithPaging(Pageable pageable);
+    Page<MemberInfoResponse> findMembersWithPaging(Pageable pageable);
 }

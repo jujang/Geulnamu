@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class MemberInfoResponseDTO {
+public class MemberInfoResponse {
 
     private Long memberId;
     private String name;
@@ -24,8 +24,8 @@ public class MemberInfoResponseDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm:SS")
     private LocalDateTime deletedAt;
 
-    public static MemberInfoResponseDTO of(Member member) {
-        return new MemberInfoResponseDTO(member.getId(), member.getName(), member.getGender(), member.getBirthDate(), member.getNickname(), member.getRole(), member.getDeletedAt());
+    public static MemberInfoResponse of(Member member) {
+        return new MemberInfoResponse(member.getId(), member.getName(), member.getGender(), member.getBirthDate(), member.getNickname(), member.getRole(), member.getDeletedAt());
     }
 
 }

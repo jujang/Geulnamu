@@ -1,10 +1,10 @@
 package com.geulnamu.controller.member;
 
-import com.geulnamu.controller.member.dto.request.MemberInfoRequestDTO;
-import com.geulnamu.controller.member.dto.request.MemberNameUpdateRequestDTO;
-import com.geulnamu.controller.member.dto.request.MemberRoleUpdateRequestDTO;
-import com.geulnamu.controller.member.dto.response.MemberInfoResponseDTO;
-import com.geulnamu.controller.member.dto.response.MemberListResponseDTO;
+import com.geulnamu.controller.member.dto.request.MemberInfoRequest;
+import com.geulnamu.controller.member.dto.request.MemberNameUpdateRequest;
+import com.geulnamu.controller.member.dto.request.MemberRoleUpdateRequest;
+import com.geulnamu.controller.member.dto.response.MemberInfoResponse;
+import com.geulnamu.controller.member.dto.response.MemberListResponse;
 import com.geulnamu.controller.shared.ControllerTest;
 import com.geulnamu.domain.member.Gender;
 import com.geulnamu.domain.shared.enums.Role;
@@ -94,7 +94,7 @@ public class MemberControllerTest extends ControllerTest {
     public void updateMemberInfoTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        MemberInfoRequestDTO requestDTO = new MemberInfoRequestDTO("나뭉이", "MALE", LocalDate.of(2022, 1, 1));
+        MemberInfoRequest request = new MemberInfoRequest("나뭉이", "MALE", LocalDate.of(2022, 1, 1));
 
         doNothing().when(memberService).updateMemberInfo(any(), any(), any(), any());
 
@@ -105,7 +105,7 @@ public class MemberControllerTest extends ControllerTest {
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(requestDTO))
+                    .content(objectMapper.writeValueAsString(request))
             );
 
         // then
@@ -140,24 +140,24 @@ public class MemberControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        MemberInfoResponseDTO memberInfoResponseDTO_1 = new MemberInfoResponseDTO(
+        MemberInfoResponse memberInfoResponse_1 = new MemberInfoResponse(
             1L, "나뭉일", Gender.valueOf("MALE"), LocalDate.of(2022, 1, 1), "namu_1", Role.LEADER, LocalDateTime.of(2022, 1, 3, 11, 30, 0)
         );
-        MemberInfoResponseDTO memberInfoResponseDTO_2 = new MemberInfoResponseDTO(
+        MemberInfoResponse memberInfoResponse_2 = new MemberInfoResponse(
             2L, "나뭉이", Gender.valueOf("FEMALE"), LocalDate.of(2022, 1, 2), "namu_2", Role.VICE_STAFF, null
         );
-        List<MemberInfoResponseDTO> memberInfoResponseDTOList = new ArrayList<>();
-        memberInfoResponseDTOList.add(memberInfoResponseDTO_1);
-        memberInfoResponseDTOList.add(memberInfoResponseDTO_2);
+        List<MemberInfoResponse> memberInfoResponseList = new ArrayList<>();
+        memberInfoResponseList.add(memberInfoResponse_1);
+        memberInfoResponseList.add(memberInfoResponse_2);
 
         PagingResponse pagingResponse = new PagingResponse(
             1, 3, 6
         );
 
-        MemberListResponseDTO memberListResponseDTO = new MemberListResponseDTO(pagingResponse, memberInfoResponseDTOList);
+        MemberListResponse memberListResponse = new MemberListResponse(pagingResponse, memberInfoResponseList);
 
 
-        given(memberService.getMembers(any())).willReturn(memberListResponseDTO);
+        given(memberService.getMembers(any())).willReturn(memberListResponse);
 
         // when
         ResultActions actions =
@@ -208,7 +208,7 @@ public class MemberControllerTest extends ControllerTest {
     public void updateMemberRoleTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        MemberRoleUpdateRequestDTO requestDTO = new MemberRoleUpdateRequestDTO("STAFF");
+        MemberRoleUpdateRequest request = new MemberRoleUpdateRequest("STAFF");
 
         doNothing().when(memberService).updateMemberRole(any(), any());
 
@@ -219,7 +219,7 @@ public class MemberControllerTest extends ControllerTest {
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(requestDTO))
+                    .content(objectMapper.writeValueAsString(request))
             );
 
         // then
@@ -254,7 +254,7 @@ public class MemberControllerTest extends ControllerTest {
     public void updateMemberNameTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        MemberNameUpdateRequestDTO requestDTO = new MemberNameUpdateRequestDTO("나뭉이");
+        MemberNameUpdateRequest request = new MemberNameUpdateRequest("나뭉이");
 
         doNothing().when(memberService).updateMemberName(any(), any());
 
@@ -265,7 +265,7 @@ public class MemberControllerTest extends ControllerTest {
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(requestDTO))
+                    .content(objectMapper.writeValueAsString(request))
             );
 
         // then

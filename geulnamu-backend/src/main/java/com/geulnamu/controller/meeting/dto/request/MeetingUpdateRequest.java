@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class MeetingUpdateRequestDTO {
+public class MeetingUpdateRequest {
 
     @Pattern(regexp = "REGULAR|FLASH|SPECIAL", message = "모임 종류는 'REGULAR', 'FLASH', 'SPECIAL' 중 하나만 가능합니다.")
     private String meetingType;    // 모임 종류
