@@ -4,11 +4,13 @@ import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequestDTO;
 import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequestDTO;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponseDTO;
 import com.geulnamu.controller.meeting.dto.response.MeetingListResponseDTO;
+import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.annotation.AuthRole;
+import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.infrastructure.response.paging.PagingRequest;
 import com.geulnamu.service.meeting.MeetingService;
@@ -24,7 +26,7 @@ public class MeetingController {
 
     private final MeetingService meetingService;
 
-    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
+    @LogAction(value = ActionType.MEETING_CREATE, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @PostMapping(name = "모임 생성")
     public BaseResponse<Void> createMeeting(@AuthMemberId Long memberId, @Valid @RequestBody MeetingCreateRequestDTO requestDTO) {
@@ -54,7 +56,7 @@ public class MeetingController {
         return BaseResponse.ofSuccess(meetingListResponseDTO);
     }
 
-    // TODO: 나중에는 수정 이력이 남아야 될 것 같은데...
+    @LogAction(value = ActionType.MEETING_UPDATE, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @PatchMapping(value = "/{meetingId}", name = "모임 수정")
     public BaseResponse<Void> updateMeeting(@PathVariable @Min(value = 1) Long meetingId, @AuthMemberId Long memberId,
@@ -78,7 +80,7 @@ public class MeetingController {
         return BaseResponse.ofSuccess();
     }
 
-    // TODO: 삭제 이력도 남아야 될 것 같은데...
+    @LogAction(value = ActionType.MEETING_DELETE, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @DeleteMapping(value = "/{meetingId}", name = "개설한 모임 삭제 - 모임 시작 6시간 전까지만 가능")
     public BaseResponse<Void> removeMeeting(@PathVariable @Min(value = 1) Long meetingId, @AuthMemberId Long memberId, @AuthRole Role role) {

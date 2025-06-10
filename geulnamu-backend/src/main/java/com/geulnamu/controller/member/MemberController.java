@@ -3,7 +3,9 @@ package com.geulnamu.controller.member;
 import com.geulnamu.controller.member.dto.request.*;
 import com.geulnamu.controller.member.dto.response.MemberInfoResponseDTO;
 import com.geulnamu.controller.member.dto.response.MemberListResponseDTO;
+import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
+import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.response.paging.PagingRequest;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
@@ -49,7 +51,7 @@ public class MemberController {
         return BaseResponse.ofSuccess(memberListResponseDTO);
     }
 
-    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
+    @LogAction(value = ActionType.MEMBER_INFO_UPDATE, actionDomain = "member")
     @AccessLevel(Level.MEMBER)
     @PatchMapping(value = "/info", name = "개인 정보 수정")
     public BaseResponse<Void> updateMemberInfo(@AuthMemberId Long memberId, @Valid @RequestBody MemberInfoRequestDTO requestDTO) {
@@ -57,34 +59,34 @@ public class MemberController {
         return BaseResponse.ofSuccess();
     }
 
-    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
+    @LogAction(value = ActionType.MEMBER_ROLE_UPDATE, actionDomain = "member")
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/role", name = "모임원 등급 변경 - 해당 모임원 재로그인 필요")
-    public BaseResponse<Void> updateMemberRole(@PathVariable @Min(value = 1) Long memberId, @Valid @RequestBody MemberRoleUpdateRequestDTO request) {
+    public BaseResponse<Void> updateMemberRole(@PathVariable @Min(value = 1) Long memberId, @AuthMemberId Long authMemberId, @Valid @RequestBody MemberRoleUpdateRequestDTO request) {
         memberService.updateMemberRole(memberId, request.getRole());
         return BaseResponse.ofSuccess();
     }
 
-    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
+    @LogAction(value = ActionType.MEMBER_NAME_UPDATE, actionDomain = "member")
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/name", name = "모임원 이름 변경")
-    public BaseResponse<Void> updateMemberName(@PathVariable @Min(value = 1) Long memberId, @Valid @RequestBody MemberNameUpdateRequestDTO request) {
+    public BaseResponse<Void> updateMemberName(@PathVariable @Min(value = 1) Long memberId, @AuthMemberId Long authMemberId, @Valid @RequestBody MemberNameUpdateRequestDTO request) {
         memberService.updateMemberName(memberId, request.getName());
         return BaseResponse.ofSuccess();
     }
 
-    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
+    @LogAction(value = ActionType.MEMBER_ACTIVATE, actionDomain = "member")
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/activate", name = "모임원 활성화")
-    public BaseResponse<Void> activateMember(@PathVariable @Min(value = 1) Long memberId) {
+    public BaseResponse<Void> activateMember(@PathVariable @Min(value = 1) Long memberId, @AuthMemberId Long authMemberId) {
         memberService.activateMember(memberId);
         return BaseResponse.ofSuccess();
     }
 
-    // TODO: 해당 요청은 이력이 남아야 될 것 같은데...
+    @LogAction(value = ActionType.MEMBER_DEACTIVATE, actionDomain = "member")
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/deactivate", name = "모임원 비활성화")
-    public BaseResponse<Void> deactivateMember(@PathVariable @Min(value = 1) Long memberId) {
+    public BaseResponse<Void> deactivateMember(@PathVariable @Min(value = 1) Long memberId, @AuthMemberId Long authMemberId) {
         memberService.deactivateMember(memberId);
         return BaseResponse.ofSuccess();
     }
