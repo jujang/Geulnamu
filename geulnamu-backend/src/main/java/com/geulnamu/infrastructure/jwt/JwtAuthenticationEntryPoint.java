@@ -33,7 +33,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         String responseContent = objectMapper.writeValueAsString(BaseResponse.ofFail(401, errorMessage, null));
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setContentType("UTF-8");
+        response.setCharacterEncoding("UTF-8");
         response.getWriter().write(responseContent);
     }
 
