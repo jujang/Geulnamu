@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class MemberCreateRequestDTO {
+public class MemberCreateRequest {
 
     @NotBlank(message = "카카오 계정 ID 필수 입력")
     private String kakaoMemberId;

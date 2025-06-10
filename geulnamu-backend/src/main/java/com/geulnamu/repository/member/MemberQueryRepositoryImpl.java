@@ -1,6 +1,6 @@
 package com.geulnamu.repository.member;
 
-import com.geulnamu.controller.member.dto.response.MemberInfoResponseDTO;
+import com.geulnamu.controller.member.dto.response.MemberInfoResponse;
 import com.geulnamu.domain.member.QMember;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -21,13 +21,13 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
     private final QMember member = QMember.member;
 
     @Override
-    public Page<MemberInfoResponseDTO> findMembersWithPaging(Pageable pageable) {
+    public Page<MemberInfoResponse> findMembersWithPaging(Pageable pageable) {
         JPAQuery<Long> count = queryFactory
             .select(member.count())
             .from(member);
 
-        List<MemberInfoResponseDTO> content = queryFactory
-            .select(Projections.constructor(MemberInfoResponseDTO.class,
+        List<MemberInfoResponse> content = queryFactory
+            .select(Projections.constructor(MemberInfoResponse.class,
                 member.id, member.name, member.gender, member.birthDate, member.nickname, member.role, member.deletedAt))
             .from(member)
             .orderBy(member.id.desc())

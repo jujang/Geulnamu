@@ -1,7 +1,7 @@
 package com.geulnamu.service.member;
 
-import com.geulnamu.controller.member.dto.response.MemberInfoResponseDTO;
-import com.geulnamu.controller.member.dto.response.MemberListResponseDTO;
+import com.geulnamu.controller.member.dto.response.MemberInfoResponse;
+import com.geulnamu.controller.member.dto.response.MemberListResponse;
 import com.geulnamu.domain.member.Gender;
 import com.geulnamu.infrastructure.response.paging.PagingRequest;
 import com.geulnamu.infrastructure.response.paging.PagingResponse;
@@ -50,19 +50,19 @@ public class MemberService {
 
     // TODO: 비활성화된 계정을 조회할 것인지 조회하지 않을 것인지 잘 고민해 볼 것
     @Transactional(readOnly = true)
-    public MemberInfoResponseDTO findMember(Long memberId) {
+    public MemberInfoResponse findMember(Long memberId) {
         Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
-        return MemberInfoResponseDTO.of(member);
+        return MemberInfoResponse.of(member);
     }
 
     @Transactional(readOnly = true)
-    public MemberListResponseDTO getMembers(PagingRequest pagingRequest) {
+    public MemberListResponse getMembers(PagingRequest pagingRequest) {
         Pageable pageable = pagingRequest.of();
-        Page<MemberInfoResponseDTO> membersDslList = memberQueryRepository.findMembersWithPaging(pageable);
+        Page<MemberInfoResponse> membersDslList = memberQueryRepository.findMembersWithPaging(pageable);
 
         PagingResponse pagingResponse = PagingResponse.from(membersDslList);
-        List<MemberInfoResponseDTO> memberList = membersDslList.getContent();
-        return new MemberListResponseDTO(pagingResponse, memberList);
+        List<MemberInfoResponse> memberList = membersDslList.getContent();
+        return new MemberListResponse(pagingResponse, memberList);
     }
 
     // 일단 여기서는 비활성화된 멤버는 조회하지 않도록 함

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class MeetingInfoResponseDTO {
+public class MeetingInfoResponse {
 
     private Long meetingId;
     private String meetingCreatorName;
@@ -23,8 +23,8 @@ public class MeetingInfoResponseDTO {
     private LocalDateTime createdAt;
     private Boolean isPrivateMeeting;
 
-    public static MeetingInfoResponseDTO of(Meeting meeting) {
-        return new MeetingInfoResponseDTO(meeting.getId(), meeting.getMember().getName(),
+    public static MeetingInfoResponse of(Meeting meeting) {
+        return new MeetingInfoResponse(meeting.getId(), meeting.getMember().getName(),
             meeting.getMeetingType(), meeting.getMeetingName(), meeting.getMeetingDate(),
             meeting.getDescription(), meeting.getCreatedAt(), meeting.getPrivateAt() != null);
     }

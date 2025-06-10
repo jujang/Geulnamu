@@ -1,9 +1,9 @@
 package com.geulnamu.controller.meeting;
 
-import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequestDTO;
-import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequestDTO;
-import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponseDTO;
-import com.geulnamu.controller.meeting.dto.response.MeetingListResponseDTO;
+import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequest;
+import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
+import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
+import com.geulnamu.controller.meeting.dto.response.MeetingListResponse;
 import com.geulnamu.controller.shared.ControllerTest;
 import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.infrastructure.response.ResponseMessage;
@@ -49,7 +49,7 @@ public class MeetingControllerTest extends ControllerTest {
     public void createMeetingTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        MeetingCreateRequestDTO requestDTO = new MeetingCreateRequestDTO(
+        MeetingCreateRequest request = new MeetingCreateRequest(
             "REGULAR", "제 200회 정기모임", LocalDateTime.of(2126, 6, 14, 10, 30), "늦지 않게 오세요~");
 
         doNothing().when(meetingService).createMeeting(any(), any(), any(), any(), any());
@@ -61,7 +61,7 @@ public class MeetingControllerTest extends ControllerTest {
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(requestDTO))
+                    .content(objectMapper.writeValueAsString(request))
             );
 
         // then
@@ -97,11 +97,11 @@ public class MeetingControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        MeetingInfoResponseDTO meetingInfoResponseDTO_01 = new MeetingInfoResponseDTO(
+        MeetingInfoResponse meetingInfoResponse_01 = new MeetingInfoResponse(
             1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임", LocalDateTime.of(2025, 5, 31, 10, 45),
             "~~", LocalDateTime.of(2025, 5, 1, 12, 30), false);
 
-        given(meetingService.findMeeting(any())).willReturn(meetingInfoResponseDTO_01);
+        given(meetingService.findMeeting(any())).willReturn(meetingInfoResponse_01);
 
         // when
         ResultActions actions =
@@ -148,22 +148,22 @@ public class MeetingControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        MeetingInfoResponseDTO meetingInfoResponseDTO_01 = new MeetingInfoResponseDTO(
+        MeetingInfoResponse meetingInfoResponse_01 = new MeetingInfoResponse(
             1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임", LocalDateTime.of(2025, 5, 31, 10, 45),
             "~~", LocalDateTime.of(2025, 5, 1, 12, 30), false);
-        MeetingInfoResponseDTO meetingInfoResponseDTO_02 = new MeetingInfoResponseDTO(
+        MeetingInfoResponse meetingInfoResponse_02 = new MeetingInfoResponse(
             2L, "나뭉이", MeetingType.FLASH, "금요 독서벙", LocalDateTime.of(2025, 6, 3, 18, 30),
             "~~", LocalDateTime.of(2025, 5, 1, 12, 31), false);
-        List<MeetingInfoResponseDTO> meetingInfoResponseDTOList = new ArrayList<>();
-        meetingInfoResponseDTOList.add(meetingInfoResponseDTO_01);
-        meetingInfoResponseDTOList.add(meetingInfoResponseDTO_02);
+        List<MeetingInfoResponse> meetingInfoResponseList = new ArrayList<>();
+        meetingInfoResponseList.add(meetingInfoResponse_01);
+        meetingInfoResponseList.add(meetingInfoResponse_02);
 
         PagingResponse pagingResponse = new PagingResponse(
             1, 3, 6);
 
-        MeetingListResponseDTO meetingListResponseDTO = new MeetingListResponseDTO(pagingResponse, meetingInfoResponseDTOList);
+        MeetingListResponse meetingListResponse = new MeetingListResponse(pagingResponse, meetingInfoResponseList);
 
-        given(meetingService.getMeetingList(any())).willReturn(meetingListResponseDTO);
+        given(meetingService.getMeetingList(any())).willReturn(meetingListResponse);
 
         // when
         ResultActions actions =
@@ -216,22 +216,22 @@ public class MeetingControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        MeetingInfoResponseDTO meetingInfoResponseDTO_01 = new MeetingInfoResponseDTO(
+        MeetingInfoResponse meetingInfoResponse_01 = new MeetingInfoResponse(
             1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임", LocalDateTime.of(2025, 5, 31, 10, 45),
             "~~", LocalDateTime.of(2025, 5, 1, 12, 30), false);
-        MeetingInfoResponseDTO meetingInfoResponseDTO_02 = new MeetingInfoResponseDTO(
+        MeetingInfoResponse meetingInfoResponse_02 = new MeetingInfoResponse(
             2L, "나뭉이", MeetingType.FLASH, "금요 독서벙", LocalDateTime.of(2025, 6, 3, 18, 30),
             "~~", LocalDateTime.of(2025, 5, 1, 12, 31), false);
-        List<MeetingInfoResponseDTO> meetingInfoResponseDTOList = new ArrayList<>();
-        meetingInfoResponseDTOList.add(meetingInfoResponseDTO_01);
-        meetingInfoResponseDTOList.add(meetingInfoResponseDTO_02);
+        List<MeetingInfoResponse> meetingInfoResponseList = new ArrayList<>();
+        meetingInfoResponseList.add(meetingInfoResponse_01);
+        meetingInfoResponseList.add(meetingInfoResponse_02);
 
         PagingResponse pagingResponse = new PagingResponse(
             1, 3, 6);
 
-        MeetingListResponseDTO meetingListResponseDTO = new MeetingListResponseDTO(pagingResponse, meetingInfoResponseDTOList);
+        MeetingListResponse meetingListResponse = new MeetingListResponse(pagingResponse, meetingInfoResponseList);
 
-        given(meetingService.getMeetingListForAdmin(any())).willReturn(meetingListResponseDTO);
+        given(meetingService.getMeetingListForAdmin(any())).willReturn(meetingListResponse);
 
         // when
         ResultActions actions =
@@ -283,7 +283,7 @@ public class MeetingControllerTest extends ControllerTest {
     public void updateMeetingTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        MeetingUpdateRequestDTO requestDTO = new MeetingUpdateRequestDTO(
+        MeetingUpdateRequest request = new MeetingUpdateRequest(
             null, null, null, "늦지 않게 오세요~");
 
         doNothing().when(meetingService).updateMeeting(any(), any(), any(), any(), any(), any(), any());
@@ -295,7 +295,7 @@ public class MeetingControllerTest extends ControllerTest {
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(requestDTO))
+                    .content(objectMapper.writeValueAsString(request))
             );
 
         // then

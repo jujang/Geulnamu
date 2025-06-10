@@ -1,6 +1,6 @@
 package com.geulnamu.repository.meeting;
 
-import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponseDTO;
+import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
 import com.geulnamu.domain.meeting.QMeeting;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -21,14 +21,14 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
     private final QMeeting meeting = QMeeting.meeting;
 
     @Override
-    public Page<MeetingInfoResponseDTO> findMeetingsWithPaging(Pageable pageable) {
+    public Page<MeetingInfoResponse> findMeetingsWithPaging(Pageable pageable) {
         JPAQuery<Long> count = queryFactory
             .select(meeting.count())
             .from(meeting)
             .where(meeting.privateAt.isNull());
 
-        List<MeetingInfoResponseDTO> content = queryFactory
-            .select(Projections.constructor(MeetingInfoResponseDTO.class,
+        List<MeetingInfoResponse> content = queryFactory
+            .select(Projections.constructor(MeetingInfoResponse.class,
                 meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingName, meeting.meetingDate,
                 meeting.description, meeting.createdAt, meeting.privateAt.isNotNull()))
             .from(meeting)
@@ -42,13 +42,13 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
     }
 
     @Override
-    public Page<MeetingInfoResponseDTO> findMeetingsForAdminWithPaging(Pageable pageable) {
+    public Page<MeetingInfoResponse> findMeetingsForAdminWithPaging(Pageable pageable) {
         JPAQuery<Long> count = queryFactory
             .select(meeting.count())
             .from(meeting);
 
-        List<MeetingInfoResponseDTO> content = queryFactory
-            .select(Projections.constructor(MeetingInfoResponseDTO.class,
+        List<MeetingInfoResponse> content = queryFactory
+            .select(Projections.constructor(MeetingInfoResponse.class,
                 meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingName, meeting.meetingDate,
                 meeting.description, meeting.createdAt, meeting.privateAt.isNotNull()))
             .from(meeting)

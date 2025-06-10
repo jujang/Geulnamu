@@ -1,6 +1,6 @@
 package com.geulnamu.controller.login;
 
-import com.geulnamu.controller.login.dto.response.LoginResponseDTO;
+import com.geulnamu.controller.login.dto.response.LoginResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.annotation.LogAction;
@@ -26,9 +26,9 @@ public class LoginController {
     @LogAction(value = ActionType.MEMBER_LOGIN, actionDomain = "login")
     @AccessLevel(Level.PUBLIC)
     @GetMapping(value = "/oauth/kakao", name = "로그인 redirect url")
-    public BaseResponse<LoginResponseDTO> processKakaoLogin(@RequestParam("code") String authorizationCode, HttpServletResponse response) {
-        LoginResponseDTO loginResponseDTO = loginFacade.loginWithKakao(authorizationCode, response);
-        return BaseResponse.ofSuccess(loginResponseDTO);
+    public BaseResponse<LoginResponse> processKakaoLogin(@RequestParam("code") String authorizationCode, HttpServletResponse response) {
+        LoginResponse loginResponse = loginFacade.loginWithKakao(authorizationCode, response);
+        return BaseResponse.ofSuccess(loginResponse);
     }
 
     @AccessLevel(Level.PUBLIC)
@@ -48,9 +48,9 @@ public class LoginController {
     @LogAction(value = ActionType.MEMBER_LOGIN, actionDomain = "login")
     @AccessLevel(Level.PUBLIC)
     @PostMapping(value = "/{memberId}/direct", name = "서버 직접 로그인 - 실 운영시 없어질 기능")
-    public BaseResponse<LoginResponseDTO> login(@PathVariable @Min(value = 1) Long memberId, HttpServletResponse response) {
-        LoginResponseDTO loginResponseDTO = loginFacade.loginForDevelopment(memberId, response);
-        return BaseResponse.ofSuccess(loginResponseDTO);
+    public BaseResponse<LoginResponse> login(@PathVariable @Min(value = 1) Long memberId, HttpServletResponse response) {
+        LoginResponse loginResponse = loginFacade.loginForDevelopment(memberId, response);
+        return BaseResponse.ofSuccess(loginResponse);
     }
 
 }

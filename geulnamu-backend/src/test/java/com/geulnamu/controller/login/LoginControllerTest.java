@@ -1,6 +1,6 @@
 package com.geulnamu.controller.login;
 
-import com.geulnamu.controller.login.dto.response.LoginResponseDTO;
+import com.geulnamu.controller.login.dto.response.LoginResponse;
 import com.geulnamu.controller.shared.ControllerTest;
 import com.geulnamu.infrastructure.security.token.TokenInfo;
 import com.geulnamu.infrastructure.response.ResponseMessage;
@@ -45,7 +45,7 @@ public class LoginControllerTest extends ControllerTest {
     public void processKakaoLoginTest() throws Exception {
         // given
         String accessToken = "Bearer accessToken";
-        LoginResponseDTO loginResponseDTO = new LoginResponseDTO(accessToken, true);
+        LoginResponse loginResponse = new LoginResponse(accessToken, true);
         Cookie cookie = new Cookie("refreshToken", "random_refreshToken_code");
         cookie.setMaxAge((int) (TokenInfo.REFRESH_TOKEN_VALID_TIME/1000));
         cookie.setPath("/");
@@ -55,7 +55,7 @@ public class LoginControllerTest extends ControllerTest {
 
         String authorizationCode = "random_code";
 
-        given(loginFacade.loginWithKakao(any(), any())).willReturn(loginResponseDTO);
+        given(loginFacade.loginWithKakao(any(), any())).willReturn(loginResponse);
 
         // when
         ResultActions actions =
@@ -75,8 +75,8 @@ public class LoginControllerTest extends ControllerTest {
             .andExpect(cookie().value(cookie.getName(), cookie.getValue()))
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
-            .andExpect(jsonPath("data.accessToken").value(loginResponseDTO.accessToken()))
-            .andExpect(jsonPath("data.newMember").value(loginResponseDTO.newMember()))
+            .andExpect(jsonPath("data.accessToken").value(loginResponse.accessToken()))
+            .andExpect(jsonPath("data.newMember").value(loginResponse.newMember()))
             .andDo(document(
                 "login/oauth/kakao",
                 getDocumentRequest(),

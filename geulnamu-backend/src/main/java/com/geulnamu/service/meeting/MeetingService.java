@@ -1,7 +1,7 @@
 package com.geulnamu.service.meeting;
 
-import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponseDTO;
-import com.geulnamu.controller.meeting.dto.response.MeetingListResponseDTO;
+import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
+import com.geulnamu.controller.meeting.dto.response.MeetingListResponse;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.domain.member.Member;
@@ -42,29 +42,29 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingInfoResponseDTO findMeeting(Long meetingId) {
+    public MeetingInfoResponse findMeeting(Long meetingId) {
         Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        return MeetingInfoResponseDTO.of(meeting);
+        return MeetingInfoResponse.of(meeting);
     }
 
     @Transactional(readOnly = true)
-    public MeetingListResponseDTO getMeetingList(PagingRequest pagingRequest) {
+    public MeetingListResponse getMeetingList(PagingRequest pagingRequest) {
         Pageable pageable = pagingRequest.of();
-        Page<MeetingInfoResponseDTO> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(pageable);
+        Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(pageable);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
-        List<MeetingInfoResponseDTO> meetingList = meetingDslList.getContent();
-        return new MeetingListResponseDTO(pagingResponse, meetingList);
+        List<MeetingInfoResponse> meetingList = meetingDslList.getContent();
+        return new MeetingListResponse(pagingResponse, meetingList);
     }
 
     @Transactional(readOnly = true)
-    public MeetingListResponseDTO getMeetingListForAdmin(PagingRequest pagingRequest) {
+    public MeetingListResponse getMeetingListForAdmin(PagingRequest pagingRequest) {
         Pageable pageable = pagingRequest.of();
-        Page<MeetingInfoResponseDTO> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(pageable);
+        Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(pageable);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
-        List<MeetingInfoResponseDTO> meetingList = meetingDslList.getContent();
-        return new MeetingListResponseDTO(pagingResponse, meetingList);
+        List<MeetingInfoResponse> meetingList = meetingDslList.getContent();
+        return new MeetingListResponse(pagingResponse, meetingList);
     }
 
     @Transactional(rollbackFor = Exception.class)

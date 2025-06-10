@@ -1,6 +1,6 @@
 package com.geulnamu.service.login;
 
-import com.geulnamu.controller.login.dto.response.LoginResponseDTO;
+import com.geulnamu.controller.login.dto.response.LoginResponse;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.infrastructure.security.token.TokenPair;
 import com.geulnamu.infrastructure.security.token.TokenReissueResult;
@@ -38,7 +38,7 @@ public class LoginFacade {
      * 카카오 로그인 전체 플로우
      */
     @Transactional(rollbackFor = Exception.class)
-    public LoginResponseDTO loginWithKakao(String authorizationCode, HttpServletResponse response) {
+    public LoginResponse loginWithKakao(String authorizationCode, HttpServletResponse response) {
         // 1.OAuth 처리
         Map<String, Object> userInfo = kakaoOAuthService.getKakaoUserInfoAndLogout(authorizationCode);
 
@@ -54,7 +54,7 @@ public class LoginFacade {
         // 4. 회원의 리프레시 토큰 업데이트(DB)
         member.updateMemberRefreshToken(tokenPair.refreshToken());
 
-        return LoginResponseDTO.of(tokenPair.accessToken(), isNewMember);
+        return LoginResponse.of(tokenPair.accessToken(), isNewMember);
     }
 
     /**
@@ -104,7 +104,7 @@ public class LoginFacade {
      * 임시 로그인 메서드 (TODO: 운영 시 삭제)
      */
     @Transactional(rollbackFor = Exception.class)
-    public LoginResponseDTO loginForDevelopment(Long memberId, HttpServletResponse response) {
+    public LoginResponse loginForDevelopment(Long memberId, HttpServletResponse response) {
         Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
 
         TokenPair tokenPair = authTokenService.createTokensAndSetCookie(
@@ -112,7 +112,7 @@ public class LoginFacade {
 
         member.updateMemberRefreshToken(tokenPair.refreshToken());
 
-        return LoginResponseDTO.of(tokenPair.accessToken(), false);
+        return LoginResponse.of(tokenPair.accessToken(), false);
     }
 
 

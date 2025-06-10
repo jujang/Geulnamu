@@ -1,9 +1,9 @@
 package com.geulnamu.controller.meeting;
 
-import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequestDTO;
-import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequestDTO;
-import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponseDTO;
-import com.geulnamu.controller.meeting.dto.response.MeetingListResponseDTO;
+import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequest;
+import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
+import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
+import com.geulnamu.controller.meeting.dto.response.MeetingListResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.domain.shared.enums.Role;
@@ -29,40 +29,40 @@ public class MeetingController {
     @LogAction(value = ActionType.MEETING_CREATE, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @PostMapping(name = "모임 생성")
-    public BaseResponse<Void> createMeeting(@AuthMemberId Long memberId, @Valid @RequestBody MeetingCreateRequestDTO requestDTO) {
-        meetingService.createMeeting(memberId, requestDTO.getMeetingName(), requestDTO.getMeetingType(),
-            requestDTO.getMeetingDate(), requestDTO.getDescription());
+    public BaseResponse<Void> createMeeting(@AuthMemberId Long memberId, @Valid @RequestBody MeetingCreateRequest request) {
+        meetingService.createMeeting(memberId, request.getMeetingName(), request.getMeetingType(),
+            request.getMeetingDate(), request.getDescription());
         return BaseResponse.ofSuccess();
     }
 
     @AccessLevel(Level.STAFF)
     @GetMapping(value = "/{meetingId}", name = "모임 단일 조회")
-    public BaseResponse<MeetingInfoResponseDTO> findMeeting(@PathVariable @Min(value = 1) Long meetingId) {
-        MeetingInfoResponseDTO meetingInfoResponseDTO = meetingService.findMeeting(meetingId);
-        return BaseResponse.ofSuccess(meetingInfoResponseDTO);
+    public BaseResponse<MeetingInfoResponse> findMeeting(@PathVariable @Min(value = 1) Long meetingId) {
+        MeetingInfoResponse meetingInfoResponse = meetingService.findMeeting(meetingId);
+        return BaseResponse.ofSuccess(meetingInfoResponse);
     }
 
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/list", name = "모임 목록 조회")
-    public BaseResponse<MeetingListResponseDTO> getMeetingList(@Valid PagingRequest pagingRequest) {
-        MeetingListResponseDTO meetingListResponseDTO = meetingService.getMeetingList(pagingRequest);
-        return BaseResponse.ofSuccess(meetingListResponseDTO);
+    public BaseResponse<MeetingListResponse> getMeetingList(@Valid PagingRequest pagingRequest) {
+        MeetingListResponse meetingListResponse = meetingService.getMeetingList(pagingRequest);
+        return BaseResponse.ofSuccess(meetingListResponse);
     }
 
     @AccessLevel(Level.ADMIN)
     @GetMapping(value = "/list/admin", name = "모임 목록 조회(관리자용)")
-    public BaseResponse<MeetingListResponseDTO> getMeetingListForAdminLevel(@Valid PagingRequest pagingRequest) {
-        MeetingListResponseDTO meetingListResponseDTO = meetingService.getMeetingListForAdmin(pagingRequest);
-        return BaseResponse.ofSuccess(meetingListResponseDTO);
+    public BaseResponse<MeetingListResponse> getMeetingListForAdminLevel(@Valid PagingRequest pagingRequest) {
+        MeetingListResponse meetingListResponse = meetingService.getMeetingListForAdmin(pagingRequest);
+        return BaseResponse.ofSuccess(meetingListResponse);
     }
 
     @LogAction(value = ActionType.MEETING_UPDATE, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @PatchMapping(value = "/{meetingId}", name = "모임 수정")
     public BaseResponse<Void> updateMeeting(@PathVariable @Min(value = 1) Long meetingId, @AuthMemberId Long memberId,
-                                            @AuthRole Role role, @Valid @RequestBody MeetingUpdateRequestDTO requestDTO) {
-        meetingService.updateMeeting(meetingId, memberId, role, requestDTO.getMeetingName(), requestDTO.getMeetingType(),
-            requestDTO.getMeetingDate(), requestDTO.getDescription());
+                                            @AuthRole Role role, @Valid @RequestBody MeetingUpdateRequest request) {
+        meetingService.updateMeeting(meetingId, memberId, role, request.getMeetingName(), request.getMeetingType(),
+            request.getMeetingDate(), request.getDescription());
         return BaseResponse.ofSuccess();
     }
 
