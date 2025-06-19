@@ -44,7 +44,7 @@ public class MeetingController {
 
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/list", name = "모임 목록 조회")
-    public BaseResponse<MeetingListResponse> getMeetingList(@Valid @ModelAttribute PagingRequest pagingRequest) {
+    public BaseResponse<MeetingListResponse> getMeetingList(@Valid PagingRequest pagingRequest) {
         MeetingListResponse meetingListResponse = meetingService.getMeetingList(pagingRequest);
         return BaseResponse.ofSuccess(meetingListResponse);
     }

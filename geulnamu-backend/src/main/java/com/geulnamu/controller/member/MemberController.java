@@ -45,7 +45,7 @@ public class MemberController {
 
     @AccessLevel(Level.ADMIN)
     @GetMapping(value = "/list", name = "모임원 목록 조회")
-    public BaseResponse<MemberListResponse> getMembers(@Valid @ModelAttribute MemberListRequest memberRequest) {
+    public BaseResponse<MemberListResponse> getMembers(@Valid MemberListRequest memberRequest) {
         MemberListResponse memberListResponse = memberService.getMembers(memberRequest);
         return BaseResponse.ofSuccess(memberListResponse);
     }
