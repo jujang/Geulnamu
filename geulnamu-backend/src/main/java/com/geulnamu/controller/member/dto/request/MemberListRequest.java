@@ -41,7 +41,7 @@ public class MemberListRequest extends PagingRequest {
     }
 
     public MemberListRequest(String gender, String role, String isDeleted,
-                             String sortBy, String isAsc, int page, int size) {
+                             String sortBy, String isAsc, Integer page, Integer size) {
         super(page, size);
         this.gender = gender;
         this.role = role;

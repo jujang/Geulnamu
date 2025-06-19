@@ -6,7 +6,6 @@ import com.geulnamu.controller.member.dto.response.MemberListResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.annotation.LogAction;
-import com.geulnamu.infrastructure.response.paging.PagingRequest;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.annotation.AccessLevel;

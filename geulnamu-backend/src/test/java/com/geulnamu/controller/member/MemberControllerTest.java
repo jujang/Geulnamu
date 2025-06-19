@@ -162,7 +162,14 @@ public class MemberControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.get("/member/list?page={page}&size={size}", 1, 2)
+                get("/member/list")
+                    .param("gender", "MALE")
+                    .param("role", "MEMBER")
+                    .param("isDeleted", "true")
+                    .param("sortBy", "role")
+                    .param("isAsc", "true")
+                    .param("page", "1")
+                    .param("size", "10")
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -181,6 +188,11 @@ public class MemberControllerTest extends ControllerTest {
                     headerWithName("Authorization").description("액세스 토큰")
                 ),
                 queryParameters(
+                    parameterWithName("gender").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'MALE', 'FEMALE' 중 하나의 값")).description("성별").optional(),
+                    parameterWithName("role").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'MEMBER', 'VICE_STAFF', 'STAFF', 'VICE_LEADER', 'LEADER', 'ADMIN' 중 하나의 값")).description("등급").optional(),
+                    parameterWithName("isDeleted").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'true', 'false' 중 하나의 값")).description("비활성 여부").optional(),
+                    parameterWithName("sortBy").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'memberId', 'role', 'name', 'gender', 'birthDate' 중 하나의 값")).description("정렬 기준").optional(),
+                    parameterWithName("isAsc").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'true', 'false' 중 하나의 값")).description("오름차순 여부").optional(),
                     parameterWithName("page").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("페이지"),
                     parameterWithName("size").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("사이즈")
                 ),
