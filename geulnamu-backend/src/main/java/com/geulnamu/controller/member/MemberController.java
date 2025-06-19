@@ -46,8 +46,8 @@ public class MemberController {
 
     @AccessLevel(Level.ADMIN)
     @GetMapping(value = "/list", name = "모임원 목록 조회")
-    public BaseResponse<MemberListResponse> getMembers(@Valid PagingRequest pagingRequest) {
-        MemberListResponse memberListResponse = memberService.getMembers(pagingRequest);
+    public BaseResponse<MemberListResponse> getMembers(@Valid @ModelAttribute MemberListRequest memberRequest) {
+        MemberListResponse memberListResponse = memberService.getMembers(memberRequest);
         return BaseResponse.ofSuccess(memberListResponse);
     }
 
