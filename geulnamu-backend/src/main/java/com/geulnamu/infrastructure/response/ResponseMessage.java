@@ -14,6 +14,9 @@ public class ResponseMessage {
 
     public static final String DATE_NOT_VALIDATE = "날짜값이 유효한 형식의 값이 아닙니다.";
 
+    public static final String MEETING_INFO_UPDATE_TIME_RESTRICTION = "모임이 이뤄진 이후에는 모임 개최 관련 정보를 수정할 수 없습니다.";
+    public static final String MEETING_DISCUSSION_INFO_UPDATE_TIME_RESTRICTION = "토론 활동이 시작된 이후에는 토론 관련 정보를 수정할 수 없습니다.";
+    public static final String MEETING_DISCUSSION_TIME_RESTRICTION = "토론 시간은 모임 당일 내에서만, 모임 시간 이후로 가능합니다.";
     public static final String MEETING_PRIVACY_TIME_RESTRICTION  = "모임이 이뤄진 당일까지는 비공개 처리할 수 없습니다.";
     public static final String MEETING_DELETION_TIME_EXPIRED = "모임 시작 6시간 전부터는 삭제할 수 없습니다.";
 

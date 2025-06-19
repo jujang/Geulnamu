@@ -29,7 +29,13 @@ public class MeetingCreateRequest {
     @JsonFormat(pattern = "yyyyMMdd HH:mm")
     private LocalDateTime meetingDate;    // 모임 개최일자
 
+    @NotNull(message = "모임 장소 필수 입력")
+    @Pattern(regexp = "^[ㄱ-ㅎ가-힣a-zA-Z0-9\\s:/@\\[\\]()~_-]{1,30}$",
+        message = "모임 장소는 한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ -)만 1자 이상, 255자 이하로 입력해주세요.")
+    private String meetingPlace;
+
     private String description;    // 상세 내용
+
 
     public MeetingType getMeetingType() {
         return MeetingType.valueOf(meetingType);

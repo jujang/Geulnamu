@@ -6,7 +6,6 @@ import com.geulnamu.domain.shared.DateColumn;
 import com.geulnamu.domain.shared.converter.MeetingTypeConverter;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.ExistDataException;
-import com.geulnamu.infrastructure.exception.ForbiddenException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,17 +31,26 @@ public class Meeting extends DateColumn {
     private Member member;
 
     @Convert(converter = MeetingTypeConverter.class)
-    @Column(name = "meeting_type", length = 7)
+    @Column(name = "meeting_type", length = 7, nullable = false)
     private MeetingType meetingType;
 
-    @Column(name = "meeting_name", length = 70)
+    @Column(name = "meeting_name", length = 70, nullable = false)
     private String meetingName;
 
-    @Column(name = "meeting_date")
+    @Column(name = "meeting_date", nullable = false)
     private LocalDateTime meetingDate;
+
+    @Column(name = "meeting_place", nullable = false)
+    private String meetingPlace;
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "discussion_time")
+    private LocalDateTime discussionTime;
+
+    @Column(name = "alarm_message")
+    private String alarmMessage;
 
     @OneToMany(mappedBy = "meeting", fetch = FetchType.LAZY)
     private List<MeetingAttendance> meetingAttendances;
@@ -51,14 +59,27 @@ public class Meeting extends DateColumn {
     private LocalDateTime privateAt;
 
 
-    public static Meeting createMeeting(Member member, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, String description) {
+    public static Meeting createMeeting(Member member, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, String meetingPlace, String description) {
         return Meeting.builder()
             .member(member)
             .meetingType(meetingType)
             .meetingName(meetingName)
             .meetingDate(meetingDate)
+            .meetingPlace(meetingPlace)
             .description(description)
             .build();
+    }
+
+    public void checkTimeCanUpdateMeeting() {
+        if(LocalDateTime.now().isAfter(this.meetingDate)) {
+            throw new BadRequestException(ResponseMessage.MEETING_INFO_UPDATE_TIME_RESTRICTION);
+        }
+    }
+
+    public void checkTimeCanUpdateMeetingForDiscussion() {
+        if(this.discussionTime != null && LocalDateTime.now().isAfter(this.discussionTime)) {
+            throw new BadRequestException(ResponseMessage.MEETING_DISCUSSION_INFO_UPDATE_TIME_RESTRICTION);
+        }
     }
 
     public void updateMeetingName(String meetingName) {
@@ -79,8 +100,33 @@ public class Meeting extends DateColumn {
         this.meetingDate = targetMeetingDate;
     }
 
+    public void updateMeetingPlace(String meetingPlace) {
+        if(this.meetingPlace.equals(meetingPlace)) {
+            throw new ExistDataException();
+        }
+        this.meetingPlace = meetingPlace;
+    }
+
     public void updateMeetingDescription(String description) {
         this.description = description;
+    }
+
+    public void updateDiscussionTime(LocalDateTime discussionTime) {
+        // 이전에 입력한 시간과 동일한지 확인
+        if(this.discussionTime != null && this.discussionTime.equals(discussionTime)) {
+            throw new ExistDataException();
+        }
+        // 토론 시간은 모임 일정의 날짜와 같은 날 안에서만 모임 이후로 가능
+        if(discussionTime != null && (!discussionTime.isAfter(this.meetingDate) ||
+            discussionTime.getYear() != this.meetingDate.getYear() ||
+            discussionTime.getDayOfYear() != this.meetingDate.getDayOfYear())) {
+            throw new BadRequestException(ResponseMessage.MEETING_DISCUSSION_TIME_RESTRICTION);
+        }
+        this.discussionTime = discussionTime;
+    }
+
+    public void updateAlarmMessage(String alarmMessage) {
+        this.alarmMessage = alarmMessage;
     }
 
     public void makeMeetingPrivate() {
