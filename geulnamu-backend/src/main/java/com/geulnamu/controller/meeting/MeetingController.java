@@ -2,6 +2,7 @@ package com.geulnamu.controller.meeting;
 
 import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingGroupUpdateRequest;
+import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
 import com.geulnamu.controller.meeting.dto.response.MeetingListResponse;
@@ -14,7 +15,6 @@ import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.annotation.AuthRole;
 import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.response.BaseResponse;
-import com.geulnamu.infrastructure.response.paging.PagingRequest;
 import com.geulnamu.service.meeting.MeetingService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -55,15 +55,15 @@ public class MeetingController {
 
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/list", name = "모임 목록 조회")
-    public BaseResponse<MeetingListResponse> getMeetingList(@Valid PagingRequest pagingRequest) {
-        MeetingListResponse meetingListResponse = meetingService.getMeetingList(pagingRequest);
+    public BaseResponse<MeetingListResponse> getMeetingList(@Valid MeetingListRequest request) {
+        MeetingListResponse meetingListResponse = meetingService.getMeetingList(request);
         return BaseResponse.ofSuccess(meetingListResponse);
     }
 
     @AccessLevel(Level.ADMIN)
     @GetMapping(value = "/list/admin", name = "모임 목록 조회(관리자용)")
-    public BaseResponse<MeetingListResponse> getMeetingListForAdminLevel(@Valid PagingRequest pagingRequest) {
-        MeetingListResponse meetingListResponse = meetingService.getMeetingListForAdmin(pagingRequest);
+    public BaseResponse<MeetingListResponse> getMeetingListForAdminLevel(@Valid MeetingListRequest request) {
+        MeetingListResponse meetingListResponse = meetingService.getMeetingListForAdmin(request);
         return BaseResponse.ofSuccess(meetingListResponse);
     }
 

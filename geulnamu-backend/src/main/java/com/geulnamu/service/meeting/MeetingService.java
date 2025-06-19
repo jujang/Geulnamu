@@ -1,16 +1,15 @@
 package com.geulnamu.service.meeting;
 
+import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
 import com.geulnamu.controller.meeting.dto.response.MeetingListResponse;
 import com.geulnamu.controller.meeting.dto.response.StaffResponse;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.domain.member.Member;
-import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
-import com.geulnamu.infrastructure.response.paging.PagingRequest;
 import com.geulnamu.infrastructure.response.paging.PagingResponse;
 import com.geulnamu.repository.meeting.MeetingQueryRepository;
 import com.geulnamu.repository.meeting.MeetingCommandRepository;
@@ -18,7 +17,6 @@ import com.geulnamu.repository.member.MemberQueryRepository;
 import com.geulnamu.service.authorization.MeetingAuthorizationService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,9 +52,8 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingListResponse getMeetingList(PagingRequest pagingRequest) {
-        Pageable pageable = pagingRequest.toPageable();
-        Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(pageable);
+    public MeetingListResponse getMeetingList(MeetingListRequest request) {
+        Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(request);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
         List<MeetingInfoResponse> meetingList = meetingDslList.getContent();
@@ -64,9 +61,8 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingListResponse getMeetingListForAdmin(PagingRequest pagingRequest) {
-        Pageable pageable = pagingRequest.toPageable();
-        Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(pageable);
+    public MeetingListResponse getMeetingListForAdmin(MeetingListRequest request) {
+        Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(request);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
         List<MeetingInfoResponse> meetingList = meetingDslList.getContent();

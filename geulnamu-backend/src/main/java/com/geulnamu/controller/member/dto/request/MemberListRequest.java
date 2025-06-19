@@ -24,6 +24,7 @@ public class MemberListRequest extends PagingRequest {
     @Pattern(regexp = "true|false", message = "오름차순 여부 값은 'true' 또는 'false' 만 가능합니다.")
     private final String isAsc;
 
+
     public Gender getGender() {
         return gender != null ? Gender.valueOf(gender) : null;
     }

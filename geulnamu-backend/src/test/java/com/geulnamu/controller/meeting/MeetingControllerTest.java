@@ -226,6 +226,8 @@ public class MeetingControllerTest extends ControllerTest {
         ResultActions actions =
             mockMvc.perform(
                 get("/meeting/list")
+                    .param("meetingType", "REGULAR")
+                    .param("meetingCreatorId", "1")
                     .param("page", "1")
                     .param("size", "10")
                     .header("Authorization", accessToken)
@@ -246,6 +248,8 @@ public class MeetingControllerTest extends ControllerTest {
                     headerWithName("Authorization").description("액세스 토큰")
                 ),
                 queryParameters(
+                    parameterWithName("meetingType").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'REGULAR', 'FLASH', 'SPECIAL' 중 하나의 값")).description("모임 종류").optional(),
+                    parameterWithName("meetingCreatorId").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("(운영진의) 모임원 고유번호").optional(),
                     parameterWithName("page").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("페이지"),
                     parameterWithName("size").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("사이즈")
                 ),
@@ -303,6 +307,9 @@ public class MeetingControllerTest extends ControllerTest {
         ResultActions actions =
             mockMvc.perform(
                 get("/meeting/list/admin")
+                    .param("meetingType", "REGULAR")
+                    .param("meetingCreatorId", "1")
+                    .param("isPrivate", "true")
                     .param("page", "1")
                     .param("size", "10")
                     .header("Authorization", accessToken)
@@ -323,6 +330,9 @@ public class MeetingControllerTest extends ControllerTest {
                     headerWithName("Authorization").description("액세스 토큰")
                 ),
                 queryParameters(
+                    parameterWithName("meetingType").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'REGULAR', 'FLASH', 'SPECIAL' 중 하나의 값")).description("모임 종류").optional(),
+                    parameterWithName("meetingCreatorId").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("(운영진의) 모임원 고유번호").optional(),
+                    parameterWithName("isPrivate").attributes(key("type").value(JsonFieldType.BOOLEAN)).attributes(setAttributes("'true', 'false' 중 하나의 값")).description("모임 비공개 여부").optional(),
                     parameterWithName("page").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("페이지"),
                     parameterWithName("size").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("사이즈")
                 ),
