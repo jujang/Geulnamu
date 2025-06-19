@@ -93,7 +93,7 @@
 
 // 추후 수정할 것
 === ✅ 출석 관리
-==== link:meeting-attendance-api-guide.html[출석 API]
+==== link:attendance-api-guide.html[출석 API]
 - **출석 처리**: QR 코드 또는 GPS 기반 출석
 - **출석 현황 조회**: 개인별/모임별 출석 이력
 - **지각자 조회**: 운영진 전용 지각자 명단

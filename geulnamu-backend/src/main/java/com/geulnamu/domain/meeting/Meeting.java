@@ -1,6 +1,6 @@
 package com.geulnamu.domain.meeting;
 
-import com.geulnamu.domain.meetingAttendance.MeetingAttendance;
+import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.DateColumn;
 import com.geulnamu.domain.shared.converter.MeetingTypeConverter;
@@ -53,7 +53,7 @@ public class Meeting extends DateColumn {
     private String alarmMessage;
 
     @OneToMany(mappedBy = "meeting", fetch = FetchType.LAZY)
-    private List<MeetingAttendance> meetingAttendances;
+    private List<Attendance> attendances;
 
     @Column(name = "private_at")
     private LocalDateTime privateAt;
@@ -79,6 +79,14 @@ public class Meeting extends DateColumn {
     public void checkTimeCanUpdateMeetingForDiscussion() {
         if(this.discussionTime != null && LocalDateTime.now().isAfter(this.discussionTime)) {
             throw new BadRequestException(ResponseMessage.MEETING_DISCUSSION_INFO_UPDATE_TIME_RESTRICTION);
+        }
+    }
+
+    public void checkTimeCanAttendMeeting() {
+        if(LocalDateTime.now().getYear() != this.meetingDate.getYear()
+            || LocalDateTime.now().getDayOfYear() != this.meetingDate.getDayOfYear()
+            || !LocalDateTime.now().isAfter(this.meetingDate.minusHours(1))) {
+            throw new BadRequestException(ResponseMessage.MEETING_ATTEND_TIME_RESTRICTION);
         }
     }
 

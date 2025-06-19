@@ -1,4 +1,4 @@
-package com.geulnamu.domain.meetingAttendance;
+package com.geulnamu.domain.attendance;
 
 
 public enum DiscussionGroup {

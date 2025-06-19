@@ -1,7 +1,7 @@
 package com.geulnamu.domain.member;
 
+import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.meeting.Meeting;
-import com.geulnamu.domain.meetingAttendance.MeetingAttendance;
 import com.geulnamu.domain.shared.*;
 import com.geulnamu.domain.shared.converter.GenderConverter;
 import com.geulnamu.domain.shared.enums.Role;
@@ -49,7 +49,7 @@ public class Member extends DateColumn {
     private List<Meeting> meetings;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<MeetingAttendance> meetingAttendances;
+    private List<Attendance> attendances;
 
     @Column(name = "kakao_user_id", nullable = false, length = 50)
     private String kakaoUserId;

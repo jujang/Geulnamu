@@ -1,0 +1,37 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+// 코드 하이라이팅
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+
+[[title]]
+= Attendance API Guide
+
+== link:index.html[Index 페이지로 이동]
+
+== POST
+
+=== 모임 출석
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/create/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/create/request-headers.adoc[]
+
+==== response
+include::{snippets}/attendance/create/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/create/response-fields.adoc[]
+
+==== Error case
+
+---

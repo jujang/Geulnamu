@@ -1,6 +1,6 @@
 package com.geulnamu.domain.shared.converter;
 
-import com.geulnamu.domain.meetingAttendance.DiscussionGroup;
+import com.geulnamu.domain.attendance.DiscussionGroup;
 
 public class DiscussionGroupConverter extends EnumConverter<DiscussionGroup> {
 

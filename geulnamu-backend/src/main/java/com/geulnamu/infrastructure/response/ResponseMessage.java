@@ -19,6 +19,9 @@ public class ResponseMessage {
     public static final String MEETING_DISCUSSION_TIME_RESTRICTION = "토론 시간은 모임 당일 내에서만, 모임 시간 이후로 가능합니다.";
     public static final String MEETING_PRIVACY_TIME_RESTRICTION  = "모임이 이뤄진 당일까지는 비공개 처리할 수 없습니다.";
     public static final String MEETING_DELETION_TIME_EXPIRED = "모임 시작 6시간 전부터는 삭제할 수 없습니다.";
+    public static final String MEETING_ATTEND_TIME_RESTRICTION = "모임 출석은 모임 당일만, 모임 시작 1시간 전 부터 가능합니다.";
+
+    public static final String ATTENDANCE_DUPLICATE_ISSUE = "하나의 모임을 중복으로 출석할 수 없습니다.";
 
     public static final String ACCESS_TOKEN_NOT_VALIDATE = "액세스 토큰이 유효하지 않습니다."; // 401
     public static final String REFRESH_TOKEN_NOT_VALIDATE = "리프레시 토큰이 유효하지 않습니다. 다시 로그인 해 주세요."; // 401
