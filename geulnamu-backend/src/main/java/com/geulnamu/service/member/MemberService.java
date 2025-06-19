@@ -1,9 +1,9 @@
 package com.geulnamu.service.member;
 
+import com.geulnamu.controller.member.dto.request.MemberListRequest;
 import com.geulnamu.controller.member.dto.response.MemberInfoResponse;
 import com.geulnamu.controller.member.dto.response.MemberListResponse;
 import com.geulnamu.domain.member.Gender;
-import com.geulnamu.infrastructure.response.paging.PagingRequest;
 import com.geulnamu.infrastructure.response.paging.PagingResponse;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.Role;
@@ -12,7 +12,6 @@ import com.geulnamu.repository.member.MemberQueryRepository;
 import com.geulnamu.repository.member.MemberCommandRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,9 +55,8 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public MemberListResponse getMembers(PagingRequest pagingRequest) {
-        Pageable pageable = pagingRequest.of();
-        Page<MemberInfoResponse> membersDslList = memberQueryRepository.findMembersWithPaging(pageable);
+    public MemberListResponse getMembers(MemberListRequest request) {
+        Page<MemberInfoResponse> membersDslList = memberQueryRepository.findMembersWithPaging(request);
 
         PagingResponse pagingResponse = PagingResponse.from(membersDslList);
         List<MemberInfoResponse> memberList = membersDslList.getContent();

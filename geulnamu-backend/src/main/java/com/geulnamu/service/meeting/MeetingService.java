@@ -49,7 +49,7 @@ public class MeetingService {
 
     @Transactional(readOnly = true)
     public MeetingListResponse getMeetingList(PagingRequest pagingRequest) {
-        Pageable pageable = pagingRequest.of();
+        Pageable pageable = pagingRequest.toPageable();
         Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(pageable);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
@@ -59,7 +59,7 @@ public class MeetingService {
 
     @Transactional(readOnly = true)
     public MeetingListResponse getMeetingListForAdmin(PagingRequest pagingRequest) {
-        Pageable pageable = pagingRequest.of();
+        Pageable pageable = pagingRequest.toPageable();
         Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(pageable);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);

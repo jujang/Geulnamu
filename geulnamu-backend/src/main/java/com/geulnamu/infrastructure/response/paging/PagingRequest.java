@@ -10,14 +10,17 @@ import org.springframework.data.domain.PageRequest;
 @AllArgsConstructor
 public class PagingRequest {
 
-    @NotNull(message = "page 필수 입력")
-    @Min(value = 1, message = "page는 1 이상이어야 합니다.")
-    private Integer page; // 요청 페이지
-    @NotNull(message = "size 필수 입력")
-    @Min(value = 1, message = "size는 1 이상이어야 합니다.")
-    private Integer size; // 한 페이지 당 보여질 개수
+    @NotNull(message = "'page' 는 반드시 입력해야 합니다.")
+    @Min(value = 1, message = "'page' 는 1 이상이어야 합니다.")
+    private final Integer page; // 요청 페이지
 
-    public PageRequest of() {
+    @NotNull(message = "'size' 는 반드시 입력해야 합니다.")
+    @Min(value = 1, message = "'size' 는 1 이상이어야 합니다.")
+    private final Integer size; // 한 페이지 당 보여질 개수
+
+
+    public PageRequest toPageable() {
         return PageRequest.of(page - 1, size);
     }
+
 }

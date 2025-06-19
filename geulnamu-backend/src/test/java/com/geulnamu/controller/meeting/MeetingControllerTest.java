@@ -32,6 +32,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.headerWit
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.snippet.Attributes.key;
@@ -168,7 +169,9 @@ public class MeetingControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.get("/meeting/list?page={page}&size={size}", 1, 2)
+                get("/meeting/list")
+                    .param("page", "1")
+                    .param("size", "10")
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -236,7 +239,9 @@ public class MeetingControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.get("/meeting/list/admin?page={page}&size={size}", 1, 2)
+                get("/meeting/list/admin")
+                    .param("page", "1")
+                    .param("size", "10")
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
