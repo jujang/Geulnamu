@@ -1,9 +1,12 @@
 package com.geulnamu.controller.meeting;
 
 import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequest;
+import com.geulnamu.controller.meeting.dto.request.MeetingGroupUpdateRequest;
+import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
 import com.geulnamu.controller.meeting.dto.response.MeetingListResponse;
+import com.geulnamu.controller.meeting.dto.response.StaffResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.domain.shared.enums.Role;
@@ -12,12 +15,13 @@ import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.annotation.AuthRole;
 import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.response.BaseResponse;
-import com.geulnamu.infrastructure.response.paging.PagingRequest;
 import com.geulnamu.service.meeting.MeetingService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +35,7 @@ public class MeetingController {
     @PostMapping(name = "모임 생성")
     public BaseResponse<Void> createMeeting(@AuthMemberId Long memberId, @Valid @RequestBody MeetingCreateRequest request) {
         meetingService.createMeeting(memberId, request.getMeetingName(), request.getMeetingType(),
-            request.getMeetingDate(), request.getDescription());
+            request.getMeetingDate(), request.getMeetingPlace(), request.getDescription());
         return BaseResponse.ofSuccess();
     }
 
@@ -43,26 +47,42 @@ public class MeetingController {
     }
 
     @AccessLevel(Level.MEMBER)
+    @GetMapping(value = "/list/staff", name = "운영진 목록 조회 - 필터링용")
+    public BaseResponse<List<StaffResponse>> getStaffList() {
+        List<StaffResponse> staffResponseList = meetingService.getStaffList();
+        return BaseResponse.ofSuccess(staffResponseList);
+    }
+
+    @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/list", name = "모임 목록 조회")
-    public BaseResponse<MeetingListResponse> getMeetingList(@Valid PagingRequest pagingRequest) {
-        MeetingListResponse meetingListResponse = meetingService.getMeetingList(pagingRequest);
+    public BaseResponse<MeetingListResponse> getMeetingList(@Valid MeetingListRequest request) {
+        MeetingListResponse meetingListResponse = meetingService.getMeetingList(request);
         return BaseResponse.ofSuccess(meetingListResponse);
     }
 
     @AccessLevel(Level.ADMIN)
     @GetMapping(value = "/list/admin", name = "모임 목록 조회(관리자용)")
-    public BaseResponse<MeetingListResponse> getMeetingListForAdminLevel(@Valid PagingRequest pagingRequest) {
-        MeetingListResponse meetingListResponse = meetingService.getMeetingListForAdmin(pagingRequest);
+    public BaseResponse<MeetingListResponse> getMeetingListForAdminLevel(@Valid MeetingListRequest request) {
+        MeetingListResponse meetingListResponse = meetingService.getMeetingListForAdmin(request);
         return BaseResponse.ofSuccess(meetingListResponse);
     }
 
     @LogAction(value = ActionType.MEETING_UPDATE, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
-    @PatchMapping(value = "/{meetingId}", name = "모임 수정")
+    @PatchMapping(value = "/{meetingId}", name = "모임 수정 - 기본 정보")
     public BaseResponse<Void> updateMeeting(@PathVariable @Min(value = 1) Long meetingId, @AuthMemberId Long memberId,
                                             @AuthRole Role role, @Valid @RequestBody MeetingUpdateRequest request) {
-        meetingService.updateMeeting(meetingId, memberId, role, request.getMeetingName(), request.getMeetingType(),
-            request.getMeetingDate(), request.getDescription());
+        meetingService.updateMeeting(meetingId, memberId, request.getMeetingName(), request.getMeetingType(),
+            request.getMeetingDate(), request.getMeetingPlace(), request.getDescription());
+        return BaseResponse.ofSuccess();
+    }
+
+    @LogAction(value = ActionType.MEETING_UPDATE_DISCUSSION, actionDomain = "meeting")
+    @AccessLevel(Level.STAFF)
+    @PatchMapping(value = "/{meetingId}/discussion", name = "모임 수정 - 조별 활동 관련")
+    public BaseResponse<Void> updateMeetingForDiscussion(@PathVariable @Min(value = 1) Long meetingId, @AuthMemberId Long memberId,
+                                                         @AuthRole Role role, @Valid @RequestBody MeetingGroupUpdateRequest request) {
+        meetingService.updateMeetingForDiscussion(meetingId, memberId, request.getDiscussionTime(), request.getAlarmMessage());
         return BaseResponse.ofSuccess();
     }
 
@@ -84,7 +104,7 @@ public class MeetingController {
     @AccessLevel(Level.STAFF)
     @DeleteMapping(value = "/{meetingId}", name = "개설한 모임 삭제 - 모임 시작 6시간 전까지만 가능")
     public BaseResponse<Void> removeMeeting(@PathVariable @Min(value = 1) Long meetingId, @AuthMemberId Long memberId, @AuthRole Role role) {
-        meetingService.removeMeeting(meetingId, memberId, role);
+        meetingService.removeMeeting(meetingId, memberId);
         return BaseResponse.ofSuccess();
     }
 

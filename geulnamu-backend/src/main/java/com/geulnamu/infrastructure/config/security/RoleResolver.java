@@ -1,6 +1,5 @@
 package com.geulnamu.infrastructure.config.security;
 
-import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.annotation.AuthRole;
 import com.geulnamu.infrastructure.exception.TokenException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
