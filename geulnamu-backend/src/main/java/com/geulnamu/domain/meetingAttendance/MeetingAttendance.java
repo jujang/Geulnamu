@@ -30,6 +30,9 @@ public class MeetingAttendance extends DateColumn {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Column(name = "note", length = 1)
+    private String note; // 비고 (출석 관련 특이사항이 적는 곳)
+
     @Convert(converter = DiscussionGroupConverter.class)
     @Column(name = "discussion_group", length = 1)
     private DiscussionGroup discussionGroup;
