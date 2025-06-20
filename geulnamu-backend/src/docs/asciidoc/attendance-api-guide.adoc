@@ -23,6 +23,9 @@ endif::[]
 ==== request
 include::{snippets}/attendance/create/http-request.adoc[]
 
+==== path-parameters
+include::{snippets}/attendance/create/path-parameters.adoc[]
+
 ==== request-headers
 include::{snippets}/attendance/create/request-headers.adoc[]
 
@@ -36,6 +39,51 @@ include::{snippets}/attendance/create/response-fields.adoc[]
 
 ---
 
+== PATCH
+
+=== 독서만 할래요
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/modify/just-read/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/modify/just-read/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/modify/just-read/request-headers.adoc[]
+
+==== response
+include::{snippets}/attendance/modify/just-read/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/modify/just-read/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 토론할래요
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/modify/want-discussion/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/modify/want-discussion/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/modify/want-discussion/request-headers.adoc[]
+
+==== response
+include::{snippets}/attendance/modify/want-discussion/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/modify/want-discussion/response-fields.adoc[]
+
+==== Error case
+
+---
 
 == DELETE
 
@@ -44,6 +92,9 @@ include::{snippets}/attendance/create/response-fields.adoc[]
 
 ==== request
 include::{snippets}/attendance/delete/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/delete/path-parameters.adoc[]
 
 ==== request-headers
 include::{snippets}/attendance/delete/request-headers.adoc[]

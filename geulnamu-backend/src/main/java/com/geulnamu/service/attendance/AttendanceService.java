@@ -30,7 +30,6 @@ public class AttendanceService {
         Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
         Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
 
-        // 모임 출석 가능 시간 확인
         meeting.checkTimeCanAttendMeeting();
         // 동일한 모임원이 해당 모임에 출석한 이력이 있는지 확인
         if(attendanceQueryRepository.findByMeetingIdAndMemberId(meetingId, memberId).isPresent()) {
@@ -40,6 +39,32 @@ public class AttendanceService {
         Attendance attendance = Attendance.createAttendance(meeting, member);
         attendanceCommandRepository.save(attendance);
         return attendance.getId();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void notWantDiscussion(Long attendanceId, Long memberId) {
+        Attendance attendance = attendanceQueryRepository.findById(attendanceId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+
+        // 처리 가능한지 체크
+        attendance.checkRequestedMemberAndAttendanceMember(member);
+        attendance.checkSettingDiscussionTime();
+        attendance.getMeeting().checkTimeCanSwitchAboutDiscussionAttendance();
+
+        attendance.updateNotWantDiscussion();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void wantDiscussion(Long attendanceId, Long memberId) {
+        Attendance attendance = attendanceQueryRepository.findById(attendanceId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+
+        // 처리 가능한지 체크
+        attendance.checkRequestedMemberAndAttendanceMember(member);
+        attendance.checkSettingDiscussionTime();
+        attendance.getMeeting().checkTimeCanSwitchAboutDiscussionAttendance();
+
+        attendance.updateWantDiscussion();
     }
 
     @Transactional(rollbackFor = Exception.class)

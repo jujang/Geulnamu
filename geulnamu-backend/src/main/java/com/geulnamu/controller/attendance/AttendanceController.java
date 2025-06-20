@@ -27,6 +27,20 @@ public class AttendanceController {
         return BaseResponse.ofSuccess(attendanceId);
     }
 
+    @AccessLevel(Level.MEMBER)
+    @PatchMapping(value = "/{attendanceId}/just-read", name = "독서만 할래요")
+    public BaseResponse<Void> notWantDiscussion(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId) {
+        attendanceService.notWantDiscussion(attendanceId, memberId);
+        return BaseResponse.ofSuccess();
+    }
+
+    @AccessLevel(Level.MEMBER)
+    @PatchMapping(value = "/{attendanceId}/want-discussion", name = "토론할래요")
+    public BaseResponse<Void> wantDiscussion(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId) {
+        attendanceService.wantDiscussion(attendanceId, memberId);
+        return BaseResponse.ofSuccess();
+    }
+
     @LogAction(value = ActionType.ATTENDANCE_DELETE, actionDomain = "attendance")
     @AccessLevel(Level.ADMIN)
     @DeleteMapping(value = "/{attendanceId}/delete", name = "출석 삭제")

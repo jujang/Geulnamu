@@ -27,14 +27,14 @@ endif::[]
 // ==== request
 // include::{snippets}/login/oauth/kakao/http-request.adoc[]
 
+// ==== path-parameters
+// include::{snippets}/login/oauth/kakao/path-parameters.adoc[]
+
 // ==== request-cookies
 // include::{snippets}/login/oauth/kakao/request-cookies.adoc[]
 
 // ==== request-headers
 // include::{snippets}/login/oauth/kakao/request-headers.adoc[]
-
-// ==== path-parameters
-// include::{snippets}/login/oauth/kakao/path-parameters.adoc[]
 
 // ==== query-parameters
 // include::{snippets}/login/oauth/kakao/query-parameters.adoc[]

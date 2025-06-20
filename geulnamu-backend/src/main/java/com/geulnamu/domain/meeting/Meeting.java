@@ -82,11 +82,19 @@ public class Meeting extends DateColumn {
         }
     }
 
+    // 모임 출석 가능 시간 확인
     public void checkTimeCanAttendMeeting() {
         if(LocalDateTime.now().getYear() != this.meetingDate.getYear()
             || LocalDateTime.now().getDayOfYear() != this.meetingDate.getDayOfYear()
             || !LocalDateTime.now().isAfter(this.meetingDate.minusHours(1))) {
             throw new BadRequestException(ResponseMessage.MEETING_ATTEND_TIME_RESTRICTION);
+        }
+    }
+
+    // 토론 참여 의사는 토론 시작 30분 전까지만 설정 가능   TODO: 해당 기능은 실 운영해보면서 수정 가능 시간이나 기능 수정 권한 조율해 볼 것
+    public void checkTimeCanSwitchAboutDiscussionAttendance() {
+        if(LocalDateTime.now().isAfter(this.discussionTime.minusMinutes(30))) {
+            throw new BadRequestException(ResponseMessage.DISCUSSION_INTENTION_SETTING_TIME_RESTRICTION);
         }
     }
 

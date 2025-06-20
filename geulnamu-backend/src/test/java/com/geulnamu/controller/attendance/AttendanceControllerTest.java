@@ -22,6 +22,9 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,6 +63,9 @@ public class AttendanceControllerTest extends ControllerTest {
                 "attendance/create",
                 getDocumentRequest(),
                 getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("meetingId").attributes(key("format").value("1 이상의 정수")).description("모임 고유번호")
+                ),
                 requestHeaders(
                     headerWithName("Authorization").description("액세스 토큰")
                 ),
@@ -67,6 +73,88 @@ public class AttendanceControllerTest extends ControllerTest {
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
                     fieldWithPath("data").type(JsonFieldType.NUMBER).description("출석 고유번호")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "MEMBER")
+    public void notWantDiscussionTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+
+        doNothing().when(attendanceService).notWantDiscussion(any(), any());
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                RestDocumentationRequestBuilders.patch("/attendance/{attendanceId}/just-read", 1L)
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andExpect(jsonPath("data").value((Object) null))
+            .andDo(document(
+                "attendance/modify/just-read",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("attendanceId").attributes(key("format").value("1 이상의 정수")).description("출석 고유번호")
+                ),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("-")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "MEMBER")
+    public void wantDiscussionTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+
+        doNothing().when(attendanceService).wantDiscussion(any(), any());
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                RestDocumentationRequestBuilders.patch("/attendance/{attendanceId}/want-discussion", 1L)
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andExpect(jsonPath("data").value((Object) null))
+            .andDo(document(
+                "attendance/modify/want-discussion",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("attendanceId").attributes(key("format").value("1 이상의 정수")).description("출석 고유번호")
+                ),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("-")
                 )
             ));
     }
@@ -98,6 +186,9 @@ public class AttendanceControllerTest extends ControllerTest {
                 "attendance/delete",
                 getDocumentRequest(),
                 getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("attendanceId").attributes(key("format").value("1 이상의 정수")).description("출석 고유번호")
+                ),
                 requestHeaders(
                     headerWithName("Authorization").description("액세스 토큰")
                 ),

@@ -5,6 +5,8 @@ import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.DateColumn;
 import com.geulnamu.domain.shared.converter.DiscussionGroupConverter;
+import com.geulnamu.infrastructure.exception.BadRequestException;
+import com.geulnamu.infrastructure.response.ResponseMessage;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -50,6 +52,28 @@ public class Attendance extends DateColumn {
             .member(member)
             .notWantDiscussion(false)
             .build();
+    }
+
+    // 불참 의사를 비친 모임원과 해당 모임의 출석한 모임원 정보가 동일하지 않을 경우, 에러 발생
+    public void checkRequestedMemberAndAttendanceMember(Member member) {
+        if(!this.member.equals(member)) {
+            throw new BadRequestException(ResponseMessage.NOT_SUITABLE_MEMBER);
+        }
+    }
+
+    // 아직 토론 시간이 셋팅되지 않았다면 에러 발생
+    public void checkSettingDiscussionTime() {
+        if(this.meeting.getDiscussionTime() == null) {
+            throw new BadRequestException(ResponseMessage.NOT_YET_SETTING_DISCUSSION_TIME);
+        }
+    }
+
+    public void updateNotWantDiscussion() {
+        this.notWantDiscussion = true;
+    }
+
+    public void updateWantDiscussion() {
+        this.notWantDiscussion = false;
     }
 
 }
