@@ -41,6 +41,31 @@ include::{snippets}/attendance/create/response-fields.adoc[]
 
 == PATCH
 
+=== 비고 작성
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/modify/note/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/modify/note/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/modify/note/request-headers.adoc[]
+
+==== request-fields
+include::{snippets}/attendance/modify/note/request-fields.adoc[]
+
+==== response
+include::{snippets}/attendance/modify/note/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/modify/note/response-fields.adoc[]
+
+==== Error case
+
+---
+
 === 독서만 할래요
 접근 가능 권한 레벨: MEMBER
 

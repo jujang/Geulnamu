@@ -1,5 +1,7 @@
 package com.geulnamu.controller.attendance;
 
+import com.geulnamu.controller.attendance.dto.request.AttendanceNoteRequest;
+import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
 import com.geulnamu.controller.shared.ControllerTest;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.service.attendance.AttendanceService;
@@ -73,6 +75,52 @@ public class AttendanceControllerTest extends ControllerTest {
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
                     fieldWithPath("data").type(JsonFieldType.NUMBER).description("출석 고유번호")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "MEMBER")
+    public void writeNoteTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+        AttendanceNoteRequest request = new AttendanceNoteRequest("지각 안 했는데요!");
+
+        doNothing().when(attendanceService).writeNote(any(), any(), any());
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                RestDocumentationRequestBuilders.patch("/attendance/{attendanceId}/note", 1L)
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andExpect(jsonPath("data").value((Object) null))
+            .andDo(document(
+                "attendance/modify/note",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("attendanceId").attributes(key("format").value("1 이상의 정수")).description("출석 고유번호")
+                ),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                requestFields(
+                    fieldWithPath("note").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ ! ? . , ; -)만으로 사용한 1자 이상, 255자 이하의 문자열")).description("비고(출석 관련 사유 작성)")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("-")
                 )
             ));
     }

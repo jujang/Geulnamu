@@ -42,6 +42,17 @@ public class AttendanceService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public void writeNote(Long attendanceId, Long memberId, String note) {
+        Attendance attendance = attendanceQueryRepository.findById(attendanceId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+
+        // 처리 가능한지 체크
+        attendance.checkRequestedMemberAndAttendanceMember(member);
+
+        attendance.updateNote(note);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public void notWantDiscussion(Long attendanceId, Long memberId) {
         Attendance attendance = attendanceQueryRepository.findById(attendanceId).orElseThrow(NotFoundDataException::new);
         Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);

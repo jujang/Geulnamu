@@ -54,7 +54,7 @@ public class Attendance extends DateColumn {
             .build();
     }
 
-    // 불참 의사를 비친 모임원과 해당 모임의 출석한 모임원 정보가 동일하지 않을 경우, 에러 발생
+    // 요청한 모임원과 해당 모임에 출석한 모임원 정보가 동일하지 않을 경우, 에러 발생
     public void checkRequestedMemberAndAttendanceMember(Member member) {
         if(!this.member.equals(member)) {
             throw new BadRequestException(ResponseMessage.NOT_SUITABLE_MEMBER);
@@ -66,6 +66,10 @@ public class Attendance extends DateColumn {
         if(this.meeting.getDiscussionTime() == null) {
             throw new BadRequestException(ResponseMessage.NOT_YET_SETTING_DISCUSSION_TIME);
         }
+    }
+
+    public void updateNote(String note) {
+        this.note = note;
     }
 
     public void updateNotWantDiscussion() {

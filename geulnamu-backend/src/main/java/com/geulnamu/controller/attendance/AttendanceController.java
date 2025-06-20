@@ -1,5 +1,6 @@
 package com.geulnamu.controller.attendance;
 
+import com.geulnamu.controller.attendance.dto.request.AttendanceNoteRequest;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
@@ -7,6 +8,7 @@ import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.attendance.AttendanceService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,13 @@ public class AttendanceController {
     public BaseResponse<Long> meetingAttend(@PathVariable @Min(value = 1) Long meetingId, @AuthMemberId Long memberId) {
         Long attendanceId = attendanceService.createAttendance(meetingId, memberId);
         return BaseResponse.ofSuccess(attendanceId);
+    }
+
+    @AccessLevel(Level.MEMBER)
+    @PatchMapping(value = "/{attendanceId}/note", name = "비고 작성")
+    public BaseResponse<Void> writeNote(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId, @Valid @RequestBody AttendanceNoteRequest request) {
+        attendanceService.writeNote(attendanceId, memberId, request.getNote());
+        return BaseResponse.ofSuccess();
     }
 
     @AccessLevel(Level.MEMBER)
