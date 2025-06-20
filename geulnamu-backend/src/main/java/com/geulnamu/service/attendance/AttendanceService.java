@@ -1,5 +1,6 @@
 package com.geulnamu.service.attendance;
 
+import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
 import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.member.Member;
@@ -39,6 +40,11 @@ public class AttendanceService {
         Attendance attendance = Attendance.createAttendance(meeting, member);
         attendanceCommandRepository.save(attendance);
         return attendance.getId();
+    }
+
+    @Transactional(readOnly = true)
+    public AttendanceInfoResponse getAttendanceInfo(Long attendanceId, Long memberId) {
+        return attendanceQueryRepository.findMyAttendanceInfo(attendanceId, memberId).orElseThrow(NotFoundDataException::new);
     }
 
     @Transactional(rollbackFor = Exception.class)

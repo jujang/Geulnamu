@@ -1,6 +1,7 @@
 package com.geulnamu.controller.attendance;
 
 import com.geulnamu.controller.attendance.dto.request.AttendanceNoteRequest;
+import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
@@ -27,6 +28,13 @@ public class AttendanceController {
     public BaseResponse<Long> meetingAttend(@PathVariable @Min(value = 1) Long meetingId, @AuthMemberId Long memberId) {
         Long attendanceId = attendanceService.createAttendance(meetingId, memberId);
         return BaseResponse.ofSuccess(attendanceId);
+    }
+
+    @AccessLevel(Level.MEMBER)
+    @GetMapping(value = "/{attendanceId}", name = "출석 정보 조회")
+    public BaseResponse<AttendanceInfoResponse> getAttendanceInfo(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId) {
+        AttendanceInfoResponse attendanceInfoResponse = attendanceService.getAttendanceInfo(attendanceId, memberId);
+        return BaseResponse.ofSuccess(attendanceInfoResponse);
     }
 
     @AccessLevel(Level.MEMBER)

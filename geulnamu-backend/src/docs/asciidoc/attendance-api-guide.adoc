@@ -37,7 +37,32 @@ include::{snippets}/attendance/create/response-fields.adoc[]
 
 ==== Error case
 
+
+== GET
+
+=== 출석 정보 조회
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/view/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/view/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/view/request-headers.adoc[]
+
+==== response
+include::{snippets}/attendance/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/view/response-fields.adoc[]
+
+==== Error case
+
+
 ---
+
 
 == PATCH
 

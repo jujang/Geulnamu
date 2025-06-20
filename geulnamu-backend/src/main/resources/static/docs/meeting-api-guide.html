@@ -500,13 +500,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
-Content-Length: 233
+Content-Length: 276
 Host: docs.api.com
 
 {
   "meetingType" : "REGULAR",
   "meetingName" : "제 200회 정기모임",
   "meetingDate" : "21260614 10:30",
+  "lateThresholdTime" : "21260614 10:45",
   "meetingPlace" : "추후 공지 예정 (합정역 주변 카페)",
   "description" : "늦지 않게 오세요~"
 }</code></pre>
@@ -574,6 +575,13 @@ Host: docs.api.com
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">yyyyMMdd HH:mm 형식으로 이뤄진 미래 시간대의 문자열</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임 개최일자</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>lateThresholdTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yyyyMMdd HH:mm 형식으로 이뤄진 미래 시간대의 문자열</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지각 기준 시간(모임 개최일자보다 빠르면 안 됨. 입력 안 할 시 모임 개최시간과 동일값 처리)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>meetingPlace</code></p></td>
@@ -741,7 +749,8 @@ Content-Type: application/json;charset=UTF-8
     "meetingCreatorName" : "나뭉이",
     "meetingType" : "REGULAR",
     "meetingName" : "1회 정기모임",
-    "meetingDateTime" : "2025.05.31 10:45",
+    "meetingDateTime" : "2025.05.31 10:30",
+    "lateThresholdTime" : "2025.05.31 10:45",
     "meetingPlace" : "추후 공지 예정 (합정역 주변 카페)",
     "description" : "~~",
     "discussionTime" : "2025.05.31 12:00",
@@ -821,6 +830,13 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임 개최일자</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.lateThresholdTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지각 기준 시간</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingPlace</code></p></td>
@@ -1100,10 +1116,11 @@ Content-Type: application/json;charset=UTF-8
       "meetingDateTime" : "2025.05.31 10:45",
       "meetingPlace" : "합정 빌리프커피로스터리스",
       "description" : "~~",
+      "attendanceStatus" : "true",
+      "discussionGroup" : "A",
       "discussionTime" : "2025.05.31 12:00",
       "alarmMessage" : null,
-      "createdAt" : "2025.05.01 12:30",
-      "isPrivateMeeting" : false
+      "createdAt" : "2025.05.01 12:30"
     }, {
       "meetingId" : 2,
       "meetingCreatorName" : "나뭉이",
@@ -1112,10 +1129,11 @@ Content-Type: application/json;charset=UTF-8
       "meetingDateTime" : "2025.06.03 18:30",
       "meetingPlace" : "합정 저스티나",
       "description" : "~~",
+      "attendanceStatus" : "true_late",
+      "discussionGroup" : null,
       "discussionTime" : "2025.05.01 12:31",
       "alarmMessage" : null,
-      "createdAt" : "2025.05.01 12:30",
-      "isPrivateMeeting" : false
+      "createdAt" : "2025.05.01 12:30"
     } ]
   }
 }</code></pre>
@@ -1241,6 +1259,20 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임 상세내용</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingList[].attendanceStatus</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">출석 상태</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingList[].discussionGroup</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">토론 조</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingList[].discussionTime</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
@@ -1260,13 +1292,6 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임 개설일자</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingList[].isPrivateMeeting</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">비공개 여부</p></td>
 </tr>
 </tbody>
 </table>
@@ -1393,7 +1418,8 @@ Content-Type: application/json;charset=UTF-8
       "meetingCreatorName" : "나뭉이",
       "meetingType" : "REGULAR",
       "meetingName" : "1회 정기모임",
-      "meetingDateTime" : "2025.05.31 10:45",
+      "meetingDateTime" : "2025.05.31 10:30",
+      "lateThresholdTime" : "2025.05.31 10:45",
       "meetingPlace" : "합정 빌리프커피로스터리스",
       "description" : "~~",
       "discussionTime" : "2025.05.31 12:00",
@@ -1406,6 +1432,7 @@ Content-Type: application/json;charset=UTF-8
       "meetingType" : "FLASH",
       "meetingName" : "금요 독서벙",
       "meetingDateTime" : "2025.06.03 18:30",
+      "lateThresholdTime" : "2025.05.31 10:45",
       "meetingPlace" : "합정 저스티나",
       "description" : "~~",
       "discussionTime" : "2025.05.01 12:31",
@@ -1523,6 +1550,13 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임 개최일자</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingList[].lateThresholdTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지각 기준 시간</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingList[].meetingPlace</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
@@ -1590,13 +1624,14 @@ Content-Type: application/json;charset=UTF-8
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
-Content-Length: 168
+Content-Length: 199
 Host: docs.api.com
 
 {
   "meetingType" : null,
   "meetingName" : null,
   "meetingDate" : null,
+  "lateThresholdTime" : null,
   "meetingPlace" : "합정 저스티나",
   "description" : "늦지 않게 오세요~"
 }</code></pre>
@@ -1691,6 +1726,13 @@ Host: docs.api.com
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">yyyyMMdd HH:mm 형식으로 이뤄진 미래 시간대의 문자열</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임 개최일자</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>lateThresholdTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yyyyMMdd HH:mm 형식으로 이뤄진 미래 시간대의 문자열</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지각 기준 시간(모임 개최 시간보다 빠르면 안 됨)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>meetingPlace</code></p></td>
