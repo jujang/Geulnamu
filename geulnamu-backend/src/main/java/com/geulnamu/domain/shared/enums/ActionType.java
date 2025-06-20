@@ -21,7 +21,8 @@ public enum ActionType {
     MEETING_DELETE("모임 삭제"),
 
     // 출석 관련
-    ATTENDANCE_CREATE("출석");
+    ATTENDANCE_CREATE("출석"),
+    ATTENDANCE_DELETE("출석 삭제");
 
 
     private final String description;

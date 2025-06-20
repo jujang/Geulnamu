@@ -51,7 +51,8 @@ public class SecurityConfig {
         "/member/list",
         "/meeting/list/admin",
         "/meeting/{meetingId}/private",
-        "/meeting/{meetingId}/public"
+        "/meeting/{meetingId}/public",
+        "/attendance/{attendanceId}/delete"
     };
 
 

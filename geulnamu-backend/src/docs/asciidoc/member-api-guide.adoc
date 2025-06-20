@@ -61,7 +61,7 @@ include::{snippets}/member/list/response-fields.adoc[]
 == PATCH
 
 === 개인 정보 수정
-접근 가능 권한 레벨: MEMBER
+접근 가능 권한 레벨: MEMBER / 로그 생성
 
 ==== request
 include::{snippets}/member/info/modify/http-request.adoc[]
@@ -84,7 +84,7 @@ include::{snippets}/member/info/modify/response-fields.adoc[]
 ---
 
 === 모임원 등급 변경
-접근 가능 권한 레벨: ADMIN / 해당 모임원 재로그인 필요
+접근 가능 권한 레벨: ADMIN / 로그 생성 / 해당 모임원 재로그인 필요
 
 ==== request
 include::{snippets}/member/role/modify/http-request.adoc[]
@@ -109,7 +109,7 @@ include::{snippets}/member/role/modify/response-fields.adoc[]
 ---
 
 === 모임원 이름 변경
-접근 가능 권한 레벨: ADMIN
+접근 가능 권한 레벨: ADMIN / 로그 생성
 
 ==== request
 include::{snippets}/member/name/modify/http-request.adoc[]
@@ -134,7 +134,7 @@ include::{snippets}/member/name/modify/response-fields.adoc[]
 ---
 
 === 모임원 활성화
-접근 가능 권한 레벨: ADMIN
+접근 가능 권한 레벨: ADMIN / 로그 생성
 
 ==== request
 include::{snippets}/member/activate/http-request.adoc[]
@@ -156,7 +156,7 @@ include::{snippets}/member/activate/response-fields.adoc[]
 ---
 
 === 모임원 비활성화
-접근 가능 권한 레벨: ADMIN
+접근 가능 권한 레벨: ADMIN / 로그 생성
 
 ==== request
 include::{snippets}/member/deactivate/http-request.adoc[]

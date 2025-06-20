@@ -60,7 +60,7 @@ include::{snippets}/login/logout/response-fields.adoc[]
 == GET
 
 === 카카오 OAuth 로그인
-접근 가능 권한 레벨: PUBLIC
+접근 가능 권한 레벨: PUBLIC / 로그 생성
 
 ==== request
 include::{snippets}/login/oauth/kakao/http-request.adoc[]

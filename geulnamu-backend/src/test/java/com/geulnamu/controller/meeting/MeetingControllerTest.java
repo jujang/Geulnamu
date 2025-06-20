@@ -51,11 +51,12 @@ public class MeetingControllerTest extends ControllerTest {
     @WithMockUser(roles = "STAFF")
     public void createMeetingTest() throws Exception {
         // given
+        Long meetingId = 1L;
         String accessToken = "Bearer access_token";
         MeetingCreateRequest request = new MeetingCreateRequest(
             "REGULAR", "제 200회 정기모임", LocalDateTime.of(2126, 6, 14, 10, 30), "추후 공지 예정 (합정역 주변 카페)", "늦지 않게 오세요~");
 
-        doNothing().when(meetingService).createMeeting(any(), any(), any(), any(), any(), any());
+        given(meetingService.createMeeting(any(), any(), any(), any(), any(), any())).willReturn(meetingId);
 
         // when
         ResultActions actions =
@@ -72,7 +73,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
-            .andExpect(jsonPath("data").value((Object) null))
+            .andExpect(jsonPath("data").value(meetingId))
             .andDo(document(
                 "meeting/open",
                 getDocumentRequest(),
@@ -90,7 +91,7 @@ public class MeetingControllerTest extends ControllerTest {
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
-                    fieldWithPath("data").type(JsonFieldType.NULL).description("-")
+                    fieldWithPath("data").type(JsonFieldType.NUMBER).description("모임 고유번호")
                 )
             ));
     }

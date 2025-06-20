@@ -18,7 +18,7 @@ endif::[]
 == POST
 
 === 모임 출석
-접근 가능 권한 레벨: MEMBER
+접근 가능 권한 레벨: MEMBER / 로그 생성
 
 ==== request
 include::{snippets}/attendance/create/http-request.adoc[]
@@ -33,5 +33,28 @@ include::{snippets}/attendance/create/http-response.adoc[]
 include::{snippets}/attendance/create/response-fields.adoc[]
 
 ==== Error case
+
+---
+
+
+== DELETE
+
+=== 출석 삭제
+접근 가능 권한 레벨: ADMIN / 로그 생성
+
+==== request
+include::{snippets}/attendance/delete/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/delete/request-headers.adoc[]
+
+==== response
+include::{snippets}/attendance/delete/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/delete/response-fields.adoc[]
+
+==== Error case
+
 
 ---

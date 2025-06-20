@@ -490,7 +490,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect2">
 <h3 id="_모임_생성"><a class="link" href="#_모임_생성">모임 생성</a></h3>
 <div class="paragraph">
-<p>접근 가능 권한 레벨: STAFF / 미래 시간만 생성 가능</p>
+<p>접근 가능 권한 레벨: STAFF / 로그 생성 / 미래 시간만 생성 가능</p>
 </div>
 <div class="sect3">
 <h4 id="_request"><a class="link" href="#_request">request</a></h4>
@@ -602,7 +602,7 @@ Content-Type: application/json;charset=UTF-8
 {
   "code" : 200,
   "message" : "API 호출에 성공했습니다.",
-  "data" : null
+  "data" : 1
 }</code></pre>
 </div>
 </div>
@@ -643,10 +643,10 @@ Content-Type: application/json;charset=UTF-8
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 고유번호</p></td>
 </tr>
 </tbody>
 </table>
@@ -1580,7 +1580,7 @@ Content-Type: application/json;charset=UTF-8
 <div class="sect2">
 <h3 id="_모임_수정_기본_정보"><a class="link" href="#_모임_수정_기본_정보">모임 수정 - 기본 정보</a></h3>
 <div class="paragraph">
-<p>접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 모임 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 모임 시작 후에도 가능)</p>
+<p>접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 모임 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 모임 시작 후에도 가능)</p>
 </div>
 <div class="sect3">
 <h4 id="_request_6"><a class="link" href="#_request_6">request</a></h4>
@@ -1776,7 +1776,7 @@ Content-Type: application/json;charset=UTF-8
 <div class="sect2">
 <h3 id="_모임_수정_조별_활동_관련"><a class="link" href="#_모임_수정_조별_활동_관련">모임 수정 - 조별 활동 관련</a></h3>
 <div class="paragraph">
-<p>접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 토론 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 토론 시작 후에도 가능)</p>
+<p>접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 토론 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 토론 시작 후에도 가능)</p>
 </div>
 <div class="sect3">
 <h4 id="_request_7"><a class="link" href="#_request_7">request</a></h4>
@@ -2211,7 +2211,7 @@ Content-Type: application/json;charset=UTF-8
 <div class="sect2">
 <h3 id="_개설한_모임_삭제"><a class="link" href="#_개설한_모임_삭제">개설한 모임 삭제</a></h3>
 <div class="paragraph">
-<p>접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 모임 시작 6시간 전까지만 가능</p>
+<p>접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 모임 시작 6시간 전까지만 가능</p>
 </div>
 <div class="sect3">
 <h4 id="_request_10"><a class="link" href="#_request_10">request</a></h4>
@@ -2343,7 +2343,7 @@ Content-Type: application/json;charset=UTF-8
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-06-19 19:30:27 +0900
+Last updated 2025-06-20 13:35:06 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

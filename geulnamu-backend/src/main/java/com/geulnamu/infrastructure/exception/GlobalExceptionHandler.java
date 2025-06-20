@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,6 +24,16 @@ public class GlobalExceptionHandler {
     public BaseResponse serverExceptionHandler(ServerException exception) {
         log.error("message: {} ", exception.getMessage());
         return BaseResponse.ofFail(exception.getCode(), exception.getMessage(), exception.getField());
+    }
+
+    /**
+     * HTTP 요청 타입이 잘못됨
+     * HttpStatus 400
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public BaseResponse httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException exception){
+        log.error("message : {} : {}", ResponseMessage.BAD_REQUEST, exception.getMessage());
+        return BaseResponse.ofFail(400, ResponseMessage.BAD_REQUEST, exception.getMessage());
     }
 
     /**

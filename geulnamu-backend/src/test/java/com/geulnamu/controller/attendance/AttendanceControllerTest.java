@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import static com.geulnamu.common.ApiDocumentUtils.getDocumentRequest;
 import static com.geulnamu.common.ApiDocumentUtils.getDocumentResponse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
@@ -35,9 +36,10 @@ public class AttendanceControllerTest extends ControllerTest {
     @WithMockUser(roles = "MEMBER")
     public void meetingAttendTest() throws Exception  {
         // given
+        Long attendanceId = 1L;
         String accessToken = "Bearer access_token";
 
-        doNothing().when(attendanceService).createAttendance(any(), any());
+        given(attendanceService.createAttendance(any(), any())).willReturn(attendanceId);
 
         // when
         ResultActions actions =
@@ -53,9 +55,47 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
-            .andExpect(jsonPath("data").value((Object) null))
+            .andExpect(jsonPath("data").value(attendanceId))
             .andDo(document(
                 "attendance/create",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.NUMBER).description("출석 고유번호")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void DeleteMeetingAttendTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+
+        doNothing().when(attendanceService).deleteAttendance(any());
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                RestDocumentationRequestBuilders.delete("/attendance/{attendanceId}/delete", 1)
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andExpect(jsonPath("data").value((Object) null))
+            .andDo(document(
+                "attendance/delete",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(

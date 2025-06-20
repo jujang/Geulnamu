@@ -34,10 +34,11 @@ public class MeetingService {
 
 
     @Transactional(rollbackFor = Exception.class)
-    public void createMeeting(Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, String meetingPlace, String description) {
+    public Long createMeeting(Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, String meetingPlace, String description) {
         Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
         Meeting meeting = Meeting.createMeeting(member, meetingName, meetingType, meetingDate, meetingPlace, description);
         meetingCommandRepository.save(meeting);
+        return meeting.getId();
     }
 
     @Transactional(readOnly = true)

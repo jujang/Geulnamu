@@ -33,10 +33,10 @@ public class MeetingController {
     @LogAction(value = ActionType.MEETING_CREATE, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @PostMapping(name = "모임 생성")
-    public BaseResponse<Void> createMeeting(@AuthMemberId Long memberId, @Valid @RequestBody MeetingCreateRequest request) {
-        meetingService.createMeeting(memberId, request.getMeetingName(), request.getMeetingType(),
+    public BaseResponse<Long> createMeeting(@AuthMemberId Long memberId, @Valid @RequestBody MeetingCreateRequest request) {
+        Long meetingId = meetingService.createMeeting(memberId, request.getMeetingName(), request.getMeetingType(),
             request.getMeetingDate(), request.getMeetingPlace(), request.getDescription());
-        return BaseResponse.ofSuccess();
+        return BaseResponse.ofSuccess(meetingId);
     }
 
     @AccessLevel(Level.STAFF)

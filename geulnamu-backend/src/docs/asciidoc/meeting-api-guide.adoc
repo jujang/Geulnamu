@@ -18,7 +18,7 @@ endif::[]
 == POST
 
 === 모임 생성
-접근 가능 권한 레벨: STAFF / 미래 시간만 생성 가능
+접근 가능 권한 레벨: STAFF / 로그 생성 / 미래 시간만 생성 가능
 
 ==== request
 include::{snippets}/meeting/open/http-request.adoc[]
@@ -128,7 +128,7 @@ include::{snippets}/meeting/list/admin/response-fields.adoc[]
 == PATCH
 
 === 모임 수정 - 기본 정보
-접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 모임 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 모임 시작 후에도 가능)
+접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 모임 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 모임 시작 후에도 가능)
 
 ==== request
 include::{snippets}/meeting/modify/http-request.adoc[]
@@ -154,7 +154,7 @@ include::{snippets}/meeting/modify/response-fields.adoc[]
 ---
 
 === 모임 수정 - 조별 활동 관련
-접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 토론 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 토론 시작 후에도 가능)
+접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 토론 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 토론 시작 후에도 가능)
 
 ==== request
 include::{snippets}/meeting/modify/discussion/http-request.adoc[]
@@ -226,7 +226,7 @@ include::{snippets}/meeting/public/response-fields.adoc[]
 == DELETE
 
 === 개설한 모임 삭제
-접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 모임 시작 6시간 전까지만 가능
+접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 모임 시작 6시간 전까지만 가능
 
 ==== request
 include::{snippets}/meeting/remove/http-request.adoc[]
