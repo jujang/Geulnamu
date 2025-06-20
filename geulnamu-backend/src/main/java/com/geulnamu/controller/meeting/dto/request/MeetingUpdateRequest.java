@@ -24,6 +24,10 @@ public class MeetingUpdateRequest {
     @JsonFormat(pattern = "yyyyMMdd HH:mm")
     private LocalDateTime meetingDate;    // 모임 개최일자
 
+    @Future(message = "지각 기준 시간은 미래의 시간이어야 합니다.")
+    @JsonFormat(pattern = "yyyyMMdd HH:mm")
+    private LocalDateTime lateThresholdTime;    // 지각 기준 시간
+
     @Pattern(regexp = "^[ㄱ-ㅎ가-힣a-zA-Z0-9\\s:/@\\[\\]()~_-]{1,30}$",
         message = "모임 장소는 한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ -)만 1자 이상, 255자 이하로 입력해주세요.")
     private String meetingPlace;

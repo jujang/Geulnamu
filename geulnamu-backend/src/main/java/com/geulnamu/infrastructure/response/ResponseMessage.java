@@ -21,6 +21,7 @@ public class ResponseMessage {
     public static final String MEETING_PRIVACY_TIME_RESTRICTION  = "모임이 이뤄진 당일까지는 비공개 처리할 수 없습니다.";
     public static final String MEETING_DELETION_TIME_EXPIRED = "모임 시작 6시간 전부터는 삭제할 수 없습니다.";
     public static final String MEETING_ATTEND_TIME_RESTRICTION = "모임 출석은 모임 당일만, 모임 시작 1시간 전 부터 가능합니다.";
+    public static final String LATE_THRESHOLD_TIME_RESTRICTION = "지각 기준 시간은 모임 당일이어야 하고, 모임 시간보다 빠를 수 없습니다.";
     public static final String NOT_YET_SETTING_DISCUSSION_TIME = "토론 시간이 아직 설정되지 않았습니다.";
     public static final String DISCUSSION_INTENTION_SETTING_TIME_RESTRICTION = "토론 불참 의사는 토론 시작 30분 전 까지만 가능합니다.";
 
