@@ -455,7 +455,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_get">GET</a>
 <ul class="sectlevel2">
-<li><a href="#_출석_정보_조회">출석 정보 조회</a></li>
+<li><a href="#_본인_출석_정보_조회">본인 출석 정보 조회</a></li>
+<li><a href="#_모임별_참석_현황_조회">모임별 참석 현황 조회</a></li>
 </ul>
 </li>
 <li><a href="#_patch">PATCH</a>
@@ -618,7 +619,7 @@ Content-Type: application/json;charset=UTF-8
 <h2 id="_get"><a class="link" href="#_get">GET</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_출석_정보_조회"><a class="link" href="#_출석_정보_조회">출석 정보 조회</a></h3>
+<h3 id="_본인_출석_정보_조회"><a class="link" href="#_본인_출석_정보_조회">본인 출석 정보 조회</a></h3>
 <div class="paragraph">
 <p>접근 가능 권한 레벨: MEMBER</p>
 </div>
@@ -626,7 +627,7 @@ Content-Type: application/json;charset=UTF-8
 <h4 id="_request_2"><a class="link" href="#_request_2">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /attendance/1 HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /attendance/1/my HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -828,13 +829,8 @@ Content-Type: application/json;charset=UTF-8
 <hr>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_patch"><a class="link" href="#_patch">PATCH</a></h2>
-<div class="sectionbody">
 <div class="sect2">
-<h3 id="_비고_작성"><a class="link" href="#_비고_작성">비고 작성</a></h3>
+<h3 id="_모임별_참석_현황_조회"><a class="link" href="#_모임별_참석_현황_조회">모임별 참석 현황 조회</a></h3>
 <div class="paragraph">
 <p>접근 가능 권한 레벨: MEMBER</p>
 </div>
@@ -842,16 +838,11 @@ Content-Type: application/json;charset=UTF-8
 <h4 id="_request_3"><a class="link" href="#_request_3">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendance/1/note HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /attendance/1 HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
-Content-Length: 43
-Host: docs.api.com
-
-{
-  "note" : "지각 안 했는데요!"
-}</code></pre>
+Host: docs.api.com</code></pre>
 </div>
 </div>
 </div>
@@ -904,36 +895,6 @@ Host: docs.api.com
 </table>
 </div>
 <div class="sect3">
-<h4 id="_request_fields"><a class="link" href="#_request_fields">request-fields</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 20%;">
-<col style="width: 20%;">
-<col style="width: 20%;">
-<col style="width: 20%;">
-<col style="width: 20%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">필드명</th>
-<th class="tableblock halign-left valign-top">타입</th>
-<th class="tableblock halign-left valign-top">필수여부</th>
-<th class="tableblock halign-left valign-top">제약조건</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>note</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ ! ? . , ; -)만으로 사용한 1자 이상, 255자 이하의 문자열</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">비고(출석 관련 사유 작성)</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
 <h4 id="_response_3"><a class="link" href="#_response_3">response</a></h4>
 <div class="listingblock">
 <div class="content">
@@ -943,7 +904,31 @@ Content-Type: application/json;charset=UTF-8
 {
   "code" : 200,
   "message" : "API 호출에 성공했습니다.",
-  "data" : null
+  "data" : {
+    "meetingAttendanceSummaryResponse" : {
+      "meetingDate" : "2025.05.31 10:30",
+      "lateThresholdTime" : "10:45",
+      "totalAttendCount" : 3,
+      "attendCount" : 2,
+      "lateAttendCount" : 1
+    },
+    "meetingAttendanceStatusResponseList" : [ {
+      "memberId" : 3,
+      "name" : "나뭉삼",
+      "attendanceTime" : "2025.05.31 10:50",
+      "isLate" : true
+    }, {
+      "memberId" : 2,
+      "name" : "나뭉이",
+      "attendanceTime" : "2025.05.31 10:44",
+      "isLate" : false
+    }, {
+      "memberId" : 1,
+      "name" : "나뭉일",
+      "attendanceTime" : "2025.05.31 10:20",
+      "isLate" : false
+    } ]
+  }
 }</code></pre>
 </div>
 </div>
@@ -983,11 +968,81 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">결과 메세지</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceSummaryResponse</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Object</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 출석 요약 정보</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceSummaryResponse.meetingDate</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 일자 및 시간</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceSummaryResponse.lateThresholdTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지각 기준 시간</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceSummaryResponse.totalAttendCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전체 참석 인원수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceSummaryResponse.attendCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">정상 참석자 수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceSummaryResponse.lateAttendCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지각 참석자 수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[]</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원별 출석 정보</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[].memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[].name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 이름</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[].attendanceTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">출석 시간</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[].isLate</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지각 여부</p></td>
 </tr>
 </tbody>
 </table>
@@ -997,8 +1052,13 @@ Content-Type: application/json;charset=UTF-8
 <hr>
 </div>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_patch"><a class="link" href="#_patch">PATCH</a></h2>
+<div class="sectionbody">
 <div class="sect2">
-<h3 id="_독서만_할래요"><a class="link" href="#_독서만_할래요">독서만 할래요</a></h3>
+<h3 id="_비고_작성"><a class="link" href="#_비고_작성">비고 작성</a></h3>
 <div class="paragraph">
 <p>접근 가능 권한 레벨: MEMBER</p>
 </div>
@@ -1006,11 +1066,16 @@ Content-Type: application/json;charset=UTF-8
 <h4 id="_request_4"><a class="link" href="#_request_4">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendance/1/just-read HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendance/1/note HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
-Host: docs.api.com</code></pre>
+Content-Length: 43
+Host: docs.api.com
+
+{
+  "note" : "지각 안 했는데요!"
+}</code></pre>
 </div>
 </div>
 </div>
@@ -1058,6 +1123,36 @@ Host: docs.api.com</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Authorization</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">액세스 토큰</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_request_fields"><a class="link" href="#_request_fields">request-fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수여부</th>
+<th class="tableblock halign-left valign-top">제약조건</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>note</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ ! ? . , ; -)만으로 사용한 1자 이상, 255자 이하의 문자열</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">비고(출석 관련 사유 작성)</p></td>
 </tr>
 </tbody>
 </table>
@@ -1127,7 +1222,7 @@ Content-Type: application/json;charset=UTF-8
 </div>
 </div>
 <div class="sect2">
-<h3 id="_토론할래요"><a class="link" href="#_토론할래요">토론할래요</a></h3>
+<h3 id="_독서만_할래요"><a class="link" href="#_독서만_할래요">독서만 할래요</a></h3>
 <div class="paragraph">
 <p>접근 가능 권한 레벨: MEMBER</p>
 </div>
@@ -1135,7 +1230,7 @@ Content-Type: application/json;charset=UTF-8
 <h4 id="_request_5"><a class="link" href="#_request_5">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendance/1/want-discussion HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendance/1/just-read HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1255,21 +1350,16 @@ Content-Type: application/json;charset=UTF-8
 <hr>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_delete"><a class="link" href="#_delete">DELETE</a></h2>
-<div class="sectionbody">
 <div class="sect2">
-<h3 id="_출석_삭제"><a class="link" href="#_출석_삭제">출석 삭제</a></h3>
+<h3 id="_토론할래요"><a class="link" href="#_토론할래요">토론할래요</a></h3>
 <div class="paragraph">
-<p>접근 가능 권한 레벨: ADMIN / 로그 생성</p>
+<p>접근 가능 권한 레벨: MEMBER</p>
 </div>
 <div class="sect3">
 <h4 id="_request_6"><a class="link" href="#_request_6">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">DELETE /attendance/1/delete HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendance/1/want-discussion HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1391,11 +1481,145 @@ Content-Type: application/json;charset=UTF-8
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_delete"><a class="link" href="#_delete">DELETE</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_출석_삭제"><a class="link" href="#_출석_삭제">출석 삭제</a></h3>
+<div class="paragraph">
+<p>접근 가능 권한 레벨: ADMIN / 로그 생성</p>
+</div>
+<div class="sect3">
+<h4 id="_request_7"><a class="link" href="#_request_7">request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">DELETE /attendance/1/delete HTTP/2.0
+Content-Type: application/json;charset=UTF-8
+Authorization: Bearer access_token
+Accept: application/json
+Host: docs.api.com</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_7"><a class="link" href="#_path_parameters_7">path-parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">필수값</th>
+<th class="tableblock halign-left valign-top">양식</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">attendanceId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">출석 고유번호</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_request_headers_7"><a class="link" href="#_request_headers_7">request-headers</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Authorization</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">액세스 토큰</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_response_7"><a class="link" href="#_response_7">response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
+Content-Type: application/json;charset=UTF-8
+
+{
+  "code" : 200,
+  "message" : "API 호출에 성공했습니다.",
+  "data" : null
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_response_fields_7"><a class="link" href="#_response_fields_7">response-fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수값</th>
+<th class="tableblock halign-left valign-top">양식</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>code</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">결과 코드</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>message</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">결과 메세지</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_error_case_7"><a class="link" href="#_error_case_7">Error case</a></h4>
+<hr>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-06-21 01:31:49 +0900
+Last updated 2025-06-23 02:21:50 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

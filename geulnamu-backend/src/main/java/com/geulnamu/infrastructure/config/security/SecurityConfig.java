@@ -37,7 +37,8 @@ public class SecurityConfig {
         "/member/info",
         "/meeting/list",
         "/meeting/list/staff",
-        "/attendance/{meetingId}"
+        "/attendance/{meetingId}/**",
+        "/attendance/{attendanceId}/my",
     };
 
     private static final String[] AUTH_FOR_STAFF = {

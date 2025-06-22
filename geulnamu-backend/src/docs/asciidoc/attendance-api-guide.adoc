@@ -40,29 +40,50 @@ include::{snippets}/attendance/create/response-fields.adoc[]
 
 == GET
 
-=== 출석 정보 조회
+=== 본인 출석 정보 조회
 접근 가능 권한 레벨: MEMBER
 
 ==== request
-include::{snippets}/attendance/view/http-request.adoc[]
+include::{snippets}/attendance/view/myInfo/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/attendance/view/path-parameters.adoc[]
+include::{snippets}/attendance/view/myInfo/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/view/request-headers.adoc[]
+include::{snippets}/attendance/view/myInfo/request-headers.adoc[]
 
 ==== response
-include::{snippets}/attendance/view/http-response.adoc[]
+include::{snippets}/attendance/view/myInfo/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/view/response-fields.adoc[]
+include::{snippets}/attendance/view/myInfo/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 모임별 참석 현황 조회
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/view/list/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/view/list/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/view/list/request-headers.adoc[]
+
+==== response
+include::{snippets}/attendance/view/list/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/view/list/response-fields.adoc[]
 
 ==== Error case
 
 
 ---
-
 
 == PATCH
 

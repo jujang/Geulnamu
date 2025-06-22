@@ -1,6 +1,9 @@
 package com.geulnamu.service.attendance;
 
 import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
+import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceDetailsResponse;
+import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
+import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
 import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.member.Member;
@@ -14,6 +17,8 @@ import com.geulnamu.repository.member.MemberQueryRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -43,8 +48,16 @@ public class AttendanceService {
     }
 
     @Transactional(readOnly = true)
-    public AttendanceInfoResponse getAttendanceInfo(Long attendanceId, Long memberId) {
+    public AttendanceInfoResponse getMyAttendanceInfo(Long attendanceId, Long memberId) {
         return attendanceQueryRepository.findMyAttendanceInfo(attendanceId, memberId).orElseThrow(NotFoundDataException::new);
+    }
+
+    @Transactional(readOnly = true)
+    public MeetingAttendanceDetailsResponse getMeetingAttendanceStatus(Long meetingId) {
+        MeetingAttendanceSummaryResponse meetingAttendanceSummaryResponse = attendanceQueryRepository.findMeetingAttendanceSummary(meetingId);
+        List<MeetingAttendanceStatusResponse> meetingAttendanceStatusResponseList
+            = attendanceQueryRepository.findMeetingAttendanceStatus(meetingId);
+        return new MeetingAttendanceDetailsResponse(meetingAttendanceSummaryResponse, meetingAttendanceStatusResponseList);
     }
 
     @Transactional(rollbackFor = Exception.class)

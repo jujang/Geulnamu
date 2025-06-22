@@ -2,6 +2,7 @@ package com.geulnamu.controller.attendance;
 
 import com.geulnamu.controller.attendance.dto.request.AttendanceNoteRequest;
 import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
+import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceDetailsResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
@@ -13,6 +14,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,10 +34,17 @@ public class AttendanceController {
     }
 
     @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/{attendanceId}", name = "출석 정보 조회")
-    public BaseResponse<AttendanceInfoResponse> getAttendanceInfo(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId) {
-        AttendanceInfoResponse attendanceInfoResponse = attendanceService.getAttendanceInfo(attendanceId, memberId);
+    @GetMapping(value = "/{attendanceId}/my", name = "개인 출석 정보 조회")
+    public BaseResponse<AttendanceInfoResponse> getMyAttendanceInfo(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId) {
+        AttendanceInfoResponse attendanceInfoResponse = attendanceService.getMyAttendanceInfo(attendanceId, memberId);
         return BaseResponse.ofSuccess(attendanceInfoResponse);
+    }
+
+    @AccessLevel(Level.MEMBER)
+    @GetMapping(value = "/{meetingId}", name = "모임별 참석 현황 조회")
+    public BaseResponse<MeetingAttendanceDetailsResponse> getMeetingAttendanceStatus(@PathVariable @Min(value = 1) Long meetingId) {
+        MeetingAttendanceDetailsResponse meetingAttendanceStatusResponseList = attendanceService.getMeetingAttendanceStatus(meetingId);
+        return BaseResponse.ofSuccess(meetingAttendanceStatusResponseList);
     }
 
     @AccessLevel(Level.MEMBER)

@@ -1,14 +1,20 @@
 package com.geulnamu.repository.attendance;
 
 import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
+import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
+import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
 import com.geulnamu.domain.attendance.QAttendance;
 import com.geulnamu.domain.meeting.QMeeting;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,6 +38,41 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
             .where(attendance.id.eq(attendanceId)
                 .and(attendance.member.id.eq(memberId)))
             .fetchOne());
+    }
+
+    @Override
+    public MeetingAttendanceSummaryResponse findMeetingAttendanceSummary(Long meetingId) {
+        return queryFactory
+            .select(Projections.constructor(MeetingAttendanceSummaryResponse.class,
+                meeting.meetingDate, meeting.lateThresholdTime, attendance.member.count(),
+                    normalAttendanceCount(),
+                    attendance.member.count().subtract(normalAttendanceCount()))
+            )
+            .from(meeting)
+            .join(attendance).on(meeting.id.eq(attendance.meeting.id))
+            .where(meeting.id.eq(meetingId))
+            .orderBy(attendance.createdAt.desc())
+            .fetchOne();
+    }
+
+    public List<MeetingAttendanceStatusResponse> findMeetingAttendanceStatus(Long meetingId) {
+        return queryFactory
+            .select(Projections.constructor(MeetingAttendanceStatusResponse.class,
+                attendance.member.id, attendance.member.name, attendance.createdAt, attendance.createdAt.after(meeting.lateThresholdTime))
+            )
+            .from(meeting)
+            .join(attendance).on(meeting.id.eq(attendance.meeting.id))
+            .where(meeting.id.eq(meetingId))
+            .orderBy(attendance.createdAt.desc())
+            .fetch();
+    }
+
+    private NumberExpression<Long> normalAttendanceCount() {
+        return new CaseBuilder()
+            .when(attendance.createdAt.before(meeting.lateThresholdTime))
+            .then(1)
+            .otherwise(0)
+            .longValue().sum();
     }
 
 }
