@@ -3,6 +3,7 @@ package com.geulnamu.repository.attendance;
 import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
+import com.geulnamu.controller.meeting.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.attendance.QAttendance;
 import com.geulnamu.domain.meeting.QMeeting;
 import com.querydsl.core.types.Projections;
@@ -53,6 +54,18 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
             .where(meeting.id.eq(meetingId))
             .orderBy(attendance.createdAt.desc())
             .fetchOne();
+    }
+
+    @Override
+    public List<MemberIdAndNameResponse> findWantDiscussionMemberList(Long meetingId) {
+        return queryFactory
+            .select(Projections.constructor(MemberIdAndNameResponse.class,
+                attendance.member.id, attendance.member.name)
+            )
+            .from(attendance)
+            .where(attendance.meeting.id.eq(meetingId))
+            .orderBy(attendance.member.id.asc())
+            .fetch();
     }
 
     public List<MeetingAttendanceStatusResponse> findMeetingAttendanceStatus(Long meetingId) {

@@ -3,13 +3,13 @@ package com.geulnamu.repository.meeting;
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoForAdminResponse;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
-import com.geulnamu.controller.meeting.dto.response.StaffResponse;
+import com.geulnamu.controller.meeting.dto.response.MemberIdAndNameResponse;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface MeetingQueryRepositoryCustom {
-    List<StaffResponse> findStaffList();
+    List<MemberIdAndNameResponse> findStaffList();
     Page<MeetingInfoResponse> findMeetingsWithPaging(MeetingListRequest request, Long myMemberId);
     Page<MeetingInfoForAdminResponse> findMeetingsForAdminWithPaging(MeetingListRequest request);
 }

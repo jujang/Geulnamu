@@ -46,9 +46,9 @@ public class MeetingController {
 
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/list/staff", name = "운영진 목록 조회 - 필터링용")
-    public BaseResponse<List<StaffResponse>> getStaffList() {
-        List<StaffResponse> staffResponseList = meetingService.getStaffList();
-        return BaseResponse.ofSuccess(staffResponseList);
+    public BaseResponse<List<MemberIdAndNameResponse>> getStaffList() {
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList = meetingService.getStaffList();
+        return BaseResponse.ofSuccess(memberIdAndNameResponseList);
     }
 
     @AccessLevel(Level.MEMBER)

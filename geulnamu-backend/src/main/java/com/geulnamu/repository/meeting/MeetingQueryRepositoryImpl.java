@@ -3,7 +3,7 @@ package com.geulnamu.repository.meeting;
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoForAdminResponse;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
-import com.geulnamu.controller.meeting.dto.response.StaffResponse;
+import com.geulnamu.controller.meeting.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.attendance.AttendanceStatus;
 import com.geulnamu.domain.attendance.QAttendance;
 import com.geulnamu.domain.meeting.MeetingType;
@@ -34,9 +34,9 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
 
 
     @Override
-    public List<StaffResponse> findStaffList() {
+    public List<MemberIdAndNameResponse> findStaffList() {
         return queryFactory
-            .select(Projections.constructor(StaffResponse.class,
+            .select(Projections.constructor(MemberIdAndNameResponse.class,
                 member.id, member.name)
             )
             .from(meeting)

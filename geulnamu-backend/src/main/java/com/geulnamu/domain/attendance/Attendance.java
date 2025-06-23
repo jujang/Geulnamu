@@ -80,4 +80,8 @@ public class Attendance extends DateColumn {
         this.notWantDiscussion = false;
     }
 
+    public void updateDiscussionGroup(DiscussionGroup discussionGroup) {
+        this.discussionGroup = discussionGroup;
+    }
+
 }

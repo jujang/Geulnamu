@@ -162,13 +162,13 @@ public class MeetingControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        StaffResponse staffResponse_01 = new StaffResponse(1L, "나뭉모임장");
-        StaffResponse staffResponse_02 = new StaffResponse(2L, "나순부모임장");
-        List<StaffResponse> staffResponseList = new ArrayList<>();
-        staffResponseList.add(staffResponse_01);
-        staffResponseList.add(staffResponse_02);
+        MemberIdAndNameResponse memberIdAndNameResponse_01 = new MemberIdAndNameResponse(1L, "나뭉모임장");
+        MemberIdAndNameResponse memberIdAndNameResponse_02 = new MemberIdAndNameResponse(2L, "나순부모임장");
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList = new ArrayList<>();
+        memberIdAndNameResponseList.add(memberIdAndNameResponse_01);
+        memberIdAndNameResponseList.add(memberIdAndNameResponse_02);
 
-        given(meetingService.getStaffList()).willReturn(staffResponseList);
+        given(meetingService.getStaffList()).willReturn(memberIdAndNameResponseList);
 
         // when
         ResultActions actions =

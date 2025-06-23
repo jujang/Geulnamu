@@ -22,8 +22,9 @@ public enum ActionType {
 
     // 출석 관련
     ATTENDANCE_CREATE("출석"),
-    ATTENDANCE_DELETE("출석 삭제");
-
+    ATTENDANCE_DELETE("출석 삭제"),
+    DISCUSSION_GROUP_ORGANIZE("토론 그룹 구성"),
+    DISCUSSION_GROUP_ORGANIZE_SOLO("개인 토론 그룹 할당");
 
     private final String description;
 

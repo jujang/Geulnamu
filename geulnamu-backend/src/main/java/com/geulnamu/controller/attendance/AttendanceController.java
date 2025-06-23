@@ -1,8 +1,10 @@
 package com.geulnamu.controller.attendance;
 
 import com.geulnamu.controller.attendance.dto.request.AttendanceNoteRequest;
+import com.geulnamu.controller.attendance.dto.request.AssignDiscussionGroupsRequest;
 import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceDetailsResponse;
+import com.geulnamu.controller.meeting.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
@@ -27,29 +29,38 @@ public class AttendanceController {
 
     @LogAction(value = ActionType.ATTENDANCE_CREATE, actionDomain = "attendance")
     @AccessLevel(Level.MEMBER)
-    @PostMapping(value = "/{meetingId}", name = "출석")
-    public BaseResponse<Long> meetingAttend(@PathVariable @Min(value = 1) Long meetingId, @AuthMemberId Long memberId) {
+    @PostMapping(name = "출석")
+    public BaseResponse<Long> meetingAttend(@RequestParam @Min(value = 1) Long meetingId, @AuthMemberId Long memberId) {
         Long attendanceId = attendanceService.createAttendance(meetingId, memberId);
         return BaseResponse.ofSuccess(attendanceId);
     }
 
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/{attendanceId}/my", name = "개인 출석 정보 조회")
-    public BaseResponse<AttendanceInfoResponse> getMyAttendanceInfo(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId) {
+    public BaseResponse<AttendanceInfoResponse> getMyAttendanceInfo(@PathVariable @Min(value = 1) Long attendanceId,
+                                                                    @AuthMemberId Long memberId) {
         AttendanceInfoResponse attendanceInfoResponse = attendanceService.getMyAttendanceInfo(attendanceId, memberId);
         return BaseResponse.ofSuccess(attendanceInfoResponse);
     }
 
     @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/{meetingId}", name = "모임별 참석 현황 조회")
-    public BaseResponse<MeetingAttendanceDetailsResponse> getMeetingAttendanceStatus(@PathVariable @Min(value = 1) Long meetingId) {
+    @GetMapping(name = "모임별 참석 현황 조회")
+    public BaseResponse<MeetingAttendanceDetailsResponse> getMeetingAttendanceStatus(@RequestParam @Min(value = 1) Long meetingId) {
         MeetingAttendanceDetailsResponse meetingAttendanceStatusResponseList = attendanceService.getMeetingAttendanceStatus(meetingId);
         return BaseResponse.ofSuccess(meetingAttendanceStatusResponseList);
     }
 
+    @AccessLevel(Level.STAFF)
+    @GetMapping(value = "/discussion", name = "모임 토론 참여 희망 명단 조회")
+    public BaseResponse<List<MemberIdAndNameResponse>> getWantDiscussionMemberList(@RequestParam @Min(value = 1) Long meetingId) {
+        List<MemberIdAndNameResponse> memberIdAndNameResponsesList = attendanceService.getWantDiscussionMemberList(meetingId);
+        return BaseResponse.ofSuccess(memberIdAndNameResponsesList);
+    }
+
     @AccessLevel(Level.MEMBER)
     @PatchMapping(value = "/{attendanceId}/note", name = "비고 작성")
-    public BaseResponse<Void> writeNote(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId, @Valid @RequestBody AttendanceNoteRequest request) {
+    public BaseResponse<Void> writeNote(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId,
+                                        @Valid @RequestBody AttendanceNoteRequest request) {
         attendanceService.writeNote(attendanceId, memberId, request.getNote());
         return BaseResponse.ofSuccess();
     }
@@ -65,6 +76,25 @@ public class AttendanceController {
     @PatchMapping(value = "/{attendanceId}/want-discussion", name = "토론할래요")
     public BaseResponse<Void> wantDiscussion(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId) {
         attendanceService.wantDiscussion(attendanceId, memberId);
+        return BaseResponse.ofSuccess();
+    }
+
+    @LogAction(value = ActionType.DISCUSSION_GROUP_ORGANIZE, actionDomain = "attendance")
+    @AccessLevel(Level.STAFF)
+    @PatchMapping(value = "/group", name = "토론 그룹 구성 - 수동")
+    public BaseResponse<Void> manuallyAssignDiscussionGroups(@RequestParam @Min(value = 1) Long meetingId,
+                                                             @Valid @RequestBody AssignDiscussionGroupsRequest request) {
+        attendanceService.manuallyAssignDiscussionGroups(meetingId, request);
+        return BaseResponse.ofSuccess();
+    }
+
+    @LogAction(value = ActionType.DISCUSSION_GROUP_ORGANIZE_SOLO, actionDomain = "attendance")
+    @AccessLevel(Level.ADMIN)
+    @PatchMapping(value = "/group/solo", name = "토론 그룹 할당 - 개인")
+    public BaseResponse<Void> manuallyAssignDiscussionGroup(@RequestParam @Min(value = 1) Long meetingId,
+                                                            @RequestParam @Min(value = 1) Long memberId,
+                                                            @RequestParam @Min(value = 1) Integer groupNumber) {
+        attendanceService.assignMemberToDiscussionGroup(meetingId, memberId, groupNumber-1);
         return BaseResponse.ofSuccess();
     }
 

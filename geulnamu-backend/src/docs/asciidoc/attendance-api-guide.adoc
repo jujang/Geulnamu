@@ -82,6 +82,26 @@ include::{snippets}/attendance/view/list/response-fields.adoc[]
 
 ==== Error case
 
+=== 모임 토론 참여 희망 명단 조회
+접근 가능 권한 레벨: STAFF
+
+==== request
+include::{snippets}/attendance/discussion/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/discussion/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/discussion/query-parameters.adoc[]
+
+==== response
+include::{snippets}/attendance/discussion/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/discussion/response-fields.adoc[]
+
+==== Error case
+
 
 ---
 
@@ -155,6 +175,55 @@ include::{snippets}/attendance/modify/want-discussion/response-fields.adoc[]
 ==== Error case
 
 ---
+
+=== 토론 그룹 구성 - 수동
+접근 가능 권한 레벨: STAFF
+
+==== request
+include::{snippets}/attendance/group/assign/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/group/assign/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/group/assign/query-parameters.adoc[]
+
+==== request-fields
+include::{snippets}/attendance/group/assign/request-fields.adoc[]
+
+==== response
+include::{snippets}/attendance/group/assign/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/group/assign/response-fields.adoc[]
+
+==== Error case
+
+---
+
+
+=== 토론 그룹 할당 - 개인
+접근 가능 권한 레벨: ADMIN
+
+==== request
+include::{snippets}/attendance/group/assign/solo/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/group/assign/solo/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/group/assign/solo/query-parameters.adoc[]
+
+==== response
+include::{snippets}/attendance/group/assign/solo/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/group/assign/solo/response-fields.adoc[]
+
+==== Error case
+
+---
+
 
 == DELETE
 

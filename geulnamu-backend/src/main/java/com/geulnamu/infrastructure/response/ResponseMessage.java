@@ -27,6 +27,9 @@ public class ResponseMessage {
 
     public static final String ATTENDANCE_DUPLICATE_ISSUE = "하나의 모임을 중복으로 출석할 수 없습니다.";
 
+    public static final String OVER_DISCUSSION_GROUP_NUMBER = "토론 그룹은 현재 최대 7개 까지만 가능합니다.";
+    public static final String MEMBER_DUPLICATE_DISCUSSION_GROUP_ASSIGNMENT = "특정 모임원이 2개 이상의 토론 그룹에 담겨 있습니다.";
+
     public static final String ACCESS_TOKEN_NOT_VALIDATE = "액세스 토큰이 유효하지 않습니다."; // 401
     public static final String REFRESH_TOKEN_NOT_VALIDATE = "리프레시 토큰이 유효하지 않습니다. 다시 로그인 해 주세요."; // 401
     public static final String NOT_FOUND_ACCESS_TOKEN = "액세스 토큰을 발견하지 못했습니다."; // 401

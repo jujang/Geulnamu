@@ -47,7 +47,7 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public List<StaffResponse> getStaffList() {
+    public List<MemberIdAndNameResponse> getStaffList() {
         return meetingQueryRepository.findStaffList();
     }
 

@@ -5,9 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class StaffResponse {
-
+public class MemberIdAndNameResponse {
     private Long memberId;
     private String memberName;
-
 }
