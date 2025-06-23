@@ -39,7 +39,7 @@ public class SecurityConfig {
         "/meeting/list/staff",
         "/attendance",
         "/attendance/{attendanceId}/my",
-        "/attendance/{attendanceId}",
+        "/attendance/discussion/{attendanceId}",
         "/attendance/{attendanceId}/note",
         "/attendance/{attendanceId}/just-read",
         "/attendance/{attendanceId}/want-discussion"
