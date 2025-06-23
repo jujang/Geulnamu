@@ -3,11 +3,8 @@ package com.geulnamu.controller.attendance;
 import com.geulnamu.controller.attendance.dto.request.AssignDiscussionGroupsRequest;
 import com.geulnamu.controller.attendance.dto.request.AttendanceNoteRequest;
 import com.geulnamu.controller.attendance.dto.request.DiscussionGroupRequest;
-import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
-import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceDetailsResponse;
-import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
-import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
-import com.geulnamu.controller.meeting.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.controller.attendance.dto.response.*;
+import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.controller.shared.ControllerTest;
 import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.infrastructure.response.ResponseMessage;
@@ -309,6 +306,69 @@ public class AttendanceControllerTest extends ControllerTest {
                     fieldWithPath("data").type(JsonFieldType.ARRAY).description("토론 참여 희망자 명단"),
                     fieldWithPath("data[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
                     fieldWithPath("data[].memberName").type(JsonFieldType.STRING).description("모임원 이름")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "STAFF")
+    public void getAllDiscussionGroupMemberList() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+
+        MemberIdAndNameResponse memberIdAndNameResponse_1 = new MemberIdAndNameResponse(1L, "나뭉일");
+        MemberIdAndNameResponse memberIdAndNameResponse_2 = new MemberIdAndNameResponse(2L, "나뭉이");
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList_1 = new ArrayList<>();
+        memberIdAndNameResponseList_1.add(memberIdAndNameResponse_1);
+        memberIdAndNameResponseList_1.add(memberIdAndNameResponse_2);
+
+        MemberIdAndNameResponse memberIdAndNameResponse_3 = new MemberIdAndNameResponse(3L, "나뭉삼");
+        MemberIdAndNameResponse memberIdAndNameResponse_4 = new MemberIdAndNameResponse(4L, "나뭉사");
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList_2 = new ArrayList<>();
+        memberIdAndNameResponseList_2.add(memberIdAndNameResponse_3);
+        memberIdAndNameResponseList_2.add(memberIdAndNameResponse_4);
+
+        DiscussionGroupResponse discussionGroupResponseList_1 = new DiscussionGroupResponse(memberIdAndNameResponseList_1);
+        DiscussionGroupResponse discussionGroupResponseList_2 = new DiscussionGroupResponse(memberIdAndNameResponseList_2);
+        List<DiscussionGroupResponse> discussionGroupResponseList = new ArrayList<>();
+        discussionGroupResponseList.add(discussionGroupResponseList_1);
+        discussionGroupResponseList.add(discussionGroupResponseList_2);
+
+        given(attendanceService.getAllDiscussionGroupMemberList(any())).willReturn(discussionGroupResponseList);
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                get("/attendance/discussion/all?meetingId={meetingId}", 1)
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andDo(document(
+                "/attendance/discussion/view/all-group",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                queryParameters(
+                    parameterWithName("meetingId").attributes(key("type").value(JsonFieldType.NUMBER))
+                        .attributes(setAttributes("1 이상의 정수")).description("모임 고유번호")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("토론 참여 희망자 명단"),
+                    fieldWithPath("data[]").type(JsonFieldType.ARRAY).description("전체 토론 그룹"),
+                    fieldWithPath("data[].memberIdAndNameResponseList").type(JsonFieldType.ARRAY).description("토론 그룹별 명단"),
+                    fieldWithPath("data[].memberIdAndNameResponseList[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
+                    fieldWithPath("data[].memberIdAndNameResponseList[].memberName").type(JsonFieldType.STRING).description("모임원 이름")
                 )
             ));
     }

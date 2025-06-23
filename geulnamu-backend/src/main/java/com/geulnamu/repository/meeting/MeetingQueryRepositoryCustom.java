@@ -3,7 +3,7 @@ package com.geulnamu.repository.meeting;
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoForAdminResponse;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
-import com.geulnamu.controller.meeting.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

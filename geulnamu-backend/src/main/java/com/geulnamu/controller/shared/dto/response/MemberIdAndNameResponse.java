@@ -1,4 +1,4 @@
-package com.geulnamu.controller.meeting.dto.response;
+package com.geulnamu.controller.shared.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

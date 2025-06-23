@@ -3,8 +3,9 @@ package com.geulnamu.controller.attendance;
 import com.geulnamu.controller.attendance.dto.request.AttendanceNoteRequest;
 import com.geulnamu.controller.attendance.dto.request.AssignDiscussionGroupsRequest;
 import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
+import com.geulnamu.controller.attendance.dto.response.DiscussionGroupResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceDetailsResponse;
-import com.geulnamu.controller.meeting.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
@@ -14,6 +15,7 @@ import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.attendance.AttendanceService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,6 +65,13 @@ public class AttendanceController {
                                                                                       @AuthMemberId Long memberId) {
         List<MemberIdAndNameResponse> memberIdAndNameResponsesList = attendanceService.getMyDiscussionMemberList(attendanceId, memberId);
         return BaseResponse.ofSuccess(memberIdAndNameResponsesList);
+    }
+
+    @AccessLevel(Level.STAFF)
+    @GetMapping(value = "/discussion/all", name = "전체 토론 그룹 명단 조회")
+    public BaseResponse<List<DiscussionGroupResponse>> getAllDiscussionGroupMemberList(@NotNull(message = "모임 고유번호 필수 입력") @Min(value = 1) Long meetingId) {
+        List<DiscussionGroupResponse> discussionGroupResponseList = attendanceService.getAllDiscussionGroupMemberList(meetingId);
+        return BaseResponse.ofSuccess(discussionGroupResponseList);
     }
 
     @AccessLevel(Level.MEMBER)

@@ -2,6 +2,7 @@ package com.geulnamu.service.meeting;
 
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
 import com.geulnamu.controller.meeting.dto.response.*;
+import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.domain.member.Member;

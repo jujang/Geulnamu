@@ -2,11 +2,8 @@ package com.geulnamu.service.attendance;
 
 import com.geulnamu.controller.attendance.dto.request.DiscussionGroupRequest;
 import com.geulnamu.controller.attendance.dto.request.AssignDiscussionGroupsRequest;
-import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
-import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceDetailsResponse;
-import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
-import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
-import com.geulnamu.controller.meeting.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.controller.attendance.dto.response.*;
+import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.meeting.Meeting;
@@ -78,6 +75,11 @@ public class AttendanceService {
         attendance.validateDiscussionGroupMemberListRequestedPerson(memberId);
         return attendanceQueryRepository.findMyDiscussionMemberList(attendance.getMeeting().getId(),
             attendance.getDiscussionGroup());
+    }
+
+    @Transactional(readOnly = true)
+    public List<DiscussionGroupResponse> getAllDiscussionGroupMemberList(Long meetingId) {
+        return attendanceQueryRepository.findAllDiscussionGroupMemberList(meetingId);
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -110,17 +110,39 @@ include::{snippets}/attendance/discussion/response-fields.adoc[]
 ==== request
 include::{snippets}/attendance/discussion/view/my-group/http-request.adoc[]
 
+==== path-parameters
+include::{snippets}/attendance/discussion/view/my-group/path-parameters.adoc[]
+
 ==== request-headers
 include::{snippets}/attendance/discussion/view/my-group/request-headers.adoc[]
-
-==== query-parameters
-include::{snippets}/attendance/discussion/view/my-group/query-parameters.adoc[]
 
 ==== response
 include::{snippets}/attendance/discussion/view/my-group/http-response.adoc[]
 
 ==== response-fields
 include::{snippets}/attendance/discussion/view/my-group/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 전체 토론 그룹 명단 조회
+접근 가능 권한 레벨: STAFF
+
+==== request
+include::{snippets}/attendance/discussion/view/all-group/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/discussion/view/all-group/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/discussion/view/all-group/query-parameters.adoc[]
+
+==== response
+include::{snippets}/attendance/discussion/view/all-group/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/discussion/view/all-group/response-fields.adoc[]
 
 ==== Error case
 

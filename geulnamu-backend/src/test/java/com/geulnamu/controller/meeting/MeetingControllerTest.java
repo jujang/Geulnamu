@@ -5,6 +5,7 @@ import com.geulnamu.controller.meeting.dto.request.MeetingGroupUpdateRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
 import com.geulnamu.controller.meeting.dto.response.*;
 import com.geulnamu.controller.shared.ControllerTest;
+import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.infrastructure.response.ResponseMessage;

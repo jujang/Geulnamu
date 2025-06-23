@@ -1,9 +1,10 @@
 package com.geulnamu.repository.attendance;
 
 import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
+import com.geulnamu.controller.attendance.dto.response.DiscussionGroupResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
-import com.geulnamu.controller.meeting.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 
 import java.util.List;
@@ -14,5 +15,6 @@ public interface AttendanceQueryRepositoryCustom {
     MeetingAttendanceSummaryResponse findMeetingAttendanceSummary(Long meetingId);
     List<MemberIdAndNameResponse> findWantDiscussionMemberList(Long meetingId);
     List<MemberIdAndNameResponse> findMyDiscussionMemberList(Long meetingId, DiscussionGroup discussionGroup);
+    List<DiscussionGroupResponse> findAllDiscussionGroupMemberList(Long meetingId);
     List<MeetingAttendanceStatusResponse> findMeetingAttendanceStatus(Long meetingId);
 }
