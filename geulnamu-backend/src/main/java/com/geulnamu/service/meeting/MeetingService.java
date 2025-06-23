@@ -1,9 +1,8 @@
 package com.geulnamu.service.meeting;
 
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
-import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
-import com.geulnamu.controller.meeting.dto.response.MeetingListResponse;
-import com.geulnamu.controller.meeting.dto.response.StaffResponse;
+import com.geulnamu.controller.meeting.dto.response.*;
+import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.domain.member.Member;
@@ -34,26 +33,28 @@ public class MeetingService {
 
 
     @Transactional(rollbackFor = Exception.class)
-    public void createMeeting(Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, String meetingPlace, String description) {
+    public Long createMeeting(Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, LocalDateTime lateThresholdTime, String meetingPlace, String description) {
         Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
-        Meeting meeting = Meeting.createMeeting(member, meetingName, meetingType, meetingDate, meetingPlace, description);
+        Meeting meeting = Meeting.createMeeting(member, meetingName, meetingType, meetingDate, lateThresholdTime, meetingPlace, description);
+        meeting.checkLateThresholdTimeBeforeMeetingTime();
         meetingCommandRepository.save(meeting);
+        return meeting.getId();
     }
 
     @Transactional(readOnly = true)
-    public MeetingInfoResponse findMeeting(Long meetingId) {
+    public MeetingInfoForAdminResponse findMeeting(Long meetingId) {
         Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        return MeetingInfoResponse.of(meeting);
+        return MeetingInfoForAdminResponse.of(meeting);
     }
 
     @Transactional(readOnly = true)
-    public List<StaffResponse> getStaffList() {
+    public List<MemberIdAndNameResponse> getStaffList() {
         return meetingQueryRepository.findStaffList();
     }
 
     @Transactional(readOnly = true)
-    public MeetingListResponse getMeetingList(MeetingListRequest request) {
-        Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(request);
+    public MeetingListResponse getMeetingList(MeetingListRequest request, Long myMemberId) {
+        Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(request, myMemberId);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
         List<MeetingInfoResponse> meetingList = meetingDslList.getContent();
@@ -61,16 +62,16 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingListResponse getMeetingListForAdmin(MeetingListRequest request) {
-        Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(request);
+    public MeetingListForAdminResponse getMeetingListForAdmin(MeetingListRequest request) {
+        Page<MeetingInfoForAdminResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(request);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
-        List<MeetingInfoResponse> meetingList = meetingDslList.getContent();
-        return new MeetingListResponse(pagingResponse, meetingList);
+        List<MeetingInfoForAdminResponse> meetingList = meetingDslList.getContent();
+        return new MeetingListForAdminResponse(pagingResponse, meetingList);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateMeeting(Long meetingId, Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, String meetingPlace, String description) {
+    public void updateMeeting(Long meetingId, Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, LocalDateTime lateThresholdTime, String meetingPlace, String description) {
         // 모임 정보 수정 가능 권한 검사
         Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
         Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
@@ -88,6 +89,7 @@ public class MeetingService {
         if(meetingName != null) meeting.updateMeetingName(meetingName);
         if(meetingType != null) meeting.updateMeetingType(meetingType);
         if(meetingDate != null) meeting.updateMeetingDate(meetingDate);
+        if(lateThresholdTime != null) meeting.updateLateThresholdTime(lateThresholdTime);
         if(meetingPlace != null) meeting.updateMeetingPlace(meetingPlace);
         if(description != null) meeting.updateMeetingDescription(description);
     }

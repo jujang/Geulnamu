@@ -1,6 +1,6 @@
 package com.geulnamu.domain.bookQuestion;
 
-import com.geulnamu.domain.meetingAttendance.MeetingAttendance;
+import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.shared.DateColumn;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -18,8 +18,8 @@ public class BookQuestion extends DateColumn {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "meeting_attendance_id")
-    private MeetingAttendance meetingAttendance;
+    @JoinColumn(name = "attendance_id")
+    private Attendance attendance;
 
     @Column(name = "content", length = 255) // 향후 테스트해보고 길이 조정할 것
     private String content;

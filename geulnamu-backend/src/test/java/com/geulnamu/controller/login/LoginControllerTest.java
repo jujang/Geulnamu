@@ -45,7 +45,7 @@ public class LoginControllerTest extends ControllerTest {
     public void processKakaoLoginTest() throws Exception {
         // given
         String accessToken = "Bearer accessToken";
-        LoginResponse loginResponse = new LoginResponse(accessToken, true);
+        LoginResponse loginResponse = new LoginResponse(1L, accessToken, true);
         Cookie cookie = new Cookie("refreshToken", "random_refreshToken_code");
         cookie.setMaxAge((int) (TokenInfo.REFRESH_TOKEN_VALID_TIME/1000));
         cookie.setPath("/");
@@ -75,6 +75,7 @@ public class LoginControllerTest extends ControllerTest {
             .andExpect(cookie().value(cookie.getName(), cookie.getValue()))
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andExpect(jsonPath("data.memberId").value(loginResponse.memberId()))
             .andExpect(jsonPath("data.accessToken").value(loginResponse.accessToken()))
             .andExpect(jsonPath("data.newMember").value(loginResponse.newMember()))
             .andDo(document(
@@ -90,6 +91,7 @@ public class LoginControllerTest extends ControllerTest {
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data.memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
                     fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰 값"),
                     fieldWithPath("data.newMember").type(JsonFieldType.BOOLEAN).description("멤버 신규 여부")
                 )

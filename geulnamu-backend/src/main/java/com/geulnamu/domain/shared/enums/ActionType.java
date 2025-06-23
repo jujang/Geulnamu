@@ -14,11 +14,17 @@ public enum ActionType {
     MEMBER_ACTIVATE("모임원 활성화"),
     MEMBER_DEACTIVATE("모임원 비활성화"),
 
-    // 모임 관리
+    // 모임 관련
     MEETING_CREATE("모임 생성"),
     MEETING_UPDATE("모임 수정"),
     MEETING_UPDATE_DISCUSSION("모임 토론 정보 수정"),
-    MEETING_DELETE("모임 삭제");
+    MEETING_DELETE("모임 삭제"),
+
+    // 출석 관련
+    ATTENDANCE_CREATE("출석"),
+    ATTENDANCE_DELETE("출석 삭제"),
+    DISCUSSION_GROUP_ORGANIZE("토론 그룹 구성"),
+    DISCUSSION_GROUP_ORGANIZE_SOLO("개인 토론 그룹 할당");
 
     private final String description;
 

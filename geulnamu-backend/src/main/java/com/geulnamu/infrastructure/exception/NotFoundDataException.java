@@ -11,6 +11,6 @@ public class NotFoundDataException extends ServerException {
     }
 
     public NotFoundDataException(String message) {
-        super(404, message);
+        super(404, ResponseMessage.NOT_FOUND, message);
     }
 }

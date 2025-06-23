@@ -16,10 +16,9 @@ public class MeetingListRequest extends PagingRequest {
     @Pattern(regexp = "true|false", message = "모임 비공개 여부 값은 'true' 또는 'false' 만 가능합니다.")
     private final String isPrivate; // 관리자용 목록 조회에서만 사용되는 값
 
-//    @Getter
-//    @Pattern(regexp = "true|true_late|false", message = "본인 참석 여부 값은 'true', 'true_late', 'false' 중 하나만 가능합니다.")
-//    private final String isAttend; // 본인 참석 여부 (true는 지각한 것 포함해서 보여주고, true_late는 지각한 참석만 보여주기로 할 것)
-    // 일반 목록 조회에서만 사용되는 값
+    @Getter
+    @Pattern(regexp = "ATTEND|ATTEND_LATE|NOT_ATTEND", message = "참석 상태 값은 'ATTEND', 'ATTEND_LATE', 'NOT_ATTEND' 중 하나만 가능합니다.")
+    private final String attendanceStatus; // 참석 상태 (일반 목록 조회에서만 사용되는 값)
 
     @Getter
     @Pattern(regexp = "meetingDate|meetingId|createdAt", message = "정렬 기준 값은 'meetingDate', 'meetingId', 'createdAt' 중 하나만 가능합니다.")
@@ -42,11 +41,12 @@ public class MeetingListRequest extends PagingRequest {
     }
 
     public MeetingListRequest(String meetingType, Long meetingCreatorId, String isPrivate,
-                              String sortBy, String isAsc, Integer page, Integer size) {
+                              String attendanceStatus, String sortBy, String isAsc, Integer page, Integer size) {
         super(page, size);
         this.meetingType = meetingType;
         this.meetingCreatorId = meetingCreatorId;
         this.isPrivate = isPrivate;
+        this.attendanceStatus = attendanceStatus;
         this.sortBy = sortBy;
         this.isAsc = isAsc;
     }

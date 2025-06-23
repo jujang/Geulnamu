@@ -1,7 +1,7 @@
 package com.geulnamu.domain.member;
 
+import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.meeting.Meeting;
-import com.geulnamu.domain.meetingAttendance.MeetingAttendance;
 import com.geulnamu.domain.shared.*;
 import com.geulnamu.domain.shared.converter.GenderConverter;
 import com.geulnamu.domain.shared.enums.Role;
@@ -49,7 +49,7 @@ public class Member extends DateColumn {
     private List<Meeting> meetings;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<MeetingAttendance> meetingAttendances;
+    private List<Attendance> attendances;
 
     @Column(name = "kakao_user_id", nullable = false, length = 50)
     private String kakaoUserId;
@@ -71,14 +71,14 @@ public class Member extends DateColumn {
 
     public void updateMemberName(String newName) {
         if(this.name != null && this.name.equals(newName)) {
-            throw new ExistDataException();
+            throw new ExistDataException("name");
         }
         this.name = newName;
     }
 
     public void updateMemberRole(Role newRole) {
         if(this.role.equals(newRole)) {
-            throw new ExistDataException();
+            throw new ExistDataException("role");
         }
         this.role = newRole;
         this.refreshToken = null; // 역할에 따라 권한이 다르기에 재접속을 강제하기 위해 리프레시 토큰 말소시킴
@@ -98,14 +98,14 @@ public class Member extends DateColumn {
 
     public void activate() {
         if(this.deletedAt == null) {
-            throw new ExistDataException();
+            throw new ExistDataException("deletedAt");
         }
         this.deletedAt = null;
     }
 
     public void deactivate() {
         if(this.deletedAt != null) {
-            throw new ExistDataException();
+            throw new ExistDataException("deletedAt");
         }
         this.refreshToken = null; // 비활성화 계정 강제 로그아웃을 위한 설정
         this.deletedAt = LocalDateTime.now();

@@ -13,8 +13,6 @@ import com.geulnamu.infrastructure.util.JwtTokenUtil;
 import com.geulnamu.repository.member.MemberCommandRepository;
 import com.geulnamu.repository.member.MemberQueryRepository;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -44,7 +42,7 @@ public class LoginFacade {
 
         // 2.회원 처리
         MemberResult memberResult = findOrCreateMember(userInfo);
-        Member member = memberResult.getMember();
+        Member member = memberResult.member();
         boolean isNewMember = memberResult.isNewMember();
 
         // 3. 토큰 생성 + 쿠키 설정
@@ -54,7 +52,7 @@ public class LoginFacade {
         // 4. 회원의 리프레시 토큰 업데이트(DB)
         member.updateMemberRefreshToken(tokenPair.refreshToken());
 
-        return LoginResponse.of(tokenPair.accessToken(), isNewMember);
+        return LoginResponse.of(member.getId(), tokenPair.accessToken(), isNewMember);
     }
 
     /**
@@ -112,7 +110,7 @@ public class LoginFacade {
 
         member.updateMemberRefreshToken(tokenPair.refreshToken());
 
-        return LoginResponse.of(tokenPair.accessToken(), false);
+        return LoginResponse.of(member.getId(), tokenPair.accessToken(), false);
     }
 
 
@@ -139,10 +137,5 @@ public class LoginFacade {
     /**
      * 회원 조회/생성 결과를 담는 내부 클래스
      */
-    @Getter
-    @AllArgsConstructor
-    private static class MemberResult {
-        private final Member member;
-        private final boolean isNewMember;
-    }
+    private record MemberResult(Member member, boolean isNewMember) {}
 }

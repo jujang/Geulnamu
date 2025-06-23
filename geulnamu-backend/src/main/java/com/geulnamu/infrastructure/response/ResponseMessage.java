@@ -4,6 +4,7 @@ public class ResponseMessage {
     public static final String SUCCESS = "API 호출에 성공했습니다."; // 200
 
     public static final String BAD_REQUEST = "잘못된 요청입니다."; // 400
+    public static final String NOT_SUITABLE_MEMBER = "해당 기능을 수행할 수 있는 당사자가 아닙니다.";
     public static final String NO_AUTHENTICATION = "인증 정보가 존재하지 않습니다."; // 401
     public static final String FORBIDDEN = "접근 권한이 없습니다."; // 403
     public static final String NOT_FOUND = "조회된 데이터가 없습니다."; // 404
@@ -19,6 +20,15 @@ public class ResponseMessage {
     public static final String MEETING_DISCUSSION_TIME_RESTRICTION = "토론 시간은 모임 당일 내에서만, 모임 시간 이후로 가능합니다.";
     public static final String MEETING_PRIVACY_TIME_RESTRICTION  = "모임이 이뤄진 당일까지는 비공개 처리할 수 없습니다.";
     public static final String MEETING_DELETION_TIME_EXPIRED = "모임 시작 6시간 전부터는 삭제할 수 없습니다.";
+    public static final String MEETING_ATTEND_TIME_RESTRICTION = "모임 출석은 모임 당일만, 모임 시작 1시간 전 부터 가능합니다.";
+    public static final String LATE_THRESHOLD_TIME_RESTRICTION = "지각 기준 시간은 모임 당일이어야 하고, 모임 시간보다 빠를 수 없습니다.";
+    public static final String NOT_YET_SETTING_DISCUSSION_TIME = "토론 시간이 아직 설정되지 않았습니다.";
+    public static final String DISCUSSION_INTENTION_SETTING_TIME_RESTRICTION = "토론 불참 의사는 토론 시작 30분 전 까지만 가능합니다.";
+
+    public static final String ATTENDANCE_DUPLICATE_ISSUE = "하나의 모임을 중복으로 출석할 수 없습니다.";
+
+    public static final String OVER_DISCUSSION_GROUP_NUMBER = "토론 그룹은 현재 최대 7개 까지만 가능합니다.";
+    public static final String MEMBER_DUPLICATE_DISCUSSION_GROUP_ASSIGNMENT = "특정 모임원이 2개 이상의 토론 그룹에 담겨 있습니다.";
 
     public static final String ACCESS_TOKEN_NOT_VALIDATE = "액세스 토큰이 유효하지 않습니다."; // 401
     public static final String REFRESH_TOKEN_NOT_VALIDATE = "리프레시 토큰이 유효하지 않습니다. 다시 로그인 해 주세요."; // 401

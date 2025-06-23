@@ -4,9 +4,8 @@ import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingGroupUpdateRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
-import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
-import com.geulnamu.controller.meeting.dto.response.MeetingListResponse;
-import com.geulnamu.controller.meeting.dto.response.StaffResponse;
+import com.geulnamu.controller.meeting.dto.response.*;
+import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.domain.shared.enums.Role;
@@ -33,37 +32,37 @@ public class MeetingController {
     @LogAction(value = ActionType.MEETING_CREATE, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @PostMapping(name = "모임 생성")
-    public BaseResponse<Void> createMeeting(@AuthMemberId Long memberId, @Valid @RequestBody MeetingCreateRequest request) {
-        meetingService.createMeeting(memberId, request.getMeetingName(), request.getMeetingType(),
-            request.getMeetingDate(), request.getMeetingPlace(), request.getDescription());
-        return BaseResponse.ofSuccess();
+    public BaseResponse<Long> createMeeting(@AuthMemberId Long memberId, @Valid @RequestBody MeetingCreateRequest request) {
+        Long meetingId = meetingService.createMeeting(memberId, request.getMeetingName(), request.getMeetingType(),
+            request.getMeetingDate(), request.getLateThresholdTime(), request.getMeetingPlace(), request.getDescription());
+        return BaseResponse.ofSuccess(meetingId);
     }
 
     @AccessLevel(Level.STAFF)
     @GetMapping(value = "/{meetingId}", name = "모임 단일 조회")
-    public BaseResponse<MeetingInfoResponse> findMeeting(@PathVariable @Min(value = 1) Long meetingId) {
-        MeetingInfoResponse meetingInfoResponse = meetingService.findMeeting(meetingId);
+    public BaseResponse<MeetingInfoForAdminResponse> findMeeting(@PathVariable @Min(value = 1) Long meetingId) {
+        MeetingInfoForAdminResponse meetingInfoResponse = meetingService.findMeeting(meetingId);
         return BaseResponse.ofSuccess(meetingInfoResponse);
     }
 
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/list/staff", name = "운영진 목록 조회 - 필터링용")
-    public BaseResponse<List<StaffResponse>> getStaffList() {
-        List<StaffResponse> staffResponseList = meetingService.getStaffList();
-        return BaseResponse.ofSuccess(staffResponseList);
+    public BaseResponse<List<MemberIdAndNameResponse>> getStaffList() {
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList = meetingService.getStaffList();
+        return BaseResponse.ofSuccess(memberIdAndNameResponseList);
     }
 
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/list", name = "모임 목록 조회")
-    public BaseResponse<MeetingListResponse> getMeetingList(@Valid MeetingListRequest request) {
-        MeetingListResponse meetingListResponse = meetingService.getMeetingList(request);
+    public BaseResponse<MeetingListResponse> getMeetingList(@Valid MeetingListRequest request, @AuthMemberId Long memberId) {
+        MeetingListResponse meetingListResponse = meetingService.getMeetingList(request, memberId);
         return BaseResponse.ofSuccess(meetingListResponse);
     }
 
     @AccessLevel(Level.ADMIN)
     @GetMapping(value = "/list/admin", name = "모임 목록 조회(관리자용)")
-    public BaseResponse<MeetingListResponse> getMeetingListForAdminLevel(@Valid MeetingListRequest request) {
-        MeetingListResponse meetingListResponse = meetingService.getMeetingListForAdmin(request);
+    public BaseResponse<MeetingListForAdminResponse> getMeetingListForAdminLevel(@Valid MeetingListRequest request) {
+        MeetingListForAdminResponse meetingListResponse = meetingService.getMeetingListForAdmin(request);
         return BaseResponse.ofSuccess(meetingListResponse);
     }
 
@@ -73,7 +72,7 @@ public class MeetingController {
     public BaseResponse<Void> updateMeeting(@PathVariable @Min(value = 1) Long meetingId, @AuthMemberId Long memberId,
                                             @AuthRole Role role, @Valid @RequestBody MeetingUpdateRequest request) {
         meetingService.updateMeeting(meetingId, memberId, request.getMeetingName(), request.getMeetingType(),
-            request.getMeetingDate(), request.getMeetingPlace(), request.getDescription());
+            request.getMeetingDate(), request.getLateThresholdTime(), request.getMeetingPlace(), request.getDescription());
         return BaseResponse.ofSuccess();
     }
 

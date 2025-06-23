@@ -1,0 +1,295 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+// 코드 하이라이팅
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+
+[[title]]
+= Attendance API Guide
+
+== link:index.html[Index 페이지로 이동]
+
+== POST
+
+=== 모임 출석
+접근 가능 권한 레벨: MEMBER / 로그 생성
+
+==== request
+include::{snippets}/attendance/create/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/create/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/create/query-parameters.adoc[]
+
+==== response
+include::{snippets}/attendance/create/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/create/response-fields.adoc[]
+
+==== Error case
+
+
+== GET
+
+=== 본인 출석 정보 조회
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/view/myInfo/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/view/myInfo/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/view/myInfo/request-headers.adoc[]
+
+==== response
+include::{snippets}/attendance/view/myInfo/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/view/myInfo/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 모임별 참석 현황 조회
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/view/list/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/view/list/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/view/list/query-parameters.adoc[]
+
+==== response
+include::{snippets}/attendance/view/list/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/view/list/response-fields.adoc[]
+
+==== Error case
+
+=== 모임 토론 참여 희망 명단 조회
+접근 가능 권한 레벨: STAFF
+
+==== request
+include::{snippets}/attendance/discussion/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/discussion/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/discussion/query-parameters.adoc[]
+
+==== response
+include::{snippets}/attendance/discussion/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/discussion/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 본인 토론 그룹 명단 조회
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/discussion/view/my-group/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/discussion/view/my-group/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/discussion/view/my-group/request-headers.adoc[]
+
+==== response
+include::{snippets}/attendance/discussion/view/my-group/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/discussion/view/my-group/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 전체 토론 그룹 명단 조회
+접근 가능 권한 레벨: STAFF
+
+==== request
+include::{snippets}/attendance/discussion/view/all-group/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/discussion/view/all-group/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/discussion/view/all-group/query-parameters.adoc[]
+
+==== response
+include::{snippets}/attendance/discussion/view/all-group/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/discussion/view/all-group/response-fields.adoc[]
+
+==== Error case
+
+---
+
+
+== PATCH
+
+=== 비고 작성
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/modify/note/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/modify/note/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/modify/note/request-headers.adoc[]
+
+==== request-fields
+include::{snippets}/attendance/modify/note/request-fields.adoc[]
+
+==== response
+include::{snippets}/attendance/modify/note/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/modify/note/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 독서만 할래요
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/modify/just-read/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/modify/just-read/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/modify/just-read/request-headers.adoc[]
+
+==== response
+include::{snippets}/attendance/modify/just-read/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/modify/just-read/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 토론할래요
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/attendance/modify/want-discussion/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/modify/want-discussion/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/modify/want-discussion/request-headers.adoc[]
+
+==== response
+include::{snippets}/attendance/modify/want-discussion/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/modify/want-discussion/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 토론 그룹 구성 - 수동
+접근 가능 권한 레벨: STAFF / 로그 생성
+
+==== request
+include::{snippets}/attendance/group/assign/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/group/assign/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/group/assign/query-parameters.adoc[]
+
+==== request-fields
+include::{snippets}/attendance/group/assign/request-fields.adoc[]
+
+==== response
+include::{snippets}/attendance/group/assign/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/group/assign/response-fields.adoc[]
+
+==== Error case
+
+---
+
+
+=== 토론 그룹 할당 - 개인
+접근 가능 권한 레벨: ADMIN / 로그 생성
+
+==== request
+include::{snippets}/attendance/group/assign/solo/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/group/assign/solo/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/group/assign/solo/query-parameters.adoc[]
+
+==== response
+include::{snippets}/attendance/group/assign/solo/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/group/assign/solo/response-fields.adoc[]
+
+==== Error case
+
+---
+
+
+== DELETE
+
+=== 출석 삭제
+접근 가능 권한 레벨: ADMIN / 로그 생성
+
+==== request
+include::{snippets}/attendance/delete/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/attendance/delete/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/attendance/delete/request-headers.adoc[]
+
+==== response
+include::{snippets}/attendance/delete/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/attendance/delete/response-fields.adoc[]
+
+==== Error case
+
+
+---
