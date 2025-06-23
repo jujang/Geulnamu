@@ -112,6 +112,12 @@ public class Meeting extends DateColumn {
         }
     }
 
+    public void validateRequestedMember(Long memberId) {
+        if(!this.getMember().getId().equals(memberId)) {
+            throw new BadRequestException(ResponseMessage.NOT_SUITABLE_MEMBER);
+        }
+    }
+
     public void updateMeetingName(String meetingName) {
         this.meetingName = meetingName;
     }

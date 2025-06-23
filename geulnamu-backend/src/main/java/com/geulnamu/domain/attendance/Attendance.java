@@ -54,13 +54,6 @@ public class Attendance extends DateColumn {
             .build();
     }
 
-    // 요청한 모임원과 해당 모임에 출석한 모임원 정보가 동일하지 않을 경우, 에러 발생
-    public void checkRequestedMemberAndAttendanceMember(Member member) {
-        if(!this.member.equals(member)) {
-            throw new BadRequestException(ResponseMessage.NOT_SUITABLE_MEMBER);
-        }
-    }
-
     // 아직 토론 시간이 셋팅되지 않았다면 에러 발생
     public void checkSettingDiscussionTime() {
         if(this.meeting.getDiscussionTime() == null) {
@@ -68,7 +61,7 @@ public class Attendance extends DateColumn {
         }
     }
 
-    public void validateDiscussionGroupMemberListRequestedPerson(Long memberId) {
+    public void validateRequestedPerson(Long memberId) {
         if(!this.getMember().getId().equals(memberId)) {
             throw new BadRequestException(ResponseMessage.NOT_SUITABLE_MEMBER);
         }

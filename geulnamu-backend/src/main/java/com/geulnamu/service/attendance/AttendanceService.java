@@ -7,7 +7,6 @@ import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.meeting.Meeting;
-import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
@@ -15,7 +14,6 @@ import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.repository.attendance.AttendanceCommandRepository;
 import com.geulnamu.repository.attendance.AttendanceQueryRepository;
 import com.geulnamu.repository.meeting.MeetingQueryRepository;
-import com.geulnamu.repository.member.MemberQueryRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,17 +25,16 @@ import java.util.List;
 @AllArgsConstructor
 public class AttendanceService {
 
-    private final MemberQueryRepository memberQueryRepository;
     private final MeetingQueryRepository meetingQueryRepository;
-    private final AttendanceCommandRepository attendanceCommandRepository;
     private final AttendanceQueryRepository attendanceQueryRepository;
+    private final AttendanceCommandRepository attendanceCommandRepository;
 
 
     // TODO: 추후 lock을 걸지 고민해 볼 것
     @Transactional(rollbackFor = Exception.class)
     public Long createAttendance(Long meetingId, Long memberId) {
         Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        meeting.validateRequestedMember(memberId);
 
         meeting.checkTimeCanAttendMeeting();
         // 동일한 모임원이 해당 모임에 출석한 이력이 있는지 확인
@@ -45,14 +42,16 @@ public class AttendanceService {
             throw new BadRequestException(ResponseMessage.ATTENDANCE_DUPLICATE_ISSUE);
         }
 
-        Attendance attendance = Attendance.createAttendance(meeting, member);
+        Attendance attendance = Attendance.createAttendance(meeting, meeting.getMember());
         attendanceCommandRepository.save(attendance);
         return attendance.getId();
     }
 
     @Transactional(readOnly = true)
     public AttendanceInfoResponse getMyAttendanceInfo(Long attendanceId, Long memberId) {
-        return attendanceQueryRepository.findMyAttendanceInfo(attendanceId, memberId).orElseThrow(NotFoundDataException::new);
+        Attendance attendance = getValidateAttendance(attendanceId, memberId);
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList = getDiscussionGroupMembers(attendance);
+        return new AttendanceInfoResponse(attendance, memberIdAndNameResponseList);
     }
 
     @Transactional(readOnly = true)
@@ -70,9 +69,7 @@ public class AttendanceService {
 
     @Transactional(readOnly = true)
     public List<MemberIdAndNameResponse> getMyDiscussionMemberList(Long attendanceId, Long memberId) {
-        Attendance attendance = attendanceQueryRepository.findById(attendanceId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
-        attendance.validateDiscussionGroupMemberListRequestedPerson(memberId);
+        Attendance attendance = getValidateAttendance(attendanceId, memberId);
         return attendanceQueryRepository.findMyDiscussionMemberList(attendance.getMeeting().getId(),
             attendance.getDiscussionGroup());
     }
@@ -84,22 +81,15 @@ public class AttendanceService {
 
     @Transactional(rollbackFor = Exception.class)
     public void writeNote(Long attendanceId, Long memberId, String note) {
-        Attendance attendance = attendanceQueryRepository.findById(attendanceId).orElseThrow(NotFoundDataException::new);
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
-
-        // 처리 가능한지 체크
-        attendance.checkRequestedMemberAndAttendanceMember(member);
-
+        Attendance attendance = getValidateAttendance(attendanceId, memberId);
         attendance.updateNote(note);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void notWantDiscussion(Long attendanceId, Long memberId) {
-        Attendance attendance = attendanceQueryRepository.findById(attendanceId).orElseThrow(NotFoundDataException::new);
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Attendance attendance = getValidateAttendance(attendanceId, memberId);
 
         // 처리 가능한지 체크
-        attendance.checkRequestedMemberAndAttendanceMember(member);
         attendance.checkSettingDiscussionTime();
         attendance.getMeeting().checkTimeCanSwitchAboutDiscussionAttendance();
 
@@ -108,11 +98,9 @@ public class AttendanceService {
 
     @Transactional(rollbackFor = Exception.class)
     public void wantDiscussion(Long attendanceId, Long memberId) {
-        Attendance attendance = attendanceQueryRepository.findById(attendanceId).orElseThrow(NotFoundDataException::new);
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Attendance attendance = getValidateAttendance(attendanceId, memberId);
 
         // 처리 가능한지 체크
-        attendance.checkRequestedMemberAndAttendanceMember(member);
         attendance.checkSettingDiscussionTime();
         attendance.getMeeting().checkTimeCanSwitchAboutDiscussionAttendance();
 
@@ -143,6 +131,19 @@ public class AttendanceService {
         attendanceQueryRepository.delete(attendance);
     }
 
+    private Attendance getValidateAttendance(Long attendanceId, Long memberId) {
+        Attendance attendance = attendanceQueryRepository.findById(attendanceId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
+        attendance.validateRequestedPerson(memberId);
+        return attendance;
+    }
+
+    private List<MemberIdAndNameResponse> getDiscussionGroupMembers(Attendance attendance) {
+        return attendance.getDiscussionGroup() != null
+            ? attendanceQueryRepository.findMyDiscussionMemberList(
+            attendance.getMeeting().getId(), attendance.getDiscussionGroup())
+            : null;
+    }
 
     private static void validateGroupNumberOver(int requestGroupSize) {
         if(requestGroupSize > DiscussionGroup.values().length) {
