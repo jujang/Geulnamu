@@ -268,6 +268,53 @@ public class AttendanceControllerTest extends ControllerTest {
 
     @Test
     @WithMockUser(roles = "MEMBER")
+    public void getMyDiscussionGroupMemberListTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+        MemberIdAndNameResponse memberIdAndNameResponse_1 = new MemberIdAndNameResponse(1L, "나뭉일");
+        MemberIdAndNameResponse memberIdAndNameResponse_2 = new MemberIdAndNameResponse(2L, "나뭉이");
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList = new ArrayList<>();
+        memberIdAndNameResponseList.add(memberIdAndNameResponse_1);
+        memberIdAndNameResponseList.add(memberIdAndNameResponse_2);
+
+        given(attendanceService.getMyDiscussionMemberList(any(), any())).willReturn(memberIdAndNameResponseList);
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                get("/attendance/discussion/{attendanceId}", 1)
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andDo(document(
+                "/attendance/discussion/view/my-group",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("attendanceId").attributes(key("format").value("1 이상의 정수")).description("출석 고유번호")
+                ),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("토론 참여 희망자 명단"),
+                    fieldWithPath("data[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
+                    fieldWithPath("data[].memberName").type(JsonFieldType.STRING).description("모임원 이름")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "MEMBER")
     public void writeNoteTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";

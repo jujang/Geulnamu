@@ -4,7 +4,7 @@ public class ResponseMessage {
     public static final String SUCCESS = "API 호출에 성공했습니다."; // 200
 
     public static final String BAD_REQUEST = "잘못된 요청입니다."; // 400
-    public static final String NOT_SUITABLE_MEMBER = "해당 기능을 수행할 수 있는 당사자가 압니다.";
+    public static final String NOT_SUITABLE_MEMBER = "해당 기능을 수행할 수 있는 당사자가 아닙니다.";
     public static final String NO_AUTHENTICATION = "인증 정보가 존재하지 않습니다."; // 401
     public static final String FORBIDDEN = "접근 권한이 없습니다."; // 403
     public static final String NOT_FOUND = "조회된 데이터가 없습니다."; // 404

@@ -4,6 +4,7 @@ import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
 import com.geulnamu.controller.meeting.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.attendance.QAttendance;
 import com.geulnamu.domain.meeting.QMeeting;
 import com.querydsl.core.types.Projections;
@@ -64,6 +65,19 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
             )
             .from(attendance)
             .where(attendance.meeting.id.eq(meetingId))
+            .orderBy(attendance.member.id.asc())
+            .fetch();
+    }
+
+    @Override
+    public List<MemberIdAndNameResponse> findMyDiscussionMemberList(Long meetingId, DiscussionGroup discussionGroup) {
+        return queryFactory
+            .select(Projections.constructor(MemberIdAndNameResponse.class,
+                attendance.member.id, attendance.member.name)
+            )
+            .from(meeting)
+            .join(attendance).on(meeting.id.eq(meetingId))
+            .where(attendance.discussionGroup.eq(discussionGroup))
             .orderBy(attendance.member.id.asc())
             .fetch();
     }

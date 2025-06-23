@@ -71,6 +71,15 @@ public class AttendanceService {
         return attendanceQueryRepository.findWantDiscussionMemberList(meetingId);
     }
 
+    @Transactional(readOnly = true)
+    public List<MemberIdAndNameResponse> getMyDiscussionMemberList(Long attendanceId, Long memberId) {
+        Attendance attendance = attendanceQueryRepository.findById(attendanceId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
+        attendance.validateDiscussionGroupMemberListRequestedPerson(memberId);
+        return attendanceQueryRepository.findMyDiscussionMemberList(attendance.getMeeting().getId(),
+            attendance.getDiscussionGroup());
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public void writeNote(Long attendanceId, Long memberId, String note) {
         Attendance attendance = attendanceQueryRepository.findById(attendanceId).orElseThrow(NotFoundDataException::new);

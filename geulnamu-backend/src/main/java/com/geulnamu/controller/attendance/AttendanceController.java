@@ -58,6 +58,14 @@ public class AttendanceController {
     }
 
     @AccessLevel(Level.MEMBER)
+    @GetMapping(value = "/discussion/{attendanceId}", name = "본인 토론 그룹 명단 조회")
+    public BaseResponse<List<MemberIdAndNameResponse>> getMyDiscussionGroupMemberList(@PathVariable @Min(value = 1) Long attendanceId,
+                                                                                      @AuthMemberId Long memberId) {
+        List<MemberIdAndNameResponse> memberIdAndNameResponsesList = attendanceService.getMyDiscussionMemberList(attendanceId, memberId);
+        return BaseResponse.ofSuccess(memberIdAndNameResponsesList);
+    }
+
+    @AccessLevel(Level.MEMBER)
     @PatchMapping(value = "/{attendanceId}/note", name = "비고 작성")
     public BaseResponse<Void> writeNote(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId,
                                         @Valid @RequestBody AttendanceNoteRequest request) {
