@@ -23,11 +23,11 @@ endif::[]
 ==== request
 include::{snippets}/attendance/create/http-request.adoc[]
 
-==== path-parameters
-include::{snippets}/attendance/create/path-parameters.adoc[]
-
 ==== request-headers
 include::{snippets}/attendance/create/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/create/query-parameters.adoc[]
 
 ==== response
 include::{snippets}/attendance/create/http-response.adoc[]
@@ -68,11 +68,11 @@ include::{snippets}/attendance/view/myInfo/response-fields.adoc[]
 ==== request
 include::{snippets}/attendance/view/list/http-request.adoc[]
 
-==== path-parameters
-include::{snippets}/attendance/view/list/path-parameters.adoc[]
-
 ==== request-headers
 include::{snippets}/attendance/view/list/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendance/view/list/query-parameters.adoc[]
 
 ==== response
 include::{snippets}/attendance/view/list/http-response.adoc[]
@@ -177,7 +177,7 @@ include::{snippets}/attendance/modify/want-discussion/response-fields.adoc[]
 ---
 
 === 토론 그룹 구성 - 수동
-접근 가능 권한 레벨: STAFF
+접근 가능 권한 레벨: STAFF / 로그 생성
 
 ==== request
 include::{snippets}/attendance/group/assign/http-request.adoc[]
@@ -203,7 +203,7 @@ include::{snippets}/attendance/group/assign/response-fields.adoc[]
 
 
 === 토론 그룹 할당 - 개인
-접근 가능 권한 레벨: ADMIN
+접근 가능 권한 레벨: ADMIN / 로그 생성
 
 ==== request
 include::{snippets}/attendance/group/assign/solo/http-request.adoc[]
