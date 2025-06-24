@@ -61,7 +61,7 @@ public class MemberController {
     @LogAction(value = ActionType.MEMBER_ROLE_UPDATE, actionDomain = "member")
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/role", name = "모임원 등급 변경 - 해당 모임원 재로그인 필요")
-    public BaseResponse<Void> updateMemberRole(@PathVariable @Min(value = 1) Long memberId, @AuthMemberId Long authMemberId,
+    public BaseResponse<Void> updateMemberRole(@PathVariable @Min(value = 1) Long memberId,
                                                @Valid @RequestBody MemberRoleUpdateRequest request) {
         memberService.updateMemberRole(memberId, request.getRole());
         return BaseResponse.ofSuccess();
@@ -70,7 +70,7 @@ public class MemberController {
     @LogAction(value = ActionType.MEMBER_NAME_UPDATE, actionDomain = "member")
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/name", name = "모임원 이름 변경")
-    public BaseResponse<Void> updateMemberName(@PathVariable @Min(value = 1) Long memberId, @AuthMemberId Long authMemberId,
+    public BaseResponse<Void> updateMemberName(@PathVariable @Min(value = 1) Long memberId,
                                                @Valid @RequestBody MemberNameUpdateRequest request) {
         memberService.updateMemberName(memberId, request.getName());
         return BaseResponse.ofSuccess();
@@ -79,7 +79,7 @@ public class MemberController {
     @LogAction(value = ActionType.MEMBER_ACTIVATE, actionDomain = "member")
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/activate", name = "모임원 활성화")
-    public BaseResponse<Void> activateMember(@PathVariable @Min(value = 1) Long memberId, @AuthMemberId Long authMemberId) {
+    public BaseResponse<Void> activateMember(@PathVariable @Min(value = 1) Long memberId) {
         memberService.activateMember(memberId);
         return BaseResponse.ofSuccess();
     }
@@ -87,7 +87,7 @@ public class MemberController {
     @LogAction(value = ActionType.MEMBER_DEACTIVATE, actionDomain = "member")
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{memberId}/deactivate", name = "모임원 비활성화")
-    public BaseResponse<Void> deactivateMember(@PathVariable @Min(value = 1) Long memberId, @AuthMemberId Long authMemberId) {
+    public BaseResponse<Void> deactivateMember(@PathVariable @Min(value = 1) Long memberId) {
         memberService.deactivateMember(memberId);
         return BaseResponse.ofSuccess();
     }
