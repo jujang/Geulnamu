@@ -1,10 +1,12 @@
 package com.geulnamu.service.meeting;
 
+import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequest;
+import com.geulnamu.controller.meeting.dto.request.MeetingGroupUpdateRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
+import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
 import com.geulnamu.controller.meeting.dto.response.*;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.meeting.Meeting;
-import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.infrastructure.exception.BadRequestException;
@@ -34,11 +36,11 @@ public class MeetingService {
 
 
     @Transactional(rollbackFor = Exception.class)
-    public Long createMeeting(Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate,
-                              LocalDateTime lateThresholdTime, String meetingPlace, String description) {
+    public Long createMeeting(Long memberId, MeetingCreateRequest request) {
         Member member = memberQueryRepository.findById(memberId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
-        Meeting meeting = Meeting.createMeeting(member, meetingName, meetingType, meetingDate, lateThresholdTime, meetingPlace, description);
+        Meeting meeting = Meeting.createMeeting(member, request.getMeetingName(), request.getMeetingType(), request.getMeetingDate(),
+            request.getLateThresholdTime(), request.getMeetingPlace(), request.getDescription());
         meeting.checkLateThresholdTimeBeforeMeetingTime();
         meetingCommandRepository.save(meeting);
         return meeting.getId();
@@ -75,8 +77,7 @@ public class MeetingService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateMeeting(Long meetingId, Long memberId, String meetingName, MeetingType meetingType,
-                              LocalDateTime meetingDate, LocalDateTime lateThresholdTime, String meetingPlace, String description) {
+    public void updateMeeting(Long meetingId, Long memberId, MeetingUpdateRequest request){
         // 모임 정보 수정 가능 권한 검사
         Meeting meeting = meetingQueryRepository.findById(meetingId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
@@ -90,19 +91,20 @@ public class MeetingService {
         }
 
         // 수정 필요 부분 적용
-        if(meetingName == null && meetingType == null && meetingDate == null && meetingPlace == null && description == null) {
+        if(request.getMeetingName() == null && request.getMeetingType() == null && request.getMeetingDate() == null
+            && request.getMeetingPlace() == null && request.getDescription() == null) {
             throw new BadRequestException(ResponseMessage.NO_CHANGE_DETECTED);
         }
-        if(meetingName != null) meeting.updateMeetingName(meetingName);
-        if(meetingType != null) meeting.updateMeetingType(meetingType);
-        if(meetingDate != null) meeting.updateMeetingDate(meetingDate);
-        if(lateThresholdTime != null) meeting.updateLateThresholdTime(lateThresholdTime);
-        if(meetingPlace != null) meeting.updateMeetingPlace(meetingPlace);
-        if(description != null) meeting.updateMeetingDescription(description);
+        if(request.getMeetingName() != null) meeting.updateMeetingName(request.getMeetingName());
+        if(request.getMeetingType() != null) meeting.updateMeetingType(request.getMeetingType());
+        if(request.getMeetingDate() != null) meeting.updateMeetingDate(request.getMeetingDate());
+        if(request.getLateThresholdTime() != null) meeting.updateLateThresholdTime(request.getLateThresholdTime());
+        if(request.getMeetingPlace() != null) meeting.updateMeetingPlace(request.getMeetingPlace());
+        if(request.getDescription() != null) meeting.updateMeetingDescription(request.getDescription());
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateMeetingForDiscussion(Long meetingId, Long memberId, LocalDateTime discussionTime, String alarmMessage) {
+    public void updateMeetingForDiscussion(Long meetingId, Long memberId, MeetingGroupUpdateRequest request) {
         // 모임 정보 수정 가능 권한 검사
         Meeting meeting = meetingQueryRepository.findById(meetingId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
@@ -116,11 +118,11 @@ public class MeetingService {
         }
 
         // 수정 필요 부분 적용
-        if(discussionTime == null && alarmMessage == null) {
+        if(request.getDiscussionTime() == null && request.getAlarmMessage() == null) {
             throw new BadRequestException(ResponseMessage.NO_CHANGE_DETECTED);
         }
-        if(discussionTime != null) meeting.updateDiscussionTime(discussionTime);
-        if(alarmMessage != null) meeting.updateAlarmMessage(alarmMessage);
+        if(request.getDiscussionTime() != null) meeting.updateDiscussionTime(request.getDiscussionTime());
+        if(request.getAlarmMessage() != null) meeting.updateAlarmMessage(request.getAlarmMessage());
     }
 
     // 모임일 익일부터 비공개 처리 가능

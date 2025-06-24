@@ -28,7 +28,7 @@ public class SecurityConfig {
         "/login/oauth/kakao",
         "/login/{memberId}/direct", // TODO: 임시 기능 -> 실 운영시 삭제 예정
         "/login/re-issue/accessToken",
-        "/members/register",
+        "/members/register", // TODO: 임시 기능 -> 실 운영시 삭제 예정
         "/error" // 향후 개발 완료 후 해당 코드 지워주고 요청들 잘 받아지는지 확인해 볼 것
     };
 
@@ -36,8 +36,8 @@ public class SecurityConfig {
         "/login/logout",
         "/members/me/profile-status",
         "/members/me/profile",
-        "/meeting/list",
-        "/meeting/list/staff",
+        "/meetings/staff-list",
+        "/meetings/list",
         "/attendance",
         "/attendance/{attendanceId}/my",
         "/attendance/{attendanceId}/note",
@@ -47,9 +47,10 @@ public class SecurityConfig {
     };
 
     private static final String[] AUTH_FOR_STAFF = {
-        "/meeting",
-        "/meeting/{meetingId}",
-        "/meeting/{meetingId}/discussion",
+        "/meetings/create",
+        "/meetings/{meetingId}",
+        "/meetings/{meetingId}/basic",
+        "/meetings/{meetingId}/discussion",
         "/discussion/list/want-discussion",
         "/discussion/all-group",
         "/discussion/assign"
@@ -58,9 +59,9 @@ public class SecurityConfig {
     private static final String[] AUTH_FOR_ADMIN = {
         "/members/{memberId}/**",
         "/members/list",
-        "/meeting/list/admin",
-        "/meeting/{meetingId}/private",
-        "/meeting/{meetingId}/public",
+        "/meetings/list/admin",
+        "/meetings/{meetingId}/make-private",
+        "/meetings/{meetingId}/make-public",
         "/attendance/{attendanceId}/delete",
         "/discussion/assign/solo"
     };

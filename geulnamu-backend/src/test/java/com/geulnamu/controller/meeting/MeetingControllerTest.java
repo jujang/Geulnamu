@@ -58,12 +58,12 @@ public class MeetingControllerTest extends ControllerTest {
             LocalDateTime.of(2126, 6, 14, 10, 45),
             "추후 공지 예정 (합정역 주변 카페)", "늦지 않게 오세요~");
 
-        given(meetingService.createMeeting(any(), any(), any(), any(), any(), any(), any())).willReturn(meetingId);
+        given(meetingService.createMeeting(any(), any())).willReturn(meetingId);
 
         // when
         ResultActions actions =
             mockMvc.perform(
-                post("/meeting")
+                post("/meetings/create")
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -77,7 +77,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value(meetingId))
             .andDo(document(
-                "/meeting/open",
+                "/meetings/create",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -117,7 +117,7 @@ public class MeetingControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.get("/meeting/{meetingId}", 1)
+                RestDocumentationRequestBuilders.get("/meetings/{meetingId}", 1)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -129,7 +129,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/meeting/view",
+                "/meetings/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -174,7 +174,7 @@ public class MeetingControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                get("/meeting/list/staff")
+                get("/meetings/staff-list")
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -186,7 +186,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/meeting/list/staff",
+                "/meetings/staff-list",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -233,7 +233,7 @@ public class MeetingControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                get("/meeting/list")
+                get("/meetings/list")
                     .param("meetingType", "REGULAR")
                     .param("meetingCreatorId", "1")
                     .param("page", "1")
@@ -249,7 +249,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/meeting/list",
+                "/meetings/list",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -317,7 +317,7 @@ public class MeetingControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                get("/meeting/list/admin")
+                get("/meetings/list/admin")
                     .param("meetingType", "REGULAR")
                     .param("meetingCreatorId", "1")
                     .param("isPrivate", "true")
@@ -334,7 +334,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/meeting/list/admin",
+                "/meetings/list/admin",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -380,12 +380,12 @@ public class MeetingControllerTest extends ControllerTest {
             null, null, null, null, "합정 저스티나", "늦지 않게 오세요~"
         );
 
-        doNothing().when(meetingService).updateMeeting(any(), any(), any(), any(), any(), any(), any(), any());
+        doNothing().when(meetingService).updateMeeting(any(), any(), any());
 
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/meeting/{meetingId}", 1L)
+                RestDocumentationRequestBuilders.patch("/meetings/{meetingId}/basic", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -399,7 +399,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/meeting/modify",
+                "/meetings/modify/basic",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -433,12 +433,12 @@ public class MeetingControllerTest extends ControllerTest {
             LocalDateTime.of(2026, 5, 1, 12, 30), "모두 올라와주세요~"
         );
 
-        doNothing().when(meetingService).updateMeetingForDiscussion(any(), any(), any(), any());
+        doNothing().when(meetingService).updateMeetingForDiscussion(any(), any(), any());
 
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/meeting/{meetingId}/discussion", 1L)
+                RestDocumentationRequestBuilders.patch("/meetings/{meetingId}/discussion", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -452,7 +452,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/meeting/modify/discussion",
+                "/meetings/modify/discussion",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -484,7 +484,7 @@ public class MeetingControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/meeting/{meetingId}/private", 1L)
+                RestDocumentationRequestBuilders.patch("/meetings/{meetingId}/make-private", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -497,7 +497,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/meeting/private",
+                "/meetings/make-private",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -525,7 +525,7 @@ public class MeetingControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/meeting/{meetingId}/public", 1L)
+                RestDocumentationRequestBuilders.patch("/meetings/{meetingId}/make-public", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -538,7 +538,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/meeting/public",
+                "/meetings/make-public",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -566,7 +566,7 @@ public class MeetingControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.delete("/meeting/{meetingId}", 1L)
+                RestDocumentationRequestBuilders.delete("/meetings/{meetingId}", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -579,7 +579,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/meeting/remove",
+                "/meetings/remove",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
