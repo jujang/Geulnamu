@@ -2,6 +2,7 @@ package com.geulnamu.service.login;
 
 import com.geulnamu.controller.login.dto.response.LoginResponse;
 import com.geulnamu.domain.member.Member;
+import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.infrastructure.security.token.TokenPair;
 import com.geulnamu.infrastructure.security.token.TokenReissueResult;
 import com.geulnamu.domain.shared.enums.Role;
@@ -67,7 +68,8 @@ public class LoginFacade {
 
         // 2. 토큰에서 회원 정보 추출
         Long memberId = jwtTokenUtil.getMemberId(refreshToken, TokenType.RefreshToken);
-        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         Role role = jwtTokenUtil.getRole(refreshToken, TokenType.RefreshToken);
 
         // 3. 토큰 재발급 (리프레시 토큰 재발급 여부 확인 함께 진행)
@@ -88,7 +90,8 @@ public class LoginFacade {
     @Transactional(rollbackFor = Exception.class)
     public void logout(Long memberId, HttpServletResponse response) {
         // 1. 멤버 조회
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
 
         // 2. DB 에서 리프레시 토큰 삭제
         member.updateMemberRefreshToken(null);
@@ -103,7 +106,8 @@ public class LoginFacade {
      */
     @Transactional(rollbackFor = Exception.class)
     public LoginResponse loginForDevelopment(Long memberId, HttpServletResponse response) {
-        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
 
         TokenPair tokenPair = authTokenService.createTokensAndSetCookie(
             member.getId(), member.getRole(), response);

@@ -33,7 +33,8 @@ public class AttendanceService {
     // TODO: 추후 lock을 걸지 고민해 볼 것
     @Transactional(rollbackFor = Exception.class)
     public Long createAttendance(Long memberId, Long meetingId) {
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
+        Meeting meeting = meetingQueryRepository.findById(meetingId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
         meeting.validateRequestedMember(memberId);
 
         meeting.checkTimeCanAttendMeeting();
@@ -127,7 +128,8 @@ public class AttendanceService {
 
     @Transactional(rollbackFor = Exception.class)
     public void deleteAttendance(Long attendanceId) {
-        Attendance attendance = attendanceQueryRepository.findById(attendanceId).orElseThrow(NotFoundDataException::new);
+        Attendance attendance = attendanceQueryRepository.findById(attendanceId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
         attendanceQueryRepository.delete(attendance);
     }
 

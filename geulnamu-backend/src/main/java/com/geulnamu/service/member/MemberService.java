@@ -4,6 +4,7 @@ import com.geulnamu.controller.member.dto.request.MemberListRequest;
 import com.geulnamu.controller.member.dto.response.MemberInfoResponse;
 import com.geulnamu.controller.member.dto.response.MemberListResponse;
 import com.geulnamu.domain.member.Gender;
+import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.infrastructure.response.paging.PagingResponse;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.Role;
@@ -34,14 +35,16 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public Boolean isMemberInfoRegistered(Long memberId) {
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         member.checkIfRoleWasAdjustedAndReLoginRequired(); // 등급 조정(=리프레시 토큰 말소)에 의한 강제 로그아웃이 필요한지 체크
         return member.getName() != null; // true면 등록된 상태, false면 미등록 상태  // 위 구문에 의한 에러 발생 시, 재로그인 필요
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void updateMemberInfo(Long memberId, String targetName, String targetGender, LocalDate targetBirthDate) {
-        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         member.updateMemberName(targetName);
         member.updateMemberGender(Gender.valueOf(targetGender));
         member.updateMemberBirthDate(targetBirthDate);
@@ -50,7 +53,8 @@ public class MemberService {
     // TODO: 비활성화된 계정을 조회할 것인지 조회하지 않을 것인지 잘 고민해 볼 것
     @Transactional(readOnly = true)
     public MemberInfoResponse findMember(Long memberId) {
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         return MemberInfoResponse.of(member);
     }
 
@@ -66,25 +70,29 @@ public class MemberService {
     // 일단 여기서는 비활성화된 멤버는 조회하지 않도록 함
     @Transactional(rollbackFor = Exception.class)
     public void updateMemberRole(Long memberId, Role targetRole) {
-        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         member.updateMemberRole(targetRole);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void updateMemberName(Long memberId, String name) {
-        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         member.updateMemberName(name);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void activateMember(Long memberId) {
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         member.activate();
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void deactivateMember(Long memberId) {
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Member member = memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         member.deactivate();
     }
 

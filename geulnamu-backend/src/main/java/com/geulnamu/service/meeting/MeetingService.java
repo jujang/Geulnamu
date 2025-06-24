@@ -6,6 +6,7 @@ import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.domain.member.Member;
+import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
@@ -33,8 +34,10 @@ public class MeetingService {
 
 
     @Transactional(rollbackFor = Exception.class)
-    public Long createMeeting(Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, LocalDateTime lateThresholdTime, String meetingPlace, String description) {
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+    public Long createMeeting(Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate,
+                              LocalDateTime lateThresholdTime, String meetingPlace, String description) {
+        Member member = memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         Meeting meeting = Meeting.createMeeting(member, meetingName, meetingType, meetingDate, lateThresholdTime, meetingPlace, description);
         meeting.checkLateThresholdTimeBeforeMeetingTime();
         meetingCommandRepository.save(meeting);
@@ -43,7 +46,8 @@ public class MeetingService {
 
     @Transactional(readOnly = true)
     public MeetingInfoForAdminResponse findMeeting(Long meetingId) {
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
+        Meeting meeting = meetingQueryRepository.findById(meetingId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
         return MeetingInfoForAdminResponse.of(meeting);
     }
 
@@ -71,10 +75,13 @@ public class MeetingService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateMeeting(Long meetingId, Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, LocalDateTime lateThresholdTime, String meetingPlace, String description) {
+    public void updateMeeting(Long meetingId, Long memberId, String meetingName, MeetingType meetingType,
+                              LocalDateTime meetingDate, LocalDateTime lateThresholdTime, String meetingPlace, String description) {
         // 모임 정보 수정 가능 권한 검사
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Meeting meeting = meetingQueryRepository.findById(meetingId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
+        Member member = memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         authorizationService.validateModificationBy(meeting, member);
 
         // 수정 가능 시간 확인(모임 시작 이후, 수정 불가) - 관리자급의 경우, 시간이 넘었더라도 수정 가능
@@ -97,8 +104,10 @@ public class MeetingService {
     @Transactional(rollbackFor = Exception.class)
     public void updateMeetingForDiscussion(Long meetingId, Long memberId, LocalDateTime discussionTime, String alarmMessage) {
         // 모임 정보 수정 가능 권한 검사
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Meeting meeting = meetingQueryRepository.findById(meetingId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
+        Member member = memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         authorizationService.validateModificationBy(meeting, member);
 
         // 수정 가능 시간 확인(토론 시작 이후, 수정 불가) - 관리자급의 경우, 시간이 넘었더라도 수정 가능
@@ -117,14 +126,16 @@ public class MeetingService {
     // 모임일 익일부터 비공개 처리 가능
     @Transactional(rollbackFor = Exception.class)
     public void makeMeetingPrivate(Long meetingId) {
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
+        Meeting meeting = meetingQueryRepository.findById(meetingId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
         meeting.validateTimeForPrivateMeeting();
         meeting.makeMeetingPrivate();
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void makeMeetingPublic(Long meetingId) {
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
+        Meeting meeting = meetingQueryRepository.findById(meetingId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
         meeting.makeMeetingPublic();
     }
 
@@ -132,8 +143,10 @@ public class MeetingService {
     @Transactional(rollbackFor = Exception.class)
     public void removeMeeting(Long meetingId, Long memberId) {
         // 모임 삭제 가능 여부 검사
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Meeting meeting = meetingQueryRepository.findById(meetingId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
+        Member member = memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         authorizationService.validateDeletionBy(meeting, member);
         meeting.validateTimeForDeleteMeeting();
 
