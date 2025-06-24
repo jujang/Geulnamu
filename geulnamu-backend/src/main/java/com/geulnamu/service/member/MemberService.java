@@ -1,5 +1,6 @@
 package com.geulnamu.service.member;
 
+import com.geulnamu.controller.member.dto.request.MemberInfoRequest;
 import com.geulnamu.controller.member.dto.request.MemberListRequest;
 import com.geulnamu.controller.member.dto.response.MemberInfoResponse;
 import com.geulnamu.controller.member.dto.response.MemberListResponse;
@@ -42,12 +43,12 @@ public class MemberService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateMemberInfo(Long memberId, String targetName, String targetGender, LocalDate targetBirthDate) {
+    public void updateMemberInfo(Long memberId, MemberInfoRequest request) {
         Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
-        member.updateMemberName(targetName);
-        member.updateMemberGender(Gender.valueOf(targetGender));
-        member.updateMemberBirthDate(targetBirthDate);
+        member.updateMemberName(request.getName());
+        member.updateMemberGender(Gender.valueOf(request.getGender()));
+        member.updateMemberBirthDate(request.getBirthDate());
     }
 
     // TODO: 비활성화된 계정을 조회할 것인지 조회하지 않을 것인지 잘 고민해 볼 것

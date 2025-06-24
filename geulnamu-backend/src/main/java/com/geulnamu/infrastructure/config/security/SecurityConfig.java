@@ -28,13 +28,14 @@ public class SecurityConfig {
         "/login/oauth/kakao",
         "/login/{memberId}/direct", // TODO: 임시 기능 -> 실 운영시 삭제 예정
         "/login/re-issue/accessToken",
-        "/member",
+        "/members/register",
         "/error" // 향후 개발 완료 후 해당 코드 지워주고 요청들 잘 받아지는지 확인해 볼 것
     };
 
     private static final String[] AUTH_ALL = {
         "/login/logout",
-        "/member/info",
+        "/members/me/profile-status",
+        "/members/me/profile",
         "/meeting/list",
         "/meeting/list/staff",
         "/attendance",
@@ -55,8 +56,8 @@ public class SecurityConfig {
     };
 
     private static final String[] AUTH_FOR_ADMIN = {
-        "/member/{memberId}/**",
-        "/member/list",
+        "/members/{memberId}/**",
+        "/members/list",
         "/meeting/list/admin",
         "/meeting/{meetingId}/private",
         "/meeting/{meetingId}/public",

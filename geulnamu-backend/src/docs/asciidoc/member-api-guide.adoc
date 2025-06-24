@@ -21,16 +21,38 @@ endif::[]
 접근 가능 권한 레벨: MEMBER
 
 ==== request
-include::{snippets}/member/info/view/http-request.adoc[]
+include::{snippets}/members/check/status/my/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/member/info/view/request-headers.adoc[]
+include::{snippets}/members/check/status/my/request-headers.adoc[]
 
 ==== response
-include::{snippets}/member/info/view/http-response.adoc[]
+include::{snippets}/members/check/status/my/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/member/info/view/response-fields.adoc[]
+include::{snippets}/members/check/status/my/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 모임원 조회
+접근 가능 권한 레벨: ADMIN
+
+==== request
+include::{snippets}/members/view/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/members/view/request-headers.adoc[]
+
+==== path-parameters
+include::{snippets}/members/view/path-parameters.adoc[]
+
+==== response
+include::{snippets}/members/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/members/view/response-fields.adoc[]
 
 ==== Error case
 
@@ -40,19 +62,19 @@ include::{snippets}/member/info/view/response-fields.adoc[]
 접근 가능 권한 레벨: ADMIN
 
 ==== request
-include::{snippets}/member/list/http-request.adoc[]
+include::{snippets}/members/list/view/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/member/list/request-headers.adoc[]
+include::{snippets}/members/list/view/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/member/list/query-parameters.adoc[]
+include::{snippets}/members/list/view/query-parameters.adoc[]
 
 ==== response
-include::{snippets}/member/list/http-response.adoc[]
+include::{snippets}/members/list/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/member/list/response-fields.adoc[]
+include::{snippets}/members/list/view/response-fields.adoc[]
 
 ==== Error case
 
@@ -64,19 +86,19 @@ include::{snippets}/member/list/response-fields.adoc[]
 접근 가능 권한 레벨: MEMBER / 로그 생성
 
 ==== request
-include::{snippets}/member/info/modify/http-request.adoc[]
+include::{snippets}/members/info/modify/my/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/member/info/modify/request-headers.adoc[]
+include::{snippets}/members/info/modify/my/request-headers.adoc[]
 
 ==== request-fields
-include::{snippets}/member/info/modify/request-fields.adoc[]
+include::{snippets}/members/info/modify/my/request-fields.adoc[]
 
 ==== response
-include::{snippets}/member/info/modify/http-response.adoc[]
+include::{snippets}/members/info/modify/my/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/member/info/modify/response-fields.adoc[]
+include::{snippets}/members/info/modify/my/response-fields.adoc[]
 
 ==== Error case
 
@@ -87,22 +109,22 @@ include::{snippets}/member/info/modify/response-fields.adoc[]
 접근 가능 권한 레벨: ADMIN / 로그 생성 / 해당 모임원 재로그인 필요
 
 ==== request
-include::{snippets}/member/role/modify/http-request.adoc[]
+include::{snippets}/members/role/modify/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/member/role/modify/request-headers.adoc[]
+include::{snippets}/members/role/modify/request-headers.adoc[]
 
 ==== path-parameters
-include::{snippets}/member/role/modify/path-parameters.adoc[]
+include::{snippets}/members/role/modify/path-parameters.adoc[]
 
 ==== request-fields
-include::{snippets}/member/role/modify/request-fields.adoc[]
+include::{snippets}/members/role/modify/request-fields.adoc[]
 
 ==== response
-include::{snippets}/member/role/modify/http-response.adoc[]
+include::{snippets}/members/role/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/member/role/modify/response-fields.adoc[]
+include::{snippets}/members/role/modify/response-fields.adoc[]
 
 ==== Error case
 
@@ -112,22 +134,22 @@ include::{snippets}/member/role/modify/response-fields.adoc[]
 접근 가능 권한 레벨: ADMIN / 로그 생성
 
 ==== request
-include::{snippets}/member/name/modify/http-request.adoc[]
+include::{snippets}/members/name/modify/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/member/name/modify/request-headers.adoc[]
+include::{snippets}/members/name/modify/request-headers.adoc[]
 
 ==== path-parameters
-include::{snippets}/member/name/modify/path-parameters.adoc[]
+include::{snippets}/members/name/modify/path-parameters.adoc[]
 
 ==== request-fields
-include::{snippets}/member/name/modify/request-fields.adoc[]
+include::{snippets}/members/name/modify/request-fields.adoc[]
 
 ==== response
-include::{snippets}/member/name/modify/http-response.adoc[]
+include::{snippets}/members/name/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/member/name/modify/response-fields.adoc[]
+include::{snippets}/members/name/modify/response-fields.adoc[]
 
 ==== Error case
 
@@ -137,19 +159,19 @@ include::{snippets}/member/name/modify/response-fields.adoc[]
 접근 가능 권한 레벨: ADMIN / 로그 생성
 
 ==== request
-include::{snippets}/member/activate/http-request.adoc[]
+include::{snippets}/members/activate/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/member/activate/request-headers.adoc[]
+include::{snippets}/members/activate/request-headers.adoc[]
 
 ==== path-parameters
-include::{snippets}/member/activate/path-parameters.adoc[]
+include::{snippets}/members/activate/path-parameters.adoc[]
 
 ==== response
-include::{snippets}/member/activate/http-response.adoc[]
+include::{snippets}/members/activate/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/member/activate/response-fields.adoc[]
+include::{snippets}/members/activate/response-fields.adoc[]
 
 ==== Error case
 
@@ -159,19 +181,19 @@ include::{snippets}/member/activate/response-fields.adoc[]
 접근 가능 권한 레벨: ADMIN / 로그 생성
 
 ==== request
-include::{snippets}/member/deactivate/http-request.adoc[]
+include::{snippets}/members/deactivate/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/member/deactivate/request-headers.adoc[]
+include::{snippets}/members/deactivate/request-headers.adoc[]
 
 ==== path-parameters
-include::{snippets}/member/deactivate/path-parameters.adoc[]
+include::{snippets}/members/deactivate/path-parameters.adoc[]
 
 ==== response
-include::{snippets}/member/deactivate/http-response.adoc[]
+include::{snippets}/members/deactivate/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/member/deactivate/response-fields.adoc[]
+include::{snippets}/members/deactivate/response-fields.adoc[]
 
 ==== Error case
 
