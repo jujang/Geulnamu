@@ -22,19 +22,19 @@ endif::[]
 접근 가능 권한 레벨: STAFF
 
 ==== request
-include::{snippets}/discussion/get/list/http-request.adoc[]
+include::{snippets}/discussions/list/want-discussion/view/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/discussion/get/list/request-headers.adoc[]
+include::{snippets}/discussions/list/want-discussion/view/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/discussion/get/list/query-parameters.adoc[]
+include::{snippets}/discussions/list/want-discussion/view/query-parameters.adoc[]
 
 ==== response
-include::{snippets}/discussion/get/list/http-response.adoc[]
+include::{snippets}/discussions/list/want-discussion/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/discussion/get/list/response-fields.adoc[]
+include::{snippets}/discussions/list/want-discussion/view/response-fields.adoc[]
 
 ==== Error case
 
@@ -44,19 +44,19 @@ include::{snippets}/discussion/get/list/response-fields.adoc[]
 접근 가능 권한 레벨: MEMBER
 
 ==== request
-include::{snippets}/discussion/view/my-group/http-request.adoc[]
+include::{snippets}/discussions/my-group/view/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/discussion/view/my-group/path-parameters.adoc[]
+include::{snippets}/discussions/my-group/view/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/discussion/view/my-group/request-headers.adoc[]
+include::{snippets}/discussions/my-group/view/request-headers.adoc[]
 
 ==== response
-include::{snippets}/discussion/view/my-group/http-response.adoc[]
+include::{snippets}/discussions/my-group/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/discussion/view/my-group/response-fields.adoc[]
+include::{snippets}/discussions/my-group/view/response-fields.adoc[]
 
 ==== Error case
 
@@ -66,19 +66,19 @@ include::{snippets}/discussion/view/my-group/response-fields.adoc[]
 접근 가능 권한 레벨: STAFF
 
 ==== request
-include::{snippets}/discussion/view/all-group/http-request.adoc[]
+include::{snippets}/discussions/groups/view/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/discussion/view/all-group/request-headers.adoc[]
+include::{snippets}/discussions/groups/view/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/discussion/view/all-group/query-parameters.adoc[]
+include::{snippets}/discussions/groups/view/query-parameters.adoc[]
 
 ==== response
-include::{snippets}/discussion/view/all-group/http-response.adoc[]
+include::{snippets}/discussions/groups/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/discussion/view/all-group/response-fields.adoc[]
+include::{snippets}/discussions/groups/view/response-fields.adoc[]
 
 ==== Error case
 
@@ -91,22 +91,22 @@ include::{snippets}/discussion/view/all-group/response-fields.adoc[]
 접근 가능 권한 레벨: STAFF / 로그 생성
 
 ==== request
-include::{snippets}/discussion/assign/http-request.adoc[]
+include::{snippets}/discussions/groups/assign/modify/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/discussion/assign/request-headers.adoc[]
+include::{snippets}/discussions/groups/assign/modify/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/discussion/assign/query-parameters.adoc[]
+include::{snippets}/discussions/groups/assign/modify/query-parameters.adoc[]
 
 ==== request-fields
-include::{snippets}/discussion/assign/request-fields.adoc[]
+include::{snippets}/discussions/groups/assign/modify/request-fields.adoc[]
 
 ==== response
-include::{snippets}/discussion/assign/http-response.adoc[]
+include::{snippets}/discussions/groups/assign/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/discussion/assign/response-fields.adoc[]
+include::{snippets}/discussions/groups/assign/modify/response-fields.adoc[]
 
 ==== Error case
 
@@ -117,19 +117,19 @@ include::{snippets}/discussion/assign/response-fields.adoc[]
 접근 가능 권한 레벨: ADMIN / 로그 생성
 
 ==== request
-include::{snippets}/discussion/assign/solo/http-request.adoc[]
+include::{snippets}/discussions/groups/assign-member/modify/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/discussion/assign/solo/request-headers.adoc[]
+include::{snippets}/discussions/groups/assign-member/modify/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/discussion/assign/solo/query-parameters.adoc[]
+include::{snippets}/discussions/groups/assign-member/modify/query-parameters.adoc[]
 
 ==== response
-include::{snippets}/discussion/assign/solo/http-response.adoc[]
+include::{snippets}/discussions/groups/assign-member/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/discussion/assign/solo/response-fields.adoc[]
+include::{snippets}/discussions/groups/assign-member/modify/response-fields.adoc[]
 
 ==== Error case
 

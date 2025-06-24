@@ -58,7 +58,7 @@ public class DiscussionControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                get("/discussion/list/want-discussion")
+                get("/discussions/list/want-discussion")
                     .param("meetingId", "1")
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
@@ -71,7 +71,7 @@ public class DiscussionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/discussion/get/list",
+                "/discussions/list/want-discussion/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -106,7 +106,7 @@ public class DiscussionControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                get("/discussion/{attendanceId}/my-group", 1)
+                get("/discussions/{attendanceId}/my-group", 1)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -118,7 +118,7 @@ public class DiscussionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/discussion/view/my-group",
+                "/discussions/my-group/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -166,7 +166,7 @@ public class DiscussionControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                get("/discussion/all-group?meetingId={meetingId}", 1)
+                get("/discussions/groups?meetingId={meetingId}", 1)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -178,7 +178,7 @@ public class DiscussionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/discussion/view/all-group",
+                "/discussions/groups/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -228,7 +228,7 @@ public class DiscussionControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                patch("/discussion/assign?meetingId={meetingId}", 1)
+                patch("/discussions/groups/assign?meetingId={meetingId}", 1)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -241,7 +241,7 @@ public class DiscussionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/discussion/assign",
+                "/discussions/groups/assign/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -273,7 +273,7 @@ public class DiscussionControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                patch("/discussion/assign/solo" +
+                patch("/discussions/groups/assign-member" +
                         "?meetingId={meetingId}&memberId={memberId}&groupNumber={groupNumber}",
                     1, 2, 3)
                     .header("Authorization", accessToken)
@@ -287,7 +287,7 @@ public class DiscussionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/discussion/assign/solo",
+                "/discussions/groups/assign-member/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
