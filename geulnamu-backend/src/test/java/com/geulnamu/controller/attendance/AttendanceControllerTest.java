@@ -54,7 +54,7 @@ public class AttendanceControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.post("/attendance?meetingId={meetingId}", 1)
+                RestDocumentationRequestBuilders.post("/attendances/check-in?meetingId={meetingId}", 1)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -67,7 +67,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value(attendanceId))
             .andDo(document(
-                "/attendance/create",
+                "/attendances/check-in/create",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -102,7 +102,7 @@ public class AttendanceControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.get("/attendance/{attendanceId}/my", 1L)
+                RestDocumentationRequestBuilders.get("/attendances/{attendanceId}/my-info", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -113,7 +113,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/attendance/view/myInfo",
+                "/attendances/my-info/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -171,7 +171,7 @@ public class AttendanceControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.get("/attendance?meetingId={meetingId}", 1)
+                RestDocumentationRequestBuilders.get("/attendances/list?meetingId={meetingId}", 1)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -183,7 +183,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/attendance/view/list",
+                "/attendances/list/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -222,7 +222,7 @@ public class AttendanceControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/attendance/{attendanceId}/note", 1L)
+                RestDocumentationRequestBuilders.patch("/attendances/{attendanceId}/note", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -236,7 +236,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/attendance/modify/note",
+                "/attendances/note/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -267,7 +267,7 @@ public class AttendanceControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/attendance/{attendanceId}/just-read", 1L)
+                RestDocumentationRequestBuilders.patch("/attendances/{attendanceId}/just-read", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -280,7 +280,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/attendance/modify/just-read",
+                "/attendances/just-read/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -308,7 +308,7 @@ public class AttendanceControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/attendance/{attendanceId}/want-discussion", 1L)
+                RestDocumentationRequestBuilders.patch("/attendances/{attendanceId}/want-discussion", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -321,7 +321,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/attendance/modify/want-discussion",
+                "/attendances/want-discussion/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -349,7 +349,7 @@ public class AttendanceControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.delete("/attendance/{attendanceId}/delete", 1)
+                RestDocumentationRequestBuilders.delete("/attendances/{attendanceId}", 1)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -362,7 +362,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/attendance/delete",
+                "/attendances/delete",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(

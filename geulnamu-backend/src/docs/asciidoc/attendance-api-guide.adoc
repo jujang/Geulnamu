@@ -21,19 +21,19 @@ endif::[]
 접근 가능 권한 레벨: MEMBER / 로그 생성
 
 ==== request
-include::{snippets}/attendance/create/http-request.adoc[]
+include::{snippets}/attendances/check-in/create/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/create/request-headers.adoc[]
+include::{snippets}/attendances/check-in/create/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/attendance/create/query-parameters.adoc[]
+include::{snippets}/attendances/check-in/create/query-parameters.adoc[]
 
 ==== response
-include::{snippets}/attendance/create/http-response.adoc[]
+include::{snippets}/attendances/check-in/create/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/create/response-fields.adoc[]
+include::{snippets}/attendances/check-in/create/response-fields.adoc[]
 
 ==== Error case
 
@@ -44,19 +44,19 @@ include::{snippets}/attendance/create/response-fields.adoc[]
 접근 가능 권한 레벨: MEMBER
 
 ==== request
-include::{snippets}/attendance/view/myInfo/http-request.adoc[]
+include::{snippets}/attendances/my-info/view/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/attendance/view/myInfo/path-parameters.adoc[]
+include::{snippets}/attendances/my-info/view/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/view/myInfo/request-headers.adoc[]
+include::{snippets}/attendances/my-info/view/request-headers.adoc[]
 
 ==== response
-include::{snippets}/attendance/view/myInfo/http-response.adoc[]
+include::{snippets}/attendances/my-info/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/view/myInfo/response-fields.adoc[]
+include::{snippets}/attendances/my-info/view/response-fields.adoc[]
 
 ==== Error case
 
@@ -66,19 +66,19 @@ include::{snippets}/attendance/view/myInfo/response-fields.adoc[]
 접근 가능 권한 레벨: MEMBER
 
 ==== request
-include::{snippets}/attendance/view/list/http-request.adoc[]
+include::{snippets}/attendances/list/view/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/view/list/request-headers.adoc[]
+include::{snippets}/attendances/list/view/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/attendance/view/list/query-parameters.adoc[]
+include::{snippets}/attendances/list/view/query-parameters.adoc[]
 
 ==== response
-include::{snippets}/attendance/view/list/http-response.adoc[]
+include::{snippets}/attendances/list/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/view/list/response-fields.adoc[]
+include::{snippets}/attendances/list/view/response-fields.adoc[]
 
 ==== Error case
 
@@ -91,22 +91,22 @@ include::{snippets}/attendance/view/list/response-fields.adoc[]
 접근 가능 권한 레벨: MEMBER
 
 ==== request
-include::{snippets}/attendance/modify/note/http-request.adoc[]
+include::{snippets}/attendances/note/modify/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/attendance/modify/note/path-parameters.adoc[]
+include::{snippets}/attendances/note/modify/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/modify/note/request-headers.adoc[]
+include::{snippets}/attendances/note/modify/request-headers.adoc[]
 
 ==== request-fields
-include::{snippets}/attendance/modify/note/request-fields.adoc[]
+include::{snippets}/attendances/note/modify/request-fields.adoc[]
 
 ==== response
-include::{snippets}/attendance/modify/note/http-response.adoc[]
+include::{snippets}/attendances/note/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/modify/note/response-fields.adoc[]
+include::{snippets}/attendances/note/modify/response-fields.adoc[]
 
 ==== Error case
 
@@ -116,19 +116,19 @@ include::{snippets}/attendance/modify/note/response-fields.adoc[]
 접근 가능 권한 레벨: MEMBER
 
 ==== request
-include::{snippets}/attendance/modify/just-read/http-request.adoc[]
+include::{snippets}/attendances/just-read/modify/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/attendance/modify/just-read/path-parameters.adoc[]
+include::{snippets}/attendances/just-read/modify/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/modify/just-read/request-headers.adoc[]
+include::{snippets}/attendances/just-read/modify/request-headers.adoc[]
 
 ==== response
-include::{snippets}/attendance/modify/just-read/http-response.adoc[]
+include::{snippets}/attendances/just-read/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/modify/just-read/response-fields.adoc[]
+include::{snippets}/attendances/just-read/modify/response-fields.adoc[]
 
 ==== Error case
 
@@ -138,19 +138,19 @@ include::{snippets}/attendance/modify/just-read/response-fields.adoc[]
 접근 가능 권한 레벨: MEMBER
 
 ==== request
-include::{snippets}/attendance/modify/want-discussion/http-request.adoc[]
+include::{snippets}/attendances/want-discussion/modify/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/attendance/modify/want-discussion/path-parameters.adoc[]
+include::{snippets}/attendances/want-discussion/modify/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/modify/want-discussion/request-headers.adoc[]
+include::{snippets}/attendances/want-discussion/modify/request-headers.adoc[]
 
 ==== response
-include::{snippets}/attendance/modify/want-discussion/http-response.adoc[]
+include::{snippets}/attendances/want-discussion/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/modify/want-discussion/response-fields.adoc[]
+include::{snippets}/attendances/want-discussion/modify/response-fields.adoc[]
 
 ==== Error case
 
@@ -162,19 +162,19 @@ include::{snippets}/attendance/modify/want-discussion/response-fields.adoc[]
 접근 가능 권한 레벨: ADMIN / 로그 생성
 
 ==== request
-include::{snippets}/attendance/delete/http-request.adoc[]
+include::{snippets}/attendances/delete/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/attendance/delete/path-parameters.adoc[]
+include::{snippets}/attendances/delete/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/delete/request-headers.adoc[]
+include::{snippets}/attendances/delete/request-headers.adoc[]
 
 ==== response
-include::{snippets}/attendance/delete/http-response.adoc[]
+include::{snippets}/attendances/delete/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/delete/response-fields.adoc[]
+include::{snippets}/attendances/delete/response-fields.adoc[]
 
 ==== Error case
 

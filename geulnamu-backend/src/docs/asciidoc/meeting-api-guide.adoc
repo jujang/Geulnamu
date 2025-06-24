@@ -66,16 +66,16 @@ include::{snippets}/meetings/view/response-fields.adoc[]
 접근 가능 권한 레벨: MEMBER
 
 ==== request
-include::{snippets}/meetings/staff-list/http-request.adoc[]
+include::{snippets}/meetings/staff-list/view/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/meetings/staff-list/request-headers.adoc[]
+include::{snippets}/meetings/staff-list/view/request-headers.adoc[]
 
 ==== response
-include::{snippets}/meetings/staff-list/http-response.adoc[]
+include::{snippets}/meetings/staff-list/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/meetings/staff-list/response-fields.adoc[]
+include::{snippets}/meetings/staff-list/view/response-fields.adoc[]
 
 ==== Error case
 
@@ -85,19 +85,19 @@ include::{snippets}/meetings/staff-list/response-fields.adoc[]
 접근 가능 권한 레벨: MEMBER
 
 ==== request
-include::{snippets}/meetings/list/http-request.adoc[]
+include::{snippets}/meetings/list/view/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/meetings/list/request-headers.adoc[]
+include::{snippets}/meetings/list/view/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/meetings/list/query-parameters.adoc[]
+include::{snippets}/meetings/list/view/query-parameters.adoc[]
 
 ==== response
-include::{snippets}/meetings/list/http-response.adoc[]
+include::{snippets}/meetings/list/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/meetings/list/response-fields.adoc[]
+include::{snippets}/meetings/list/view/response-fields.adoc[]
 
 ==== Error case
 
@@ -108,19 +108,19 @@ include::{snippets}/meetings/list/response-fields.adoc[]
 접근 가능 권한 레벨: ADMIN
 
 ==== request
-include::{snippets}/meetings/list/admin/http-request.adoc[]
+include::{snippets}/meetings/list/admin/view/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/meetings/list/admin/request-headers.adoc[]
+include::{snippets}/meetings/list/admin/view/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/meetings/list/admin/query-parameters.adoc[]
+include::{snippets}/meetings/list/admin/view/query-parameters.adoc[]
 
 ==== response
-include::{snippets}/meetings/list/admin/http-response.adoc[]
+include::{snippets}/meetings/list/admin/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/meetings/list/admin/response-fields.adoc[]
+include::{snippets}/meetings/list/admin/view/response-fields.adoc[]
 
 ==== Error case
 
@@ -131,22 +131,22 @@ include::{snippets}/meetings/list/admin/response-fields.adoc[]
 접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 모임 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 모임 시작 후에도 가능)
 
 ==== request
-include::{snippets}/meetings/modify/basic/http-request.adoc[]
+include::{snippets}/meetings/basic/modify/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/meetings/modify/basic/request-headers.adoc[]
+include::{snippets}/meetings/basic/modify/request-headers.adoc[]
 
 ==== path-parameters
-include::{snippets}/meetings/modify/basic/path-parameters.adoc[]
+include::{snippets}/meetings/basic/modify/path-parameters.adoc[]
 
 ==== request-fields
-include::{snippets}/meetings/modify/basic/request-fields.adoc[]
+include::{snippets}/meetings/basic/modify/request-fields.adoc[]
 
 ==== response
-include::{snippets}/meetings/modify/basic/http-response.adoc[]
+include::{snippets}/meetings/basic/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/meetings/modify/basic/response-fields.adoc[]
+include::{snippets}/meetings/basic/modify/response-fields.adoc[]
 
 ==== Error case
 
@@ -157,22 +157,22 @@ include::{snippets}/meetings/modify/basic/response-fields.adoc[]
 접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 토론 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 토론 시작 후에도 가능)
 
 ==== request
-include::{snippets}/meetings/modify/discussion/http-request.adoc[]
+include::{snippets}/meetings/discussion/modify/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/meetings/modify/discussion/request-headers.adoc[]
+include::{snippets}/meetings/discussion/modify/request-headers.adoc[]
 
 ==== path-parameters
-include::{snippets}/meetings/modify/discussion/path-parameters.adoc[]
+include::{snippets}/meetings/discussion/modify/path-parameters.adoc[]
 
 ==== request-fields
-include::{snippets}/meetings/modify/discussion/request-fields.adoc[]
+include::{snippets}/meetings/discussion/modify/request-fields.adoc[]
 
 ==== response
-include::{snippets}/meetings/modify/discussion/http-response.adoc[]
+include::{snippets}/meetings/discussion/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/meetings/modify/discussion/response-fields.adoc[]
+include::{snippets}/meetings/discussion/modify/response-fields.adoc[]
 
 ==== Error case
 
@@ -183,19 +183,19 @@ include::{snippets}/meetings/modify/discussion/response-fields.adoc[]
 접근 가능 권한 레벨: ADMIN / 모임 익일부터 처리 가능
 
 ==== request
-include::{snippets}/meetings/make-private/http-request.adoc[]
+include::{snippets}/meetings/make-private/modify/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/meetings/make-private/request-headers.adoc[]
+include::{snippets}/meetings/make-private/modify/request-headers.adoc[]
 
 ==== path-parameters
-include::{snippets}/meetings/make-private/path-parameters.adoc[]
+include::{snippets}/meetings/make-private/modify/path-parameters.adoc[]
 
 ==== response
-include::{snippets}/meetings/make-private/http-response.adoc[]
+include::{snippets}/meetings/make-private/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/meetings/make-private/response-fields.adoc[]
+include::{snippets}/meetings/make-private/modify/response-fields.adoc[]
 
 ==== Error case
 
@@ -206,19 +206,19 @@ include::{snippets}/meetings/make-private/response-fields.adoc[]
 접근 가능 권한 레벨: ADMIN
 
 ==== request
-include::{snippets}/meetings/make-public/http-request.adoc[]
+include::{snippets}/meetings/make-public/modify/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/meetings/make-public/request-headers.adoc[]
+include::{snippets}/meetings/make-public/modify/request-headers.adoc[]
 
 ==== path-parameters
-include::{snippets}/meetings/make-public/path-parameters.adoc[]
+include::{snippets}/meetings/make-public/modify/path-parameters.adoc[]
 
 ==== response
-include::{snippets}/meetings/make-public/http-response.adoc[]
+include::{snippets}/meetings/make-public/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/meetings/make-public/response-fields.adoc[]
+include::{snippets}/meetings/make-public/modify/response-fields.adoc[]
 
 ==== Error case
 

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/attendance")
+@RequestMapping("/attendances")
 public class AttendanceController {
 
     private final AttendanceService attendanceService;
@@ -25,25 +25,25 @@ public class AttendanceController {
 
     @LogAction(value = ActionType.ATTENDANCE_CREATE, actionDomain = "attendance")
     @AccessLevel(Level.MEMBER)
-    @PostMapping(name = "출석")
+    @PostMapping(value = "/check-in", name = "출석")
     public BaseResponse<Long> meetingAttend(@AuthMemberId Long memberId, @RequestParam @Min(value = 1) Long meetingId) {
         Long attendanceId = attendanceService.createAttendance(memberId, meetingId);
         return BaseResponse.ofSuccess(attendanceId);
     }
 
     @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/{attendanceId}/my", name = "개인 출석 정보 조회")
+    @GetMapping(value = "/{attendanceId}/my-info", name = "개인 출석 정보 조회")
     public BaseResponse<AttendanceInfoResponse> getMyAttendanceInfo(@PathVariable @Min(value = 1) Long attendanceId,
                                                                     @AuthMemberId Long memberId) {
-        AttendanceInfoResponse attendanceInfoResponse = attendanceService.getMyAttendanceInfo(attendanceId, memberId);
-        return BaseResponse.ofSuccess(attendanceInfoResponse);
+        AttendanceInfoResponse response = attendanceService.getMyAttendanceInfo(attendanceId, memberId);
+        return BaseResponse.ofSuccess(response);
     }
 
     @AccessLevel(Level.MEMBER)
-    @GetMapping(name = "모임별 참석 현황 조회")
+    @GetMapping(value = "/list", name = "모임별 참석 현황 조회")
     public BaseResponse<MeetingAttendanceDetailsResponse> getMeetingAttendanceStatus(@RequestParam @Min(value = 1) Long meetingId) {
-        MeetingAttendanceDetailsResponse meetingAttendanceStatusResponseList = attendanceService.getMeetingAttendanceStatus(meetingId);
-        return BaseResponse.ofSuccess(meetingAttendanceStatusResponseList);
+        MeetingAttendanceDetailsResponse response = attendanceService.getMeetingAttendanceStatus(meetingId);
+        return BaseResponse.ofSuccess(response);
     }
 
     @AccessLevel(Level.MEMBER)
@@ -70,7 +70,7 @@ public class AttendanceController {
 
     @LogAction(value = ActionType.ATTENDANCE_DELETE, actionDomain = "attendance")
     @AccessLevel(Level.ADMIN)
-    @DeleteMapping(value = "/{attendanceId}/delete", name = "출석 삭제")
+    @DeleteMapping(value = "/{attendanceId}", name = "출석 삭제")
     public BaseResponse<Void> DeleteMeetingAttend(@PathVariable @Min(value = 1) Long attendanceId) {
         attendanceService.deleteAttendance(attendanceId);
         return BaseResponse.ofSuccess();

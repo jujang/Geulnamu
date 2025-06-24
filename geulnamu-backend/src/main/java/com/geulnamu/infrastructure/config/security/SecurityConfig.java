@@ -38,11 +38,12 @@ public class SecurityConfig {
         "/members/me/profile",
         "/meetings/staff-list",
         "/meetings/list",
-        "/attendance",
-        "/attendance/{attendanceId}/my",
-        "/attendance/{attendanceId}/note",
-        "/attendance/{attendanceId}/just-read",
-        "/attendance/{attendanceId}/want-discussion",
+        "/attendances/check-in",
+        "/attendances/{attendanceId}/my-info",
+        "/attendances/list",
+        "/attendances/{attendanceId}/note",
+        "/attendances/{attendanceId}/just-read",
+        "/attendances/{attendanceId}/want-discussion",
         "/discussion/{attendanceId}/my-group"
     };
 
@@ -62,7 +63,7 @@ public class SecurityConfig {
         "/meetings/list/admin",
         "/meetings/{meetingId}/make-private",
         "/meetings/{meetingId}/make-public",
-        "/attendance/{attendanceId}/delete",
+        "/attendances/{attendanceId}/delete",
         "/discussion/assign/solo"
     };
 
