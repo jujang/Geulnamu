@@ -61,7 +61,7 @@ public class Attendance extends DateColumn {
         }
     }
 
-    public void validateRequestedPerson(Long memberId) {
+    public void checkRequestedMember(Long memberId) {
         if(!this.getMember().getId().equals(memberId)) {
             throw new BadRequestException(ResponseMessage.NOT_SUITABLE_MEMBER);
         }

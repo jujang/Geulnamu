@@ -35,7 +35,7 @@ public class AttendanceService {
     public Long createAttendance(Long memberId, Long meetingId) {
         Meeting meeting = meetingQueryRepository.findById(meetingId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
-        meeting.validateRequestedMember(memberId);
+        meeting.checkRequestedMember(memberId);
 
         meeting.checkTimeCanAttendMeeting();
         // 동일한 모임원이 해당 모임에 출석한 이력이 있는지 확인
@@ -92,7 +92,7 @@ public class AttendanceService {
 
         // 처리 가능한지 체크
         attendance.checkSettingDiscussionTime();
-        attendance.getMeeting().checkTimeCanSwitchAboutDiscussionAttendance();
+        attendance.getMeeting().checkTimeCanSwitchDiscussionAttendance();
 
         attendance.updateNotWantDiscussion();
     }
@@ -103,7 +103,7 @@ public class AttendanceService {
 
         // 처리 가능한지 체크
         attendance.checkSettingDiscussionTime();
-        attendance.getMeeting().checkTimeCanSwitchAboutDiscussionAttendance();
+        attendance.getMeeting().checkTimeCanSwitchDiscussionAttendance();
 
         attendance.updateWantDiscussion();
     }
@@ -136,7 +136,7 @@ public class AttendanceService {
     private Attendance getValidateAttendance(Long attendanceId, Long memberId) {
         Attendance attendance = attendanceQueryRepository.findById(attendanceId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
-        attendance.validateRequestedPerson(memberId);
+        attendance.checkRequestedMember(memberId);
         return attendance;
     }
 

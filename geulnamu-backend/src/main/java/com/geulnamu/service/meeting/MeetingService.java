@@ -86,7 +86,7 @@ public class MeetingService {
 
         // 수정 가능 시간 확인(모임 시작 이후, 수정 불가) - 관리자급의 경우, 시간이 넘었더라도 수정 가능
         if(!authorizationService.hasAdminPrivileges(member)) {
-            meeting.checkTimeCanUpdateMeeting();
+            meeting.checkMeetingUpdateTime();
         }
 
         // 수정 필요 부분 적용
@@ -112,7 +112,7 @@ public class MeetingService {
 
         // 수정 가능 시간 확인(토론 시작 이후, 수정 불가) - 관리자급의 경우, 시간이 넘었더라도 수정 가능
         if(!authorizationService.hasAdminPrivileges(member)) {
-            meeting.checkTimeCanUpdateMeetingForDiscussion();
+            meeting.checkDiscussionUpdateTime();
         }
 
         // 수정 필요 부분 적용
@@ -128,7 +128,7 @@ public class MeetingService {
     public void makeMeetingPrivate(Long meetingId) {
         Meeting meeting = meetingQueryRepository.findById(meetingId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
-        meeting.validateTimeForPrivateMeeting();
+        meeting.checkTimeForPrivateMeeting();
         meeting.makeMeetingPrivate();
     }
 
@@ -148,7 +148,7 @@ public class MeetingService {
         Member member = memberQueryRepository.findById(memberId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         authorizationService.validateDeletionBy(meeting, member);
-        meeting.validateTimeForDeleteMeeting();
+        meeting.checkTimeForDeleteMeeting();
 
         // 모임 삭제 (hard delete)
         meetingCommandRepository.delete(meeting);

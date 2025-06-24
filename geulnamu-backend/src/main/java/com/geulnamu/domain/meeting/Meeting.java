@@ -75,13 +75,13 @@ public class Meeting extends DateColumn {
             .build();
     }
 
-    public void checkTimeCanUpdateMeeting() {
+    public void checkMeetingUpdateTime() {
         if(LocalDateTime.now().isAfter(this.meetingDate)) {
             throw new BadRequestException(ResponseMessage.MEETING_INFO_UPDATE_TIME_RESTRICTION);
         }
     }
 
-    public void checkTimeCanUpdateMeetingForDiscussion() {
+    public void checkDiscussionUpdateTime() {
         if(this.discussionTime != null && LocalDateTime.now().isAfter(this.discussionTime)) {
             throw new BadRequestException(ResponseMessage.MEETING_DISCUSSION_INFO_UPDATE_TIME_RESTRICTION);
         }
@@ -106,15 +106,27 @@ public class Meeting extends DateColumn {
     }
 
     // 토론 참여 의사는 토론 시작 30분 전까지만 설정 가능   TODO: 해당 기능은 실 운영해보면서 수정 가능 시간이나 기능 수정 권한 조율해 볼 것
-    public void checkTimeCanSwitchAboutDiscussionAttendance() {
+    public void checkTimeCanSwitchDiscussionAttendance() {
         if(LocalDateTime.now().isAfter(this.discussionTime.minusMinutes(30))) {
             throw new BadRequestException(ResponseMessage.DISCUSSION_INTENTION_SETTING_TIME_RESTRICTION);
         }
     }
 
-    public void validateRequestedMember(Long memberId) {
+    public void checkRequestedMember(Long memberId) {
         if(!this.getMember().getId().equals(memberId)) {
             throw new BadRequestException(ResponseMessage.NOT_SUITABLE_MEMBER);
+        }
+    }
+
+    public void checkTimeForDeleteMeeting() {
+        if(LocalDateTime.now().plusHours(6).isAfter(this.meetingDate)) {
+            throw new BadRequestException(ResponseMessage.MEETING_DELETION_TIME_EXPIRED);
+        }
+    }
+
+    public void checkTimeForPrivateMeeting() {
+        if(LocalDateTime.now().isBefore(this.meetingDate.plusDays(1).with(LocalTime.MIN))) {
+            throw new BadRequestException(ResponseMessage.MEETING_PRIVACY_TIME_RESTRICTION);
         }
     }
 
@@ -185,18 +197,6 @@ public class Meeting extends DateColumn {
             throw new ExistDataException("privateAt");
         }
         this.privateAt = null;
-    }
-
-    public void validateTimeForDeleteMeeting() {
-        if(LocalDateTime.now().plusHours(6).isAfter(this.meetingDate)) {
-            throw new BadRequestException(ResponseMessage.MEETING_DELETION_TIME_EXPIRED);
-        }
-    }
-
-    public void validateTimeForPrivateMeeting() {
-        if(LocalDateTime.now().isBefore(this.meetingDate.plusDays(1).with(LocalTime.MIN))) {
-            throw new BadRequestException(ResponseMessage.MEETING_PRIVACY_TIME_RESTRICTION);
-        }
     }
 
 }
