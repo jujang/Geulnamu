@@ -115,7 +115,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/info/modify",
+                "/member/info/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -241,7 +241,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/role/modify",
+                "/member/role/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -287,7 +287,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/name/modify",
+                "/member/name/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -331,7 +331,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/activate",
+                "/member/activate",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -372,7 +372,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/deactivate",
+                "/member/deactivate",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(

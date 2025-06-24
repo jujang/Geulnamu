@@ -77,7 +77,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value(meetingId))
             .andDo(document(
-                "meeting/open",
+                "/meeting/open",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -399,7 +399,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "meeting/modify",
+                "/meeting/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -452,7 +452,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "meeting/modify/discussion",
+                "/meeting/modify/discussion",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -497,7 +497,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "meeting/private",
+                "/meeting/private",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -538,7 +538,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "meeting/public",
+                "/meeting/public",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -579,7 +579,7 @@ public class MeetingControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "meeting/remove",
+                "/meeting/remove",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(

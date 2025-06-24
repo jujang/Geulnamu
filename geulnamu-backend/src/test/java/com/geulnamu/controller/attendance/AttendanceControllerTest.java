@@ -67,7 +67,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value(attendanceId))
             .andDo(document(
-                "attendance/create",
+                "/attendance/create",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -236,7 +236,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "attendance/modify/note",
+                "/attendance/modify/note",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -280,7 +280,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "attendance/modify/just-read",
+                "/attendance/modify/just-read",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -321,7 +321,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "attendance/modify/want-discussion",
+                "/attendance/modify/want-discussion",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -362,7 +362,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "attendance/delete",
+                "/attendance/delete",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(

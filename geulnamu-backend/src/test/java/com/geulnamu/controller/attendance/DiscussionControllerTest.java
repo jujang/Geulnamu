@@ -71,7 +71,7 @@ public class DiscussionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "discussion/get/list",
+                "/discussion/get/list",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -118,7 +118,7 @@ public class DiscussionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "discussion/view/my-group",
+                "/discussion/view/my-group",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -178,7 +178,7 @@ public class DiscussionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "discussion/view/all-group",
+                "/discussion/view/all-group",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -241,7 +241,7 @@ public class DiscussionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "discussion/assign",
+                "/discussion/assign",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -287,7 +287,7 @@ public class DiscussionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "discussion/assign/solo",
+                "/discussion/assign/solo",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
