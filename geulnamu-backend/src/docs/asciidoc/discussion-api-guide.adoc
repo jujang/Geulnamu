@@ -1,0 +1,136 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+// 코드 하이라이팅
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+
+[[title]]
+= Discussion API Guide
+
+== link:index.html[Index 페이지로 이동]
+
+
+== GET
+
+=== 모임 토론 참여 희망 명단 조회
+접근 가능 권한 레벨: STAFF
+
+==== request
+include::{snippets}/discussion/get/list/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/discussion/get/list/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/discussion/get/list/query-parameters.adoc[]
+
+==== response
+include::{snippets}/discussion/get/list/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/discussion/get/list/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 본인 토론 그룹 명단 조회
+접근 가능 권한 레벨: MEMBER
+
+==== request
+include::{snippets}/discussion/view/my-group/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/discussion/view/my-group/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/discussion/view/my-group/request-headers.adoc[]
+
+==== response
+include::{snippets}/discussion/view/my-group/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/discussion/view/my-group/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 전체 토론 그룹 명단 조회
+접근 가능 권한 레벨: STAFF
+
+==== request
+include::{snippets}/discussion/view/all-group/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/discussion/view/all-group/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/discussion/view/all-group/query-parameters.adoc[]
+
+==== response
+include::{snippets}/discussion/view/all-group/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/discussion/view/all-group/response-fields.adoc[]
+
+==== Error case
+
+---
+
+
+== PATCH
+
+=== 토론 그룹 구성 - 수동
+접근 가능 권한 레벨: STAFF / 로그 생성
+
+==== request
+include::{snippets}/discussion/assign/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/discussion/assign/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/discussion/assign/query-parameters.adoc[]
+
+==== request-fields
+include::{snippets}/discussion/assign/request-fields.adoc[]
+
+==== response
+include::{snippets}/discussion/assign/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/discussion/assign/response-fields.adoc[]
+
+==== Error case
+
+---
+
+
+=== 토론 그룹 할당 - 개인
+접근 가능 권한 레벨: ADMIN / 로그 생성
+
+==== request
+include::{snippets}/discussion/assign/solo/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/discussion/assign/solo/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/discussion/assign/solo/query-parameters.adoc[]
+
+==== response
+include::{snippets}/discussion/assign/solo/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/discussion/assign/solo/response-fields.adoc[]
+
+==== Error case
+
+---
