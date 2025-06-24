@@ -456,7 +456,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_get">GET</a>
 <ul class="sectlevel2">
 <li><a href="#_본인_출석_정보_조회">본인 출석 정보 조회</a></li>
-<li><a href="#_모임별_참석_현황_조회">모임별 참석 현황 조회</a></li>
+<li><a href="#_모임원_참석_현황_조회">모임원 참석 현황 조회</a></li>
 </ul>
 </li>
 <li><a href="#_patch">PATCH</a>
@@ -486,14 +486,27 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_모임_출석"><a class="link" href="#_모임_출석">모임 출석</a></h3>
-<div class="paragraph">
+<div class="ulist">
+<ul>
+<li>
 <p>접근 가능 권한 레벨: MEMBER / 로그 생성</p>
+</li>
+<li>
+<p>모임원이 특정 모임에 출석하는 용도의 API, 이후에 해당 모임에서 조를 배정받고 토론 참석 및 발제문 작성, 조회 등이 가능함</p>
+</li>
+<li>
+<p>모임 출석은 모임 개최 당일 개최 시간으로부터 1시간 전부터 가능</p>
+</li>
+<li>
+<p>비활성화된 모임원은 해당 기능이 제한됨</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request"><a class="link" href="#_request">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">POST /attendance?meetingId=1 HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">POST /attendances/check-in?meetingId=1 HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -623,14 +636,24 @@ Content-Type: application/json;charset=UTF-8
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_본인_출석_정보_조회"><a class="link" href="#_본인_출석_정보_조회">본인 출석 정보 조회</a></h3>
-<div class="paragraph">
+<div class="ulist">
+<ul>
+<li>
 <p>접근 가능 권한 레벨: MEMBER</p>
+</li>
+<li>
+<p>모임원의 모임 출석 정보를 조회하는 용도의 API</p>
+</li>
+<li>
+<p>토론 그룹을 배정 받았을 경우, 같은 토론 그룹 명단도 함께 조회 가능함.</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_2"><a class="link" href="#_request_2">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /attendance/1/my HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /attendances/1/my-info HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -700,14 +723,14 @@ Content-Type: application/json;charset=UTF-8
     "attendanceId" : 1,
     "meetingType" : "REGULAR",
     "meetingDateTime" : "2126.06.14 10:30",
-    "lateThresholdTime" : "2126.06.14 10:45",
+    "lateThresholdTime" : "10:45",
     "meetingName" : "1000회 정기모임",
     "meetingPlace" : "합정 저스티나",
     "description" : "조심히 오세요~",
+    "attendTime" : "20:00",
     "note" : "1등으로 왔지롱~",
-    "discussionTime" : "2126.06.14 12:00",
-    "groupMemberList" : null,
-    "createdAt" : "2126.06.13 20:00"
+    "discussionTime" : "12:00",
+    "groupMemberList" : null
   }
 }</code></pre>
 </div>
@@ -797,6 +820,13 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임 상세내용</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.attendTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 참석 시간</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.note</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
@@ -817,13 +847,6 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">토론 조 명단</p></td>
 </tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.createdAt</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임 개설일자</p></td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -833,15 +856,22 @@ Content-Type: application/json;charset=UTF-8
 </div>
 </div>
 <div class="sect2">
-<h3 id="_모임별_참석_현황_조회"><a class="link" href="#_모임별_참석_현황_조회">모임별 참석 현황 조회</a></h3>
-<div class="paragraph">
+<h3 id="_모임원_참석_현황_조회"><a class="link" href="#_모임원_참석_현황_조회">모임원 참석 현황 조회</a></h3>
+<div class="ulist">
+<ul>
+<li>
 <p>접근 가능 권한 레벨: MEMBER</p>
+</li>
+<li>
+<p>자신을 포함한 모임원들의 모임 출석 현황을 조회하는 API</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_3"><a class="link" href="#_request_3">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /attendance?meetingId=1 HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /attendances/list?meetingId=1 HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1065,14 +1095,21 @@ Content-Type: application/json;charset=UTF-8
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_비고_작성"><a class="link" href="#_비고_작성">비고 작성</a></h3>
-<div class="paragraph">
+<div class="ulist">
+<ul>
+<li>
 <p>접근 가능 권한 레벨: MEMBER</p>
+</li>
+<li>
+<p>모임원이 본인의 모임 출석 관련한 정보를 입력하는 용도의 API</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_4"><a class="link" href="#_request_4">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendance/1/note HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendances/1/note HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1229,14 +1266,24 @@ Content-Type: application/json;charset=UTF-8
 </div>
 <div class="sect2">
 <h3 id="_독서만_할래요"><a class="link" href="#_독서만_할래요">독서만 할래요</a></h3>
-<div class="paragraph">
+<div class="ulist">
+<ul>
+<li>
 <p>접근 가능 권한 레벨: MEMBER</p>
+</li>
+<li>
+<p>토론을 희망하지 않는 모임원이 토론 미참여를 희망하는 의사를 설정하는 용도의 API (기본적으로는 출석시 토론 희망으로 자동 설정됨)</p>
+</li>
+<li>
+<p>모임의 토론 시간이 셋팅된 이후부터, 토론 시작 30분 전까지만 설정 가능</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_5"><a class="link" href="#_request_5">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendance/1/just-read HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendances/1/just-read HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1358,14 +1405,24 @@ Content-Type: application/json;charset=UTF-8
 </div>
 <div class="sect2">
 <h3 id="_토론할래요"><a class="link" href="#_토론할래요">토론할래요</a></h3>
-<div class="paragraph">
+<div class="ulist">
+<ul>
+<li>
 <p>접근 가능 권한 레벨: MEMBER</p>
+</li>
+<li>
+<p>토론을 희망하지 않는다고 설정한 모임원이 다시 토론 참여를 희망하는 의사를 설정하는 용도의 API</p>
+</li>
+<li>
+<p>모임의 토론 시간이 셋팅된 이후부터, 토론 시작 30분 전까지만 설정 가능</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_6"><a class="link" href="#_request_6">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendance/1/want-discussion HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /attendances/1/want-discussion HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1492,14 +1549,21 @@ Content-Type: application/json;charset=UTF-8
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_출석_삭제"><a class="link" href="#_출석_삭제">출석 삭제</a></h3>
-<div class="paragraph">
+<div class="ulist">
+<ul>
+<li>
 <p>접근 가능 권한 레벨: ADMIN / 로그 생성</p>
+</li>
+<li>
+<p>관리자급 모임원이 특정 모임원의 출석 정보를 삭제하는 용도의 API</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_7"><a class="link" href="#_request_7">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">DELETE /attendance/1/delete HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">DELETE /attendances/1 HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1625,7 +1689,7 @@ Content-Type: application/json;charset=UTF-8
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-06-24 15:16:10 +0900
+Last updated 2025-06-25 02:35:33 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

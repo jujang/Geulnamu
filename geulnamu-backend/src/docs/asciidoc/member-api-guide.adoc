@@ -18,7 +18,8 @@ endif::[]
 == GET
 
 === 개인 정보 입력 여부 확인
-접근 가능 권한 레벨: MEMBER
+* 접근 가능 권한 레벨: MEMBER
+* 모임원의 정보가 등록되었는지 확인하는 api이자 프론트 기준으로 페이지 이동시마다 항상 사용되는 api, 내부적으로 DB 상에 리프레시 토큰이 저장되어 있는지 확인해서 없다면 에러를 출력하고 프론트에서 로그아웃을 강제하도록 하기 위해 사용됨.
 
 ==== request
 include::{snippets}/members/check/status/my/http-request.adoc[]
@@ -37,7 +38,8 @@ include::{snippets}/members/check/status/my/response-fields.adoc[]
 ---
 
 === 모임원 조회
-접근 가능 권한 레벨: ADMIN
+* 접근 가능 권한 레벨: ADMIN
+* 관리자급 모임원이 특정 모임원을 조회하기 위해 사용되는 API
 
 ==== request
 include::{snippets}/members/view/http-request.adoc[]
@@ -59,7 +61,8 @@ include::{snippets}/members/view/response-fields.adoc[]
 ---
 
 === 모임원 목록 조회
-접근 가능 권한 레벨: ADMIN
+* 접근 가능 권한 레벨: STAFF
+* 운영진 모임원이 운영진 페이지에서 모임원 목록을 조회하기 위해 사용되는 API
 
 ==== request
 include::{snippets}/members/list/view/http-request.adoc[]
@@ -83,7 +86,8 @@ include::{snippets}/members/list/view/response-fields.adoc[]
 == PATCH
 
 === 개인 정보 수정
-접근 가능 권한 레벨: MEMBER / 로그 생성
+* 접근 가능 권한 레벨: MEMBER / 로그 생성
+* 모임원이 본인 정보를 수정하는데 사용되는 API
 
 ==== request
 include::{snippets}/members/info/modify/my/http-request.adoc[]
@@ -106,7 +110,9 @@ include::{snippets}/members/info/modify/my/response-fields.adoc[]
 ---
 
 === 모임원 등급 변경
-접근 가능 권한 레벨: ADMIN / 로그 생성 / 해당 모임원 재로그인 필요
+* 접근 가능 권한 레벨: ADMIN / 로그 생성
+* 관리자급 모임원이 특정 모임원의 등급을 조정하는 용도의 API
+* 등급이 조정된 모임원의 경우, 리프레시 토큰이 말소되기에 재로그인이 필요함. (엑세스 토큰을 이용해 권한을 확인하고, 권한별 사용 가능 API가 달라지기 때문)
 
 ==== request
 include::{snippets}/members/role/modify/http-request.adoc[]
@@ -131,7 +137,8 @@ include::{snippets}/members/role/modify/response-fields.adoc[]
 ---
 
 === 모임원 이름 변경
-접근 가능 권한 레벨: ADMIN / 로그 생성
+* 접근 가능 권한 레벨: ADMIN / 로그 생성
+* 관리자급 모임원이 모임원 계정의 이름을 변경하는 API (중복된 이름을 갖고 있거나, 잘못된 이름을 설정했을 경우 조정을 위해 사용하는 기능)
 
 ==== request
 include::{snippets}/members/name/modify/http-request.adoc[]
@@ -156,7 +163,8 @@ include::{snippets}/members/name/modify/response-fields.adoc[]
 ---
 
 === 모임원 활성화
-접근 가능 권한 레벨: ADMIN / 로그 생성
+* 접근 가능 권한 레벨: ADMIN / 로그 생성
+* 관리자급 모임원이 특정 비활성화 되어있는 모임원을 활성화하는 API
 
 ==== request
 include::{snippets}/members/activate/http-request.adoc[]
@@ -178,7 +186,9 @@ include::{snippets}/members/activate/response-fields.adoc[]
 ---
 
 === 모임원 비활성화
-접근 가능 권한 레벨: ADMIN / 로그 생성
+* 접근 가능 권한 레벨: ADMIN / 로그 생성
+* 관리자급 모임원이 특정 활성화 되어있는 모임원을 비활성화하는 API
+* 비활성화된 계정은 이후, 로그아웃이 강제되고 모임 출석을 진행할 수 없음
 
 ==== request
 include::{snippets}/members/deactivate/http-request.adoc[]

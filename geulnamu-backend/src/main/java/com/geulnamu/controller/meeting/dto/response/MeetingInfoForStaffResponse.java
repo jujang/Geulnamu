@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class MeetingInfoForAdminResponse {
+public class MeetingInfoForStaffResponse {
 
     private Long meetingId;
     private String meetingCreatorName;
@@ -30,8 +30,8 @@ public class MeetingInfoForAdminResponse {
     private Boolean isPrivateMeeting;
 
 
-    public static MeetingInfoForAdminResponse of(Meeting meeting) {
-        return new MeetingInfoForAdminResponse(meeting.getId(), meeting.getMember().getName(), meeting.getMeetingType(),
+    public static MeetingInfoForStaffResponse of(Meeting meeting) {
+        return new MeetingInfoForStaffResponse(meeting.getId(), meeting.getMember().getName(), meeting.getMeetingType(),
             meeting.getMeetingName(), meeting.getMeetingDate(), meeting.getLateThresholdTime(), meeting.getMeetingPlace(),
             meeting.getDescription(), meeting.getDiscussionTime(), meeting.getAlarmMessage(), meeting.getCreatedAt(),
             meeting.getPrivateAt() != null);

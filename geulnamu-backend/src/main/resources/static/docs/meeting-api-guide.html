@@ -455,10 +455,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_get">GET</a>
 <ul class="sectlevel2">
-<li><a href="#_모임_단일_조회">모임 단일 조회</a></li>
 <li><a href="#_운영진_목록_조회_필터링용">운영진 목록 조회 - 필터링용</a></li>
 <li><a href="#_모임_목록_조회">모임 목록 조회</a></li>
-<li><a href="#_모임_목록_조회_관리자용">모임 목록 조회 (관리자용)</a></li>
+<li><a href="#_모임_목록_조회_운영진용">모임 목록 조회 (운영진용)</a></li>
+<li><a href="#_모임_단일_조회_운영진용">모임 단일 조회 (운영진용)</a></li>
 </ul>
 </li>
 <li><a href="#_patch">PATCH</a>
@@ -489,14 +489,27 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_모임_생성"><a class="link" href="#_모임_생성">모임 생성</a></h3>
-<div class="paragraph">
-<p>접근 가능 권한 레벨: STAFF / 로그 생성 / 미래 시간만 생성 가능</p>
+<div class="ulist">
+<ul>
+<li>
+<p>접근 가능 권한 레벨: STAFF / 로그 생성</p>
+</li>
+<li>
+<p>운영진급 모임원이 모임을 생성하는 용도의 API</p>
+</li>
+<li>
+<p>모임의 개최 일정은 미래 시간만 가능함.</p>
+</li>
+<li>
+<p>지각 기준 시간을 설정할 수 있는데, 설정하지 않는다면 모임 개최 시간 자체가 지각 기준 시간이 됨. (지각 기준 시간은 모임 개최 시간 보다 빠르면 안 되고, 같은 날 안에서만 설정이 가능함.)</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request"><a class="link" href="#_request">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">POST /meeting HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">POST /meetings/create HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -670,15 +683,22 @@ Content-Type: application/json;charset=UTF-8
 <h2 id="_get"><a class="link" href="#_get">GET</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_모임_단일_조회"><a class="link" href="#_모임_단일_조회">모임 단일 조회</a></h3>
-<div class="paragraph">
-<p>접근 가능 권한 레벨: STAFF</p>
+<h3 id="_운영진_목록_조회_필터링용"><a class="link" href="#_운영진_목록_조회_필터링용">운영진 목록 조회 - 필터링용</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>접근 가능 권한 레벨: MEMBER</p>
+</li>
+<li>
+<p>모임 목록 조회 기능에서 필터링 기준으로 사용하는 모임원 리스트를 제공받는 용도의 API</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_2"><a class="link" href="#_request_2">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /meeting/1 HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /meetings/staff-list HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -708,226 +728,7 @@ Host: docs.api.com</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters"><a class="link" href="#_path_parameters">path-parameters</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">필드명</th>
-<th class="tableblock halign-left valign-top">필수값</th>
-<th class="tableblock halign-left valign-top">양식</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">meetingId</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임 고유번호</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
 <h4 id="_response_2"><a class="link" href="#_response_2">response</a></h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
-Content-Type: application/json;charset=UTF-8
-
-{
-  "code" : 200,
-  "message" : "API 호출에 성공했습니다.",
-  "data" : {
-    "meetingId" : 1,
-    "meetingCreatorName" : "나뭉이",
-    "meetingType" : "REGULAR",
-    "meetingName" : "1회 정기모임",
-    "meetingDateTime" : "2025.05.31 10:30",
-    "lateThresholdTime" : "2025.05.31 10:45",
-    "meetingPlace" : "추후 공지 예정 (합정역 주변 카페)",
-    "description" : "~~",
-    "discussionTime" : "2025.05.31 12:00",
-    "alarmMessage" : null,
-    "createdAt" : "2025.05.01 12:30",
-    "isPrivateMeeting" : false
-  }
-}</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_response_fields_2"><a class="link" href="#_response_fields_2">response-fields</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 20%;">
-<col style="width: 20%;">
-<col style="width: 20%;">
-<col style="width: 20%;">
-<col style="width: 20%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">필드명</th>
-<th class="tableblock halign-left valign-top">타입</th>
-<th class="tableblock halign-left valign-top">필수값</th>
-<th class="tableblock halign-left valign-top">양식</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>code</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">결과 코드</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>message</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">결과 메세지</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임 고유번호</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingCreatorName</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임 개설자 이름</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingType</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임 유형</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingName</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임 제목</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingDateTime</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임 개최일자</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.lateThresholdTime</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">지각 기준 시간</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingPlace</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임 장소</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.description</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임 상세내용</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.discussionTime</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">토론 시간</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.alarmMessage</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">토론 시작 알림 메세지</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.createdAt</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임 개설일자</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.isPrivateMeeting</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">비공개 여부</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_error_case_2"><a class="link" href="#_error_case_2">Error case</a></h4>
-<hr>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_운영진_목록_조회_필터링용"><a class="link" href="#_운영진_목록_조회_필터링용">운영진 목록 조회 - 필터링용</a></h3>
-<div class="paragraph">
-<p>접근 가능 권한 레벨: MEMBER</p>
-</div>
-<div class="sect3">
-<h4 id="_request_3"><a class="link" href="#_request_3">request</a></h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /meeting/list/staff HTTP/2.0
-Content-Type: application/json;charset=UTF-8
-Authorization: Bearer access_token
-Accept: application/json
-Host: docs.api.com</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_request_headers_3"><a class="link" href="#_request_headers_3">request-headers</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">필드명</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Authorization</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">액세스 토큰</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_response_3"><a class="link" href="#_response_3">response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
@@ -948,7 +749,7 @@ Content-Type: application/json;charset=UTF-8
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_3"><a class="link" href="#_response_fields_3">response-fields</a></h4>
+<h4 id="_response_fields_2"><a class="link" href="#_response_fields_2">response-fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 20%;">
@@ -999,20 +800,30 @@ Content-Type: application/json;charset=UTF-8
 </table>
 </div>
 <div class="sect3">
-<h4 id="_error_case_3"><a class="link" href="#_error_case_3">Error case</a></h4>
+<h4 id="_error_case_2"><a class="link" href="#_error_case_2">Error case</a></h4>
 <hr>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_모임_목록_조회"><a class="link" href="#_모임_목록_조회">모임 목록 조회</a></h3>
-<div class="paragraph">
+<div class="ulist">
+<ul>
+<li>
 <p>접근 가능 권한 레벨: MEMBER</p>
+</li>
+<li>
+<p>모임 목록을 조회하는 용도의 API</p>
+</li>
+<li>
+<p>페이지네이션이 적용됨</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
-<h4 id="_request_4"><a class="link" href="#_request_4">request</a></h4>
+<h4 id="_request_3"><a class="link" href="#_request_3">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /meeting/list?meetingType=REGULAR&amp;meetingCreatorId=1&amp;page=1&amp;size=10 HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /meetings/list?meetingType=REGULAR&amp;meetingCreatorId=1&amp;attendanceStatus=ATTEND&amp;sortBy=meetingDate&amp;isAsc=false&amp;page=1&amp;size=10 HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1021,7 +832,7 @@ Host: docs.api.com</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_request_headers_4"><a class="link" href="#_request_headers_4">request-headers</a></h4>
+<h4 id="_request_headers_3"><a class="link" href="#_request_headers_3">request-headers</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -1076,6 +887,27 @@ Host: docs.api.com</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">(운영진의) 모임원 고유번호</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>attendanceStatus</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">'ATTEND', 'ATTEND_LATE', 'NOT_ATTEND' 중 하나의 값</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">출석 상태</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sortBy</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">'meetingDate', 'meetingId', 'createdAt' 중 하나의 값</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지네이션 정렬 기준</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>isAsc</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">'true', 'false' 중 하나의 값</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">오름차순 여부</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>page</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
@@ -1093,7 +925,7 @@ Host: docs.api.com</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_response_4"><a class="link" href="#_response_4">response</a></h4>
+<h4 id="_response_3"><a class="link" href="#_response_3">response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
@@ -1141,7 +973,7 @@ Content-Type: application/json;charset=UTF-8
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_4"><a class="link" href="#_response_fields_4">response-fields</a></h4>
+<h4 id="_response_fields_3"><a class="link" href="#_response_fields_3">response-fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 20%;">
@@ -1297,20 +1129,30 @@ Content-Type: application/json;charset=UTF-8
 </table>
 </div>
 <div class="sect3">
-<h4 id="_error_case_4"><a class="link" href="#_error_case_4">Error case</a></h4>
+<h4 id="_error_case_3"><a class="link" href="#_error_case_3">Error case</a></h4>
 <hr>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_모임_목록_조회_관리자용"><a class="link" href="#_모임_목록_조회_관리자용">모임 목록 조회 (관리자용)</a></h3>
-<div class="paragraph">
-<p>접근 가능 권한 레벨: ADMIN</p>
+<h3 id="_모임_목록_조회_운영진용"><a class="link" href="#_모임_목록_조회_운영진용">모임 목록 조회 (운영진용)</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>접근 가능 권한 레벨: STAFF</p>
+</li>
+<li>
+<p>운영진 모임원이 운영진 페이지에서 모임 목록을 조회하는 용도의 API (운영진 제공 정보에는 모임 비활성화여부가 함께 보여짐)</p>
+</li>
+<li>
+<p>페이지네이션이 적용됨</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
-<h4 id="_request_5"><a class="link" href="#_request_5">request</a></h4>
+<h4 id="_request_4"><a class="link" href="#_request_4">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /meeting/list/admin?meetingType=REGULAR&amp;meetingCreatorId=1&amp;isPrivate=true&amp;page=1&amp;size=10 HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /meetings/list/staff?meetingType=REGULAR&amp;meetingCreatorId=1&amp;isPrivate=true&amp;sortBy=meetingDate&amp;isAsc=false&amp;page=1&amp;size=10 HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1319,7 +1161,7 @@ Host: docs.api.com</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_request_headers_5"><a class="link" href="#_request_headers_5">request-headers</a></h4>
+<h4 id="_request_headers_4"><a class="link" href="#_request_headers_4">request-headers</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -1381,6 +1223,20 @@ Host: docs.api.com</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임 비공개 여부</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sortBy</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">'meetingDate', 'meetingId', 'createdAt' 중 하나의 값</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지네이션 정렬 기준</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>isAsc</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">'true', 'false' 중 하나의 값</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">오름차순 여부</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>page</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
@@ -1398,7 +1254,7 @@ Host: docs.api.com</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_response_5"><a class="link" href="#_response_5">response</a></h4>
+<h4 id="_response_4"><a class="link" href="#_response_4">response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
@@ -1446,7 +1302,7 @@ Content-Type: application/json;charset=UTF-8
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_5"><a class="link" href="#_response_fields_5">response-fields</a></h4>
+<h4 id="_response_fields_4"><a class="link" href="#_response_fields_4">response-fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 20%;">
@@ -1602,6 +1458,232 @@ Content-Type: application/json;charset=UTF-8
 </table>
 </div>
 <div class="sect3">
+<h4 id="_error_case_4"><a class="link" href="#_error_case_4">Error case</a></h4>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_모임_단일_조회_운영진용"><a class="link" href="#_모임_단일_조회_운영진용">모임 단일 조회 (운영진용)</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>접근 가능 권한 레벨: STAFF</p>
+</li>
+<li>
+<p>운영진 모임원이 운영진 페이지에서 모임을 단일 조회하는 데에 사용하는 API</p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="_request_5"><a class="link" href="#_request_5">request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /meetings/1 HTTP/2.0
+Content-Type: application/json;charset=UTF-8
+Authorization: Bearer access_token
+Accept: application/json
+Host: docs.api.com</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_request_headers_5"><a class="link" href="#_request_headers_5">request-headers</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Authorization</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">액세스 토큰</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters"><a class="link" href="#_path_parameters">path-parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">필수값</th>
+<th class="tableblock halign-left valign-top">양식</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">meetingId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 고유번호</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_response_5"><a class="link" href="#_response_5">response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
+Content-Type: application/json;charset=UTF-8
+
+{
+  "code" : 200,
+  "message" : "API 호출에 성공했습니다.",
+  "data" : {
+    "meetingId" : 1,
+    "meetingCreatorName" : "나뭉이",
+    "meetingType" : "REGULAR",
+    "meetingName" : "1회 정기모임",
+    "meetingDateTime" : "2025.05.31 10:30",
+    "lateThresholdTime" : "2025.05.31 10:45",
+    "meetingPlace" : "추후 공지 예정 (합정역 주변 카페)",
+    "description" : "~~",
+    "discussionTime" : "2025.05.31 12:00",
+    "alarmMessage" : null,
+    "createdAt" : "2025.05.01 12:30",
+    "isPrivateMeeting" : false
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_response_fields_5"><a class="link" href="#_response_fields_5">response-fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수값</th>
+<th class="tableblock halign-left valign-top">양식</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>code</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">결과 코드</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>message</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">결과 메세지</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 고유번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingCreatorName</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 개설자 이름</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingType</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 유형</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingName</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 제목</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingDateTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 개최일자</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.lateThresholdTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지각 기준 시간</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingPlace</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 장소</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.description</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 상세내용</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.discussionTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">토론 시간</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.alarmMessage</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">토론 시작 알림 메세지</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.createdAt</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 개설일자</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.isPrivateMeeting</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">비공개 여부</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
 <h4 id="_error_case_5"><a class="link" href="#_error_case_5">Error case</a></h4>
 
 </div>
@@ -1613,14 +1695,24 @@ Content-Type: application/json;charset=UTF-8
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_모임_수정_기본_정보"><a class="link" href="#_모임_수정_기본_정보">모임 수정 - 기본 정보</a></h3>
-<div class="paragraph">
-<p>접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 모임 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 모임 시작 후에도 가능)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>접근 가능 권한 레벨: STAFF / 로그 생성</p>
+</li>
+<li>
+<p>운영진 모임원이 모임을 수정하는 용도의 API (운영진 등급 중에서는 개설 당사자만 가능)</p>
+</li>
+<li>
+<p>모임 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 모임 시작 후에도 가능)</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_6"><a class="link" href="#_request_6">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /meeting/1 HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /meetings/1/basic HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1817,14 +1909,24 @@ Content-Type: application/json;charset=UTF-8
 </div>
 <div class="sect2">
 <h3 id="_모임_수정_조별_활동_관련"><a class="link" href="#_모임_수정_조별_활동_관련">모임 수정 - 조별 활동 관련</a></h3>
-<div class="paragraph">
-<p>접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 토론 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 토론 시작 후에도 가능)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>접근 가능 권한 레벨: STAFF / 로그 생성</p>
+</li>
+<li>
+<p>운영진 모임원이 모임을 수정하는 용도의 API (운영진 등급 중에서는 개설 당사자만 가능)</p>
+</li>
+<li>
+<p>토론 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 토론 시작 후에도 수정 가능)</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_7"><a class="link" href="#_request_7">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /meeting/1/discussion HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /meetings/1/discussion HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1989,14 +2091,24 @@ Content-Type: application/json;charset=UTF-8
 </div>
 <div class="sect2">
 <h3 id="_지난_모임_비공개_처리"><a class="link" href="#_지난_모임_비공개_처리">지난 모임 비공개 처리</a></h3>
-<div class="paragraph">
-<p>접근 가능 권한 레벨: ADMIN / 모임 익일부터 처리 가능</p>
+<div class="ulist">
+<ul>
+<li>
+<p>접근 가능 권한 레벨: ADMIN</p>
+</li>
+<li>
+<p>관리자급 모임원이 지난 모임을 비공개 처리해서 일반 모임원은 조회가 불가능하게 만드는 용도의 API</p>
+</li>
+<li>
+<p>모임 익일부터 처리 가능</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_8"><a class="link" href="#_request_8">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /meeting/1/private HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /meetings/1/make-private HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -2118,14 +2230,21 @@ Content-Type: application/json;charset=UTF-8
 </div>
 <div class="sect2">
 <h3 id="_비공개_모임_공개_처리"><a class="link" href="#_비공개_모임_공개_처리">비공개 모임 공개 처리</a></h3>
-<div class="paragraph">
+<div class="ulist">
+<ul>
+<li>
 <p>접근 가능 권한 레벨: ADMIN</p>
+</li>
+<li>
+<p>관리자급 모임원이 비공개했던 모임을 다시 공개하는 용도의 API</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_9"><a class="link" href="#_request_9">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /meeting/1/public HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /meetings/1/make-public HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -2252,14 +2371,31 @@ Content-Type: application/json;charset=UTF-8
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_개설한_모임_삭제"><a class="link" href="#_개설한_모임_삭제">개설한 모임 삭제</a></h3>
-<div class="paragraph">
-<p>접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 모임 시작 6시간 전까지만 가능</p>
+<div class="ulist">
+<ul>
+<li>
+<p>접근 가능 권한 레벨: STAFF / 로그 생성</p>
+</li>
+<li>
+<p>운영진 모임원이 개설한 모임을 삭제하는 용도의 API (운영진 중에서는 개설 당사자만 가능)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>해당 삭제는 Hard Delete 이기에 수행 후, 복원이 되지 않음!</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>모임 시작 6시간 전까지만 가능</p>
+</li>
+</ul>
 </div>
 <div class="sect3">
 <h4 id="_request_10"><a class="link" href="#_request_10">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">DELETE /meeting/1 HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">DELETE /meetings/1 HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -2385,7 +2521,7 @@ Content-Type: application/json;charset=UTF-8
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-06-24 13:45:37 +0900
+Last updated 2025-06-25 02:17:32 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

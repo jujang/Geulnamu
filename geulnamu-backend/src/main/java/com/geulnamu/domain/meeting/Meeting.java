@@ -6,6 +6,7 @@ import com.geulnamu.domain.shared.DateColumn;
 import com.geulnamu.domain.shared.converter.MeetingTypeConverter;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.ExistDataException;
+import com.geulnamu.infrastructure.exception.ForbiddenException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import jakarta.persistence.*;
 import lombok.*;
@@ -105,7 +106,7 @@ public class Meeting extends DateColumn {
         }
     }
 
-    // 토론 참여 의사는 토론 시작 30분 전까지만 설정 가능   TODO: 해당 기능은 실 운영해보면서 수정 가능 시간이나 기능 수정 권한 조율해 볼 것
+    // 토론 참여 여부 의사는 토론 시작 30분 전까지만 설정 가능   TODO: 해당 기능은 실 운영해보면서 수정 가능 시간이나 기능 수정 권한 조율해 볼 것
     public void checkTimeCanSwitchDiscussionAttendance() {
         if(LocalDateTime.now().isAfter(this.discussionTime.minusMinutes(30))) {
             throw new BadRequestException(ResponseMessage.DISCUSSION_INTENTION_SETTING_TIME_RESTRICTION);
@@ -115,6 +116,12 @@ public class Meeting extends DateColumn {
     public void checkRequestedMember(Long memberId) {
         if(!this.getMember().getId().equals(memberId)) {
             throw new BadRequestException(ResponseMessage.NOT_SUITABLE_MEMBER);
+        }
+    }
+
+    public void checkMemberIsDeActivated(Long memberId) {
+        if(this.getMember().getDeletedAt() != null) {
+            throw new ForbiddenException(ResponseMessage.DEACTIVATE_MEMBER_ACCESS_DENIED);
         }
     }
 

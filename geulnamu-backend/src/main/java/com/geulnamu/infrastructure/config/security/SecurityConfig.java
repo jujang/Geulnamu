@@ -48,7 +48,9 @@ public class SecurityConfig {
     };
 
     private static final String[] AUTH_FOR_STAFF = {
+        "/members/list",
         "/meetings/create",
+        "/meetings/list/staff",
         "/meetings/{meetingId}",
         "/meetings/{meetingId}/basic",
         "/meetings/{meetingId}/discussion",
@@ -59,8 +61,6 @@ public class SecurityConfig {
 
     private static final String[] AUTH_FOR_ADMIN = {
         "/members/{memberId}/**",
-        "/members/list",
-        "/meetings/list/admin",
         "/meetings/{meetingId}/make-private",
         "/meetings/{meetingId}/make-public",
         "/attendances/{attendanceId}/delete",

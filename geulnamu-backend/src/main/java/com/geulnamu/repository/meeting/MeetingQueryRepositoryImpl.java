@@ -1,7 +1,7 @@
 package com.geulnamu.repository.meeting;
 
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
-import com.geulnamu.controller.meeting.dto.response.MeetingInfoForAdminResponse;
+import com.geulnamu.controller.meeting.dto.response.MeetingInfoForStaffResponse;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.attendance.AttendanceStatus;
@@ -85,7 +85,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
     }
 
     @Override
-    public Page<MeetingInfoForAdminResponse> findMeetingsForAdminWithPaging(MeetingListRequest request) {
+    public Page<MeetingInfoForStaffResponse> findMeetingsForAdminWithPaging(MeetingListRequest request) {
         Pageable pageable = request.toPageable();
 
         List<Long> count = queryFactory
@@ -98,8 +98,8 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
             )
             .fetch();
 
-        List<MeetingInfoForAdminResponse> content = queryFactory
-            .select(Projections.constructor(MeetingInfoForAdminResponse.class,
+        List<MeetingInfoForStaffResponse> content = queryFactory
+            .select(Projections.constructor(MeetingInfoForStaffResponse.class,
                 meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingName, meeting.meetingDate,
                 meeting.lateThresholdTime, meeting.meetingPlace, meeting.description, meeting.discussionTime,
                 meeting.alarmMessage, meeting.createdAt, meeting.privateAt.isNotNull())

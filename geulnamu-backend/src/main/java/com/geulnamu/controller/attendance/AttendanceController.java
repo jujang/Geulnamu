@@ -40,7 +40,7 @@ public class AttendanceController {
     }
 
     @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/list", name = "모임별 참석 현황 조회")
+    @GetMapping(value = "/list", name = "모임별 모임원 참석 현황 조회")
     public BaseResponse<MeetingAttendanceDetailsResponse> getMeetingAttendanceStatus(@RequestParam @Min(value = 1) Long meetingId) {
         MeetingAttendanceDetailsResponse response = attendanceService.getMeetingAttendanceStatus(meetingId);
         return BaseResponse.ofSuccess(response);

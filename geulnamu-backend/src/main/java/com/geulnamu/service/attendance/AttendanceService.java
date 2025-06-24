@@ -36,6 +36,7 @@ public class AttendanceService {
         Meeting meeting = meetingQueryRepository.findById(meetingId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
         meeting.checkRequestedMember(memberId);
+        meeting.checkMemberIsDeActivated(memberId); // 비활성화 계정은 출석 하지 못하게 제한
 
         meeting.checkTimeCanAttendMeeting();
         // 동일한 모임원이 해당 모임에 출석한 이력이 있는지 확인

@@ -35,13 +35,6 @@ public class MeetingController {
         return BaseResponse.ofSuccess(meetingId);
     }
 
-    @AccessLevel(Level.STAFF)
-    @GetMapping(value = "/{meetingId}", name = "모임 단일 조회")
-    public BaseResponse<MeetingInfoForAdminResponse> findMeeting(@PathVariable @Min(value = 1) Long meetingId) {
-        MeetingInfoForAdminResponse response = meetingService.findMeeting(meetingId);
-        return BaseResponse.ofSuccess(response);
-    }
-
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/staff-list", name = "운영진 목록 조회 - 필터링용")
     public BaseResponse<List<MemberIdAndNameResponse>> getStaffList() {
@@ -57,14 +50,21 @@ public class MeetingController {
         return BaseResponse.ofSuccess(response);
     }
 
-    @AccessLevel(Level.ADMIN)
-    @GetMapping(value = "/list/admin", name = "모임 목록 조회(관리자용)")
-    public BaseResponse<MeetingListForAdminResponse> getMeetingListForAdminLevel(@Valid MeetingListRequest request) {
-        MeetingListForAdminResponse response = meetingService.getMeetingListForAdmin(request);
+    @AccessLevel(Level.STAFF)
+    @GetMapping(value = "/list/staff", name = "모임 목록 조회(운영진용)")
+    public BaseResponse<MeetingListForStaffResponse> getMeetingListForStaff(@Valid MeetingListRequest request) {
+        MeetingListForStaffResponse response = meetingService.getMeetingListForAdmin(request);
         return BaseResponse.ofSuccess(response);
     }
 
-    @LogAction(value = ActionType.MEETING_UPDATE, actionDomain = "meeting")
+    @AccessLevel(Level.STAFF)
+    @GetMapping(value = "/{meetingId}", name = "모임 단일 조회(운영진용)")
+    public BaseResponse<MeetingInfoForStaffResponse> findMeetingForStaff(@PathVariable @Min(value = 1) Long meetingId) {
+        MeetingInfoForStaffResponse response = meetingService.findMeeting(meetingId);
+        return BaseResponse.ofSuccess(response);
+    }
+
+    @LogAction(value = ActionType.MEETING_UPDATE_BASIC, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @PatchMapping(value = "/{meetingId}/basic", name = "모임 수정 - 기본 정보")
     public BaseResponse<Void> updateMeeting(@PathVariable @Min(value = 1) Long meetingId,

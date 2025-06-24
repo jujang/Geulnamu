@@ -18,7 +18,10 @@ endif::[]
 == POST
 
 === 모임 생성
-접근 가능 권한 레벨: STAFF / 로그 생성 / 미래 시간만 생성 가능
+* 접근 가능 권한 레벨: STAFF / 로그 생성
+* 운영진급 모임원이 모임을 생성하는 용도의 API
+* 모임의 개최 일정은 미래 시간만 가능함.
+* 지각 기준 시간을 설정할 수 있는데, 설정하지 않는다면 모임 개최 시간 자체가 지각 기준 시간이 됨. (지각 기준 시간은 모임 개최 시간 보다 빠르면 안 되고, 같은 날 안에서만 설정이 가능함.)
 
 ==== request
 include::{snippets}/meetings/create/http-request.adoc[]
@@ -40,30 +43,9 @@ include::{snippets}/meetings/create/response-fields.adoc[]
 
 == GET
 
-=== 모임 단일 조회
-접근 가능 권한 레벨: STAFF
-
-==== request
-include::{snippets}/meetings/view/http-request.adoc[]
-
-==== request-headers
-include::{snippets}/meetings/view/request-headers.adoc[]
-
-==== path-parameters
-include::{snippets}/meetings/view/path-parameters.adoc[]
-
-==== response
-include::{snippets}/meetings/view/http-response.adoc[]
-
-==== response-fields
-include::{snippets}/meetings/view/response-fields.adoc[]
-
-==== Error case
-
----
-
 === 운영진 목록 조회 - 필터링용
-접근 가능 권한 레벨: MEMBER
+* 접근 가능 권한 레벨: MEMBER
+* 모임 목록 조회 기능에서 필터링 기준으로 사용하는 모임원 리스트를 제공받는 용도의 API
 
 ==== request
 include::{snippets}/meetings/staff-list/view/http-request.adoc[]
@@ -82,7 +64,9 @@ include::{snippets}/meetings/staff-list/view/response-fields.adoc[]
 ---
 
 === 모임 목록 조회
-접근 가능 권한 레벨: MEMBER
+* 접근 가능 권한 레벨: MEMBER
+* 모임 목록을 조회하는 용도의 API
+* 페이지네이션이 적용됨
 
 ==== request
 include::{snippets}/meetings/list/view/http-request.adoc[]
@@ -104,31 +88,57 @@ include::{snippets}/meetings/list/view/response-fields.adoc[]
 
 ---
 
-=== 모임 목록 조회 (관리자용)
-접근 가능 권한 레벨: ADMIN
+=== 모임 목록 조회 (운영진용)
+* 접근 가능 권한 레벨: STAFF
+* 운영진 모임원이 운영진 페이지에서 모임 목록을 조회하는 용도의 API (운영진 제공 정보에는 모임 비활성화여부가 함께 보여짐)
+* 페이지네이션이 적용됨
 
 ==== request
-include::{snippets}/meetings/list/admin/view/http-request.adoc[]
+include::{snippets}/meetings/list/staff/view/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/meetings/list/admin/view/request-headers.adoc[]
+include::{snippets}/meetings/list/staff/view/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/meetings/list/admin/view/query-parameters.adoc[]
+include::{snippets}/meetings/list/staff/view/query-parameters.adoc[]
 
 ==== response
-include::{snippets}/meetings/list/admin/view/http-response.adoc[]
+include::{snippets}/meetings/list/staff/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/meetings/list/admin/view/response-fields.adoc[]
+include::{snippets}/meetings/list/staff/view/response-fields.adoc[]
 
 ==== Error case
 
+---
+
+=== 모임 단일 조회 (운영진용)
+* 접근 가능 권한 레벨: STAFF
+* 운영진 모임원이 운영진 페이지에서 모임을 단일 조회하는 데에 사용하는 API
+
+==== request
+include::{snippets}/meetings/view/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/meetings/view/request-headers.adoc[]
+
+==== path-parameters
+include::{snippets}/meetings/view/path-parameters.adoc[]
+
+==== response
+include::{snippets}/meetings/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/meetings/view/response-fields.adoc[]
+
+==== Error case
 
 == PATCH
 
 === 모임 수정 - 기본 정보
-접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 모임 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 모임 시작 후에도 가능)
+* 접근 가능 권한 레벨: STAFF / 로그 생성
+* 운영진 모임원이 모임을 수정하는 용도의 API (운영진 등급 중에서는 개설 당사자만 가능)
+* 모임 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 모임 시작 후에도 가능)
 
 ==== request
 include::{snippets}/meetings/basic/modify/http-request.adoc[]
@@ -154,7 +164,9 @@ include::{snippets}/meetings/basic/modify/response-fields.adoc[]
 ---
 
 === 모임 수정 - 조별 활동 관련
-접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 토론 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 토론 시작 후에도 가능)
+* 접근 가능 권한 레벨: STAFF / 로그 생성
+* 운영진 모임원이 모임을 수정하는 용도의 API (운영진 등급 중에서는 개설 당사자만 가능)
+* 토론 시작 전, 미래 시간으로만 수정 가능 (관리자 급은 토론 시작 후에도 수정 가능)
 
 ==== request
 include::{snippets}/meetings/discussion/modify/http-request.adoc[]
@@ -180,7 +192,9 @@ include::{snippets}/meetings/discussion/modify/response-fields.adoc[]
 ---
 
 === 지난 모임 비공개 처리
-접근 가능 권한 레벨: ADMIN / 모임 익일부터 처리 가능
+* 접근 가능 권한 레벨: ADMIN
+* 관리자급 모임원이 지난 모임을 비공개 처리해서 일반 모임원은 조회가 불가능하게 만드는 용도의 API
+* 모임 익일부터 처리 가능
 
 ==== request
 include::{snippets}/meetings/make-private/modify/http-request.adoc[]
@@ -203,7 +217,8 @@ include::{snippets}/meetings/make-private/modify/response-fields.adoc[]
 ---
 
 === 비공개 모임 공개 처리
-접근 가능 권한 레벨: ADMIN
+* 접근 가능 권한 레벨: ADMIN
+* 관리자급 모임원이 비공개했던 모임을 다시 공개하는 용도의 API
 
 ==== request
 include::{snippets}/meetings/make-public/modify/http-request.adoc[]
@@ -226,7 +241,10 @@ include::{snippets}/meetings/make-public/modify/response-fields.adoc[]
 == DELETE
 
 === 개설한 모임 삭제
-접근 가능 권한 레벨: STAFF (STAFF 중에서는 개설 당사자만 가능) / 로그 생성 / 모임 시작 6시간 전까지만 가능
+* 접근 가능 권한 레벨: STAFF / 로그 생성
+* 운영진 모임원이 개설한 모임을 삭제하는 용도의 API (운영진 중에서는 개설 당사자만 가능)
+** 해당 삭제는 Hard Delete 이기에 수행 후, 복원이 되지 않음!
+* 모임 시작 6시간 전까지만 가능
 
 ==== request
 include::{snippets}/meetings/remove/http-request.adoc[]

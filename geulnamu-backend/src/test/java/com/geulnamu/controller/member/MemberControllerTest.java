@@ -140,7 +140,7 @@ public class MemberControllerTest extends ControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "STAFF")
     public void getMembersTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";

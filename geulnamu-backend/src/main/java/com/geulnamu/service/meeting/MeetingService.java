@@ -22,7 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -47,10 +46,10 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingInfoForAdminResponse findMeeting(Long meetingId) {
+    public MeetingInfoForStaffResponse findMeeting(Long meetingId) {
         Meeting meeting = meetingQueryRepository.findById(meetingId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
-        return MeetingInfoForAdminResponse.of(meeting);
+        return MeetingInfoForStaffResponse.of(meeting);
     }
 
     @Transactional(readOnly = true)
@@ -68,12 +67,12 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingListForAdminResponse getMeetingListForAdmin(MeetingListRequest request) {
-        Page<MeetingInfoForAdminResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(request);
+    public MeetingListForStaffResponse getMeetingListForAdmin(MeetingListRequest request) {
+        Page<MeetingInfoForStaffResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(request);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
-        List<MeetingInfoForAdminResponse> meetingList = meetingDslList.getContent();
-        return new MeetingListForAdminResponse(pagingResponse, meetingList);
+        List<MeetingInfoForStaffResponse> meetingList = meetingDslList.getContent();
+        return new MeetingListForStaffResponse(pagingResponse, meetingList);
     }
 
     @Transactional(rollbackFor = Exception.class)

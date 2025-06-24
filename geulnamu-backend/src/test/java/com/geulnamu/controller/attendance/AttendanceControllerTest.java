@@ -92,9 +92,8 @@ public class AttendanceControllerTest extends ControllerTest {
         AttendanceInfoResponse attendanceInfoResponse = new AttendanceInfoResponse(
             1L, MeetingType.REGULAR, LocalDateTime.of(2126, 6, 14, 10, 30),
             LocalDateTime.of(2126, 6, 14, 10, 45), "1000회 정기모임",
-            "합정 저스티나", "조심히 오세요~", "1등으로 왔지롱~",
-            LocalDateTime.of(2126, 6, 14, 12, 0), null,
-            LocalDateTime.of(2126, 6, 13, 20, 0)
+            "합정 저스티나", "조심히 오세요~", LocalDateTime.of(2126, 6, 13, 20, 0),
+            "1등으로 왔지롱~", LocalDateTime.of(2126, 6, 14, 12, 0), null
         );
 
         given(attendanceService.getMyAttendanceInfo(any(), any())).willReturn(attendanceInfoResponse);
@@ -132,10 +131,10 @@ public class AttendanceControllerTest extends ControllerTest {
                     fieldWithPath("data.meetingName").type(JsonFieldType.STRING).description("모임 제목"),
                     fieldWithPath("data.meetingPlace").type(JsonFieldType.STRING).description("모임 장소"),
                     fieldWithPath("data.description").type(JsonFieldType.STRING).description("모임 상세내용").optional(),
+                    fieldWithPath("data.attendTime").type(JsonFieldType.STRING).optional().description("모임 참석 시간"),
                     fieldWithPath("data.note").type(JsonFieldType.STRING).description("참석 관련 비고").optional(),
                     fieldWithPath("data.discussionTime").type(JsonFieldType.STRING).description("토론 시간").optional(),
-                    fieldWithPath("data.groupMemberList").type(JsonFieldType.STRING).description("토론 조 명단").optional(),
-                    fieldWithPath("data.createdAt").type(JsonFieldType.STRING).optional().description("모임 개설일자")
+                    fieldWithPath("data.groupMemberList").type(JsonFieldType.STRING).description("토론 조 명단").optional()
                 )
             ));
     }

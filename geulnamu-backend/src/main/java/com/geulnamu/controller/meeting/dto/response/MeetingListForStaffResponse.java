@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class MeetingListForAdminResponse {
+public class MeetingListForStaffResponse {
     private PagingResponse pagingResponse;
-    private List<MeetingInfoForAdminResponse> meetingList;
+    private List<MeetingInfoForStaffResponse> meetingList;
 }

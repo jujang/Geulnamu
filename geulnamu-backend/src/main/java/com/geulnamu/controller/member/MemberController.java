@@ -43,7 +43,7 @@ public class MemberController {
         return BaseResponse.ofSuccess(response);
     }
 
-    @AccessLevel(Level.ADMIN)
+    @AccessLevel(Level.STAFF)
     @GetMapping(value = "/list", name = "모임원 목록 조회")
     public BaseResponse<MemberListResponse> getMembers(@Valid MemberListRequest request) {
         MemberListResponse response = memberService.getMembers(request);
