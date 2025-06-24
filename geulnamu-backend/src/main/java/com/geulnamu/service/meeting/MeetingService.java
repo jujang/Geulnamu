@@ -28,8 +28,8 @@ public class MeetingService {
 
     private final MeetingAuthorizationService authorizationService;
     private final MemberQueryRepository memberQueryRepository;
-    private final MeetingCommandRepository meetingCommandRepository;
     private final MeetingQueryRepository meetingQueryRepository;
+    private final MeetingCommandRepository meetingCommandRepository;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -53,7 +53,7 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingListResponse getMeetingList(MeetingListRequest request, Long myMemberId) {
+    public MeetingListResponse getMeetingList(Long myMemberId, MeetingListRequest request) {
         Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(request, myMemberId);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);

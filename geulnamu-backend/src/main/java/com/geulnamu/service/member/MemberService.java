@@ -22,8 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberService {
 
-    private final MemberCommandRepository memberCommandRepository;
     private final MemberQueryRepository memberQueryRepository;
+    private final MemberCommandRepository memberCommandRepository;
 
 
     @Transactional(rollbackFor = Exception.class)

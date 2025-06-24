@@ -32,8 +32,8 @@ public class AttendanceController {
     @LogAction(value = ActionType.ATTENDANCE_CREATE, actionDomain = "attendance")
     @AccessLevel(Level.MEMBER)
     @PostMapping(name = "출석")
-    public BaseResponse<Long> meetingAttend(@RequestParam @Min(value = 1) Long meetingId, @AuthMemberId Long memberId) {
-        Long attendanceId = attendanceService.createAttendance(meetingId, memberId);
+    public BaseResponse<Long> meetingAttend(@AuthMemberId Long memberId, @RequestParam @Min(value = 1) Long meetingId) {
+        Long attendanceId = attendanceService.createAttendance(memberId, meetingId);
         return BaseResponse.ofSuccess(attendanceId);
     }
 

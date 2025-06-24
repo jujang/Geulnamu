@@ -32,7 +32,7 @@ public class AttendanceService {
 
     // TODO: 추후 lock을 걸지 고민해 볼 것
     @Transactional(rollbackFor = Exception.class)
-    public Long createAttendance(Long meetingId, Long memberId) {
+    public Long createAttendance(Long memberId, Long meetingId) {
         Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
         meeting.validateRequestedMember(memberId);
 

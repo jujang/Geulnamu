@@ -3,8 +3,6 @@ package com.geulnamu.service.actionHistory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.geulnamu.domain.actionHistory.ActionHistory;
-import com.geulnamu.domain.shared.enums.ActionStatus;
-import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.infrastructure.aspect.dto.ActionLogContext;
 import com.geulnamu.repository.actionHistory.ActionHistoryCommandRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ActionHistoryService {
 
-    private final ActionHistoryCommandRepository actionHistoryRepository;
     private final ObjectMapper objectMapper;
+    private final ActionHistoryCommandRepository actionHistoryRepository;
 
     /**
      * 액션 히스토리 저장 (비동기 처리)
