@@ -12,7 +12,6 @@ import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.attendance.AttendanceService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,8 +42,7 @@ public class DiscussionController {
 
     @AccessLevel(Level.STAFF)
     @GetMapping(value = "/groups", name = "전체 토론 그룹 명단 조회")
-    public BaseResponse<List<DiscussionGroupResponse>> getAllDiscussionGroupMemberList(@RequestParam /*@NotNull(message = "모임 고유번호 필수 입력")*/
-                                                                                           @Min(value = 1) Long meetingId) {
+    public BaseResponse<List<DiscussionGroupResponse>> getAllDiscussionGroupMemberList(@RequestParam @Min(value = 1) Long meetingId) {
         List<DiscussionGroupResponse> responseList = attendanceService.getAllDiscussionGroupMemberList(meetingId);
         return BaseResponse.ofSuccess(responseList);
     }
