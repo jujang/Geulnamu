@@ -1,5 +1,6 @@
 package com.geulnamu.repository.meeting;
 
+import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoForStaffResponse;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
@@ -82,6 +83,27 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
             .fetch();
 
         return PageableExecutionUtils.getPage(content, pageable, count::size);
+    }
+
+    @Override
+    public List<AttendanceInfoResponse> findTodayMeetingList(Long memberId) {
+        return queryFactory
+            .select(Projections.constructor(AttendanceInfoResponse.class,
+                attendance.id, meeting.id, meeting.meetingType, meeting.meetingDate,
+                meeting.lateThresholdTime, meeting.meetingName, meeting.meetingPlace,
+                meeting.description, attendance.createdAt, attendance.note,
+                meeting.discussionTime, attendance.discussionGroup, Expressions.nullExpression(List.class))
+            )
+            .from(meeting)
+            .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id)
+                .and(attendance.member.id.eq(memberId)))
+            .where(
+                meeting.privateAt.isNull(), // 비공개된 모임은 조회해오지 않음
+                meeting.meetingDate.year().eq(DateTimeExpression.currentTimestamp().year()),
+                meeting.meetingDate.dayOfYear().eq(DateTimeExpression.currentTimestamp().dayOfYear())
+            )
+            .orderBy(meeting.meetingDate.asc())
+            .fetch();
     }
 
     @Override

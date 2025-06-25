@@ -50,8 +50,9 @@ public class AttendanceService {
     }
 
     @Transactional(readOnly = true)
-    public AttendanceInfoResponse getMyAttendanceInfo(Long attendanceId, Long memberId) {
-        Attendance attendance = getValidateAttendance(attendanceId, memberId);
+    public AttendanceInfoResponse getMyAttendanceInfo(Long memberId, Long meetingId) {
+        Attendance attendance = attendanceQueryRepository.findByMeetingIdAndMemberId(meetingId, memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
         List<MemberIdAndNameResponse> memberIdAndNameResponseList = getDiscussionGroupMembers(attendance);
         return new AttendanceInfoResponse(attendance, memberIdAndNameResponseList);
     }

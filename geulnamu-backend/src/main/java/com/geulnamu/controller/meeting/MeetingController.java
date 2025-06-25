@@ -1,5 +1,6 @@
 package com.geulnamu.controller.meeting;
 
+import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
 import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingGroupUpdateRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
@@ -49,6 +50,13 @@ public class MeetingController {
                                                             @Valid MeetingListRequest request) {
         MeetingListResponse response = meetingService.getMeetingList(memberId, request);
         return BaseResponse.ofSuccess(response);
+    }
+
+    @AccessLevel(Level.MEMBER)
+    @GetMapping(value = "/list/today", name = "오늘의 모임 조회")
+    public BaseResponse<List<AttendanceInfoResponse>> getTodayMeetingList(@AuthMemberId Long memberId) {
+        List<AttendanceInfoResponse> responseList = meetingService.getTodayMeetingList(memberId);
+        return BaseResponse.ofSuccess(responseList);
     }
 
     // TODO: 현재 모임원이 사용 가능한 모임 단일 조회는 존재하지 않음. 대신, 출석 이후에 출석 정보를 조회하면서 모임 조회도 동시에 할 수 있음.

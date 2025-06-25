@@ -32,10 +32,10 @@ public class AttendanceController {
     }
 
     @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/{attendanceId}/my-info", name = "개인 출석 정보 조회")
-    public BaseResponse<AttendanceInfoResponse> getMyAttendanceInfo(@PathVariable @Min(value = 1) Long attendanceId,
-                                                                    @AuthMemberId Long memberId) {
-        AttendanceInfoResponse response = attendanceService.getMyAttendanceInfo(attendanceId, memberId);
+    @GetMapping(value = "/my-info", name = "개인 출석 정보 조회")
+    public BaseResponse<AttendanceInfoResponse> getMyAttendanceInfo(@AuthMemberId Long memberId,
+                                                                    @RequestParam @Min(value = 1) Long meetingId) {
+        AttendanceInfoResponse response = attendanceService.getMyAttendanceInfo(memberId, meetingId);
         return BaseResponse.ofSuccess(response);
     }
 

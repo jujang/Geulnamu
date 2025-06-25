@@ -52,11 +52,11 @@ include::{snippets}/attendances/check-in/create/response-fields.adoc[]
 ==== request
 include::{snippets}/attendances/my-info/view/http-request.adoc[]
 
-==== path-parameters
-include::{snippets}/attendances/my-info/view/path-parameters.adoc[]
-
 ==== request-headers
 include::{snippets}/attendances/my-info/view/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/attendances/my-info/view/query-parameters.adoc[]
 
 ==== response
 include::{snippets}/attendances/my-info/view/http-response.adoc[]

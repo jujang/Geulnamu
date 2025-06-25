@@ -1,5 +1,6 @@
 package com.geulnamu.controller.meeting;
 
+import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
 import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingGroupUpdateRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
@@ -234,6 +235,85 @@ public class MeetingControllerTest extends ControllerTest {
                     fieldWithPath("data.meetingList[].discussionTime").type(JsonFieldType.STRING).description("토론 시간").optional(),
                     fieldWithPath("data.meetingList[].alarmMessage").type(JsonFieldType.STRING).description("토론 시작 알림 메세지").optional(),
                     fieldWithPath("data.meetingList[].createdAt").type(JsonFieldType.STRING).optional().description("모임 개설일자")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "MEMBER")
+    public void getTodayMeetingListTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+
+        AttendanceInfoResponse attendanceInfoResponse_1 = new AttendanceInfoResponse(
+            1L, 1L, MeetingType.REGULAR, LocalDateTime.of(2126, 6, 14, 10, 30),
+            LocalDateTime.of(2126, 6, 14, 10, 45), "1000회 정기모임",
+            "합정 저스티나", "조심히 오세요~", LocalDateTime.of(2126, 6, 14, 10, 0),
+            "1등으로 왔지롱~", LocalDateTime.of(2126, 6, 14, 12, 0), null, null
+        );
+
+        MemberIdAndNameResponse memberIdAndNameResponse_1 = new MemberIdAndNameResponse(1L, "나뭉일");
+        MemberIdAndNameResponse memberIdAndNameResponse_2 = new MemberIdAndNameResponse(2L, "나뭉이");
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList = new ArrayList<>();
+        memberIdAndNameResponseList.add(memberIdAndNameResponse_1);
+        memberIdAndNameResponseList.add(memberIdAndNameResponse_2);
+
+        AttendanceInfoResponse attendanceInfoResponse_2 = new AttendanceInfoResponse(
+            4L, 2L, MeetingType.REGULAR, LocalDateTime.of(2126, 6, 14, 18, 30),
+            LocalDateTime.of(2126, 6, 14, 18, 45), "독서벙",
+            "합정 빌리프커피로스터리", "조심히 오세요~", LocalDateTime.of(2126, 6, 14, 18, 25),
+            "지각 안 했습니다~", LocalDateTime.of(2126, 6, 14, 20, 0), DiscussionGroup.A, memberIdAndNameResponseList
+        );
+
+        List<AttendanceInfoResponse> attendanceInfoResponseList = new ArrayList<>();
+        attendanceInfoResponseList.add(attendanceInfoResponse_1);
+        attendanceInfoResponseList.add(attendanceInfoResponse_2);
+
+        given(meetingService.getTodayMeetingList(any())).willReturn(attendanceInfoResponseList);
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                get("/meetings/list/today")
+                    .param("meetingId", "1")
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andDo(document(
+                "/meetings/list/today/view",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                queryParameters(
+                    parameterWithName("meetingId").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("모임 고유번호")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data[].attendanceId").type(JsonFieldType.NUMBER).description("참석 고유번호"),
+                    fieldWithPath("data[].meetingId").type(JsonFieldType.NUMBER).description("모임 고유번호"),
+                    fieldWithPath("data[].meetingType").type(JsonFieldType.STRING).description("모임 유형"),
+                    fieldWithPath("data[].meetingDateTime").type(JsonFieldType.STRING).description("모임 개최일자"),
+                    fieldWithPath("data[].lateThresholdTime").type(JsonFieldType.STRING).description("지각 기준 시간"),
+                    fieldWithPath("data[].meetingName").type(JsonFieldType.STRING).description("모임 제목"),
+                    fieldWithPath("data[].meetingPlace").type(JsonFieldType.STRING).description("모임 장소"),
+                    fieldWithPath("data[].description").type(JsonFieldType.STRING).description("모임 상세내용").optional(),
+                    fieldWithPath("data[].attendTime").type(JsonFieldType.STRING).optional().description("모임 참석 시간"),
+                    fieldWithPath("data[].note").type(JsonFieldType.STRING).description("참석 관련 비고").optional(),
+                    fieldWithPath("data[].discussionTime").type(JsonFieldType.STRING).description("토론 시간").optional(),
+                    fieldWithPath("data[].discussionGroup").type(JsonFieldType.STRING).description("토론 조 그룹").optional(),
+                    fieldWithPath("data[].groupMemberList").type(JsonFieldType.ARRAY).description("토론 조 명단").optional(),
+                    fieldWithPath("data[].groupMemberList[].memberId").type(JsonFieldType.NUMBER).description("같은 토론 조 모임원 고유번호").optional(),
+                    fieldWithPath("data[].groupMemberList[].memberName").type(JsonFieldType.STRING).description("같은 토론 조 모임원 이름").optional()
                 )
             ));
     }
