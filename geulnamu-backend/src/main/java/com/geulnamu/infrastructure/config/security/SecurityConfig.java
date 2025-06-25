@@ -38,6 +38,7 @@ public class SecurityConfig {
         "/members/me/profile",
         "/meetings/staff-list",
         "/meetings/list",
+        "/meetings/list/today",
         "/attendances/check-in",
         "/attendances/{attendanceId}/my-info",
         "/attendances/list",

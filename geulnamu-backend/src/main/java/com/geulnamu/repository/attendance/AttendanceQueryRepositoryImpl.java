@@ -1,6 +1,5 @@
 package com.geulnamu.repository.attendance;
 
-import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
 import com.geulnamu.controller.attendance.dto.response.DiscussionGroupResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
@@ -11,7 +10,6 @@ import com.geulnamu.domain.meeting.QMeeting;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -29,21 +26,6 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
     private final JPAQueryFactory queryFactory;
     private final QMeeting meeting = QMeeting.meeting;
     private final QAttendance attendance = QAttendance.attendance;
-
-    @Override
-    public Optional<AttendanceInfoResponse> findMyAttendanceInfo(Long attendanceId, Long memberId) {
-        return Optional.ofNullable(queryFactory
-            .select(Projections.constructor(AttendanceInfoResponse.class,
-                attendance.id, attendance.meeting.meetingType, attendance.meeting.meetingDate,
-                attendance.meeting.lateThresholdTime, attendance.meeting.meetingName, attendance.meeting.meetingPlace,
-                attendance.meeting.description, attendance.note, attendance.meeting.discussionTime,
-                Expressions.nullExpression(String.class), attendance.meeting.createdAt)
-            )
-            .from(attendance)
-            .where(attendance.id.eq(attendanceId)
-                .and(attendance.member.id.eq(memberId)))
-            .fetchOne());
-    }
 
     @Override
     public MeetingAttendanceSummaryResponse findMeetingAttendanceSummary(Long meetingId) {

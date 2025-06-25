@@ -3,6 +3,8 @@ package com.geulnamu.controller.attendance;
 import com.geulnamu.controller.attendance.dto.request.AttendanceNoteRequest;
 import com.geulnamu.controller.attendance.dto.response.*;
 import com.geulnamu.controller.shared.ControllerTest;
+import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.service.attendance.AttendanceService;
@@ -89,11 +91,18 @@ public class AttendanceControllerTest extends ControllerTest {
     public void getMyAttendanceInfoTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
+
+        MemberIdAndNameResponse memberIdAndNameResponse_1 = new MemberIdAndNameResponse(1L, "나뭉일");
+        MemberIdAndNameResponse memberIdAndNameResponse_2 = new MemberIdAndNameResponse(2L, "나뭉이");
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList = new ArrayList<>();
+        memberIdAndNameResponseList.add(memberIdAndNameResponse_1);
+        memberIdAndNameResponseList.add(memberIdAndNameResponse_2);
+
         AttendanceInfoResponse attendanceInfoResponse = new AttendanceInfoResponse(
-            1L, MeetingType.REGULAR, LocalDateTime.of(2126, 6, 14, 10, 30),
+            1L, 1L, MeetingType.REGULAR, LocalDateTime.of(2126, 6, 14, 10, 30),
             LocalDateTime.of(2126, 6, 14, 10, 45), "1000회 정기모임",
-            "합정 저스티나", "조심히 오세요~", LocalDateTime.of(2126, 6, 13, 20, 0),
-            "1등으로 왔지롱~", LocalDateTime.of(2126, 6, 14, 12, 0), null
+            "합정 저스티나", "조심히 오세요~", LocalDateTime.of(2126, 6, 14, 10, 0),
+            "1등으로 왔지롱~", LocalDateTime.of(2126, 6, 14, 12, 0), DiscussionGroup.A, memberIdAndNameResponseList
         );
 
         given(attendanceService.getMyAttendanceInfo(any(), any())).willReturn(attendanceInfoResponse);
@@ -101,12 +110,13 @@ public class AttendanceControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.get("/attendances/{attendanceId}/my-info", 1L)
+                RestDocumentationRequestBuilders.get("/attendances/my-info?meetingId={meetingId}", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
             );
 
+        // then
         actions
             .andExpect(status().isOk())
             .andExpect(jsonPath("code").value(200))
@@ -115,16 +125,17 @@ public class AttendanceControllerTest extends ControllerTest {
                 "/attendances/my-info/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
-                pathParameters(
-                    parameterWithName("attendanceId").attributes(key("format").value("1 이상의 정수")).description("참석 고유번호")
-                ),
                 requestHeaders(
                     headerWithName("Authorization").description("액세스 토큰")
+                ),
+                queryParameters(
+                    parameterWithName("meetingId").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("모임 고유번호")
                 ),
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
                     fieldWithPath("data.attendanceId").type(JsonFieldType.NUMBER).description("참석 고유번호"),
+                    fieldWithPath("data.meetingId").type(JsonFieldType.NUMBER).description("모임 고유번호"),
                     fieldWithPath("data.meetingType").type(JsonFieldType.STRING).description("모임 유형"),
                     fieldWithPath("data.meetingDateTime").type(JsonFieldType.STRING).description("모임 개최일자"),
                     fieldWithPath("data.lateThresholdTime").type(JsonFieldType.STRING).description("지각 기준 시간"),
@@ -134,7 +145,10 @@ public class AttendanceControllerTest extends ControllerTest {
                     fieldWithPath("data.attendTime").type(JsonFieldType.STRING).optional().description("모임 참석 시간"),
                     fieldWithPath("data.note").type(JsonFieldType.STRING).description("참석 관련 비고").optional(),
                     fieldWithPath("data.discussionTime").type(JsonFieldType.STRING).description("토론 시간").optional(),
-                    fieldWithPath("data.groupMemberList").type(JsonFieldType.STRING).description("토론 조 명단").optional()
+                    fieldWithPath("data.discussionGroup").type(JsonFieldType.STRING).description("토론 조 그룹").optional(),
+                    fieldWithPath("data.groupMemberList").type(JsonFieldType.ARRAY).description("토론 조 명단").optional(),
+                    fieldWithPath("data.groupMemberList[].memberId").type(JsonFieldType.NUMBER).description("같은 토론 조 모임원 고유번호").optional(),
+                    fieldWithPath("data.groupMemberList[].memberName").type(JsonFieldType.STRING).description("같은 토론 조 모임원 이름").optional()
                 )
             ));
     }
