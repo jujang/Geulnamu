@@ -54,7 +54,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
             .from(meeting)
             .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id)
                 .and(attendance.member.id.eq(myMemberId)))
-            .where(meeting.privateAt.isNull(),
+            .where(meeting.privateAt.isNull(), // 비공개된 모임은 조회해오지 않음
                 filterByMeetingType(request.getMeetingType()),
                 filterByMemberId(request.getMeetingCreatorId()),
                 filterByAttendanceStatus(request.getAttendanceStatus())
@@ -64,13 +64,13 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
         List<MeetingInfoResponse> content = queryFactory
             .select(Projections.constructor(MeetingInfoResponse.class,
                 meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingName, meeting.meetingDate,
-                meeting.meetingPlace, meeting.description, attendanceStatusExpression(), attendance.discussionGroup,
-                meeting.discussionTime, meeting.alarmMessage, meeting.createdAt)
+                meeting.lateThresholdTime, meeting.meetingPlace, meeting.description, attendanceStatusExpression(),
+                attendance.discussionGroup, meeting.discussionTime, meeting.alarmMessage, meeting.createdAt)
             )
             .from(meeting)
             .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id)
                 .and(attendance.member.id.eq(myMemberId)))
-            .where(meeting.privateAt.isNull(),
+            .where(meeting.privateAt.isNull(), // 비공개된 모임은 조회해오지 않음
                 filterByMeetingType(request.getMeetingType()),
                 filterByMemberId(request.getMeetingCreatorId()),
                 filterByAttendanceStatus(request.getAttendanceStatus())

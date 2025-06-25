@@ -150,13 +150,17 @@ public class MeetingControllerTest extends ControllerTest {
         String accessToken = "Bearer access_token";
 
         MeetingInfoResponse meetingInfoResponse_01 = new MeetingInfoResponse(
-            1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임", LocalDateTime.of(2025, 5, 31, 10, 45),
+            1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임",
+            LocalDateTime.of(2025, 5, 31, 10, 30),
+            LocalDateTime.of(2025, 5, 31, 10, 45),
             "합정 빌리프커피로스터리스", "~~", "true", DiscussionGroup.A,
             LocalDateTime.of(2025, 5, 31, 12, 0), null,
             LocalDateTime.of(2025, 5, 1, 12, 30)
         );
         MeetingInfoResponse meetingInfoResponse_02 = new MeetingInfoResponse(
-            2L, "나뭉이", MeetingType.FLASH, "금요 독서벙", LocalDateTime.of(2025, 6, 3, 18, 30),
+            2L, "나뭉이", MeetingType.FLASH, "금요 독서벙",
+            LocalDateTime.of(2025, 6, 3, 18, 30),
+            LocalDateTime.of(2025, 6, 3, 18, 30),
             "합정 저스티나", "~~", "true_late", null,
             LocalDateTime.of(2025, 5, 1, 12, 31), null,
             LocalDateTime.of(2025, 5, 1, 12, 30)
@@ -222,6 +226,7 @@ public class MeetingControllerTest extends ControllerTest {
                     fieldWithPath("data.meetingList[].meetingType").type(JsonFieldType.STRING).description("모임 유형"),
                     fieldWithPath("data.meetingList[].meetingName").type(JsonFieldType.STRING).description("모임 제목"),
                     fieldWithPath("data.meetingList[].meetingDateTime").type(JsonFieldType.STRING).description("모임 개최일자"),
+                    fieldWithPath("data.meetingList[].lateThresholdTime").type(JsonFieldType.STRING).description("지각 기준 시간"),
                     fieldWithPath("data.meetingList[].meetingPlace").type(JsonFieldType.STRING).description("모임 장소"),
                     fieldWithPath("data.meetingList[].description").type(JsonFieldType.STRING).description("모임 상세내용").optional(),
                     fieldWithPath("data.meetingList[].attendanceStatus").type(JsonFieldType.STRING).description("출석 상태"),
@@ -260,7 +265,7 @@ public class MeetingControllerTest extends ControllerTest {
 
         MeetingListForStaffResponse meetingListForStaffResponse = new MeetingListForStaffResponse(pagingResponse, meetingInfoForStaffResponseList);
 
-        given(meetingService.getMeetingListForAdmin(any())).willReturn(meetingListForStaffResponse);
+        given(meetingService.getMeetingListForStaff(any())).willReturn(meetingListForStaffResponse);
 
         // when
         ResultActions actions =
@@ -336,7 +341,7 @@ public class MeetingControllerTest extends ControllerTest {
             LocalDateTime.of(2025, 5, 1, 12, 30), false
         );
 
-        given(meetingService.findMeeting(any())).willReturn(meetingInfoForAdminResponse_01);
+        given(meetingService.findMeetingForStaff(any())).willReturn(meetingInfoForAdminResponse_01);
 
         // when
         ResultActions actions =

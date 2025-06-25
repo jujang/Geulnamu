@@ -30,7 +30,8 @@ public class MeetingController {
     @LogAction(value = ActionType.MEETING_CREATE, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @PostMapping(value = "/create", name = "모임 생성")
-    public BaseResponse<Long> createMeeting(@AuthMemberId Long memberId, @Valid @RequestBody MeetingCreateRequest request) {
+    public BaseResponse<Long> createMeeting(@AuthMemberId Long memberId,
+                                            @Valid @RequestBody MeetingCreateRequest request) {
         Long meetingId = meetingService.createMeeting(memberId, request);
         return BaseResponse.ofSuccess(meetingId);
     }
@@ -50,17 +51,20 @@ public class MeetingController {
         return BaseResponse.ofSuccess(response);
     }
 
+    // TODO: 현재 모임원이 사용 가능한 모임 단일 조회는 존재하지 않음. 대신, 출석 이후에 출석 정보를 조회하면서 모임 조회도 동시에 할 수 있음.
+    // TODO: 일단은 운영해보면서 '모임 목록 조회'와 '출석 단일 조회'로 적당히 커버 가능한지 확인해보고, 안 되면 그때가서 기능 만들 것. 근데 이러면, 아예 출석 조회 기능을 모임 조회 기능으로 끌어오는게 나을 수도 있음
+
     @AccessLevel(Level.STAFF)
     @GetMapping(value = "/list/staff", name = "모임 목록 조회(운영진용)")
     public BaseResponse<MeetingListForStaffResponse> getMeetingListForStaff(@Valid MeetingListRequest request) {
-        MeetingListForStaffResponse response = meetingService.getMeetingListForAdmin(request);
+        MeetingListForStaffResponse response = meetingService.getMeetingListForStaff(request);
         return BaseResponse.ofSuccess(response);
     }
 
     @AccessLevel(Level.STAFF)
     @GetMapping(value = "/{meetingId}", name = "모임 단일 조회(운영진용)")
     public BaseResponse<MeetingInfoForStaffResponse> findMeetingForStaff(@PathVariable @Min(value = 1) Long meetingId) {
-        MeetingInfoForStaffResponse response = meetingService.findMeeting(meetingId);
+        MeetingInfoForStaffResponse response = meetingService.findMeetingForStaff(meetingId);
         return BaseResponse.ofSuccess(response);
     }
 

@@ -66,6 +66,7 @@ include::{snippets}/meetings/staff-list/view/response-fields.adoc[]
 === 모임 목록 조회
 * 접근 가능 권한 레벨: MEMBER
 * 모임 목록을 조회하는 용도의 API
+** 비공개 처리된 모임의 경우, 해당 요청에서 조회되지 않음
 * 페이지네이션이 적용됨
 
 ==== request

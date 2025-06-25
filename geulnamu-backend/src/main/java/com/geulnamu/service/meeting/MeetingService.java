@@ -6,6 +6,7 @@ import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
 import com.geulnamu.controller.meeting.dto.response.*;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
@@ -13,6 +14,7 @@ import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.response.paging.PagingResponse;
+import com.geulnamu.repository.attendance.AttendanceQueryRepository;
 import com.geulnamu.repository.meeting.MeetingQueryRepository;
 import com.geulnamu.repository.meeting.MeetingCommandRepository;
 import com.geulnamu.repository.member.MemberQueryRepository;
@@ -30,6 +32,7 @@ public class MeetingService {
 
     private final MeetingAuthorizationService authorizationService;
     private final MemberQueryRepository memberQueryRepository;
+    private final AttendanceQueryRepository attendanceQueryRepository;
     private final MeetingQueryRepository meetingQueryRepository;
     private final MeetingCommandRepository meetingCommandRepository;
 
@@ -43,13 +46,6 @@ public class MeetingService {
         meeting.checkLateThresholdTimeBeforeMeetingTime();
         meetingCommandRepository.save(meeting);
         return meeting.getId();
-    }
-
-    @Transactional(readOnly = true)
-    public MeetingInfoForStaffResponse findMeeting(Long meetingId) {
-        Meeting meeting = meetingQueryRepository.findById(meetingId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
-        return MeetingInfoForStaffResponse.of(meeting);
     }
 
     @Transactional(readOnly = true)
@@ -67,12 +63,19 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingListForStaffResponse getMeetingListForAdmin(MeetingListRequest request) {
+    public MeetingListForStaffResponse getMeetingListForStaff(MeetingListRequest request) {
         Page<MeetingInfoForStaffResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(request);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
         List<MeetingInfoForStaffResponse> meetingList = meetingDslList.getContent();
         return new MeetingListForStaffResponse(pagingResponse, meetingList);
+    }
+
+    @Transactional(readOnly = true)
+    public MeetingInfoForStaffResponse findMeetingForStaff(Long meetingId) {
+        Meeting meeting = meetingQueryRepository.findById(meetingId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
+        return MeetingInfoForStaffResponse.of(meeting);
     }
 
     @Transactional(rollbackFor = Exception.class)
