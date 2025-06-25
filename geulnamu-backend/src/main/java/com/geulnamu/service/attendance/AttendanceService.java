@@ -32,9 +32,11 @@ public class AttendanceService {
 
     // TODO: 추후 lock을 걸지 고민해 볼 것
     @Transactional(rollbackFor = Exception.class)
-    public Long createAttendance(Long meetingId, Long memberId) {
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        meeting.validateRequestedMember(memberId);
+    public Long createAttendance(Long memberId, Long meetingId) {
+        Meeting meeting = meetingQueryRepository.findById(meetingId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
+        meeting.checkRequestedMember(memberId);
+        meeting.checkMemberIsDeActivated(memberId); // 비활성화 계정은 출석 하지 못하게 제한
 
         meeting.checkTimeCanAttendMeeting();
         // 동일한 모임원이 해당 모임에 출석한 이력이 있는지 확인
@@ -91,7 +93,7 @@ public class AttendanceService {
 
         // 처리 가능한지 체크
         attendance.checkSettingDiscussionTime();
-        attendance.getMeeting().checkTimeCanSwitchAboutDiscussionAttendance();
+        attendance.getMeeting().checkTimeCanSwitchDiscussionAttendance();
 
         attendance.updateNotWantDiscussion();
     }
@@ -102,7 +104,7 @@ public class AttendanceService {
 
         // 처리 가능한지 체크
         attendance.checkSettingDiscussionTime();
-        attendance.getMeeting().checkTimeCanSwitchAboutDiscussionAttendance();
+        attendance.getMeeting().checkTimeCanSwitchDiscussionAttendance();
 
         attendance.updateWantDiscussion();
     }
@@ -127,14 +129,15 @@ public class AttendanceService {
 
     @Transactional(rollbackFor = Exception.class)
     public void deleteAttendance(Long attendanceId) {
-        Attendance attendance = attendanceQueryRepository.findById(attendanceId).orElseThrow(NotFoundDataException::new);
+        Attendance attendance = attendanceQueryRepository.findById(attendanceId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
         attendanceQueryRepository.delete(attendance);
     }
 
     private Attendance getValidateAttendance(Long attendanceId, Long memberId) {
         Attendance attendance = attendanceQueryRepository.findById(attendanceId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
-        attendance.validateRequestedPerson(memberId);
+        attendance.checkRequestedMember(memberId);
         return attendance;
     }
 

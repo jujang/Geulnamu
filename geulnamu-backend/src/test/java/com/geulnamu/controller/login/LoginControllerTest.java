@@ -79,7 +79,7 @@ public class LoginControllerTest extends ControllerTest {
             .andExpect(jsonPath("data.accessToken").value(loginResponse.accessToken()))
             .andExpect(jsonPath("data.newMember").value(loginResponse.newMember()))
             .andDo(document(
-                "login/oauth/kakao",
+                "/login/oauth/kakao",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 responseHeaders(
@@ -138,7 +138,8 @@ public class LoginControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value(accessToken))
-            .andDo(document("/login/re-issue/accessToken",
+            .andDo(document(
+                "/login/re-issue/accessToken",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestCookies(
@@ -178,7 +179,7 @@ public class LoginControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "login/logout",
+                "/login/logout",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(

@@ -28,40 +28,43 @@ public class SecurityConfig {
         "/login/oauth/kakao",
         "/login/{memberId}/direct", // TODO: 임시 기능 -> 실 운영시 삭제 예정
         "/login/re-issue/accessToken",
-        "/member",
+        "/members/register", // TODO: 임시 기능 -> 실 운영시 삭제 예정
         "/error" // 향후 개발 완료 후 해당 코드 지워주고 요청들 잘 받아지는지 확인해 볼 것
     };
 
     private static final String[] AUTH_ALL = {
         "/login/logout",
-        "/member/info",
-        "/meeting/list",
-        "/meeting/list/staff",
-        "/attendance",
-        "/attendance/{attendanceId}/my",
-        "/attendance/discussion/{attendanceId}",
-        "/attendance/{attendanceId}/note",
-        "/attendance/{attendanceId}/just-read",
-        "/attendance/{attendanceId}/want-discussion"
+        "/members/me/profile-status",
+        "/members/me/profile",
+        "/meetings/staff-list",
+        "/meetings/list",
+        "/attendances/check-in",
+        "/attendances/{attendanceId}/my-info",
+        "/attendances/list",
+        "/attendances/{attendanceId}/note",
+        "/attendances/{attendanceId}/just-read",
+        "/attendances/{attendanceId}/want-discussion",
+        "/discussions/{attendanceId}/my-group"
     };
 
     private static final String[] AUTH_FOR_STAFF = {
-        "/meeting",
-        "/meeting/{meetingId}",
-        "/meeting/{meetingId}/discussion",
-        "/attendance/discussion",
-        "/attendance/discussion/all",
-        "/attendance/group"
+        "/members/list",
+        "/meetings/create",
+        "/meetings/list/staff",
+        "/meetings/{meetingId}",
+        "/meetings/{meetingId}/basic",
+        "/meetings/{meetingId}/discussion",
+        "/discussions/list/want-discussion",
+        "/discussions/groups",
+        "/discussions/groups/assign"
     };
 
     private static final String[] AUTH_FOR_ADMIN = {
-        "/member/{memberId}/**",
-        "/member/list",
-        "/meeting/list/admin",
-        "/meeting/{meetingId}/private",
-        "/meeting/{meetingId}/public",
-        "/attendance/group/solo",
-        "/attendance/{attendanceId}/delete"
+        "/members/{memberId}/**",
+        "/meetings/{meetingId}/make-private",
+        "/meetings/{meetingId}/make-public",
+        "/attendances/{attendanceId}/delete",
+        "/discussions/groups/assign-member"
     };
 
 

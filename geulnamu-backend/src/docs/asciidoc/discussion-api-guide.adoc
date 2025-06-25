@@ -1,0 +1,145 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+// 코드 하이라이팅
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+
+[[title]]
+= Discussion API Guide
+
+== link:index.html[Index 페이지로 이동]
+
+
+== GET
+
+=== 모임 토론 참여 희망 명단 조회
+* 접근 가능 권한 레벨: STAFF
+* 운영진 모임원이 토론 그룹을 구성하기 전에, 토론 참여 희망자 명단을 확인하는 용도의 API
+
+==== request
+include::{snippets}/discussions/list/want-discussion/view/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/discussions/list/want-discussion/view/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/discussions/list/want-discussion/view/query-parameters.adoc[]
+
+==== response
+include::{snippets}/discussions/list/want-discussion/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/discussions/list/want-discussion/view/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 본인 토론 그룹 명단 조회
+* 접근 가능 권한 레벨: MEMBER
+* 모임원이 본인과 같은 토론 그룹의 모임원 명단을 조회하는 용도의 API
+
+==== request
+include::{snippets}/discussions/my-group/view/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/discussions/my-group/view/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/discussions/my-group/view/request-headers.adoc[]
+
+==== response
+include::{snippets}/discussions/my-group/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/discussions/my-group/view/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 전체 토론 그룹 명단 조회
+* 접근 가능 권한 레벨: STAFF
+* 운영진 모임원이 특정 모임의 전체 토론 그룹 모임원 명단을 조회하는 용도의 API
+
+==== request
+include::{snippets}/discussions/groups/view/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/discussions/groups/view/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/discussions/groups/view/query-parameters.adoc[]
+
+==== response
+include::{snippets}/discussions/groups/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/discussions/groups/view/response-fields.adoc[]
+
+==== Error case
+
+---
+
+
+== PATCH
+
+=== 토론 그룹 구성 - 수동
+* 접근 가능 권한 레벨: STAFF / 로그 생성
+* 운영진 모임원이 토론 그룹을 구성하는 용도의 API
+** 토론 그룹은 (현재) 최대 7개까지만 구성이 가능함
+** 한 명의 모임원은 한 명의 그룹에만 할당 가능함
+* 해당 기능에 의한 DB 수정의 경우, 'attendance' 테이블의 'lastModifiedAt' 컬럼에 기록되지 않음 (bulk update를 사용하기에)
+
+==== request
+include::{snippets}/discussions/groups/assign/modify/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/discussions/groups/assign/modify/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/discussions/groups/assign/modify/query-parameters.adoc[]
+
+==== request-fields
+include::{snippets}/discussions/groups/assign/modify/request-fields.adoc[]
+
+==== response
+include::{snippets}/discussions/groups/assign/modify/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/discussions/groups/assign/modify/response-fields.adoc[]
+
+==== Error case
+
+---
+
+
+=== 토론 그룹 할당 - 개인
+* 접근 가능 권한 레벨: ADMIN / 로그 생성
+* (이미 토론 그룹이 구성된 이후) 관리자급 모임원이 누락된 특정 모임원을 토론 그룹에 배정하는 경우에 사용하는 API (또는 한 명만 변경하는 경우에도 사용 가능)
+** (현재까지는) 7개의 그룹 안에서만 배정이 가능함
+
+==== request
+include::{snippets}/discussions/groups/assign-member/modify/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/discussions/groups/assign-member/modify/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/discussions/groups/assign-member/modify/query-parameters.adoc[]
+
+==== response
+include::{snippets}/discussions/groups/assign-member/modify/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/discussions/groups/assign-member/modify/response-fields.adoc[]
+
+==== Error case
+
+---

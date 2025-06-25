@@ -18,17 +18,17 @@ public class AttendanceInfoResponse {
     private MeetingType meetingType;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     private LocalDateTime meetingDateTime;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalDateTime lateThresholdTime;
     private String meetingName;
     private String meetingPlace;
     private String description;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    private LocalDateTime attendTime;
     private String note;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalDateTime discussionTime;
     private List<MemberIdAndNameResponse> groupMemberList;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
-    private LocalDateTime createdAt;
     // TODO: 발제문 내용을 여기다가 적을지 어떻게 할지 고민해 볼 것 (근데 따로 빼는 게 나을 것 같음..;)
 
 
@@ -40,10 +40,10 @@ public class AttendanceInfoResponse {
         this.meetingName = attendance.getMeeting().getMeetingName();
         this.meetingPlace = attendance.getMeeting().getMeetingPlace();
         this.description = attendance.getMeeting().getDescription();
+        this.attendTime = attendance.getCreatedAt();
         this.note = attendance.getNote();
         this.discussionTime = attendance.getMeeting().getDiscussionTime();
         this.groupMemberList = memberIdAndNameResponseList;
-        this.createdAt = attendance.getCreatedAt();
     }
 
 }

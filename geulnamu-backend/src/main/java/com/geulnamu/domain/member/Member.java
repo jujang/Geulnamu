@@ -5,6 +5,7 @@ import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.shared.*;
 import com.geulnamu.domain.shared.converter.GenderConverter;
 import com.geulnamu.domain.shared.enums.Role;
+import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.exception.ExistDataException;
 import com.geulnamu.infrastructure.exception.TokenException;
@@ -69,6 +70,13 @@ public class Member extends DateColumn {
             .build();
     }
 
+    public void checkIfRoleWasAdjustedAndReLoginRequired() {
+        if(this.refreshToken == null) {
+            throw new TokenException(ResponseMessage.REFRESH_TOKEN_NOT_VALIDATE);
+            // TODO: 프론트에서 알림과 함께, 강제 로그아웃 시킬 것
+        }
+    }
+
     public void updateMemberName(String newName) {
         if(this.name != null && this.name.equals(newName)) {
             throw new ExistDataException("name");
@@ -111,10 +119,4 @@ public class Member extends DateColumn {
         this.deletedAt = LocalDateTime.now();
     }
 
-    public void checkIfRoleWasAdjustedAndReLoginRequired() {
-        if(this.refreshToken == null) {
-            throw new TokenException(ResponseMessage.REFRESH_TOKEN_NOT_VALIDATE);
-            // TODO: 프론트에서 알림과 함께, 강제 로그아웃 시킬 것
-        }
-    }
 }

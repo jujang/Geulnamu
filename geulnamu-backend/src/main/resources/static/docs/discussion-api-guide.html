@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>Login API Guide</title>
+<title>Discussion API Guide</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -440,7 +440,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body id="title" class="book toc2 toc-left">
 <div id="header">
-<h1>Login API Guide</h1>
+<h1>Discussion API Guide</h1>
 <div class="details">
 <span id="revnumber">version 0.0.1-SNAPSHOT</span>
 </div>
@@ -448,15 +448,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_index_페이지로_이동">Index 페이지로 이동</a></li>
-<li><a href="#_post">POST</a>
-<ul class="sectlevel2">
-<li><a href="#_액세스_토큰_재발급">액세스 토큰 재발급</a></li>
-<li><a href="#_로그아웃">로그아웃</a></li>
-</ul>
-</li>
 <li><a href="#_get">GET</a>
 <ul class="sectlevel2">
-<li><a href="#_카카오_oauth_로그인">카카오 OAuth 로그인</a></li>
+<li><a href="#_모임_토론_참여_희망_명단_조회">모임 토론 참여 희망 명단 조회</a></li>
+<li><a href="#_본인_토론_그룹_명단_조회">본인 토론 그룹 명단 조회</a></li>
+<li><a href="#_전체_토론_그룹_명단_조회">전체 토론 그룹 명단 조회</a></li>
+</ul>
+</li>
+<li><a href="#_patch">PATCH</a>
+<ul class="sectlevel2">
+<li><a href="#_토론_그룹_구성_수동">토론 그룹 구성 - 수동</a></li>
+<li><a href="#_토론_그룹_할당_개인">토론 그룹 할당 - 개인</a></li>
 </ul>
 </li>
 </ul>
@@ -470,17 +472,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_post"><a class="link" href="#_post">POST</a></h2>
+<h2 id="_get"><a class="link" href="#_get">GET</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_액세스_토큰_재발급"><a class="link" href="#_액세스_토큰_재발급">액세스 토큰 재발급</a></h3>
+<h3 id="_모임_토론_참여_희망_명단_조회"><a class="link" href="#_모임_토론_참여_희망_명단_조회">모임 토론 참여 희망 명단 조회</a></h3>
 <div class="ulist">
 <ul>
 <li>
-<p>접근 가능 권한 레벨: PUBLIC</p>
+<p>접근 가능 권한 레벨: STAFF</p>
 </li>
 <li>
-<p>액세스 토큰의 유효기한이 다 한 경우, 리프레시 토큰을 쿠키에 담아서 요청을 보내면 리프레시 토큰을 검증한 후, 액세스 토큰을 재발급 함. (이 때에, 리프레시 토큰의 기한도 반 이하로 남아있다면 리프레시 토큰 또한 재발급 함.)</p>
+<p>운영진 모임원이 토론 그룹을 구성하기 전에, 토론 참여 희망자 명단을 확인하는 용도의 API</p>
 </li>
 </ul>
 </div>
@@ -488,16 +490,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h4 id="_request"><a class="link" href="#_request">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">POST /login/re-issue/accessToken HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /discussions/list/want-discussion?meetingId=1 HTTP/2.0
+Content-Type: application/json;charset=UTF-8
+Authorization: Bearer access_token
 Accept: application/json
-Host: docs.api.com
-Cookie: refreshToken=random_refreshToken_code_1
-Content-Type: application/x-www-form-urlencoded</code></pre>
+Host: docs.api.com</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_request_cookies"><a class="link" href="#_request_cookies">request-cookies</a></h4>
+<h4 id="_request_headers"><a class="link" href="#_request_headers">request-headers</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -511,8 +513,38 @@ Content-Type: application/x-www-form-urlencoded</code></pre>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>refreshToken</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">리프레시 토큰</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Authorization</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">액세스 토큰</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters"><a class="link" href="#_query_parameters">query-parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">파라미터</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수여부</th>
+<th class="tableblock halign-left valign-top">제약조건</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>meetingId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 고유번호</p></td>
 </tr>
 </tbody>
 </table>
@@ -523,36 +555,20 @@ Content-Type: application/x-www-form-urlencoded</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
 Content-Type: application/json;charset=UTF-8
-Set-Cookie: refreshToken=random_refreshToken_code_2; Path=/; Max-Age=15552000; Expires=Mon, 22 Dec 2025 03:58:21 GMT; Secure; HttpOnly
 
 {
   "code" : 200,
   "message" : "API 호출에 성공했습니다.",
-  "data" : "Bearer access_token"
+  "data" : [ {
+    "memberId" : 1,
+    "memberName" : "나뭉일"
+  }, {
+    "memberId" : 2,
+    "memberName" : "나뭉이"
+  } ]
 }</code></pre>
 </div>
 </div>
-</div>
-<div class="sect3">
-<h4 id="_response_headers"><a class="link" href="#_response_headers">response-headers</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">필드명</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Set-Cookie</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">새로 발급된 리프레시 토큰</p></td>
-</tr>
-</tbody>
-</table>
 </div>
 <div class="sect3">
 <h4 id="_response_fields"><a class="link" href="#_response_fields">response-fields</a></h4>
@@ -590,10 +606,24 @@ Set-Cookie: refreshToken=random_refreshToken_code_2; Path=/; Max-Age=15552000; E
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">토론 참여 희망자 명단</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberName</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">신규 발급 액세스 토큰</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 이름</p></td>
 </tr>
 </tbody>
 </table>
@@ -604,14 +634,14 @@ Set-Cookie: refreshToken=random_refreshToken_code_2; Path=/; Max-Age=15552000; E
 </div>
 </div>
 <div class="sect2">
-<h3 id="_로그아웃"><a class="link" href="#_로그아웃">로그아웃</a></h3>
+<h3 id="_본인_토론_그룹_명단_조회"><a class="link" href="#_본인_토론_그룹_명단_조회">본인 토론 그룹 명단 조회</a></h3>
 <div class="ulist">
 <ul>
 <li>
 <p>접근 가능 권한 레벨: MEMBER</p>
 </li>
 <li>
-<p>로그아웃을 하며 DB에 저장되어 있던 리프레시 토큰을 삭제하여 이후 요청을 보낼 시, 로그인을 강제하게 함. (프론트 기준으로 항상 기본적으로 리프레시 토큰이 유효한지 체크하는 기능이 포함되어 있는 api를 보내도록 설정 예정 - 해당 api: '개인 정보 입력 여부 확인' api)</p>
+<p>모임원이 본인과 같은 토론 그룹의 모임원 명단을 조회하는 용도의 API</p>
 </li>
 </ul>
 </div>
@@ -619,16 +649,43 @@ Set-Cookie: refreshToken=random_refreshToken_code_2; Path=/; Max-Age=15552000; E
 <h4 id="_request_2"><a class="link" href="#_request_2">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">POST /login/logout HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /discussions/1/my-group HTTP/2.0
+Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
-Host: docs.api.com
-Content-Type: application/x-www-form-urlencoded</code></pre>
+Host: docs.api.com</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_request_headers"><a class="link" href="#_request_headers">request-headers</a></h4>
+<h4 id="_path_parameters"><a class="link" href="#_path_parameters">path-parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">필수값</th>
+<th class="tableblock halign-left valign-top">양식</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">attendanceId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">출석 고유번호</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_request_headers_2"><a class="link" href="#_request_headers_2">request-headers</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -658,13 +715,419 @@ Content-Type: application/json;charset=UTF-8
 {
   "code" : 200,
   "message" : "API 호출에 성공했습니다.",
-  "data" : null
+  "data" : [ {
+    "memberId" : 1,
+    "memberName" : "나뭉일"
+  }, {
+    "memberId" : 2,
+    "memberName" : "나뭉이"
+  } ]
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_response_fields_2"><a class="link" href="#_response_fields_2">response-fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수값</th>
+<th class="tableblock halign-left valign-top">양식</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>code</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">결과 코드</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>message</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">결과 메세지</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">토론 참여 희망자 명단</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberName</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 이름</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_error_case_2"><a class="link" href="#_error_case_2">Error case</a></h4>
+<hr>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_전체_토론_그룹_명단_조회"><a class="link" href="#_전체_토론_그룹_명단_조회">전체 토론 그룹 명단 조회</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>접근 가능 권한 레벨: STAFF</p>
+</li>
+<li>
+<p>운영진 모임원이 특정 모임의 전체 토론 그룹 모임원 명단을 조회하는 용도의 API</p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="_request_3"><a class="link" href="#_request_3">request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /discussions/groups?meetingId=1 HTTP/2.0
+Content-Type: application/json;charset=UTF-8
+Authorization: Bearer access_token
+Accept: application/json
+Host: docs.api.com</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_request_headers_3"><a class="link" href="#_request_headers_3">request-headers</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Authorization</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">액세스 토큰</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_2"><a class="link" href="#_query_parameters_2">query-parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">파라미터</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수여부</th>
+<th class="tableblock halign-left valign-top">제약조건</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>meetingId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 고유번호</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_response_3"><a class="link" href="#_response_3">response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
+Content-Type: application/json;charset=UTF-8
+
+{
+  "code" : 200,
+  "message" : "API 호출에 성공했습니다.",
+  "data" : [ {
+    "memberIdAndNameResponseList" : [ {
+      "memberId" : 1,
+      "memberName" : "나뭉일"
+    }, {
+      "memberId" : 2,
+      "memberName" : "나뭉이"
+    } ]
+  }, {
+    "memberIdAndNameResponseList" : [ {
+      "memberId" : 3,
+      "memberName" : "나뭉삼"
+    }, {
+      "memberId" : 4,
+      "memberName" : "나뭉사"
+    } ]
+  } ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_response_fields_3"><a class="link" href="#_response_fields_3">response-fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수값</th>
+<th class="tableblock halign-left valign-top">양식</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>code</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">결과 코드</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>message</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">결과 메세지</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">토론 참여 희망자 명단</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[]</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전체 토론 그룹</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberIdAndNameResponseList</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">토론 그룹별 명단</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberIdAndNameResponseList[].memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberIdAndNameResponseList[].memberName</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 이름</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_error_case_3"><a class="link" href="#_error_case_3">Error case</a></h4>
+<hr>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_patch"><a class="link" href="#_patch">PATCH</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_토론_그룹_구성_수동"><a class="link" href="#_토론_그룹_구성_수동">토론 그룹 구성 - 수동</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>접근 가능 권한 레벨: STAFF / 로그 생성</p>
+</li>
+<li>
+<p>운영진 모임원이 토론 그룹을 구성하는 용도의 API</p>
+<div class="ulist">
+<ul>
+<li>
+<p>토론 그룹은 (현재) 최대 7개까지만 구성이 가능함</p>
+</li>
+<li>
+<p>한 명의 모임원은 한 명의 그룹에만 할당 가능함</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>해당 기능에 의한 DB 수정의 경우, 'attendance' 테이블의 'lastModifiedAt' 컬럼에 기록되지 않음 (bulk update를 사용하기에)</p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="_request_4"><a class="link" href="#_request_4">request</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /discussions/groups/assign?meetingId=1 HTTP/2.0
+Content-Type: application/json;charset=UTF-8
+Authorization: Bearer access_token
+Accept: application/json
+Content-Length: 101
+Host: docs.api.com
+
+{
+  "groups" : [ {
+    "memberIdList" : [ 1, 10 ]
+  }, {
+    "memberIdList" : [ 2, 20 ]
+  } ]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_request_headers_4"><a class="link" href="#_request_headers_4">request-headers</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Authorization</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">액세스 토큰</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_3"><a class="link" href="#_query_parameters_3">query-parameters</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">파라미터</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수여부</th>
+<th class="tableblock halign-left valign-top">제약조건</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>meetingId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 고유번호</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_request_fields"><a class="link" href="#_request_fields">request-fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수여부</th>
+<th class="tableblock halign-left valign-top">제약조건</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>groups[]</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">7개 이하의 리스트를 담고 있는 리스트</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전체 그룹(7개 이하)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>groups[].memberIdList[]</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수가 하나 이상 담긴 리스트</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호 리스트</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_response_4"><a class="link" href="#_response_4">response</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
+Content-Type: application/json;charset=UTF-8
+
+{
+  "code" : 200,
+  "message" : "API 호출에 성공했습니다.",
+  "data" : null
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_response_fields_4"><a class="link" href="#_response_fields_4">response-fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 20%;">
@@ -708,39 +1171,64 @@ Content-Type: application/json;charset=UTF-8
 </table>
 </div>
 <div class="sect3">
-<h4 id="_error_case_2"><a class="link" href="#_error_case_2">Error case</a></h4>
-
+<h4 id="_error_case_4"><a class="link" href="#_error_case_4">Error case</a></h4>
+<hr>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_get"><a class="link" href="#_get">GET</a></h2>
-<div class="sectionbody">
 <div class="sect2">
-<h3 id="_카카오_oauth_로그인"><a class="link" href="#_카카오_oauth_로그인">카카오 OAuth 로그인</a></h3>
+<h3 id="_토론_그룹_할당_개인"><a class="link" href="#_토론_그룹_할당_개인">토론 그룹 할당 - 개인</a></h3>
 <div class="ulist">
 <ul>
 <li>
-<p>접근 가능 권한 레벨: PUBLIC / 로그 생성</p>
+<p>접근 가능 권한 레벨: ADMIN / 로그 생성</p>
 </li>
 <li>
-<p>kakao OAuth 2.0을 통한 로그인 방식 (앱 계정이 없다면 생성 후 로그인, 있다면 바로 로그인)</p>
+<p>(이미 토론 그룹이 구성된 이후) 관리자급 모임원이 누락된 특정 모임원을 토론 그룹에 배정하는 경우에 사용하는 API (또는 한 명만 변경하는 경우에도 사용 가능)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>(현재까지는) 7개의 그룹 안에서만 배정이 가능함</p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>
 <div class="sect3">
-<h4 id="_request_3"><a class="link" href="#_request_3">request</a></h4>
+<h4 id="_request_5"><a class="link" href="#_request_5">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">GET /login/oauth/kakao?code=random_code HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /discussions/groups/assign-member?meetingId=1&amp;memberId=2&amp;groupNumber=3 HTTP/2.0
+Content-Type: application/json;charset=UTF-8
+Authorization: Bearer access_token
 Accept: application/json
 Host: docs.api.com</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters"><a class="link" href="#_query_parameters">query-parameters</a></h4>
+<h4 id="_request_headers_5"><a class="link" href="#_request_headers_5">request-headers</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">필드명</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Authorization</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">액세스 토큰</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_4"><a class="link" href="#_query_parameters_4">query-parameters</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 20%;">
@@ -760,58 +1248,46 @@ Host: docs.api.com</code></pre>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>code</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>meetingId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">카카오 oauth를 통해 받은 code</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">kakao oauth code</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임 고유번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>groupNumber</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 이상, 7 이하의 정수</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">그룹 번호</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_response_3"><a class="link" href="#_response_3">response</a></h4>
+<h4 id="_response_5"><a class="link" href="#_response_5">response</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/2.0 200 OK
 Content-Type: application/json;charset=UTF-8
-Set-Cookie: refreshToken=random_refreshToken_code; Path=/; Max-Age=15552000; Expires=Mon, 22 Dec 2025 03:58:21 GMT; Secure; HttpOnly
 
 {
   "code" : 200,
   "message" : "API 호출에 성공했습니다.",
-  "data" : {
-    "memberId" : 1,
-    "accessToken" : "Bearer accessToken",
-    "newMember" : true
-  }
+  "data" : null
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_headers_2"><a class="link" href="#_response_headers_2">response-headers</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">필드명</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Set-Cookie</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">리프레시 토큰</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_response_fields_3"><a class="link" href="#_response_fields_3">response-fields</a></h4>
+<h4 id="_response_fields_5"><a class="link" href="#_response_fields_5">response-fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 20%;">
@@ -845,31 +1321,17 @@ Set-Cookie: refreshToken=random_refreshToken_code; Path=/; Max-Age=15552000; Exp
 <td class="tableblock halign-left valign-top"><p class="tableblock">결과 메세지</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.memberId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.accessToken</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">액세스 토큰 값</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.newMember</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">멤버 신규 여부</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_error_case_3"><a class="link" href="#_error_case_3">Error case</a></h4>
+<h4 id="_error_case_5"><a class="link" href="#_error_case_5">Error case</a></h4>
 <hr>
 </div>
 </div>
@@ -879,7 +1341,7 @@ Set-Cookie: refreshToken=random_refreshToken_code; Path=/; Max-Age=15552000; Exp
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-06-25 00:56:51 +0900
+Last updated 2025-06-25 02:45:03 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

@@ -18,7 +18,7 @@ public class MemberListRequest extends PagingRequest {
     private final String isDeleted;
 
     @Getter
-    @Pattern(regexp = "memberId|role|name|gender|birthDate", message = "정렬 기준 값은 'memberId', 'role', 'name', 'gender', 'birthDate' 만 가능합니다.")
+    @Pattern(regexp = "id|role|name|gender|birthDate", message = "정렬 기준 값은 'id', 'role', 'name', 'gender', 'birthDate' 만 가능합니다.")
     private final String sortBy;
 
     @Pattern(regexp = "true|false", message = "오름차순 여부 값은 'true' 또는 'false' 만 가능합니다.")

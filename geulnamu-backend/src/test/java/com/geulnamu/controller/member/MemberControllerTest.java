@@ -53,7 +53,7 @@ public class MemberControllerTest extends ControllerTest {
 
     @Test
     @WithMockUser(roles = "MEMBER")
-    public void checkMemberInfoRegisterTest() throws Exception {
+    public void checkMyInfoRegisterTest() throws Exception {
         // given
         Boolean response = true;
         String accessToken = "Bearer access_token";
@@ -63,7 +63,7 @@ public class MemberControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                get("/member/info")
+                get("/members/me/profile-status")
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
             );
@@ -75,7 +75,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value(response))
             .andDo(document(
-                "member/info/view",
+                "/members/check/status/my",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -90,22 +90,24 @@ public class MemberControllerTest extends ControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "MEMBER")
-    public void updateMemberInfoTest() throws Exception {
+    @WithMockUser(roles = "ADMIN")
+    public void findMemberTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        MemberInfoRequest request = new MemberInfoRequest("나뭉이", "MALE", LocalDate.of(2022, 1, 1));
 
-        doNothing().when(memberService).updateMemberInfo(any(), any(), any(), any());
+        MemberInfoResponse memberInfoResponse = new MemberInfoResponse(
+            1L, "나뭉일", Gender.valueOf("MALE"), LocalDate.of(2022, 1, 1), "namu_1", Role.LEADER, LocalDateTime.of(2022, 1, 3, 11, 30, 0)
+        );
+
+        given(memberService.findMember(any())).willReturn(memberInfoResponse);
 
         // when
         ResultActions actions =
             mockMvc.perform(
-                patch("/member/info")
+                get("/members/{memberId}", 1)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request))
             );
 
         // then
@@ -113,29 +115,32 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
-            .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/info/modify",
+                "/members/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("memberId").attributes(key("format").value("1 이상의 정수")).description("모임원 고유번호")
+                ),
                 requestHeaders(
                     headerWithName("Authorization").description("액세스 토큰")
-                ),
-                requestFields(
-                    fieldWithPath("name").type(JsonFieldType.STRING).attributes(key("format").value("특수 문자를 제외한 2자 이상, 10자 이하 문자열")).description("이름"),
-                    fieldWithPath("gender").type(JsonFieldType.STRING).attributes(key("format").value("'MALE', 'FEMALE' 중 하나의 값")).description("성별"),
-                    fieldWithPath("birthDate").type(JsonFieldType.STRING).attributes(key("format").value("yyyyMMdd 형식의 숫자값")).description("생년월일")
                 ),
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
-                    fieldWithPath("data").type(JsonFieldType.NULL).description("-")
+                    fieldWithPath("data.memberId").type(JsonFieldType.NUMBER).description("멤버 고유번호"),
+                    fieldWithPath("data.name").type(JsonFieldType.STRING).description("이름"),
+                    fieldWithPath("data.gender").type(JsonFieldType.STRING).description("성별"),
+                    fieldWithPath("data.birthDate").type(JsonFieldType.STRING).description("생년월일"),
+                    fieldWithPath("data.nickname").type(JsonFieldType.STRING).description("닉네임(카카오 닉네임)"),
+                    fieldWithPath("data.role").type(JsonFieldType.STRING).description("권한 등급"),
+                    fieldWithPath("data.deletedAt").type(JsonFieldType.STRING).optional().description("삭제일자 (삭제되지 않은 경우 null)")
                 )
             ));
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "STAFF")
     public void getMembersTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
@@ -162,7 +167,7 @@ public class MemberControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                get("/member/list")
+                get("/members/list")
                     .param("gender", "MALE")
                     .param("role", "MEMBER")
                     .param("isDeleted", "true")
@@ -181,7 +186,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/member/list",
+                "/members/list/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -191,7 +196,7 @@ public class MemberControllerTest extends ControllerTest {
                     parameterWithName("gender").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'MALE', 'FEMALE' 중 하나의 값")).description("성별").optional(),
                     parameterWithName("role").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'MEMBER', 'VICE_STAFF', 'STAFF', 'VICE_LEADER', 'LEADER', 'ADMIN' 중 하나의 값")).description("등급").optional(),
                     parameterWithName("isDeleted").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'true', 'false' 중 하나의 값")).description("비활성 여부").optional(),
-                    parameterWithName("sortBy").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'memberId', 'role', 'name', 'gender', 'birthDate' 중 하나의 값")).description("정렬 기준").optional(),
+                    parameterWithName("sortBy").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'id', 'role', 'name', 'gender', 'birthDate' 중 하나의 값")).description("정렬 기준 (id는 memberId를 뜻함)").optional(),
                     parameterWithName("isAsc").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'true', 'false' 중 하나의 값")).description("오름차순 여부").optional(),
                     parameterWithName("page").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("페이지"),
                     parameterWithName("size").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("사이즈")
@@ -216,18 +221,18 @@ public class MemberControllerTest extends ControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    public void updateMemberRoleTest() throws Exception {
+    @WithMockUser(roles = "MEMBER")
+    public void updateMyInfoTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        MemberRoleUpdateRequest request = new MemberRoleUpdateRequest("STAFF");
+        MemberInfoRequest request = new MemberInfoRequest("나뭉이", "MALE", LocalDate.of(2022, 1, 1));
 
-        doNothing().when(memberService).updateMemberRole(any(), any());
+        doNothing().when(memberService).updateMemberInfo(any(), any());
 
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/member/{memberId}/role", 1L)
+                patch("/members/me/profile")
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -241,7 +246,52 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/role/modify",
+                "/members/info/modify/my",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                requestFields(
+                    fieldWithPath("name").type(JsonFieldType.STRING).attributes(key("format").value("특수 문자를 제외한 2자 이상, 10자 이하 문자열")).description("이름"),
+                    fieldWithPath("gender").type(JsonFieldType.STRING).attributes(key("format").value("'MALE', 'FEMALE' 중 하나의 값")).description("성별"),
+                    fieldWithPath("birthDate").type(JsonFieldType.STRING).attributes(key("format").value("yyyyMMdd 형식의 숫자값")).description("생년월일")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("-")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void updateMemberRoleTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+        MemberRoleUpdateRequest request = new MemberRoleUpdateRequest("STAFF");
+
+        doNothing().when(memberService).updateMemberRole(any(), any());
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                RestDocumentationRequestBuilders.patch("/members/{memberId}/role", 1L)
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andExpect(jsonPath("data").value((Object) null))
+            .andDo(document(
+                "/members/role/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -273,7 +323,7 @@ public class MemberControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/member/{memberId}/name", 1L)
+                RestDocumentationRequestBuilders.patch("/members/{memberId}/name", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -287,7 +337,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/name/modify",
+                "/members/name/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -318,7 +368,7 @@ public class MemberControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/member/{memberId}/activate", 1L)
+                RestDocumentationRequestBuilders.patch("/members/{memberId}/activate", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -331,7 +381,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/activate",
+                "/members/activate",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -359,7 +409,7 @@ public class MemberControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                RestDocumentationRequestBuilders.patch("/member/{memberId}/deactivate", 1L)
+                RestDocumentationRequestBuilders.patch("/members/{memberId}/deactivate", 1L)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -372,7 +422,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "member/deactivate",
+                "/members/deactivate",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(

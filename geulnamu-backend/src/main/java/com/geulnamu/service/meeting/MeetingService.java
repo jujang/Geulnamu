@@ -1,11 +1,14 @@
 package com.geulnamu.service.meeting;
 
+import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequest;
+import com.geulnamu.controller.meeting.dto.request.MeetingGroupUpdateRequest;
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
+import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
 import com.geulnamu.controller.meeting.dto.response.*;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.meeting.Meeting;
-import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.domain.member.Member;
+import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
@@ -19,7 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -28,23 +30,18 @@ public class MeetingService {
 
     private final MeetingAuthorizationService authorizationService;
     private final MemberQueryRepository memberQueryRepository;
-    private final MeetingCommandRepository meetingCommandRepository;
     private final MeetingQueryRepository meetingQueryRepository;
+    private final MeetingCommandRepository meetingCommandRepository;
 
 
     @Transactional(rollbackFor = Exception.class)
-    public Long createMeeting(Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, LocalDateTime lateThresholdTime, String meetingPlace, String description) {
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
-        Meeting meeting = Meeting.createMeeting(member, meetingName, meetingType, meetingDate, lateThresholdTime, meetingPlace, description);
+    public Long createMeeting(Long memberId, MeetingCreateRequest request) {
+        Member member = findMemberOrThrow(memberId);
+        Meeting meeting = Meeting.createMeeting(member, request.getMeetingName(), request.getMeetingType(), request.getMeetingDate(),
+            request.getLateThresholdTime(), request.getMeetingPlace(), request.getDescription());
         meeting.checkLateThresholdTimeBeforeMeetingTime();
         meetingCommandRepository.save(meeting);
         return meeting.getId();
-    }
-
-    @Transactional(readOnly = true)
-    public MeetingInfoForAdminResponse findMeeting(Long meetingId) {
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        return MeetingInfoForAdminResponse.of(meeting);
     }
 
     @Transactional(readOnly = true)
@@ -53,7 +50,7 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingListResponse getMeetingList(MeetingListRequest request, Long myMemberId) {
+    public MeetingListResponse getMeetingList(Long myMemberId, MeetingListRequest request) {
         Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(request, myMemberId);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
@@ -62,69 +59,76 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingListForAdminResponse getMeetingListForAdmin(MeetingListRequest request) {
-        Page<MeetingInfoForAdminResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(request);
+    public MeetingListForStaffResponse getMeetingListForStaff(MeetingListRequest request) {
+        Page<MeetingInfoForStaffResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(request);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
-        List<MeetingInfoForAdminResponse> meetingList = meetingDslList.getContent();
-        return new MeetingListForAdminResponse(pagingResponse, meetingList);
+        List<MeetingInfoForStaffResponse> meetingList = meetingDslList.getContent();
+        return new MeetingListForStaffResponse(pagingResponse, meetingList);
+    }
+
+    @Transactional(readOnly = true)
+    public MeetingInfoForStaffResponse getMeetingForStaff(Long meetingId) {
+        Meeting meeting = findMeetingOrThrow(meetingId);
+        return MeetingInfoForStaffResponse.of(meeting);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateMeeting(Long meetingId, Long memberId, String meetingName, MeetingType meetingType, LocalDateTime meetingDate, LocalDateTime lateThresholdTime, String meetingPlace, String description) {
+    public void updateMeeting(Long meetingId, Long memberId, MeetingUpdateRequest request){
         // 모임 정보 수정 가능 권한 검사
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Meeting meeting = findMeetingOrThrow(meetingId);
+        Member member = findMemberOrThrow(memberId);
         authorizationService.validateModificationBy(meeting, member);
 
         // 수정 가능 시간 확인(모임 시작 이후, 수정 불가) - 관리자급의 경우, 시간이 넘었더라도 수정 가능
         if(!authorizationService.hasAdminPrivileges(member)) {
-            meeting.checkTimeCanUpdateMeeting();
+            meeting.checkMeetingUpdateTime();
         }
 
         // 수정 필요 부분 적용
-        if(meetingName == null && meetingType == null && meetingDate == null && meetingPlace == null && description == null) {
+        if(request.getMeetingName() == null && request.getMeetingType() == null && request.getMeetingDate() == null
+            && request.getMeetingPlace() == null && request.getDescription() == null) {
             throw new BadRequestException(ResponseMessage.NO_CHANGE_DETECTED);
         }
-        if(meetingName != null) meeting.updateMeetingName(meetingName);
-        if(meetingType != null) meeting.updateMeetingType(meetingType);
-        if(meetingDate != null) meeting.updateMeetingDate(meetingDate);
-        if(lateThresholdTime != null) meeting.updateLateThresholdTime(lateThresholdTime);
-        if(meetingPlace != null) meeting.updateMeetingPlace(meetingPlace);
-        if(description != null) meeting.updateMeetingDescription(description);
+        if(request.getMeetingName() != null) meeting.updateMeetingName(request.getMeetingName());
+        if(request.getMeetingType() != null) meeting.updateMeetingType(request.getMeetingType());
+        if(request.getMeetingDate() != null) meeting.updateMeetingDate(request.getMeetingDate());
+        if(request.getLateThresholdTime() != null) meeting.updateLateThresholdTime(request.getLateThresholdTime());
+        if(request.getMeetingPlace() != null) meeting.updateMeetingPlace(request.getMeetingPlace());
+        if(request.getDescription() != null) meeting.updateMeetingDescription(request.getDescription());
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateMeetingForDiscussion(Long meetingId, Long memberId, LocalDateTime discussionTime, String alarmMessage) {
+    public void updateMeetingForDiscussion(Long meetingId, Long memberId, MeetingGroupUpdateRequest request) {
         // 모임 정보 수정 가능 권한 검사
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Meeting meeting = findMeetingOrThrow(meetingId);
+        Member member = findMemberOrThrow(memberId);
         authorizationService.validateModificationBy(meeting, member);
 
         // 수정 가능 시간 확인(토론 시작 이후, 수정 불가) - 관리자급의 경우, 시간이 넘었더라도 수정 가능
         if(!authorizationService.hasAdminPrivileges(member)) {
-            meeting.checkTimeCanUpdateMeetingForDiscussion();
+            meeting.checkDiscussionUpdateTime();
         }
 
         // 수정 필요 부분 적용
-        if(discussionTime == null && alarmMessage == null) {
+        if(request.getDiscussionTime() == null && request.getAlarmMessage() == null) {
             throw new BadRequestException(ResponseMessage.NO_CHANGE_DETECTED);
         }
-        if(discussionTime != null) meeting.updateDiscussionTime(discussionTime);
-        if(alarmMessage != null) meeting.updateAlarmMessage(alarmMessage);
+        if(request.getDiscussionTime() != null) meeting.updateDiscussionTime(request.getDiscussionTime());
+        if(request.getAlarmMessage() != null) meeting.updateAlarmMessage(request.getAlarmMessage());
     }
 
     // 모임일 익일부터 비공개 처리 가능
     @Transactional(rollbackFor = Exception.class)
     public void makeMeetingPrivate(Long meetingId) {
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        meeting.validateTimeForPrivateMeeting();
+        Meeting meeting = findMeetingOrThrow(meetingId);
+        meeting.checkTimeForPrivateMeeting();
         meeting.makeMeetingPrivate();
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void makeMeetingPublic(Long meetingId) {
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
+        Meeting meeting = findMeetingOrThrow(meetingId);
         meeting.makeMeetingPublic();
     }
 
@@ -132,13 +136,23 @@ public class MeetingService {
     @Transactional(rollbackFor = Exception.class)
     public void removeMeeting(Long meetingId, Long memberId) {
         // 모임 삭제 가능 여부 검사
-        Meeting meeting = meetingQueryRepository.findById(meetingId).orElseThrow(NotFoundDataException::new);
-        Member member = memberQueryRepository.findById(memberId).orElseThrow(NotFoundDataException::new);
+        Meeting meeting = findMeetingOrThrow(meetingId);
+        Member member = findMemberOrThrow(memberId);
         authorizationService.validateDeletionBy(meeting, member);
-        meeting.validateTimeForDeleteMeeting();
+        meeting.checkTimeForDeleteMeeting();
 
         // 모임 삭제 (hard delete)
         meetingCommandRepository.delete(meeting);
+    }
+
+    private Meeting findMeetingOrThrow(Long meetingId) {
+        return meetingQueryRepository.findById(meetingId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
+    }
+
+    private Member findMemberOrThrow(Long memberId) {
+        return memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
     }
 
 }

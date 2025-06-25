@@ -18,22 +18,25 @@ endif::[]
 == POST
 
 === 모임 출석
-접근 가능 권한 레벨: MEMBER / 로그 생성
+* 접근 가능 권한 레벨: MEMBER / 로그 생성
+* 모임원이 특정 모임에 출석하는 용도의 API, 이후에 해당 모임에서 조를 배정받고 토론 참석 및 발제문 작성, 조회 등이 가능함
+* 모임 출석은 모임 개최 당일 개최 시간으로부터 1시간 전부터 가능
+* 비활성화된 모임원은 해당 기능이 제한됨
 
 ==== request
-include::{snippets}/attendance/create/http-request.adoc[]
+include::{snippets}/attendances/check-in/create/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/create/request-headers.adoc[]
+include::{snippets}/attendances/check-in/create/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/attendance/create/query-parameters.adoc[]
+include::{snippets}/attendances/check-in/create/query-parameters.adoc[]
 
 ==== response
-include::{snippets}/attendance/create/http-response.adoc[]
+include::{snippets}/attendances/check-in/create/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/create/response-fields.adoc[]
+include::{snippets}/attendances/check-in/create/response-fields.adoc[]
 
 ==== Error case
 
@@ -41,108 +44,48 @@ include::{snippets}/attendance/create/response-fields.adoc[]
 == GET
 
 === 본인 출석 정보 조회
-접근 가능 권한 레벨: MEMBER
+* 접근 가능 권한 레벨: MEMBER
+* 모임원의 모임 출석 정보를 조회하는 용도의 API
+* 프론트 엔드 기준으로 모임 목록 조회 후, (모임에 출석한 모임원 한정으로) 모임을 선택할 시에 해당 요청을 통해 조회하게 됨
+* 토론 그룹을 배정 받았을 경우, 같은 토론 그룹 명단도 함께 조회 가능함.
 
 ==== request
-include::{snippets}/attendance/view/myInfo/http-request.adoc[]
+include::{snippets}/attendances/my-info/view/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/attendance/view/myInfo/path-parameters.adoc[]
+include::{snippets}/attendances/my-info/view/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/view/myInfo/request-headers.adoc[]
+include::{snippets}/attendances/my-info/view/request-headers.adoc[]
 
 ==== response
-include::{snippets}/attendance/view/myInfo/http-response.adoc[]
+include::{snippets}/attendances/my-info/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/view/myInfo/response-fields.adoc[]
+include::{snippets}/attendances/my-info/view/response-fields.adoc[]
 
 ==== Error case
 
 ---
 
-=== 모임별 참석 현황 조회
-접근 가능 권한 레벨: MEMBER
+=== 모임원 참석 현황 조회
+* 접근 가능 권한 레벨: MEMBER
+* 자신을 포함한 모임원들의 모임 출석 현황을 조회하는 API
 
 ==== request
-include::{snippets}/attendance/view/list/http-request.adoc[]
+include::{snippets}/attendances/list/view/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/view/list/request-headers.adoc[]
+include::{snippets}/attendances/list/view/request-headers.adoc[]
 
 ==== query-parameters
-include::{snippets}/attendance/view/list/query-parameters.adoc[]
+include::{snippets}/attendances/list/view/query-parameters.adoc[]
 
 ==== response
-include::{snippets}/attendance/view/list/http-response.adoc[]
+include::{snippets}/attendances/list/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/view/list/response-fields.adoc[]
-
-==== Error case
-
-=== 모임 토론 참여 희망 명단 조회
-접근 가능 권한 레벨: STAFF
-
-==== request
-include::{snippets}/attendance/discussion/http-request.adoc[]
-
-==== request-headers
-include::{snippets}/attendance/discussion/request-headers.adoc[]
-
-==== query-parameters
-include::{snippets}/attendance/discussion/query-parameters.adoc[]
-
-==== response
-include::{snippets}/attendance/discussion/http-response.adoc[]
-
-==== response-fields
-include::{snippets}/attendance/discussion/response-fields.adoc[]
-
-==== Error case
-
----
-
-=== 본인 토론 그룹 명단 조회
-접근 가능 권한 레벨: MEMBER
-
-==== request
-include::{snippets}/attendance/discussion/view/my-group/http-request.adoc[]
-
-==== path-parameters
-include::{snippets}/attendance/discussion/view/my-group/path-parameters.adoc[]
-
-==== request-headers
-include::{snippets}/attendance/discussion/view/my-group/request-headers.adoc[]
-
-==== response
-include::{snippets}/attendance/discussion/view/my-group/http-response.adoc[]
-
-==== response-fields
-include::{snippets}/attendance/discussion/view/my-group/response-fields.adoc[]
-
-==== Error case
-
----
-
-=== 전체 토론 그룹 명단 조회
-접근 가능 권한 레벨: STAFF
-
-==== request
-include::{snippets}/attendance/discussion/view/all-group/http-request.adoc[]
-
-==== request-headers
-include::{snippets}/attendance/discussion/view/all-group/request-headers.adoc[]
-
-==== query-parameters
-include::{snippets}/attendance/discussion/view/all-group/query-parameters.adoc[]
-
-==== response
-include::{snippets}/attendance/discussion/view/all-group/http-response.adoc[]
-
-==== response-fields
-include::{snippets}/attendance/discussion/view/all-group/response-fields.adoc[]
+include::{snippets}/attendances/list/view/response-fields.adoc[]
 
 ==== Error case
 
@@ -152,142 +95,99 @@ include::{snippets}/attendance/discussion/view/all-group/response-fields.adoc[]
 == PATCH
 
 === 비고 작성
-접근 가능 권한 레벨: MEMBER
+* 접근 가능 권한 레벨: MEMBER
+* 모임원이 본인의 모임 출석 관련한 정보를 입력하는 용도의 API
 
 ==== request
-include::{snippets}/attendance/modify/note/http-request.adoc[]
+include::{snippets}/attendances/note/modify/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/attendance/modify/note/path-parameters.adoc[]
+include::{snippets}/attendances/note/modify/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/modify/note/request-headers.adoc[]
+include::{snippets}/attendances/note/modify/request-headers.adoc[]
 
 ==== request-fields
-include::{snippets}/attendance/modify/note/request-fields.adoc[]
+include::{snippets}/attendances/note/modify/request-fields.adoc[]
 
 ==== response
-include::{snippets}/attendance/modify/note/http-response.adoc[]
+include::{snippets}/attendances/note/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/modify/note/response-fields.adoc[]
+include::{snippets}/attendances/note/modify/response-fields.adoc[]
 
 ==== Error case
 
 ---
 
 === 독서만 할래요
-접근 가능 권한 레벨: MEMBER
+* 접근 가능 권한 레벨: MEMBER
+* 토론을 희망하지 않는 모임원이 토론 미참여를 희망하는 의사를 설정하는 용도의 API (기본적으로는 출석시 토론 희망으로 자동 설정됨)
+* 모임의 토론 시간이 셋팅된 이후부터, 토론 시작 30분 전까지만 설정 가능
 
 ==== request
-include::{snippets}/attendance/modify/just-read/http-request.adoc[]
+include::{snippets}/attendances/just-read/modify/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/attendance/modify/just-read/path-parameters.adoc[]
+include::{snippets}/attendances/just-read/modify/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/modify/just-read/request-headers.adoc[]
+include::{snippets}/attendances/just-read/modify/request-headers.adoc[]
 
 ==== response
-include::{snippets}/attendance/modify/just-read/http-response.adoc[]
+include::{snippets}/attendances/just-read/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/modify/just-read/response-fields.adoc[]
+include::{snippets}/attendances/just-read/modify/response-fields.adoc[]
 
 ==== Error case
 
 ---
 
 === 토론할래요
-접근 가능 권한 레벨: MEMBER
+* 접근 가능 권한 레벨: MEMBER
+* 토론을 희망하지 않는다고 설정한 모임원이 다시 토론 참여를 희망하는 의사를 설정하는 용도의 API
+* 모임의 토론 시간이 셋팅된 이후부터, 토론 시작 30분 전까지만 설정 가능
 
 ==== request
-include::{snippets}/attendance/modify/want-discussion/http-request.adoc[]
+include::{snippets}/attendances/want-discussion/modify/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/attendance/modify/want-discussion/path-parameters.adoc[]
+include::{snippets}/attendances/want-discussion/modify/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/modify/want-discussion/request-headers.adoc[]
+include::{snippets}/attendances/want-discussion/modify/request-headers.adoc[]
 
 ==== response
-include::{snippets}/attendance/modify/want-discussion/http-response.adoc[]
+include::{snippets}/attendances/want-discussion/modify/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/modify/want-discussion/response-fields.adoc[]
+include::{snippets}/attendances/want-discussion/modify/response-fields.adoc[]
 
 ==== Error case
 
 ---
-
-=== 토론 그룹 구성 - 수동
-접근 가능 권한 레벨: STAFF / 로그 생성
-
-==== request
-include::{snippets}/attendance/group/assign/http-request.adoc[]
-
-==== request-headers
-include::{snippets}/attendance/group/assign/request-headers.adoc[]
-
-==== query-parameters
-include::{snippets}/attendance/group/assign/query-parameters.adoc[]
-
-==== request-fields
-include::{snippets}/attendance/group/assign/request-fields.adoc[]
-
-==== response
-include::{snippets}/attendance/group/assign/http-response.adoc[]
-
-==== response-fields
-include::{snippets}/attendance/group/assign/response-fields.adoc[]
-
-==== Error case
-
----
-
-
-=== 토론 그룹 할당 - 개인
-접근 가능 권한 레벨: ADMIN / 로그 생성
-
-==== request
-include::{snippets}/attendance/group/assign/solo/http-request.adoc[]
-
-==== request-headers
-include::{snippets}/attendance/group/assign/solo/request-headers.adoc[]
-
-==== query-parameters
-include::{snippets}/attendance/group/assign/solo/query-parameters.adoc[]
-
-==== response
-include::{snippets}/attendance/group/assign/solo/http-response.adoc[]
-
-==== response-fields
-include::{snippets}/attendance/group/assign/solo/response-fields.adoc[]
-
-==== Error case
-
----
-
 
 == DELETE
 
 === 출석 삭제
-접근 가능 권한 레벨: ADMIN / 로그 생성
+* 접근 가능 권한 레벨: ADMIN / 로그 생성
+* 관리자급 모임원이 특정 모임원의 출석 정보를 삭제하는 용도의 API
 
 ==== request
-include::{snippets}/attendance/delete/http-request.adoc[]
+include::{snippets}/attendances/delete/http-request.adoc[]
 
 ==== path-parameters
-include::{snippets}/attendance/delete/path-parameters.adoc[]
+include::{snippets}/attendances/delete/path-parameters.adoc[]
 
 ==== request-headers
-include::{snippets}/attendance/delete/request-headers.adoc[]
+include::{snippets}/attendances/delete/request-headers.adoc[]
 
 ==== response
-include::{snippets}/attendance/delete/http-response.adoc[]
+include::{snippets}/attendances/delete/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/attendance/delete/response-fields.adoc[]
+include::{snippets}/attendances/delete/response-fields.adoc[]
 
 ==== Error case
 

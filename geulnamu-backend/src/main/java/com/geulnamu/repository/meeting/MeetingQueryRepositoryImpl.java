@@ -1,7 +1,7 @@
 package com.geulnamu.repository.meeting;
 
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
-import com.geulnamu.controller.meeting.dto.response.MeetingInfoForAdminResponse;
+import com.geulnamu.controller.meeting.dto.response.MeetingInfoForStaffResponse;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.attendance.AttendanceStatus;
@@ -54,7 +54,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
             .from(meeting)
             .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id)
                 .and(attendance.member.id.eq(myMemberId)))
-            .where(meeting.privateAt.isNull(),
+            .where(meeting.privateAt.isNull(), // 비공개된 모임은 조회해오지 않음
                 filterByMeetingType(request.getMeetingType()),
                 filterByMemberId(request.getMeetingCreatorId()),
                 filterByAttendanceStatus(request.getAttendanceStatus())
@@ -64,13 +64,13 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
         List<MeetingInfoResponse> content = queryFactory
             .select(Projections.constructor(MeetingInfoResponse.class,
                 meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingName, meeting.meetingDate,
-                meeting.meetingPlace, meeting.description, attendanceStatusExpression(), attendance.discussionGroup,
-                meeting.discussionTime, meeting.alarmMessage, meeting.createdAt)
+                meeting.lateThresholdTime, meeting.meetingPlace, meeting.description, attendanceStatusExpression(),
+                attendance.discussionGroup, meeting.discussionTime, meeting.alarmMessage, meeting.createdAt)
             )
             .from(meeting)
             .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id)
                 .and(attendance.member.id.eq(myMemberId)))
-            .where(meeting.privateAt.isNull(),
+            .where(meeting.privateAt.isNull(), // 비공개된 모임은 조회해오지 않음
                 filterByMeetingType(request.getMeetingType()),
                 filterByMemberId(request.getMeetingCreatorId()),
                 filterByAttendanceStatus(request.getAttendanceStatus())
@@ -85,7 +85,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
     }
 
     @Override
-    public Page<MeetingInfoForAdminResponse> findMeetingsForAdminWithPaging(MeetingListRequest request) {
+    public Page<MeetingInfoForStaffResponse> findMeetingsForAdminWithPaging(MeetingListRequest request) {
         Pageable pageable = request.toPageable();
 
         List<Long> count = queryFactory
@@ -98,8 +98,8 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
             )
             .fetch();
 
-        List<MeetingInfoForAdminResponse> content = queryFactory
-            .select(Projections.constructor(MeetingInfoForAdminResponse.class,
+        List<MeetingInfoForStaffResponse> content = queryFactory
+            .select(Projections.constructor(MeetingInfoForStaffResponse.class,
                 meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingName, meeting.meetingDate,
                 meeting.lateThresholdTime, meeting.meetingPlace, meeting.description, meeting.discussionTime,
                 meeting.alarmMessage, meeting.createdAt, meeting.privateAt.isNotNull())
@@ -132,11 +132,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
 
     BooleanExpression filterByMeetingType(MeetingType meetingType) {
         if(meetingType == null) return meeting.meetingType.isNotNull();
-        return switch(meetingType) {
-            case REGULAR -> meeting.meetingType.eq(MeetingType.REGULAR);
-            case FLASH -> meeting.meetingType.eq(MeetingType.FLASH);
-            case SPECIAL -> meeting.meetingType.eq(MeetingType.SPECIAL);
-        };
+        return meeting.meetingType.eq(meetingType);
     }
 
     BooleanExpression filterByMemberId(Long memberId) {
@@ -162,19 +158,8 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
         if(sortBy == null) return QueryDslUtil.getSortedColumn(Order.DESC, meeting, "id");
         if(isAsc == null) isAsc = false;
 
-        return switch(sortBy) {
-            case "meetingDate" ->
-                (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, meeting, "meetingDate")
-                    : QueryDslUtil.getSortedColumn(Order.DESC, meeting, "meetingDate");
-            case "meetingId" ->
-                (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, meeting, "id")
-                    : QueryDslUtil.getSortedColumn(Order.DESC, meeting, "id");
-            case "createdAt" ->
-                (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, meeting, "createdAt")
-                    : QueryDslUtil.getSortedColumn(Order.DESC, meeting, "createdAt");
-            default ->
-                QueryDslUtil.getSortedColumn(Order.DESC, meeting, "id");
-        };
+        return (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, meeting, sortBy)
+            : QueryDslUtil.getSortedColumn(Order.DESC, meeting, sortBy);
     }
 
 }

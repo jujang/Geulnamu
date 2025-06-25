@@ -9,7 +9,7 @@ public class ExistDataException extends ServerException {
     }
 
     public ExistDataException(String message) {
-        super(409, message);
+        super(409, ResponseMessage.NO_CHANGE_DETECTED, message);
     }
 
 }

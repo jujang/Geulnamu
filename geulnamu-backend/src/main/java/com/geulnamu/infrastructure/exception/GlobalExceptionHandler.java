@@ -10,6 +10,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestCookieException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
@@ -22,7 +23,7 @@ public class GlobalExceptionHandler {
     // 커스텀 에러 핸들러
     @ExceptionHandler(ServerException.class)
     public BaseResponse serverExceptionHandler(ServerException exception) {
-        log.error("message: {} ", exception.getMessage());
+        log.error("message : {} ", exception.getMessage());
         return BaseResponse.ofFail(exception.getCode(), exception.getMessage(), exception.getField());
     }
 
@@ -37,13 +38,23 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 입력값으로 LocalDate를 올바른 형식으로 입력하지 않았을 경우
+     * queryString이 전달되지 않았을 경우
+     * HttpStatus 400
+     */
+    @ExceptionHandler({MissingServletRequestParameterException.class})
+    public BaseResponse missingServletRequestParameterException(MissingServletRequestParameterException exception) {
+        log.error("message : {} : {} : {}", ResponseMessage.BAD_REQUEST, exception.getMessage(), exception.getParameterName());
+        return BaseResponse.of(400, ResponseMessage.BAD_REQUEST, exception.getMessage());
+    }
+
+    /**
+     * 요청(requestBody) 값 null이거나 원하는 형식이 아님
      * HttpStatus 400
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public BaseResponse DateTimeParseExceptionHandler(HttpMessageNotReadableException exception) {
-        log.error("message: {} ", exception.getMessage());
-        return BaseResponse.ofFail(400, ResponseMessage.DATE_NOT_VALIDATE, null);
+        log.error("message : {} : {} ", ResponseMessage.BAD_REQUEST, exception.getMessage());
+        return BaseResponse.ofFail(400, ResponseMessage.BAD_REQUEST, "요청 정보가 존재하지 않습니다.");
     }
 
     /**

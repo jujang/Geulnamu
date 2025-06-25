@@ -16,7 +16,7 @@ public enum ActionType {
 
     // 모임 관련
     MEETING_CREATE("모임 생성"),
-    MEETING_UPDATE("모임 수정"),
+    MEETING_UPDATE_BASIC("모임 수정"),
     MEETING_UPDATE_DISCUSSION("모임 토론 정보 수정"),
     MEETING_DELETE("모임 삭제"),
 
