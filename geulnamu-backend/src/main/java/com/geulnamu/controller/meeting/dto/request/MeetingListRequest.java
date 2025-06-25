@@ -21,8 +21,8 @@ public class MeetingListRequest extends PagingRequest {
     private final String attendanceStatus; // 참석 상태 (일반 목록 조회에서만 사용되는 값)
 
     @Getter
-    @Pattern(regexp = "meetingDate|meetingId|createdAt", message = "정렬 기준 값은 'meetingDate', 'meetingId', 'createdAt' 중 하나만 가능합니다.")
-    private final String sortBy;
+    @Pattern(regexp = "meetingDate|id|createdAt", message = "정렬 기준 값은 'meetingDate', 'id', 'createdAt' 중 하나만 가능합니다.")
+    private final String sortBy; // 여기서 id는 meetingId를 뜻함
 
     @Pattern(regexp = "true|false", message = "오름차순 여부 값은 'true' 또는 'false' 만 가능합니다.")
     private final String isAsc;

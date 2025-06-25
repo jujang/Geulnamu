@@ -88,24 +88,7 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
         if(sortBy == null) return QueryDslUtil.getSortedColumn(Order.ASC, member, "name");
         if(isAsc == null) isAsc = false;
 
-        return switch(sortBy) {
-            case "memberId" ->
-                (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, member, "id")
-                    : QueryDslUtil.getSortedColumn(Order.DESC, member, "id");
-            case "role" ->
-                (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, member, "role")
-                    : QueryDslUtil.getSortedColumn(Order.DESC, member, "role");
-            case "name" ->
-                (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, member, "name")
-                    : QueryDslUtil.getSortedColumn(Order.DESC, member, "name");
-            case "gender" ->
-                (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, member, "gender")
-                    : QueryDslUtil.getSortedColumn(Order.DESC, member, "gender");
-            case "birthDate" ->
-                (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, member, "birthDate")
-                    : QueryDslUtil.getSortedColumn(Order.DESC, member, "birthDate");
-            default ->
-                QueryDslUtil.getSortedColumn(Order.ASC, member, "name");
-        };
+        return (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, member, sortBy)
+            : QueryDslUtil.getSortedColumn(Order.DESC, member, sortBy);
     }
 }

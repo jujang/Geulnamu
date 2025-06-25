@@ -208,7 +208,7 @@ public class MeetingControllerTest extends ControllerTest {
                     parameterWithName("meetingType").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'REGULAR', 'FLASH', 'SPECIAL' 중 하나의 값")).description("모임 종류").optional(),
                     parameterWithName("meetingCreatorId").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("(운영진의) 모임원 고유번호").optional(),
                     parameterWithName("attendanceStatus").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'ATTEND', 'ATTEND_LATE', 'NOT_ATTEND' 중 하나의 값")).description("출석 상태").optional(),
-                    parameterWithName("sortBy").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'meetingDate', 'meetingId', 'createdAt' 중 하나의 값")).description("페이지네이션 정렬 기준").optional(),
+                    parameterWithName("sortBy").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'meetingDate', 'id', 'createdAt' 중 하나의 값")).description("페이지네이션 정렬 기준 (id는 meetingId를 뜻함)").optional(),
                     parameterWithName("isAsc").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'true', 'false' 중 하나의 값")).description("오름차순 여부").optional(),
                     parameterWithName("page").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("페이지"),
                     parameterWithName("size").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("사이즈")
@@ -299,7 +299,7 @@ public class MeetingControllerTest extends ControllerTest {
                     parameterWithName("meetingType").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'REGULAR', 'FLASH', 'SPECIAL' 중 하나의 값")).description("모임 종류").optional(),
                     parameterWithName("meetingCreatorId").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("(운영진의) 모임원 고유번호").optional(),
                     parameterWithName("isPrivate").attributes(key("type").value(JsonFieldType.BOOLEAN)).attributes(setAttributes("'true', 'false' 중 하나의 값")).description("모임 비공개 여부").optional(),
-                    parameterWithName("sortBy").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'meetingDate', 'meetingId', 'createdAt' 중 하나의 값")).description("페이지네이션 정렬 기준").optional(),
+                    parameterWithName("sortBy").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'meetingDate', 'id', 'createdAt' 중 하나의 값")).description("페이지네이션 정렬 기준(id는 meetingId를 뜻함)").optional(),
                     parameterWithName("isAsc").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'true', 'false' 중 하나의 값")).description("오름차순 여부").optional(),
                     parameterWithName("page").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("페이지"),
                     parameterWithName("size").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("사이즈")
@@ -341,7 +341,7 @@ public class MeetingControllerTest extends ControllerTest {
             LocalDateTime.of(2025, 5, 1, 12, 30), false
         );
 
-        given(meetingService.findMeetingForStaff(any())).willReturn(meetingInfoForAdminResponse_01);
+        given(meetingService.getMeetingForStaff(any())).willReturn(meetingInfoForAdminResponse_01);
 
         // when
         ResultActions actions =

@@ -132,11 +132,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
 
     BooleanExpression filterByMeetingType(MeetingType meetingType) {
         if(meetingType == null) return meeting.meetingType.isNotNull();
-        return switch(meetingType) {
-            case REGULAR -> meeting.meetingType.eq(MeetingType.REGULAR);
-            case FLASH -> meeting.meetingType.eq(MeetingType.FLASH);
-            case SPECIAL -> meeting.meetingType.eq(MeetingType.SPECIAL);
-        };
+        return meeting.meetingType.eq(meetingType);
     }
 
     BooleanExpression filterByMemberId(Long memberId) {
@@ -162,19 +158,8 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
         if(sortBy == null) return QueryDslUtil.getSortedColumn(Order.DESC, meeting, "id");
         if(isAsc == null) isAsc = false;
 
-        return switch(sortBy) {
-            case "meetingDate" ->
-                (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, meeting, "meetingDate")
-                    : QueryDslUtil.getSortedColumn(Order.DESC, meeting, "meetingDate");
-            case "meetingId" ->
-                (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, meeting, "id")
-                    : QueryDslUtil.getSortedColumn(Order.DESC, meeting, "id");
-            case "createdAt" ->
-                (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, meeting, "createdAt")
-                    : QueryDslUtil.getSortedColumn(Order.DESC, meeting, "createdAt");
-            default ->
-                QueryDslUtil.getSortedColumn(Order.DESC, meeting, "id");
-        };
+        return (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, meeting, sortBy)
+            : QueryDslUtil.getSortedColumn(Order.DESC, meeting, sortBy);
     }
 
 }

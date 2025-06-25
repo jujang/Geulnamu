@@ -35,8 +35,7 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public Boolean isMemberInfoRegistered(Long memberId) {
-        Member member = memberQueryRepository.findById(memberId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
+        Member member = findMemberOrThrow(memberId);
         member.checkIfRoleWasAdjustedAndReLoginRequired(); // 등급 조정(=리프레시 토큰 말소)에 의한 강제 로그아웃이 필요한지 체크
         return member.getName() != null; // true면 등록된 상태, false면 미등록 상태  // 위 구문에 의한 에러 발생 시, 재로그인 필요
     }
@@ -53,8 +52,7 @@ public class MemberService {
     // TODO: 비활성화된 계정을 조회할 것인지 조회하지 않을 것인지 잘 고민해 볼 것
     @Transactional(readOnly = true)
     public MemberInfoResponse findMember(Long memberId) {
-        Member member = memberQueryRepository.findById(memberId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
+        Member member = findMemberOrThrow(memberId);
         return MemberInfoResponse.of(member);
     }
 
@@ -67,33 +65,33 @@ public class MemberService {
         return new MemberListResponse(pagingResponse, memberList);
     }
 
-    // 일단 여기서는 비활성화된 멤버는 조회하지 않도록 함
     @Transactional(rollbackFor = Exception.class)
     public void updateMemberRole(Long memberId, Role targetRole) {
-        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
+        Member member = findMemberOrThrow(memberId);
         member.updateMemberRole(targetRole);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void updateMemberName(Long memberId, String name) {
-        Member member = memberQueryRepository.findByIdAndDeletedAtIsNull(memberId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
+        Member member = findMemberOrThrow(memberId);
         member.updateMemberName(name);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void activateMember(Long memberId) {
-        Member member = memberQueryRepository.findById(memberId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
+        Member member = findMemberOrThrow(memberId);
         member.activate();
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void deactivateMember(Long memberId) {
-        Member member = memberQueryRepository.findById(memberId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
+        Member member = findMemberOrThrow(memberId);
         member.deactivate();
+    }
+
+    private Member findMemberOrThrow(Long memberId) {
+        return memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
     }
 
 }

@@ -64,7 +64,7 @@ public class MeetingController {
     @AccessLevel(Level.STAFF)
     @GetMapping(value = "/{meetingId}", name = "모임 단일 조회(운영진용)")
     public BaseResponse<MeetingInfoForStaffResponse> findMeetingForStaff(@PathVariable @Min(value = 1) Long meetingId) {
-        MeetingInfoForStaffResponse response = meetingService.findMeetingForStaff(meetingId);
+        MeetingInfoForStaffResponse response = meetingService.getMeetingForStaff(meetingId);
         return BaseResponse.ofSuccess(response);
     }
 
