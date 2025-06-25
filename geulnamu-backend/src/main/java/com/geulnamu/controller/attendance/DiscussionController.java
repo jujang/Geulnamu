@@ -41,7 +41,7 @@ public class DiscussionController {
     }
 
     @AccessLevel(Level.STAFF)
-    @GetMapping(value = "/groups", name = "전체 토론 그룹 명단 조회")
+    @GetMapping(value = "/groups", name = "모임별 토론 명단 조회")
     public BaseResponse<List<DiscussionGroupResponse>> getAllDiscussionGroupMemberList(@RequestParam @Min(value = 1) Long meetingId) {
         List<DiscussionGroupResponse> responseList = attendanceService.getAllDiscussionGroupMemberList(meetingId);
         return BaseResponse.ofSuccess(responseList);
