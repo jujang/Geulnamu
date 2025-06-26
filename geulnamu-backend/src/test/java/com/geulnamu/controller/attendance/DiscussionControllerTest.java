@@ -15,7 +15,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.geulnamu.common.ApiDocumentUtils.getDocumentRequest;
@@ -47,11 +47,11 @@ public class DiscussionControllerTest extends ControllerTest {
     public void getWantDiscussionMemberListTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        MemberIdAndNameResponse memberIdAndNameResponse_1 = new MemberIdAndNameResponse(1L, "나뭉일");
-        MemberIdAndNameResponse memberIdAndNameResponse_2 = new MemberIdAndNameResponse(2L, "나뭉이");
-        List<MemberIdAndNameResponse> memberIdAndNameResponseList = new ArrayList<>();
-        memberIdAndNameResponseList.add(memberIdAndNameResponse_1);
-        memberIdAndNameResponseList.add(memberIdAndNameResponse_2);
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList =
+            Arrays.asList(
+                new MemberIdAndNameResponse(1L, "나뭉일"),
+                new MemberIdAndNameResponse(2L, "나뭉이")
+            );
 
         given(attendanceService.getWantDiscussionMemberList(any())).willReturn(memberIdAndNameResponseList);
 
@@ -95,11 +95,11 @@ public class DiscussionControllerTest extends ControllerTest {
     public void getMyDiscussionGroupMemberListTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        MemberIdAndNameResponse memberIdAndNameResponse_1 = new MemberIdAndNameResponse(1L, "나뭉일");
-        MemberIdAndNameResponse memberIdAndNameResponse_2 = new MemberIdAndNameResponse(2L, "나뭉이");
-        List<MemberIdAndNameResponse> memberIdAndNameResponseList = new ArrayList<>();
-        memberIdAndNameResponseList.add(memberIdAndNameResponse_1);
-        memberIdAndNameResponseList.add(memberIdAndNameResponse_2);
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList =
+            Arrays.asList(
+                new MemberIdAndNameResponse(1L, "나뭉일"),
+                new MemberIdAndNameResponse(2L, "나뭉이")
+            );
 
         given(attendanceService.getMyDiscussionMemberList(any(), any())).willReturn(memberIdAndNameResponseList);
 
@@ -143,23 +143,17 @@ public class DiscussionControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        MemberIdAndNameResponse memberIdAndNameResponse_1 = new MemberIdAndNameResponse(1L, "나뭉일");
-        MemberIdAndNameResponse memberIdAndNameResponse_2 = new MemberIdAndNameResponse(2L, "나뭉이");
-        List<MemberIdAndNameResponse> memberIdAndNameResponseList_1 = new ArrayList<>();
-        memberIdAndNameResponseList_1.add(memberIdAndNameResponse_1);
-        memberIdAndNameResponseList_1.add(memberIdAndNameResponse_2);
-
-        MemberIdAndNameResponse memberIdAndNameResponse_3 = new MemberIdAndNameResponse(3L, "나뭉삼");
-        MemberIdAndNameResponse memberIdAndNameResponse_4 = new MemberIdAndNameResponse(4L, "나뭉사");
-        List<MemberIdAndNameResponse> memberIdAndNameResponseList_2 = new ArrayList<>();
-        memberIdAndNameResponseList_2.add(memberIdAndNameResponse_3);
-        memberIdAndNameResponseList_2.add(memberIdAndNameResponse_4);
-
-        DiscussionGroupResponse discussionGroupResponseList_1 = new DiscussionGroupResponse(memberIdAndNameResponseList_1);
-        DiscussionGroupResponse discussionGroupResponseList_2 = new DiscussionGroupResponse(memberIdAndNameResponseList_2);
-        List<DiscussionGroupResponse> discussionGroupResponseList = new ArrayList<>();
-        discussionGroupResponseList.add(discussionGroupResponseList_1);
-        discussionGroupResponseList.add(discussionGroupResponseList_2);
+        List<DiscussionGroupResponse> discussionGroupResponseList =
+            Arrays.asList(
+                new DiscussionGroupResponse(Arrays.asList(
+                    new MemberIdAndNameResponse(1L, "나뭉일"),
+                    new MemberIdAndNameResponse(2L, "나뭉이")
+                )),
+                new DiscussionGroupResponse(Arrays.asList(
+                    new MemberIdAndNameResponse(3L, "나뭉삼"),
+                    new MemberIdAndNameResponse(4L, "나뭉사")
+                ))
+            );
 
         given(attendanceService.getAllDiscussionGroupMemberList(any())).willReturn(discussionGroupResponseList);
 
@@ -206,22 +200,12 @@ public class DiscussionControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        List<Long> memberIdList_1 = new ArrayList<>();
-        memberIdList_1.add(1L);
-        memberIdList_1.add(10L);
-        DiscussionGroupRequest discussionGroupRequest_1 = new DiscussionGroupRequest(memberIdList_1);
-
-        List<Long> memberIdList_2 = new ArrayList<>();
-        memberIdList_2.add(2L);
-        memberIdList_2.add(20L);
-        DiscussionGroupRequest discussionGroupRequest_2 = new DiscussionGroupRequest(memberIdList_2);
-
-        List<DiscussionGroupRequest> discussionGroupRequestList = new ArrayList<>();
-        discussionGroupRequestList.add(discussionGroupRequest_1);
-        discussionGroupRequestList.add(discussionGroupRequest_2);
-
         AssignDiscussionGroupsRequest request = new AssignDiscussionGroupsRequest(
-            discussionGroupRequestList);
+            Arrays.asList(
+                new DiscussionGroupRequest(Arrays.asList(1L, 10L)),
+                new DiscussionGroupRequest(Arrays.asList(2L, 20L))
+            )
+        );
 
         doNothing().when(attendanceService).manuallyAssignDiscussionGroups(any(), any());
 
