@@ -475,7 +475,7 @@ public class MeetingControllerTest extends ControllerTest {
             null, null, null, null, "합정 저스티나", "늦지 않게 오세요~"
         );
 
-        doNothing().when(meetingService).updateMeeting(any(), any(), any());
+        doNothing().when(meetingService).updateMeeting(any(), any(), any(), any());
 
         // when
         ResultActions actions =
@@ -528,7 +528,7 @@ public class MeetingControllerTest extends ControllerTest {
             LocalDateTime.of(2026, 5, 1, 12, 30), "모두 올라와주세요~"
         );
 
-        doNothing().when(meetingService).updateMeetingForDiscussion(any(), any(), any());
+        doNothing().when(meetingService).updateMeetingForDiscussion(any(), any(), any(), any());
 
         // when
         ResultActions actions =
@@ -656,7 +656,7 @@ public class MeetingControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        doNothing().when(meetingService).removeMeeting(any(), any());
+        doNothing().when(meetingService).removeMeeting(any(), any(), any());
 
         // when
         ResultActions actions =

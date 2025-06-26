@@ -9,8 +9,10 @@ import com.geulnamu.controller.meeting.dto.response.*;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
+import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
+import com.geulnamu.infrastructure.annotation.AuthRole;
 import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.meeting.MeetingService;
@@ -81,9 +83,9 @@ public class MeetingController {
     @AccessLevel(Level.STAFF)
     @PatchMapping(value = "/{meetingId}/basic", name = "모임 수정 - 기본 정보")
     public BaseResponse<Void> updateMeeting(@PathVariable @Min(value = 1) Long meetingId,
-                                            @AuthMemberId Long memberId,
+                                            @AuthMemberId Long memberId, @AuthRole Role role,
                                             @Valid @RequestBody MeetingUpdateRequest request) {
-        meetingService.updateMeeting(meetingId, memberId, request);
+        meetingService.updateMeeting(meetingId, memberId, role, request);
         return BaseResponse.ofSuccess();
     }
 
@@ -91,9 +93,9 @@ public class MeetingController {
     @AccessLevel(Level.STAFF)
     @PatchMapping(value = "/{meetingId}/discussion", name = "모임 수정 - 조별 활동 관련")
     public BaseResponse<Void> updateMeetingForDiscussion(@PathVariable @Min(value = 1) Long meetingId,
-                                                         @AuthMemberId Long memberId,
+                                                         @AuthMemberId Long memberId, @AuthRole Role role,
                                                          @Valid @RequestBody MeetingGroupUpdateRequest request) {
-        meetingService.updateMeetingForDiscussion(meetingId, memberId, request);
+        meetingService.updateMeetingForDiscussion(meetingId, memberId, role, request);
         return BaseResponse.ofSuccess();
     }
 
@@ -115,8 +117,8 @@ public class MeetingController {
     @AccessLevel(Level.STAFF)
     @DeleteMapping(value = "/{meetingId}", name = "개설한 모임 삭제 - 모임 시작 6시간 전까지만 가능")
     public BaseResponse<Void> removeMeeting(@PathVariable @Min(value = 1) Long meetingId,
-                                            @AuthMemberId Long memberId) {
-        meetingService.removeMeeting(meetingId, memberId);
+                                            @AuthMemberId Long memberId, @AuthRole Role role) {
+        meetingService.removeMeeting(meetingId, memberId, role);
         return BaseResponse.ofSuccess();
     }
 

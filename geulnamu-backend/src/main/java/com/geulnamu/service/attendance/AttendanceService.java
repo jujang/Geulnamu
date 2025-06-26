@@ -39,7 +39,7 @@ public class AttendanceService {
         Meeting meeting = meetingQueryRepository.findById(meetingId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
         meeting.checkRequestedMember(memberId);
-        meeting.checkMemberIsDeActivated(memberId); // 비활성화 계정은 출석 하지 못하게 제한
+        meeting.checkMemberIsDeActivated(memberId); // 비활성화 계정은 출석하지 못하게 제한
 
         meeting.checkTimeCanAttendMeeting();
         // 동일한 모임원이 해당 모임에 출석한 이력이 있는지 확인
@@ -126,7 +126,7 @@ public class AttendanceService {
     @Transactional(rollbackFor = Exception.class)
     public void assignMemberToDiscussionGroup(Long meetingId, Long memberId, Integer optimizedGroupNumber) {
         meetingQueryRepository.findById(meetingId).orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
-        validateGroupNumberOver(optimizedGroupNumber);
+        validateGroupNumberOver(optimizedGroupNumber); // 토론 그룹 수 (7개) 초과 체크
         Attendance attendance = attendanceQueryRepository.findByMeetingIdAndMemberId(meetingId, memberId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
         attendance.updateDiscussionGroup(DiscussionGroup.values()[optimizedGroupNumber]);
