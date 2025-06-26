@@ -1,0 +1,64 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+// 코드 하이라이팅
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+
+[[title]]
+= VoC API Guide
+
+== link:index.html[Index 페이지로 이동]
+
+== POST
+
+=== 에러 보고
+* 접근 가능 권한 레벨: MEMBER / 로그 생성
+* 모임원이 해당 서비스에 대한 에러를 보고하기 위한 용도의 API
+
+==== request
+include::{snippets}/voc/error-report/create/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/voc/error-report/create/request-headers.adoc[]
+
+==== request-fields
+include::{snippets}/voc/error-report/create/request-fields.adoc[]
+
+==== response
+include::{snippets}/voc/error-report/create/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/voc/error-report/create/response-fields.adoc[]
+
+==== Error case
+
+---
+
+=== 기능 요청
+* 접근 가능 권한 레벨: MEMBER / 로그 생성
+* 모임원이 해당 서비스에 대한 희망 기능을 요청하기 위한 용도의 API
+
+==== request
+include::{snippets}/voc/feature-request/create/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/voc/feature-request/create/request-headers.adoc[]
+
+==== request-fields
+include::{snippets}/voc/feature-request/create/request-fields.adoc[]
+
+==== response
+include::{snippets}/voc/feature-request/create/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/voc/feature-request/create/response-fields.adoc[]
+
+==== Error case
+
+

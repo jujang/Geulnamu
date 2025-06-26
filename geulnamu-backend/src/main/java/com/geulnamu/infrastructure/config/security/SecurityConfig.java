@@ -46,7 +46,8 @@ public class SecurityConfig {
         "/attendances/{attendanceId}/just-read",
         "/attendances/{attendanceId}/want-discussion",
         "/discussions/{attendanceId}/my-group",
-        "/book-questions/**"
+        "/book-questions/**",
+        "/voc/**"
     };
 
     private static final String[] AUTH_FOR_STAFF = {
