@@ -5,6 +5,7 @@ import com.geulnamu.controller.member.dto.response.MemberInfoResponse;
 import com.geulnamu.controller.member.dto.response.MemberListResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
+import com.geulnamu.infrastructure.annotation.ErrorLogAction;
 import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
@@ -22,6 +23,8 @@ public class MemberController {
 
     private final MemberService memberService;
 
+
+    @ErrorLogAction(value = ActionType.MEMBER_CREATE, actionDomain = "member")
     @AccessLevel(Level.PUBLIC)
     @PostMapping(value = "register", name = "모임원 생성 (OAuth 토큰 발행 대안 기능)")
     public BaseResponse<Void> createMember(@Valid @RequestBody MemberCreateRequest request) {
@@ -29,6 +32,7 @@ public class MemberController {
         return BaseResponse.ofSuccess();
     }
 
+    @ErrorLogAction(value = ActionType.MEMBER_CHECK_PROFILE_STATUS, actionDomain = "member")
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/me/profile-status", name = "개인 정보 입력 여부 확인")
     public BaseResponse<Boolean> checkMyInfoRegister(@AuthMemberId Long memberId) {
@@ -36,6 +40,7 @@ public class MemberController {
         return BaseResponse.ofSuccess(response);
     }
 
+    @ErrorLogAction(value = ActionType.MEMBER_VIEW, actionDomain = "member")
     @AccessLevel(Level.ADMIN)
     @GetMapping(value = "/{memberId}", name = "모임원 조회")
     public BaseResponse<MemberInfoResponse> findMember(@PathVariable @Min(value = 1) Long memberId) {
@@ -43,6 +48,7 @@ public class MemberController {
         return BaseResponse.ofSuccess(response);
     }
 
+    @ErrorLogAction(value = ActionType.MEMBER_LIST_VIEW, actionDomain = "member")
     @AccessLevel(Level.STAFF)
     @GetMapping(value = "/list", name = "모임원 목록 조회")
     public BaseResponse<MemberListResponse> getMembers(@Valid MemberListRequest request) {

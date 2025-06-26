@@ -10,10 +10,7 @@ import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.domain.shared.enums.Role;
-import com.geulnamu.infrastructure.annotation.AccessLevel;
-import com.geulnamu.infrastructure.annotation.AuthMemberId;
-import com.geulnamu.infrastructure.annotation.AuthRole;
-import com.geulnamu.infrastructure.annotation.LogAction;
+import com.geulnamu.infrastructure.annotation.*;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.meeting.MeetingService;
 import jakarta.validation.Valid;
@@ -40,6 +37,8 @@ public class MeetingController {
         return BaseResponse.ofSuccess(meetingId);
     }
 
+    // TODO: 얘를 MEMBER 도메인으로 옮기는 것에 대해서 고민해 볼 것
+    @ErrorLogAction(value = ActionType.MEETING_STAFF_LIST_VIEW, actionDomain = "meeting")
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/staff-list", name = "운영진 명단 조회 - 필터링용")
     public BaseResponse<List<MemberIdAndNameResponse>> getStaffList() {
@@ -47,6 +46,15 @@ public class MeetingController {
         return BaseResponse.ofSuccess(responseList);
     }
 
+    @ErrorLogAction(value = ActionType.MEETING_TODAY_LIST_VIEW, actionDomain = "meeting")
+    @AccessLevel(Level.MEMBER)
+    @GetMapping(value = "/list/today", name = "오늘의 모임 (목록) 조회")
+    public BaseResponse<List<AttendanceInfoResponse>> getTodayMeetingList(@AuthMemberId Long memberId) {
+        List<AttendanceInfoResponse> responseList = meetingService.getTodayMeetingList(memberId);
+        return BaseResponse.ofSuccess(responseList);
+    }
+
+    @ErrorLogAction(value = ActionType.MEETING_LIST_VIEW, actionDomain = "meeting")
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/list", name = "모임 목록 조회")
     public BaseResponse<MeetingListResponse> getMeetingList(@AuthMemberId Long memberId,
@@ -55,13 +63,7 @@ public class MeetingController {
         return BaseResponse.ofSuccess(response);
     }
 
-    @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/list/today", name = "오늘의 모임 조회")
-    public BaseResponse<List<AttendanceInfoResponse>> getTodayMeetingList(@AuthMemberId Long memberId) {
-        List<AttendanceInfoResponse> responseList = meetingService.getTodayMeetingList(memberId);
-        return BaseResponse.ofSuccess(responseList);
-    }
-
+    @ErrorLogAction(value = ActionType.MEETING_LIST_VIEW_FOR_STAFF, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @GetMapping(value = "/list/staff", name = "모임 목록 조회(운영진용)")
     public BaseResponse<MeetingListForStaffResponse> getMeetingListForStaff(@Valid MeetingListRequest request) {
@@ -69,6 +71,7 @@ public class MeetingController {
         return BaseResponse.ofSuccess(response);
     }
 
+    @ErrorLogAction(value = ActionType.MEETING_VIEW_FOR_STAFF, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @GetMapping(value = "/{meetingId}", name = "모임 단일 조회(운영진용)")
     public BaseResponse<MeetingInfoForStaffResponse> findMeetingForStaff(@PathVariable @Min(value = 1) Long meetingId) {
@@ -96,6 +99,7 @@ public class MeetingController {
         return BaseResponse.ofSuccess();
     }
 
+    @ErrorLogAction(value = ActionType.MEETING_MAKE_PRIVATE, actionDomain = "meeting")
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{meetingId}/make-private", name = "지난 모임 비공개 처리 - 모임 익일부터 처리 가능")
     public BaseResponse<Void> makeMeetingPrivate(@PathVariable @Min(value = 1) Long meetingId) {
@@ -103,6 +107,7 @@ public class MeetingController {
         return BaseResponse.ofSuccess();
     }
 
+    @ErrorLogAction(value = ActionType.MEETING_MAKE_PUBLIC, actionDomain = "meeting")
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/{meetingId}/make-public", name = "비공개 모임 공개 처리")
     public BaseResponse<Void> makeMeetingPublic(@PathVariable @Min(value = 1) Long meetingId) {

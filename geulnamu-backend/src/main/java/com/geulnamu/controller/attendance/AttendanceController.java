@@ -7,6 +7,7 @@ import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
+import com.geulnamu.infrastructure.annotation.ErrorLogAction;
 import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.attendance.AttendanceService;
@@ -31,6 +32,7 @@ public class AttendanceController {
         return BaseResponse.ofSuccess(attendanceId);
     }
 
+    @ErrorLogAction(value = ActionType.ATTENDANCE_MY_VIEW, actionDomain = "attendance")
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/my-info", name = "개인 출석 정보 조회")
     public BaseResponse<AttendanceInfoResponse> getMyAttendanceInfo(@AuthMemberId Long memberId,
@@ -39,13 +41,15 @@ public class AttendanceController {
         return BaseResponse.ofSuccess(response);
     }
 
+    @ErrorLogAction(value = ActionType.ATTENDANCE_LIST_VIEW, actionDomain = "attendance")
     @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/list", name = "모임별 모임원 참석 현황 조회")
+    @GetMapping(value = "/list", name = "모임별 모임원 출석 현황 조회")
     public BaseResponse<MeetingAttendanceDetailsResponse> getMeetingAttendanceStatus(@RequestParam @Min(value = 1) Long meetingId) {
         MeetingAttendanceDetailsResponse response = attendanceService.getMeetingAttendanceStatus(meetingId);
         return BaseResponse.ofSuccess(response);
     }
 
+    @ErrorLogAction(value = ActionType.ATTENDANCE_WRITE_NOTE, actionDomain = "attendance")
     @AccessLevel(Level.MEMBER)
     @PatchMapping(value = "/{attendanceId}/note", name = "비고 작성")
     public BaseResponse<Void> writeNote(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId,
@@ -54,6 +58,7 @@ public class AttendanceController {
         return BaseResponse.ofSuccess();
     }
 
+    @ErrorLogAction(value = ActionType.ATTENDANCE_JUST_READ, actionDomain = "attendance")
     @AccessLevel(Level.MEMBER)
     @PatchMapping(value = "/{attendanceId}/just-read", name = "독서만 할래요")
     public BaseResponse<Void> notWantDiscussion(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId) {
@@ -61,6 +66,7 @@ public class AttendanceController {
         return BaseResponse.ofSuccess();
     }
 
+    @ErrorLogAction(value = ActionType.ATTENDANCE_WANT_DISCUSSION, actionDomain = "attendance")
     @AccessLevel(Level.MEMBER)
     @PatchMapping(value = "/{attendanceId}/want-discussion", name = "토론할래요")
     public BaseResponse<Void> wantDiscussion(@PathVariable @Min(value = 1) Long attendanceId, @AuthMemberId Long memberId) {

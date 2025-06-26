@@ -6,10 +6,7 @@ import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionGroupViewRe
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.domain.shared.enums.Role;
-import com.geulnamu.infrastructure.annotation.AccessLevel;
-import com.geulnamu.infrastructure.annotation.AuthMemberId;
-import com.geulnamu.infrastructure.annotation.AuthRole;
-import com.geulnamu.infrastructure.annotation.LogAction;
+import com.geulnamu.infrastructure.annotation.*;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.bookQuestion.BookQuestionService;
 import jakarta.validation.Valid;
@@ -38,6 +35,7 @@ public class BookQuestionController {
         return BaseResponse.ofSuccess(bookQuestionId);
     }
 
+    @ErrorLogAction(value = ActionType.BOOK_QUESTION_MY_GROUP_LIST_VIEW, actionDomain = "bookQuestion")
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/my-group", name = "토론 그룹별 발제문 리스트 조회 - 본인 토론 그룹")
     public BaseResponse<List<BookQuestionViewResponse>> getMyGroupBookQuestions(@RequestParam @Min(value = 1) Long attendanceId) {
@@ -45,6 +43,7 @@ public class BookQuestionController {
         return BaseResponse.ofSuccess(responseList);
     }
 
+    @ErrorLogAction(value = ActionType.BOOK_QUESTION_ALL_GROUP_LIST_VIEW, actionDomain = "bookQuestion")
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/meeting", name = "모임별 발제문 리스트 조회")
     public BaseResponse<List<BookQuestionGroupViewResponse>> getMeetingBookQuestions(@RequestParam @Min(value = 1) Long meetingId) {
