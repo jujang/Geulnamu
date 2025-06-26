@@ -1,6 +1,8 @@
 package com.geulnamu.infrastructure.aspect;
 
 import com.geulnamu.domain.shared.enums.ActionStatus;
+import com.geulnamu.domain.shared.enums.ActionType;
+import com.geulnamu.infrastructure.annotation.ErrorLogAction;
 import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.aspect.dto.ActionLogContext;
 import com.geulnamu.infrastructure.exception.GlobalExceptionHandler;
@@ -80,20 +82,50 @@ public class ActionHistoryAspect {
         }
     }
 
+    @AfterThrowing(value = "@annotation(errorLogAction)", throwing = "exception")
+    public void onlyLogFailure(JoinPoint joinPoint, ErrorLogAction errorLogAction, Exception exception) {
+        try {
+            BaseResponse<?> errorResponse = createErrorResponse(exception);
+
+            ActionLogContext context = buildLogContext(joinPoint, errorLogAction, ActionStatus.FAILURE, errorResponse, exception);
+            saveActionHistory(context);
+        } catch (Exception e) {
+            log.error("액션 히스토리 단독 실패 케이스 로깅 실패", e);
+        } finally {
+            startTimeHolder.remove();
+        }
+    }
+
     /**
      * 로그 컨텍스트 생성
      */
-    private ActionLogContext buildLogContext(JoinPoint joinPoint, LogAction logAction, 
+    private ActionLogContext buildLogContext(JoinPoint joinPoint, Object annotation,
                                            ActionStatus status, Object responseData, Exception exception) {
         
         HttpServletRequest request = getCurrentRequest();
         Long processingTime = calculateProcessingTime();
-        
+
+        ActionType actionType;
+        String actionDomain;
+
+        if(annotation instanceof LogAction) {
+            LogAction logAction = (LogAction) annotation;
+            actionType = logAction.value();
+            actionDomain = logAction.actionDomain().isEmpty() ? null : logAction.actionDomain();
+        } else if (annotation instanceof ErrorLogAction) {
+            ErrorLogAction errorLogAction = (ErrorLogAction) annotation;
+            actionType = errorLogAction.value();
+            actionDomain = errorLogAction.actionDomain().isEmpty() ? null : errorLogAction.actionDomain();;
+            processingTime = null;
+        } else {
+            throw new IllegalArgumentException("지원하지 않는 어노테이션 타입: " + annotation.getClass());
+        }
+
         return ActionLogContext.builder()
                 .actorMemberId(extractMemberIdFromRequest(request, joinPoint))
-                .actionType(logAction.value())
+                .actionType(actionType)
                 .status(status)
-                .actionDomain(logAction.actionDomain().isEmpty() ? null : logAction.actionDomain())
+                .actionDomain(actionDomain)
                 .targetId(extractTargetId(joinPoint))
                 .requestData(extractRequestData(joinPoint))
                 .responseData(responseData)
