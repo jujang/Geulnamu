@@ -28,6 +28,7 @@ public class MeetingController {
 
     private final MeetingService meetingService;
 
+
     @LogAction(value = ActionType.MEETING_CREATE, actionDomain = "meeting")
     @AccessLevel(Level.STAFF)
     @PostMapping(value = "/create", name = "모임 생성")

@@ -1,5 +1,6 @@
 package com.geulnamu.service.attendance;
 
+import com.geulnamu.controller.attendance.dto.MemberInfoWithGroup;
 import com.geulnamu.controller.attendance.dto.request.DiscussionGroupRequest;
 import com.geulnamu.controller.attendance.dto.request.AssignDiscussionGroupsRequest;
 import com.geulnamu.controller.attendance.dto.response.*;
@@ -20,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -79,7 +82,8 @@ public class AttendanceService {
 
     @Transactional(readOnly = true)
     public List<DiscussionGroupResponse> getAllDiscussionGroupMemberList(Long meetingId) {
-        return attendanceQueryRepository.findAllDiscussionGroupMemberList(meetingId);
+        List<MemberInfoWithGroup> memberInfoWithGroupList = attendanceQueryRepository.findAllDiscussionGroupMemberList(meetingId);
+        return convertToDiscussionGroupResponse(memberInfoWithGroupList);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -147,6 +151,28 @@ public class AttendanceService {
             ? attendanceQueryRepository.findMyDiscussionMemberList(
             attendance.getMeeting().getId(), attendance.getDiscussionGroup())
             : null;
+    }
+
+    private List<DiscussionGroupResponse> convertToDiscussionGroupResponse(List<MemberInfoWithGroup> memberInfoWithGroupList) {
+        // discussionGroup 값을 기준으로 같은 discussionGroup 끼리 List로 묶어서 map 으로 만들기
+        Map<DiscussionGroup, List<MemberIdAndNameResponse>> groupMap = memberInfoWithGroupList.stream()
+            .collect(Collectors.groupingBy(
+                MemberInfoWithGroup::getDiscussionGroup,
+                Collectors.mapping(this::toMemberResponse, Collectors.toList())
+            ));
+
+        // 맵들을 discussionGroup 값으로 정렬하고, 값들을 DiscussionGroupResponse 타입에 담아 전체를 list로 만들어 반환
+        return groupMap.entrySet().stream()
+            .sorted(Map.Entry.comparingByKey())
+            .map(entry -> new DiscussionGroupResponse(entry.getValue()))
+            .collect(Collectors.toList());
+    }
+
+    private MemberIdAndNameResponse toMemberResponse(MemberInfoWithGroup memberInfoWithGroup) {
+        return new MemberIdAndNameResponse(
+            memberInfoWithGroup.getMemberId(),
+            memberInfoWithGroup.getMemberName()
+        );
     }
 
     private static void validateGroupNumberOver(int requestGroupSize) {

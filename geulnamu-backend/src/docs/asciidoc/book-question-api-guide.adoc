@@ -1,0 +1,153 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+// 코드 하이라이팅
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+
+[[title]]
+= BookQuestion API Guide
+
+== link:index.html[Index 페이지로 이동]
+
+== POST
+
+=== 발제문 작성
+* 접근 가능 권한 레벨: MEMBER / 로그 생성
+* 모임에 출석한 모임원이 토론에서 진행하는 발제 시간을 위해 발제문 작성을 위한 용도의 API
+* 해당 기능은 모임의 토론 시간이 설정되어 있어야 사용 가능함
+
+==== request
+include::{snippets}/book-questions/create/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/book-questions/create/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/book-questions/create/query-parameters.adoc[]
+
+==== request-fields
+include::{snippets}/book-questions/create/request-fields.adoc[]
+
+==== response
+include::{snippets}/book-questions/create/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/book-questions/create/response-fields.adoc[]
+
+==== Error case
+
+
+
+== GET
+
+=== 발제문 조회 - 그룹 단위
+* 접근 가능 권한 레벨: MEMBER
+* 그룹 토론 시간에 발제 시간에 발제문을 취합 및 발제문을 통한 대화를 위한 용도의 API
+* 토론 그룹이 지정된 모임원만 본인 토론 그룹에 대해서 해당 기능 사용이 가능함 (모임 단위 발제문 조회의 경우에는 제한이 없으므로 토론 시간 토론 참여자가 아닌 한 모임 단위 발제문 조회 사용을 권장)
+
+==== request
+include::{snippets}/book-questions/my-group/view/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/book-questions/my-group/view/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/book-questions/my-group/view/query-parameters.adoc[]
+
+==== response
+include::{snippets}/book-questions/my-group/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/book-questions/my-group/view/response-fields.adoc[]
+
+==== Error case
+
+
+---
+
+
+=== 발제문 조회 - 모임 단위
+* 접근 가능 권한 레벨: MEMBER
+* 모임 단위로 작성된 발제문 조회하는 용도의 API (모임 단위이지만, 내부적으로는 토론 그룹 단위로 구분되어서 보여짐)
+
+==== request
+include::{snippets}/book-questions/meeting/view/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/book-questions/meeting/view/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/book-questions/meeting/view/query-parameters.adoc[]
+
+==== response
+include::{snippets}/book-questions/meeting/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/book-questions/meeting/view/response-fields.adoc[]
+
+==== Error case
+
+
+
+== PATCH
+
+=== 발제문 수정
+* 접근 가능 권한 레벨: MEMBER / 로그 생성
+* 작성한 발제문 수정을 위한 용도로 사용되는 API
+* 모임원 본인이 작성한 발제문만 토론 시간 시작 2시간 이내로만 수정이 가능함 (관리자급 모임원의 경우, 본인의 발제문이 아니어도 수정이 가능하고, 시간 제약을 받지 않음)
+
+==== request
+include::{snippets}/book-questions/modify/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/book-questions/modify/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/book-questions/modify/request-headers.adoc[]
+
+==== request-fields
+include::{snippets}/book-questions/modify/request-fields.adoc[]
+
+==== response
+include::{snippets}/book-questions/modify/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/book-questions/modify/response-fields.adoc[]
+
+==== Error case
+
+
+---
+
+== DELETE
+
+=== 발제문 작성
+* 접근 가능 권한 레벨: MEMBER / 로그 생성
+* 작성한 발제문 삭제를 위한 용도로 사용되는 API
+* 모임원 본인이 작성한 발제문만 토론 시간 시작 2시간 이내로만 삭제가 가능함 (관리자급 모임원의 경우, 본인의 발제문이 아니어도 삭제가 가능하고, 시간 제약을 받지 않음)
+
+==== request
+include::{snippets}/book-questions/remove/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/book-questions/remove/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/book-questions/remove/request-headers.adoc[]
+
+==== response
+include::{snippets}/book-questions/remove/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/book-questions/remove/response-fields.adoc[]
+
+==== Error case
+
+
+---

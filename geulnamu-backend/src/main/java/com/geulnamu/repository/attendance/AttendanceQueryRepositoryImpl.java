@@ -1,5 +1,6 @@
 package com.geulnamu.repository.attendance;
 
+import com.geulnamu.controller.attendance.dto.MemberInfoWithGroup;
 import com.geulnamu.controller.attendance.dto.response.DiscussionGroupResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
@@ -68,34 +69,17 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
     }
 
     @Override
-    public List<DiscussionGroupResponse> findAllDiscussionGroupMemberList(Long meetingId) {
+    public List<MemberInfoWithGroup> findAllDiscussionGroupMemberList(Long meetingId) {
         // meetingId 값을 기준으로 모두 조회
-        List<Tuple> results = queryFactory
-            .select(attendance.discussionGroup, attendance.member.id, attendance.member.name)
+        return queryFactory
+            .select(Projections.constructor(MemberInfoWithGroup.class,
+                    attendance.member.id, attendance.member.name, attendance.discussionGroup)
+            )
             .from(attendance)
             .where(attendance.meeting.id.eq(meetingId)
                 .and(attendance.discussionGroup.isNotNull()))
             .orderBy(attendance.discussionGroup.asc(), attendance.member.id.asc())
             .fetch();
-
-        // discussionGroup 값을 기준으로 같은 discussionGroup 끼리 List로 묶어서 map 으로 만들기
-        Map<DiscussionGroup, List<MemberIdAndNameResponse>> groupMap = results.stream()
-            .collect(Collectors.groupingBy(
-                tuple -> tuple.get(attendance.discussionGroup),
-                Collectors.mapping(
-                    tuple -> new MemberIdAndNameResponse(
-                        tuple.get(attendance.member.id),
-                        tuple.get(attendance.member.name)
-                    ),
-                    Collectors.toList()
-                )
-            ));
-
-        // 맵들을 discussionGroup 값으로 정렬하고, 값들을 DiscussionGroupResponse 타입에 담아 전체를 list로 만들어 반환
-        return groupMap.entrySet().stream()
-            .sorted(Map.Entry.comparingByKey())
-            .map(entry -> new DiscussionGroupResponse(entry.getValue()))
-            .collect(Collectors.toList());
     }
 
     public List<MeetingAttendanceStatusResponse> findMeetingAttendanceStatus(Long meetingId) {

@@ -8,6 +8,7 @@ public class ResponseMessage {
     public static final String NO_AUTHENTICATION = "인증 정보가 존재하지 않습니다."; // 401
     public static final String FORBIDDEN = "접근 권한이 없습니다."; // 403
     public static final String NOT_FOUND = "조회된 데이터가 없습니다."; // 404
+    public static final String NOT_FOUND_URL = "존재하지 않는 URL 입니다.";
     public static final String INVALID_REQ_VALUE = "유효성 검사를 충족하지 못했습니다."; // 417
     public static final String NO_CHANGE_DETECTED = "현재 값과 동일하여 처리할 수 없습니다."; // 422
     public static final String INTERNAL_SERVER_ERROR = "Unknown error"; // 500
@@ -38,5 +39,8 @@ public class ResponseMessage {
 
     public static final String OVER_DISCUSSION_GROUP_NUMBER = "토론 그룹은 현재 최대 7개 까지만 가능합니다.";
     public static final String MEMBER_DUPLICATE_DISCUSSION_GROUP_ASSIGNMENT = "특정 모임원이 2개 이상의 토론 그룹에 담겨 있습니다.";
+
+    public static final String BOOK_QUESTION_TIME_RESTRICTION = "발제문 수정 및 삭제는 토론 시간 2시간 이내까지만 가능합니다.";
+    public static final String BOOK_QUESTION_VIEW_RESTRICTION = "그룹 발제문 조회는 토론 그룹을 지정받은 경우에만 조회 가능합니다.";
 
 }
