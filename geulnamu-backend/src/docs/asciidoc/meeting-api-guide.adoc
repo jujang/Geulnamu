@@ -267,7 +267,7 @@ include::{snippets}/meetings/make-public/modify/response-fields.adoc[]
 
 === 개설한 모임 삭제
 * 접근 가능 권한 레벨: STAFF / 로그 생성
-* 운영진 모임원이 개설한 모임을 삭제하는 용도의 API (운영진 중에서는 개설 당사자만 가능)
+* 운영진 모임원이 개설된 모임을 삭제하는 용도의 API (운영진 중에서는 개설 당사자만 가능)
 ** 해당 삭제는 Hard Delete 이기에 수행 후, 복원이 되지 않음!
 * 모임 시작 6시간 전까지만 가능
 

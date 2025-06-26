@@ -94,7 +94,7 @@ public class AuthTokenService {
     /**
      * 리프레시 토큰을 쿠키에 설정하는 내부 메서드
      */
-    private void setRefreshTokenCookie(String refreshToken, HttpServletResponse response) {
+    private static void setRefreshTokenCookie(String refreshToken, HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
             .maxAge(TokenInfo.REFRESH_TOKEN_VALID_TIME / 1000)
             .path("/")

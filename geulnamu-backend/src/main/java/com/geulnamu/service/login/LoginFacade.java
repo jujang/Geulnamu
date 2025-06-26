@@ -123,7 +123,6 @@ public class LoginFacade {
      */
     private MemberResult findOrCreateMember(Map<String, Object> userInfo) {
         String kakaoUserId = userInfo.get("id").toString();
-        System.out.println("kakaoUserId: " + kakaoUserId);
         Optional<Member> memberOptional = memberQueryRepository.findByKakaoUserId(kakaoUserId);
 
         if(memberOptional.isEmpty()) {

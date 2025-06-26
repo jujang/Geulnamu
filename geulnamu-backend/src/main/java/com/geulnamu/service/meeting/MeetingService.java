@@ -171,13 +171,13 @@ public class MeetingService {
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
     }
 
-    public void checkMeetingOpenedMember(Long meetingMemberId, Long requestedMemberId) {
+    public static void checkMeetingOpenedMember(Long meetingMemberId, Long requestedMemberId) {
         if(!meetingMemberId.equals(requestedMemberId)) {
             throw new ForbiddenException(ResponseMessage.NOT_SUITABLE_MEMBER);
         }
     }
 
-    public boolean hasAdminPrivileges(Role role) {
+    public static boolean hasAdminPrivileges(Role role) {
         return (role.equals(Role.ADMIN) || role.equals(Role.LEADER) || role.equals(Role.VICE_LEADER));
     }
 
