@@ -10,7 +10,9 @@ import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
+import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.exception.BadRequestException;
+import com.geulnamu.infrastructure.exception.ForbiddenException;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.response.paging.PagingResponse;
@@ -18,7 +20,6 @@ import com.geulnamu.repository.attendance.AttendanceQueryRepository;
 import com.geulnamu.repository.meeting.MeetingQueryRepository;
 import com.geulnamu.repository.meeting.MeetingCommandRepository;
 import com.geulnamu.repository.member.MemberQueryRepository;
-import com.geulnamu.service.authorization.MeetingAuthorizationService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,6 @@ import java.util.List;
 @AllArgsConstructor
 public class MeetingService {
 
-    private final MeetingAuthorizationService authorizationService;
     private final MemberQueryRepository memberQueryRepository;
     private final MeetingQueryRepository meetingQueryRepository;
     private final MeetingCommandRepository meetingCommandRepository;
@@ -39,7 +39,8 @@ public class MeetingService {
 
     @Transactional(rollbackFor = Exception.class)
     public Long createMeeting(Long memberId, MeetingCreateRequest request) {
-        Member member = findMemberOrThrow(memberId);
+        Member member = memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         Meeting meeting = Meeting.createMeeting(member, request.getMeetingName(), request.getMeetingType(), request.getMeetingDate(),
             request.getLateThresholdTime(), request.getMeetingPlace(), request.getDescription());
         meeting.checkLateThresholdTimeBeforeMeetingTime();
@@ -93,14 +94,13 @@ public class MeetingService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateMeeting(Long meetingId, Long memberId, MeetingUpdateRequest request){
+    public void updateMeeting(Long meetingId, Long memberId, Role role, MeetingUpdateRequest request){
         // 모임 정보 수정 가능 권한 검사
         Meeting meeting = findMeetingOrThrow(meetingId);
-        Member member = findMemberOrThrow(memberId);
-        authorizationService.validateModificationBy(meeting, member);
 
         // 수정 가능 시간 확인(모임 시작 이후, 수정 불가) - 관리자급의 경우, 시간이 넘었더라도 수정 가능
-        if(!authorizationService.hasAdminPrivileges(member)) {
+        if(!hasAdminPrivileges(role)) {
+            checkMeetingOpenedMember(meeting.getMember().getId(), memberId);
             meeting.checkMeetingUpdateTime();
         }
 
@@ -118,14 +118,13 @@ public class MeetingService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void updateMeetingForDiscussion(Long meetingId, Long memberId, MeetingGroupUpdateRequest request) {
+    public void updateMeetingForDiscussion(Long meetingId, Long memberId, Role role, MeetingGroupUpdateRequest request) {
         // 모임 정보 수정 가능 권한 검사
         Meeting meeting = findMeetingOrThrow(meetingId);
-        Member member = findMemberOrThrow(memberId);
-        authorizationService.validateModificationBy(meeting, member);
 
         // 수정 가능 시간 확인(토론 시작 이후, 수정 불가) - 관리자급의 경우, 시간이 넘었더라도 수정 가능
-        if(!authorizationService.hasAdminPrivileges(member)) {
+        if(!hasAdminPrivileges(role)) {
+            checkMeetingOpenedMember(meeting.getMember().getId(), memberId);
             meeting.checkDiscussionUpdateTime();
         }
 
@@ -153,12 +152,15 @@ public class MeetingService {
 
     // 모임 시작 6시간 전까지만 삭제 가능
     @Transactional(rollbackFor = Exception.class)
-    public void removeMeeting(Long meetingId, Long memberId) {
+    public void removeMeeting(Long meetingId, Long memberId, Role role) {
         // 모임 삭제 가능 여부 검사
         Meeting meeting = findMeetingOrThrow(meetingId);
-        Member member = findMemberOrThrow(memberId);
-        authorizationService.validateDeletionBy(meeting, member);
-        meeting.checkTimeForDeleteMeeting();
+
+        if(!hasAdminPrivileges(role)) {
+            checkMeetingOpenedMember(meeting.getMember().getId(), memberId);
+        }
+
+        meeting.checkTimeForDeleteMeeting(); // TODO: 삭제는 관리자급이어도 모임 시작 6시간 남았을 때부터는 삭제 불가능, 추후 관리자는(모임 시작 전까지는) 삭제 가능하게 것도 고려해 볼 것
 
         // 모임 삭제 (hard delete)
         meetingCommandRepository.delete(meeting);
@@ -169,9 +171,14 @@ public class MeetingService {
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
     }
 
-    private Member findMemberOrThrow(Long memberId) {
-        return memberQueryRepository.findById(memberId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
+    public static void checkMeetingOpenedMember(Long meetingMemberId, Long requestedMemberId) {
+        if(!meetingMemberId.equals(requestedMemberId)) {
+            throw new ForbiddenException(ResponseMessage.NOT_SUITABLE_MEMBER);
+        }
+    }
+
+    public static boolean hasAdminPrivileges(Role role) {
+        return (role.equals(Role.ADMIN) || role.equals(Role.LEADER) || role.equals(Role.VICE_LEADER));
     }
 
 }

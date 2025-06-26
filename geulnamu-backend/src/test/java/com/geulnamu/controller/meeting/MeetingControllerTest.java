@@ -22,7 +22,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.geulnamu.common.ApiDocumentUtils.getDocumentRequest;
@@ -105,12 +105,11 @@ public class MeetingControllerTest extends ControllerTest {
     public void getStaffListTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-
-        MemberIdAndNameResponse memberIdAndNameResponse_01 = new MemberIdAndNameResponse(1L, "나뭉모임장");
-        MemberIdAndNameResponse memberIdAndNameResponse_02 = new MemberIdAndNameResponse(2L, "나순부모임장");
-        List<MemberIdAndNameResponse> memberIdAndNameResponseList = new ArrayList<>();
-        memberIdAndNameResponseList.add(memberIdAndNameResponse_01);
-        memberIdAndNameResponseList.add(memberIdAndNameResponse_02);
+        List<MemberIdAndNameResponse> memberIdAndNameResponseList =
+            Arrays.asList(
+                new MemberIdAndNameResponse(1L, "나뭉모임장"),
+                new MemberIdAndNameResponse(2L, "나순부모임장")
+            );
 
         given(meetingService.getStaffList()).willReturn(memberIdAndNameResponseList);
 
@@ -149,31 +148,28 @@ public class MeetingControllerTest extends ControllerTest {
     public void getMeetingListTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-
-        MeetingInfoResponse meetingInfoResponse_01 = new MeetingInfoResponse(
-            1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임",
-            LocalDateTime.of(2025, 5, 31, 10, 30),
-            LocalDateTime.of(2025, 5, 31, 10, 45),
-            "합정 빌리프커피로스터리스", "~~", "true", DiscussionGroup.A,
-            LocalDateTime.of(2025, 5, 31, 12, 0), null,
-            LocalDateTime.of(2025, 5, 1, 12, 30)
-        );
-        MeetingInfoResponse meetingInfoResponse_02 = new MeetingInfoResponse(
-            2L, "나뭉이", MeetingType.FLASH, "금요 독서벙",
-            LocalDateTime.of(2025, 6, 3, 18, 30),
-            LocalDateTime.of(2025, 6, 3, 18, 30),
-            "합정 저스티나", "~~", "true_late", null,
-            LocalDateTime.of(2025, 5, 1, 12, 31), null,
-            LocalDateTime.of(2025, 5, 1, 12, 30)
-        );
-        List<MeetingInfoResponse> meetingInfoResponseList = new ArrayList<>();
-        meetingInfoResponseList.add(meetingInfoResponse_01);
-        meetingInfoResponseList.add(meetingInfoResponse_02);
-
-        PagingResponse pagingResponse = new PagingResponse(
-            1, 3, 6);
-
-        MeetingListResponse meetingListResponse = new MeetingListResponse(pagingResponse, meetingInfoResponseList);
+        MeetingListResponse meetingListResponse =
+            new MeetingListResponse(
+                new PagingResponse(1, 3, 6),
+                Arrays.asList(
+                    new MeetingInfoResponse(
+                        1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임",
+                        LocalDateTime.of(2025, 5, 31, 10, 30),
+                        LocalDateTime.of(2025, 5, 31, 10, 45),
+                        "합정 빌리프커피로스터리스", "~~", "true", DiscussionGroup.A,
+                        LocalDateTime.of(2025, 5, 31, 12, 0), null,
+                        LocalDateTime.of(2025, 5, 1, 12, 30)
+                    ),
+                    new MeetingInfoResponse(
+                        2L, "나뭉이", MeetingType.FLASH, "금요 독서벙",
+                        LocalDateTime.of(2025, 6, 3, 18, 30),
+                        LocalDateTime.of(2025, 6, 3, 18, 30),
+                        "합정 저스티나", "~~", "true_late", null,
+                        LocalDateTime.of(2025, 5, 1, 12, 31), null,
+                        LocalDateTime.of(2025, 5, 1, 12, 30)
+                    )
+                )
+            );
 
         given(meetingService.getMeetingList(any(), any())).willReturn(meetingListResponse);
 
@@ -244,30 +240,25 @@ public class MeetingControllerTest extends ControllerTest {
     public void getTodayMeetingListTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-
-        AttendanceInfoResponse attendanceInfoResponse_1 = new AttendanceInfoResponse(
-            1L, 1L, MeetingType.REGULAR, LocalDateTime.of(2126, 6, 14, 10, 30),
-            LocalDateTime.of(2126, 6, 14, 10, 45), "1000회 정기모임",
-            "합정 저스티나", "조심히 오세요~", LocalDateTime.of(2126, 6, 14, 10, 0),
-            "1등으로 왔지롱~", LocalDateTime.of(2126, 6, 14, 12, 0), null, null
-        );
-
-        MemberIdAndNameResponse memberIdAndNameResponse_1 = new MemberIdAndNameResponse(1L, "나뭉일");
-        MemberIdAndNameResponse memberIdAndNameResponse_2 = new MemberIdAndNameResponse(2L, "나뭉이");
-        List<MemberIdAndNameResponse> memberIdAndNameResponseList = new ArrayList<>();
-        memberIdAndNameResponseList.add(memberIdAndNameResponse_1);
-        memberIdAndNameResponseList.add(memberIdAndNameResponse_2);
-
-        AttendanceInfoResponse attendanceInfoResponse_2 = new AttendanceInfoResponse(
-            4L, 2L, MeetingType.REGULAR, LocalDateTime.of(2126, 6, 14, 18, 30),
-            LocalDateTime.of(2126, 6, 14, 18, 45), "독서벙",
-            "합정 빌리프커피로스터리", "조심히 오세요~", LocalDateTime.of(2126, 6, 14, 18, 25),
-            "지각 안 했습니다~", LocalDateTime.of(2126, 6, 14, 20, 0), DiscussionGroup.A, memberIdAndNameResponseList
-        );
-
-        List<AttendanceInfoResponse> attendanceInfoResponseList = new ArrayList<>();
-        attendanceInfoResponseList.add(attendanceInfoResponse_1);
-        attendanceInfoResponseList.add(attendanceInfoResponse_2);
+        List<AttendanceInfoResponse> attendanceInfoResponseList =
+            Arrays.asList(
+                new AttendanceInfoResponse(
+                    1L, 1L, MeetingType.REGULAR, LocalDateTime.of(2126, 6, 14, 10, 30),
+                    LocalDateTime.of(2126, 6, 14, 10, 45), "1000회 정기모임",
+                    "합정 저스티나", "조심히 오세요~", LocalDateTime.of(2126, 6, 14, 10, 0),
+                    "1등으로 왔지롱~", LocalDateTime.of(2126, 6, 14, 12, 0), null, null
+                ),
+                new AttendanceInfoResponse(
+                    4L, 2L, MeetingType.REGULAR, LocalDateTime.of(2126, 6, 14, 18, 30),
+                    LocalDateTime.of(2126, 6, 14, 18, 45), "독서벙",
+                    "합정 빌리프커피로스터리", "조심히 오세요~", LocalDateTime.of(2126, 6, 14, 18, 25),
+                    "지각 안 했습니다~", LocalDateTime.of(2126, 6, 14, 20, 0), DiscussionGroup.A,
+                    Arrays.asList(
+                        new MemberIdAndNameResponse(1L, "나뭉일"),
+                        new MemberIdAndNameResponse(2L, "나뭉이")
+                    )
+                )
+            );
 
         given(meetingService.getTodayMeetingList(any())).willReturn(attendanceInfoResponseList);
 
@@ -323,27 +314,24 @@ public class MeetingControllerTest extends ControllerTest {
     public void getMeetingListForStaffTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-
-        MeetingInfoForStaffResponse meetingInfoForStaffResponse_01 = new MeetingInfoForStaffResponse(
-            1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임", LocalDateTime.of(2025, 5, 31, 10, 30),
-            LocalDateTime.of(2025, 5, 31, 10, 45), "합정 빌리프커피로스터리스", "~~",
-            LocalDateTime.of(2025, 5, 31, 12, 0), null,
-            LocalDateTime.of(2025, 5, 1, 12, 30), false
-        );
-        MeetingInfoForStaffResponse meetingInfoForAdminResponse_02 = new MeetingInfoForStaffResponse(
-            2L, "나뭉이", MeetingType.FLASH, "금요 독서벙", LocalDateTime.of(2025, 6, 3, 18, 30),
-            LocalDateTime.of(2025, 5, 31, 10, 45), "합정 저스티나", "~~",
-            LocalDateTime.of(2025, 5, 1, 12, 31), null,
-            LocalDateTime.of(2025, 5, 1, 12, 30), false
-        );
-        List<MeetingInfoForStaffResponse> meetingInfoForStaffResponseList = new ArrayList<>();
-        meetingInfoForStaffResponseList.add(meetingInfoForStaffResponse_01);
-        meetingInfoForStaffResponseList.add(meetingInfoForAdminResponse_02);
-
-        PagingResponse pagingResponse = new PagingResponse(
-            1, 3, 6);
-
-        MeetingListForStaffResponse meetingListForStaffResponse = new MeetingListForStaffResponse(pagingResponse, meetingInfoForStaffResponseList);
+        MeetingListForStaffResponse meetingListForStaffResponse =
+            new MeetingListForStaffResponse(
+                new PagingResponse(1, 3, 6),
+                Arrays.asList(
+                    new MeetingInfoForStaffResponse(
+                        1L, "나뭉이", MeetingType.REGULAR, "1회 정기모임", LocalDateTime.of(2025, 5, 31, 10, 30),
+                        LocalDateTime.of(2025, 5, 31, 10, 45), "합정 빌리프커피로스터리스", "~~",
+                        LocalDateTime.of(2025, 5, 31, 12, 0), null,
+                        LocalDateTime.of(2025, 5, 1, 12, 30), false
+                    ),
+                    new MeetingInfoForStaffResponse(
+                        2L, "나뭉이", MeetingType.FLASH, "금요 독서벙", LocalDateTime.of(2025, 6, 3, 18, 30),
+                        LocalDateTime.of(2025, 5, 31, 10, 45), "합정 저스티나", "~~",
+                        LocalDateTime.of(2025, 5, 1, 12, 31), null,
+                        LocalDateTime.of(2025, 5, 1, 12, 30), false
+                    )
+                )
+            );
 
         given(meetingService.getMeetingListForStaff(any())).willReturn(meetingListForStaffResponse);
 
@@ -475,7 +463,7 @@ public class MeetingControllerTest extends ControllerTest {
             null, null, null, null, "합정 저스티나", "늦지 않게 오세요~"
         );
 
-        doNothing().when(meetingService).updateMeeting(any(), any(), any());
+        doNothing().when(meetingService).updateMeeting(any(), any(), any(), any());
 
         // when
         ResultActions actions =
@@ -528,7 +516,7 @@ public class MeetingControllerTest extends ControllerTest {
             LocalDateTime.of(2026, 5, 1, 12, 30), "모두 올라와주세요~"
         );
 
-        doNothing().when(meetingService).updateMeetingForDiscussion(any(), any(), any());
+        doNothing().when(meetingService).updateMeetingForDiscussion(any(), any(), any(), any());
 
         // when
         ResultActions actions =
@@ -656,7 +644,7 @@ public class MeetingControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        doNothing().when(meetingService).removeMeeting(any(), any());
+        doNothing().when(meetingService).removeMeeting(any(), any(), any());
 
         // when
         ResultActions actions =

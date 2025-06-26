@@ -78,7 +78,7 @@ public class ActionHistoryService {
     /**
      * 민감한 정보 마스킹 처리
      */
-    private String maskSensitiveData(String json) {
+    private static String maskSensitiveData(String json) {
         if (json == null) {
             return null;
         }

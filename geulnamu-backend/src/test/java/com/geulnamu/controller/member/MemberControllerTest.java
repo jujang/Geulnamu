@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.geulnamu.common.ApiDocumentUtils.getDocumentRequest;
@@ -145,15 +145,14 @@ public class MemberControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        MemberInfoResponse memberInfoResponse_1 = new MemberInfoResponse(
-            1L, "나뭉일", Gender.valueOf("MALE"), LocalDate.of(2022, 1, 1), "namu_1", Role.LEADER, LocalDateTime.of(2022, 1, 3, 11, 30, 0)
-        );
-        MemberInfoResponse memberInfoResponse_2 = new MemberInfoResponse(
-            2L, "나뭉이", Gender.valueOf("FEMALE"), LocalDate.of(2022, 1, 2), "namu_2", Role.VICE_STAFF, null
-        );
-        List<MemberInfoResponse> memberInfoResponseList = new ArrayList<>();
-        memberInfoResponseList.add(memberInfoResponse_1);
-        memberInfoResponseList.add(memberInfoResponse_2);
+        List<MemberInfoResponse> memberInfoResponseList =
+            Arrays.asList(
+                new MemberInfoResponse(1L, "나뭉일", Gender.valueOf("MALE"),
+                    LocalDate.of(2022, 1, 1), "namu_1", Role.LEADER,
+                    LocalDateTime.of(2022, 1, 3, 11, 30, 0)),
+                new MemberInfoResponse(2L, "나뭉이", Gender.valueOf("FEMALE"),
+                    LocalDate.of(2022, 1, 2), "namu_2", Role.VICE_STAFF, null)
+            );
 
         PagingResponse pagingResponse = new PagingResponse(
             1, 3, 6

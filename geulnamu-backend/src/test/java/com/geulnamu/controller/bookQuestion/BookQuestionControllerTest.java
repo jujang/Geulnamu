@@ -146,23 +146,17 @@ public class BookQuestionControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        List<BookQuestionViewResponse> bookQuestionViewResponseList_1 =
-            Arrays.asList(
-                new BookQuestionViewResponse(1L, 1L, "오늘 점심 뭔가요?"),
-                new BookQuestionViewResponse(2L, 1L, "사랑이 뭐라고 생각하시나요?"),
-                new BookQuestionViewResponse(3L, 2L, "속독하는 본인만의 노하우가 있을까요??")
-            );
-
-        List<BookQuestionViewResponse> bookQuestionViewResponseList_2 =
-            Arrays.asList(
-                new BookQuestionViewResponse(4L, 3L, "하루에 최대 몇 시간까지 책을 읽어보았나요?"),
-                new BookQuestionViewResponse(5L, 4L, "세상이 정의로울 필요가 있을까요?")
-            );
-
         List<BookQuestionGroupViewResponse> bookQuestionGroupViewResponseList =
             Arrays.asList(
-                new BookQuestionGroupViewResponse(bookQuestionViewResponseList_1),
-                new BookQuestionGroupViewResponse(bookQuestionViewResponseList_2)
+                new BookQuestionGroupViewResponse(Arrays.asList(
+                    new BookQuestionViewResponse(1L, 1L, "오늘 점심 뭔가요?"),
+                    new BookQuestionViewResponse(2L, 1L, "사랑이 뭐라고 생각하시나요?"),
+                    new BookQuestionViewResponse(3L, 2L, "속독하는 본인만의 노하우가 있을까요??")
+                )),
+                new BookQuestionGroupViewResponse(Arrays.asList(
+                    new BookQuestionViewResponse(4L, 3L, "하루에 최대 몇 시간까지 책을 읽어보았나요?"),
+                    new BookQuestionViewResponse(5L, 4L, "세상이 정의로울 필요가 있을까요?")
+                ))
             );
 
         given(bookQuestionService.findMeetingBookQuestions(any())).willReturn(bookQuestionGroupViewResponseList);

@@ -9,8 +9,10 @@ import com.geulnamu.controller.meeting.dto.response.*;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
+import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
+import com.geulnamu.infrastructure.annotation.AuthRole;
 import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.meeting.MeetingService;
@@ -60,9 +62,6 @@ public class MeetingController {
         return BaseResponse.ofSuccess(responseList);
     }
 
-    // TODO: 현재 모임원이 사용 가능한 모임 단일 조회는 존재하지 않음. 대신, 출석 이후에 출석 정보를 조회하면서 모임 조회도 동시에 할 수 있음.
-    // TODO: 일단은 운영해보면서 '모임 목록 조회'와 '출석 단일 조회'로 적당히 커버 가능한지 확인해보고, 안 되면 그때가서 기능 만들 것. 근데 이러면, 아예 출석 조회 기능을 모임 조회 기능으로 끌어오는게 나을 수도 있음
-
     @AccessLevel(Level.STAFF)
     @GetMapping(value = "/list/staff", name = "모임 목록 조회(운영진용)")
     public BaseResponse<MeetingListForStaffResponse> getMeetingListForStaff(@Valid MeetingListRequest request) {
@@ -81,9 +80,9 @@ public class MeetingController {
     @AccessLevel(Level.STAFF)
     @PatchMapping(value = "/{meetingId}/basic", name = "모임 수정 - 기본 정보")
     public BaseResponse<Void> updateMeeting(@PathVariable @Min(value = 1) Long meetingId,
-                                            @AuthMemberId Long memberId,
+                                            @AuthMemberId Long memberId, @AuthRole Role role,
                                             @Valid @RequestBody MeetingUpdateRequest request) {
-        meetingService.updateMeeting(meetingId, memberId, request);
+        meetingService.updateMeeting(meetingId, memberId, role, request);
         return BaseResponse.ofSuccess();
     }
 
@@ -91,9 +90,9 @@ public class MeetingController {
     @AccessLevel(Level.STAFF)
     @PatchMapping(value = "/{meetingId}/discussion", name = "모임 수정 - 조별 활동 관련")
     public BaseResponse<Void> updateMeetingForDiscussion(@PathVariable @Min(value = 1) Long meetingId,
-                                                         @AuthMemberId Long memberId,
+                                                         @AuthMemberId Long memberId, @AuthRole Role role,
                                                          @Valid @RequestBody MeetingGroupUpdateRequest request) {
-        meetingService.updateMeetingForDiscussion(meetingId, memberId, request);
+        meetingService.updateMeetingForDiscussion(meetingId, memberId, role, request);
         return BaseResponse.ofSuccess();
     }
 
@@ -115,8 +114,8 @@ public class MeetingController {
     @AccessLevel(Level.STAFF)
     @DeleteMapping(value = "/{meetingId}", name = "개설한 모임 삭제 - 모임 시작 6시간 전까지만 가능")
     public BaseResponse<Void> removeMeeting(@PathVariable @Min(value = 1) Long meetingId,
-                                            @AuthMemberId Long memberId) {
-        meetingService.removeMeeting(meetingId, memberId);
+                                            @AuthMemberId Long memberId, @AuthRole Role role) {
+        meetingService.removeMeeting(meetingId, memberId, role);
         return BaseResponse.ofSuccess();
     }
 

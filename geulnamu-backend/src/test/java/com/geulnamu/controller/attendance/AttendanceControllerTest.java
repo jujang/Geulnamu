@@ -18,8 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import static com.geulnamu.common.ApiDocumentUtils.getDocumentRequest;
 import static com.geulnamu.common.ApiDocumentUtils.getDocumentResponse;
@@ -91,18 +90,15 @@ public class AttendanceControllerTest extends ControllerTest {
     public void getMyAttendanceInfoTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-
-        MemberIdAndNameResponse memberIdAndNameResponse_1 = new MemberIdAndNameResponse(1L, "나뭉일");
-        MemberIdAndNameResponse memberIdAndNameResponse_2 = new MemberIdAndNameResponse(2L, "나뭉이");
-        List<MemberIdAndNameResponse> memberIdAndNameResponseList = new ArrayList<>();
-        memberIdAndNameResponseList.add(memberIdAndNameResponse_1);
-        memberIdAndNameResponseList.add(memberIdAndNameResponse_2);
-
         AttendanceInfoResponse attendanceInfoResponse = new AttendanceInfoResponse(
             1L, 1L, MeetingType.REGULAR, LocalDateTime.of(2126, 6, 14, 10, 30),
             LocalDateTime.of(2126, 6, 14, 10, 45), "1000회 정기모임",
             "합정 저스티나", "조심히 오세요~", LocalDateTime.of(2126, 6, 14, 10, 0),
-            "1등으로 왔지롱~", LocalDateTime.of(2126, 6, 14, 12, 0), DiscussionGroup.A, memberIdAndNameResponseList
+            "1등으로 왔지롱~", LocalDateTime.of(2126, 6, 14, 12, 0), DiscussionGroup.A,
+            Arrays.asList(
+                new MemberIdAndNameResponse(1L, "나뭉일"),
+                new MemberIdAndNameResponse(2L, "나뭉이")
+            )
         );
 
         given(attendanceService.getMyAttendanceInfo(any(), any())).willReturn(attendanceInfoResponse);
@@ -158,26 +154,22 @@ public class AttendanceControllerTest extends ControllerTest {
     public void getMeetingAttendanceStatusTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-
-        MeetingAttendanceSummaryResponse meetingAttendanceSummaryResponse = new MeetingAttendanceSummaryResponse(
-            LocalDateTime.of(2025, 5, 31, 10, 30),
-            LocalDateTime.of(2025, 5, 31, 10, 45),
-            3L, 2L, 1L
-        );
-
-        MeetingAttendanceStatusResponse meetingAttendanceStatusResponse_1 = new MeetingAttendanceStatusResponse(
-            1L, "나뭉일", LocalDateTime.of(2025, 5, 31, 10, 20), false);
-        MeetingAttendanceStatusResponse meetingAttendanceStatusResponse_2 = new MeetingAttendanceStatusResponse(
-            2L, "나뭉이", LocalDateTime.of(2025, 5, 31, 10, 44), false);
-        MeetingAttendanceStatusResponse meetingAttendanceStatusResponse_3 = new MeetingAttendanceStatusResponse(
-            3L, "나뭉삼", LocalDateTime.of(2025, 5, 31, 10, 50), true);
-        List<MeetingAttendanceStatusResponse> meetingAttendanceStatusResponseList = new ArrayList<>();
-        meetingAttendanceStatusResponseList.add(meetingAttendanceStatusResponse_3);
-        meetingAttendanceStatusResponseList.add(meetingAttendanceStatusResponse_2);
-        meetingAttendanceStatusResponseList.add(meetingAttendanceStatusResponse_1);
-
         MeetingAttendanceDetailsResponse meetingAttendanceDetailsResponse =
-            new MeetingAttendanceDetailsResponse(meetingAttendanceSummaryResponse, meetingAttendanceStatusResponseList);
+            new MeetingAttendanceDetailsResponse(
+                new MeetingAttendanceSummaryResponse(
+                    LocalDateTime.of(2025, 5, 31, 10, 30),
+                    LocalDateTime.of(2025, 5, 31, 10, 45),
+                    3L, 2L, 1L
+                ),
+                Arrays.asList(
+                    new MeetingAttendanceStatusResponse(
+                        1L, "나뭉일", LocalDateTime.of(2025, 5, 31, 10, 20), false),
+                    new MeetingAttendanceStatusResponse(
+                        2L, "나뭉이", LocalDateTime.of(2025, 5, 31, 10, 44), false),
+                    new MeetingAttendanceStatusResponse(
+                        3L, "나뭉삼", LocalDateTime.of(2025, 5, 31, 10, 50), true)
+                )
+            );
 
         given(attendanceService.getMeetingAttendanceStatus(any())).willReturn(meetingAttendanceDetailsResponse);
 
