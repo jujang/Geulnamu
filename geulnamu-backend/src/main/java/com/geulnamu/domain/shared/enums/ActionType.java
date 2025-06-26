@@ -29,7 +29,11 @@ public enum ActionType {
     // 발제문 관련
     BOOK_QUESTION_CREATE("발제문 작성"),
     BOOK_QUESTION_MODIFY("발제문 수정"),
-    BOOK_QUESTION_DELETE("발제문 삭제");
+    BOOK_QUESTION_DELETE("발제문 삭제"),
+
+    // 모임원의 소리 관련
+    VOC_ERROR_REPORT("오류 보고"),
+    VOC_FEATURE_REQUEST("요청 기능");
 
     private final String description;
 
