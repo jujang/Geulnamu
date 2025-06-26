@@ -1,7 +1,6 @@
 package com.geulnamu.domain.bookQuestion;
 
 import com.geulnamu.domain.attendance.Attendance;
-import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.DateColumn;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
@@ -41,23 +40,9 @@ public class BookQuestion extends DateColumn {
         this.content = content;
     }
 
-    public void checkTimeCanModifyBookQuestionContent() {
+    public void checkTimeCanModifyOrDeleteBookQuestionContent() {
         if(LocalDateTime.now().isAfter(this.getAttendance().getMeeting().getDiscussionTime().plusHours(2))) {
             throw new BadRequestException(ResponseMessage.BOOK_QUESTION_TIME_RESTRICTION);
-        }
-    }
-
-    public void checkTimeCanDeleteBookQuestionContent() {
-        if(LocalDateTime.now().isAfter(this.getAttendance().getMeeting().getDiscussionTime().plusHours(2))) {
-            System.out.println(this.getAttendance().getMeeting().getDiscussionTime());
-            System.out.println(LocalDateTime.now().isAfter(this.getAttendance().getMeeting().getDiscussionTime().plusHours(2)));
-            throw new BadRequestException(ResponseMessage.BOOK_QUESTION_TIME_RESTRICTION);
-        }
-    }
-
-    public void checkRequestedMember(Long memberId) {
-        if(!this.getAttendance().getMember().getId().equals(memberId)) {
-            throw new BadRequestException(ResponseMessage.NOT_SUITABLE_MEMBER);
         }
     }
 

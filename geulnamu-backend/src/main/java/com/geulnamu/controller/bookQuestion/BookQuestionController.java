@@ -1,12 +1,14 @@
 package com.geulnamu.controller.bookQuestion;
 
 import com.geulnamu.controller.bookQuestion.dto.request.BookQuestionCreateRequest;
+import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionViewResponse;
 import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionGroupViewResponse;
-import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionMeetingViewResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.Level;
+import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
+import com.geulnamu.infrastructure.annotation.AuthRole;
 import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.bookQuestion.BookQuestionService;
@@ -38,15 +40,15 @@ public class BookQuestionController {
 
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/my-group", name = "토론 그룹별 발제문 리스트 조회 - 본인 토론 그룹")
-    public BaseResponse<List<BookQuestionGroupViewResponse>> getMyGroupBookQuestions(@RequestParam @Min(value = 1) Long attendanceId) {
-        List<BookQuestionGroupViewResponse> responseList = bookQuestionService.findMyDiscussionGroupBookQuestions(attendanceId);
+    public BaseResponse<List<BookQuestionViewResponse>> getMyGroupBookQuestions(@RequestParam @Min(value = 1) Long attendanceId) {
+        List<BookQuestionViewResponse> responseList = bookQuestionService.findMyDiscussionGroupBookQuestions(attendanceId);
         return BaseResponse.ofSuccess(responseList);
     }
 
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/meeting", name = "모임별 발제문 리스트 조회")
-    public BaseResponse<List<BookQuestionMeetingViewResponse>> getMeetingBookQuestions(@RequestParam @Min(value = 1) Long meetingId) {
-        List<BookQuestionMeetingViewResponse> responseList = bookQuestionService.findMeetingBookQuestions(meetingId);
+    public BaseResponse<List<BookQuestionGroupViewResponse>> getMeetingBookQuestions(@RequestParam @Min(value = 1) Long meetingId) {
+        List<BookQuestionGroupViewResponse> responseList = bookQuestionService.findMeetingBookQuestions(meetingId);
         return BaseResponse.ofSuccess(responseList);
     }
 
@@ -54,9 +56,9 @@ public class BookQuestionController {
     @AccessLevel(Level.MEMBER)
     @PatchMapping(value = "/{bookQuestionId}", name = "발제문 수정")
     public BaseResponse<Void> modifyBookQuestion(@PathVariable @Min(value = 1) Long bookQuestionId,
-                                                 @AuthMemberId Long memberId,
+                                                 @AuthMemberId Long memberId, @AuthRole Role role,
                                                  @Valid @RequestBody BookQuestionCreateRequest request) {
-        bookQuestionService.modifyBookQuestion(memberId, bookQuestionId, request.getContent());
+        bookQuestionService.modifyBookQuestion(bookQuestionId, memberId, role, request.getContent());
         return BaseResponse.ofSuccess();
     }
 
@@ -64,8 +66,8 @@ public class BookQuestionController {
     @AccessLevel(Level.MEMBER)
     @DeleteMapping(value = "/{bookQuestionId}", name = "발제문 삭제")
     public BaseResponse<Void> removeBookQuestion(@PathVariable @Min(value = 1) Long bookQuestionId,
-                                                 @AuthMemberId Long memberId) {
-        bookQuestionService.removeBookQuestion(memberId, bookQuestionId);
+                                                 @AuthMemberId Long memberId, @AuthRole Role role) {
+        bookQuestionService.removeBookQuestion(bookQuestionId, memberId, role);
         return BaseResponse.ofSuccess();
     }
 

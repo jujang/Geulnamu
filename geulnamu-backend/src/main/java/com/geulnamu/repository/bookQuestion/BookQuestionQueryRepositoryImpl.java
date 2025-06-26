@@ -1,7 +1,7 @@
 package com.geulnamu.repository.bookQuestion;
 
 import com.geulnamu.controller.bookQuestion.dto.BookQuestionWithGroup;
-import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionGroupViewResponse;
+import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionViewResponse;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.attendance.QAttendance;
 import com.geulnamu.domain.bookQuestion.QBookQuestion;
@@ -24,9 +24,9 @@ public class BookQuestionQueryRepositoryImpl implements BookQuestionQueryReposit
 
 
     @Override
-    public List<BookQuestionGroupViewResponse> findMyDiscussionGroupBookQuestion(Long meetingId, DiscussionGroup discussionGroup) {
+    public List<BookQuestionViewResponse> findMyDiscussionGroupBookQuestion(Long meetingId, DiscussionGroup discussionGroup) {
         return queryFactory
-            .select(Projections.constructor(BookQuestionGroupViewResponse.class,
+            .select(Projections.constructor(BookQuestionViewResponse.class,
                 bookQuestion.id, attendance.member.id, bookQuestion.content)
             )
             .from(meeting)

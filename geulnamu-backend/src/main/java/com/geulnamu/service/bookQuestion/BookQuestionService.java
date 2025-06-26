@@ -1,12 +1,11 @@
 package com.geulnamu.service.bookQuestion;
 
 import com.geulnamu.controller.bookQuestion.dto.BookQuestionWithGroup;
+import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionViewResponse;
 import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionGroupViewResponse;
-import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionMeetingViewResponse;
 import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.bookQuestion.BookQuestion;
-import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.exception.BadRequestException;
@@ -15,7 +14,6 @@ import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.repository.attendance.AttendanceQueryRepository;
 import com.geulnamu.repository.bookQuestion.BookQuestionCommandRepository;
 import com.geulnamu.repository.bookQuestion.BookQuestionQueryRepository;
-import com.geulnamu.repository.member.MemberQueryRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +26,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class BookQuestionService {
 
-    private final MemberQueryRepository memberQueryRepository;
     private final AttendanceQueryRepository attendanceQueryRepository;
     private final BookQuestionQueryRepository bookQuestionQueryRepository;
     private final BookQuestionCommandRepository bookQuestionCommandRepository;
@@ -46,7 +43,7 @@ public class BookQuestionService {
     }
 
     @Transactional(readOnly = true)
-    public List<BookQuestionGroupViewResponse> findMyDiscussionGroupBookQuestions(Long attendanceId) {
+    public List<BookQuestionViewResponse> findMyDiscussionGroupBookQuestions(Long attendanceId) {
         Attendance attendance = attendanceQueryRepository.findById(attendanceId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
         attendance.checkMemberIsAssignDiscussionGroupForViewGroupBookQuestion();
@@ -55,48 +52,40 @@ public class BookQuestionService {
     }
 
     @Transactional(readOnly = true)
-    public List<BookQuestionMeetingViewResponse> findMeetingBookQuestions(Long meetingId) {
+    public List<BookQuestionGroupViewResponse> findMeetingBookQuestions(Long meetingId) {
         List<BookQuestionWithGroup> bookQuestionWithGroupList = bookQuestionQueryRepository.findMeetingBookQuestion(meetingId);
         return convertToMeetingViewResponse(bookQuestionWithGroupList);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void modifyBookQuestion(Long memberId, Long bookQuestionId, String content) {
+    public void modifyBookQuestion(Long bookQuestionId, Long memberId, Role role, String content) {
         BookQuestion bookQuestion = bookQuestionQueryRepository.findById(bookQuestionId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.BOOK_HISTORY.getDescription()));
-        if(!bookQuestion.isBookQuestionWriteMember(memberId)) {
-            Member member = memberQueryRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
-            if(!member.getRole().equals(Role.VICE_LEADER) && !member.getRole().equals(Role.LEADER)
-                && !member.getRole().equals(Role.ADMIN)) {
+        if(!role.equals(Role.VICE_LEADER) && !role.equals(Role.LEADER) && !role.equals(Role.ADMIN)) {
+            if(!bookQuestion.isBookQuestionWriteMember(memberId)) {
                 throw new BadRequestException(ResponseMessage.FORBIDDEN);
             }
-        } else {
-            bookQuestion.checkTimeCanModifyBookQuestionContent();
+            bookQuestion.checkTimeCanModifyOrDeleteBookQuestionContent();
         }
         bookQuestion.updateContent(content);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void removeBookQuestion(Long memberId, Long bookQuestionId) {
+    public void removeBookQuestion(Long bookQuestionId, Long memberId, Role role) {
         BookQuestion bookQuestion = bookQuestionQueryRepository.findById(bookQuestionId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.BOOK_HISTORY.getDescription()));
-        if(!bookQuestion.isBookQuestionWriteMember(memberId)) {
-            Member member = memberQueryRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
-            if(!member.getRole().equals(Role.VICE_LEADER) && !member.getRole().equals(Role.LEADER)
-                && !member.getRole().equals(Role.ADMIN)) {
+        if(!role.equals(Role.VICE_LEADER) && !role.equals(Role.LEADER) && !role.equals(Role.ADMIN)) {
+            if(!bookQuestion.isBookQuestionWriteMember(memberId)) {
                 throw new BadRequestException(ResponseMessage.FORBIDDEN);
             }
-        } else {
-            bookQuestion.checkTimeCanDeleteBookQuestionContent();
+            bookQuestion.checkTimeCanModifyOrDeleteBookQuestionContent();
         }
         bookQuestionCommandRepository.delete(bookQuestion);
     }
 
 
-    private List<BookQuestionMeetingViewResponse> convertToMeetingViewResponse(List<BookQuestionWithGroup> bookQuestionWithGroupList) {
-        Map<DiscussionGroup, List<BookQuestionGroupViewResponse>> groupedByDiscussionGroup =
+    private List<BookQuestionGroupViewResponse> convertToMeetingViewResponse(List<BookQuestionWithGroup> bookQuestionWithGroupList) {
+        Map<DiscussionGroup, List<BookQuestionViewResponse>> groupedByDiscussionGroup =
             bookQuestionWithGroupList.stream()
                 .collect(Collectors.groupingBy(
                     BookQuestionWithGroup::getDiscussionGroup,
@@ -104,12 +93,12 @@ public class BookQuestionService {
                 ));
 
         return groupedByDiscussionGroup.values().stream()
-            .map(BookQuestionMeetingViewResponse::new)
+            .map(BookQuestionGroupViewResponse::new)
             .collect(Collectors.toList());
     }
 
-    private BookQuestionGroupViewResponse toGroupViewResponse(BookQuestionWithGroup bookQuestionWithGroup) {
-        return new BookQuestionGroupViewResponse(
+    private BookQuestionViewResponse toGroupViewResponse(BookQuestionWithGroup bookQuestionWithGroup) {
+        return new BookQuestionViewResponse(
             bookQuestionWithGroup.getBookQuestionId(),
             bookQuestionWithGroup.getWriterMemberId(),
             bookQuestionWithGroup.getContent()
