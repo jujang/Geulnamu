@@ -113,8 +113,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public BaseResponse handleException(Exception exception) {
+        log.error("message : {}", exception.getClass());
         log.error("message : {}", exception.getMessage());
-        log.error(exception.toString());
 
 //        slackSendMessage(exception);
 
@@ -122,7 +122,7 @@ public class GlobalExceptionHandler {
 //            exception.printStackTrace();
 //        }
 
-        return BaseResponse.ofFail(500, ResponseMessage.INTERNAL_SERVER_ERROR, null);
+        return BaseResponse.ofFail(500, ResponseMessage.INTERNAL_SERVER_ERROR, exception.getClass() + ": " + exception.getMessage());
     }
 
 
