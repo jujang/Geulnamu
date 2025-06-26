@@ -8,9 +8,7 @@ import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.bookQuestion.BookQuestion;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.domain.shared.enums.Role;
-import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
-import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.repository.attendance.AttendanceQueryRepository;
 import com.geulnamu.repository.bookQuestion.BookQuestionCommandRepository;
 import com.geulnamu.repository.bookQuestion.BookQuestionQueryRepository;
@@ -33,8 +31,7 @@ public class BookQuestionService {
 
     @Transactional(rollbackFor = Exception.class)
     public Long createBookQuestion(Long memberId, Long attendanceId, String content) {
-        Attendance attendance = attendanceQueryRepository.findById(attendanceId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
+        Attendance attendance = findAttendanceById(attendanceId);
         attendance.checkRequestedMember(memberId);
         attendance.checkSettingDiscussionTime();
         BookQuestion bookQuestion = BookQuestion.createBookQuestion(attendance, content);
@@ -44,8 +41,7 @@ public class BookQuestionService {
 
     @Transactional(readOnly = true)
     public List<BookQuestionViewResponse> findMyDiscussionGroupBookQuestions(Long attendanceId) {
-        Attendance attendance = attendanceQueryRepository.findById(attendanceId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
+        Attendance attendance = findAttendanceById(attendanceId);
         attendance.checkMemberIsAssignDiscussionGroupForViewGroupBookQuestion();
         return bookQuestionQueryRepository
             .findMyDiscussionGroupBookQuestion(attendance.getMeeting().getId(), attendance.getDiscussionGroup());
@@ -59,27 +55,15 @@ public class BookQuestionService {
 
     @Transactional(rollbackFor = Exception.class)
     public void modifyBookQuestion(Long bookQuestionId, Long memberId, Role role, String content) {
-        BookQuestion bookQuestion = bookQuestionQueryRepository.findById(bookQuestionId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.BOOK_HISTORY.getDescription()));
-        if(!role.equals(Role.VICE_LEADER) && !role.equals(Role.LEADER) && !role.equals(Role.ADMIN)) {
-            if(!bookQuestion.isBookQuestionWriteMember(memberId)) {
-                throw new BadRequestException(ResponseMessage.FORBIDDEN);
-            }
-            bookQuestion.checkTimeCanModifyOrDeleteBookQuestionContent();
-        }
+        BookQuestion bookQuestion = findBookQuestionById(bookQuestionId);
+        bookQuestion.checkModificationOrDeletionAuthority(memberId, role);
         bookQuestion.updateContent(content);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void removeBookQuestion(Long bookQuestionId, Long memberId, Role role) {
-        BookQuestion bookQuestion = bookQuestionQueryRepository.findById(bookQuestionId)
-            .orElseThrow(() -> new NotFoundDataException(DomainType.BOOK_HISTORY.getDescription()));
-        if(!role.equals(Role.VICE_LEADER) && !role.equals(Role.LEADER) && !role.equals(Role.ADMIN)) {
-            if(!bookQuestion.isBookQuestionWriteMember(memberId)) {
-                throw new BadRequestException(ResponseMessage.FORBIDDEN);
-            }
-            bookQuestion.checkTimeCanModifyOrDeleteBookQuestionContent();
-        }
+        BookQuestion bookQuestion = findBookQuestionById(bookQuestionId);
+        bookQuestion.checkModificationOrDeletionAuthority(memberId, role);
         bookQuestionCommandRepository.delete(bookQuestion);
     }
 
@@ -103,6 +87,16 @@ public class BookQuestionService {
             bookQuestionWithGroup.getWriterMemberId(),
             bookQuestionWithGroup.getContent()
         );
+    }
+
+    private Attendance findAttendanceById(Long attendanceId) {
+        return attendanceQueryRepository.findById(attendanceId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
+    }
+
+    private BookQuestion findBookQuestionById(Long bookQuestionId) {
+        return bookQuestionQueryRepository.findById(bookQuestionId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.BOOK_QUESTION.getDescription()));
     }
 
 }

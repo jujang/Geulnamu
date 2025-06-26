@@ -9,7 +9,7 @@ public enum DomainType {
     MEMBER("member"),
     MEETING("meeting"),
     ATTENDANCE("attendance"),
-    BOOK_HISTORY("book_history"),
+    BOOK_QUESTION("book_question"),
     ACTION_HISTORY("action_history");
 
     private final String description;

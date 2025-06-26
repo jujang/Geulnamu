@@ -2,6 +2,7 @@ package com.geulnamu.domain.bookQuestion;
 
 import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.shared.DateColumn;
+import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import jakarta.persistence.*;
@@ -36,17 +37,31 @@ public class BookQuestion extends DateColumn {
             .build();
     }
 
-    public void updateContent(String content) {
-        this.content = content;
+    public void checkModificationOrDeletionAuthority(Long requestedMemberId, Role requestRole) {
+        if(!hasManagementRole(requestRole)) {
+            if(!isWriter(requestedMemberId)) {
+                throw new BadRequestException(ResponseMessage.FORBIDDEN);
+            }
+            checkTimeCanModifyOrDeleteBookQuestionContent();
+        }
     }
 
-    public void checkTimeCanModifyOrDeleteBookQuestionContent() {
+    private boolean hasManagementRole(Role role) {
+        return role.equals(Role.VICE_LEADER) || role.equals(Role.LEADER) || role.equals(Role.ADMIN);
+    }
+
+    private void checkTimeCanModifyOrDeleteBookQuestionContent() {
         if(LocalDateTime.now().isAfter(this.getAttendance().getMeeting().getDiscussionTime().plusHours(2))) {
             throw new BadRequestException(ResponseMessage.BOOK_QUESTION_TIME_RESTRICTION);
         }
     }
 
-    public Boolean isBookQuestionWriteMember(Long memberId) {
+    private boolean isWriter(Long memberId) {
         return this.getAttendance().getMember().getId().equals(memberId);
     }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
 }
