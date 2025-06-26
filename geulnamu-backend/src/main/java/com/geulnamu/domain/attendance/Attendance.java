@@ -67,6 +67,12 @@ public class Attendance extends DateColumn {
         }
     }
 
+    public void checkMemberIsAssignDiscussionGroupForViewGroupBookQuestion() {
+        if(this.getDiscussionGroup() == null) {
+            throw new BadRequestException(ResponseMessage.BOOK_QUESTION_VIEW_RESTRICTION);
+        }
+    }
+
     public void updateNote(String note) {
         this.note = note;
     }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -35,6 +36,15 @@ public class GlobalExceptionHandler {
     public BaseResponse httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException exception){
         log.error("message : {} : {}", ResponseMessage.BAD_REQUEST, exception.getMessage());
         return BaseResponse.ofFail(400, ResponseMessage.BAD_REQUEST, exception.getMessage());
+    }
+
+    /**
+     * 매핑되는 API URL을 찾을 수 없음
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public BaseResponse noHandlerFoundException(NoHandlerFoundException exception) {
+        log.error("message : {} : {}", ResponseMessage.NOT_FOUND_URL, exception.getRequestURL());
+        return BaseResponse.ofFail(404, ResponseMessage.NOT_FOUND_URL, exception.getRequestURL());
     }
 
     /**
