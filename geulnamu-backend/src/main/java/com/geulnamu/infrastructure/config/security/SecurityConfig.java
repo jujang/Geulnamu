@@ -47,7 +47,8 @@ public class SecurityConfig {
         "/attendances/{attendanceId}/want-discussion",
         "/discussions/{attendanceId}/my-group",
         "/book-questions/**",
-        "/voc/**"
+        "/voc/error-report",
+        "/voc/feature-request"
     };
 
     private static final String[] AUTH_FOR_STAFF = {
@@ -68,7 +69,8 @@ public class SecurityConfig {
         "/meetings/{meetingId}/make-public",
         "/attendances/{attendanceId}/delete",
         "/discussions/groups/assign-member",
-        "/action-histories/list"
+        "/action-histories/list",
+        "/voc/list"
     };
 
 

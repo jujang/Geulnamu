@@ -1,7 +1,7 @@
 package com.geulnamu.controller.voc;
 
 import com.geulnamu.controller.shared.ControllerTest;
-import com.geulnamu.controller.voc.dto.VoCRequest;
+import com.geulnamu.controller.voc.dto.request.VoCCreateRequest;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.service.voc.VoCService;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ public class VoCControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        VoCRequest voCRequest = new VoCRequest("응답이 느려요ㅠㅠ");
+        VoCCreateRequest voCCreateRequest = new VoCCreateRequest("응답이 느려요ㅠㅠ");
 
         doNothing().when(voCService).reportError(any(), any());
 
@@ -48,7 +48,7 @@ public class VoCControllerTest extends ControllerTest {
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(voCRequest))
+                    .content(objectMapper.writeValueAsString(voCCreateRequest))
             );
 
         // then
@@ -82,7 +82,7 @@ public class VoCControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
 
-        VoCRequest voCRequest = new VoCRequest("점심 메뉴 추천 기능은 없나요?");
+        VoCCreateRequest voCCreateRequest = new VoCCreateRequest("점심 메뉴 추천 기능은 없나요?");
 
         doNothing().when(voCService).requestFeature(any(), any());
 
@@ -93,7 +93,7 @@ public class VoCControllerTest extends ControllerTest {
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(voCRequest))
+                    .content(objectMapper.writeValueAsString(voCCreateRequest))
             );
 
         // then
