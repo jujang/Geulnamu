@@ -18,7 +18,7 @@ endif::[]
 == POST
 
 === 에러 보고
-* 접근 가능 권한 레벨: MEMBER / 로그 생성
+* 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
 * 모임원이 해당 서비스에 대한 에러를 보고하기 위한 용도의 API
 
 ==== request
@@ -41,7 +41,7 @@ include::{snippets}/voc/error-report/create/response-fields.adoc[]
 ---
 
 === 기능 요청
-* 접근 가능 권한 레벨: MEMBER / 로그 생성
+* 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
 * 모임원이 해당 서비스에 대한 희망 기능을 요청하기 위한 용도의 API
 
 ==== request
@@ -61,4 +61,54 @@ include::{snippets}/voc/feature-request/create/response-fields.adoc[]
 
 ==== Error case
 
+== GET
+
+=== 이슈 목록 조회
+* 접근 가능 권한 레벨: ADMIN / 에러 로그만 생성
+* 모임원들이 등록한 이슈 목록을 조회하는 용도의 API
+* 페이지네이션이 적용됨
+
+==== request
+include::{snippets}/voc/list/view/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/voc/list/view/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/voc/list/view/query-parameters.adoc[]
+
+==== response
+include::{snippets}/voc/list/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/voc/list/view/response-fields.adoc[]
+
+==== Error case
+
+== PATCH
+
+=== 이슈 상태 변경
+* 접근 가능 권한 레벨: ADMIN / 에러 로그만 생성
+* 서비스 관리자가 모임원들이 등록한 이슈들의 상태를 관리하기 위한 용도의 API
+* 해당 API는 관리자 등급 중 순수하게 '관리자(개발자)' 역할만 사용이 가능한 기능
+
+==== request
+include::{snippets}/voc/status/modify/http-request.adoc[]
+
+==== path-parameters
+include::{snippets}/voc/status/modify/path-parameters.adoc[]
+
+==== request-headers
+include::{snippets}/voc/status/modify/request-headers.adoc[]
+
+==== request-fields
+include::{snippets}/voc/status/modify/request-fields.adoc[]
+
+==== response
+include::{snippets}/voc/status/modify/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/voc/status/modify/response-fields.adoc[]
+
+==== Error case
 

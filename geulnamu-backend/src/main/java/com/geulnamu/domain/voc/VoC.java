@@ -1,18 +1,15 @@
 package com.geulnamu.domain.voc;
 
-import com.geulnamu.domain.shared.converter.VoCTypeConverter;
+import com.geulnamu.domain.shared.DateColumn;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Builder
 @Entity(name = "voc")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class VoC {
+public class VoC extends DateColumn {
 
     @Id
     @Column(name = "voc_id", updatable = false)
@@ -22,16 +19,19 @@ public class VoC {
     @Column(name = "member_id", nullable = false)
     private Long memberId;
 
-    @Convert(converter = VoCTypeConverter.class)
+    @Enumerated(EnumType.STRING)
     @Column(name = "voc_type", length = 15, nullable = false)
     private VoCType voCType;
 
     @Column(name = "content", nullable = false)
     private String content;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "issue_status", length = 12, nullable = false)
+    private IssueStatus issueStatus;
+
+    @Column(name = "admin_comment", length = 255)
+    private String adminComment;
 
 
     public static VoC createVoC(Long memberId, VoCType voCType, String content) {
@@ -39,6 +39,13 @@ public class VoC {
             .memberId(memberId)
             .voCType(voCType)
             .content(content)
+            .issueStatus(IssueStatus.PENDING)
             .build();
     }
+
+    public void updateIssueStatus(IssueStatus issueStatus, String adminComment) {
+        this.issueStatus = issueStatus;
+        this.adminComment = adminComment;
+    }
+
 }
