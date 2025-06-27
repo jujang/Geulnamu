@@ -57,7 +57,11 @@ public enum ActionType {
 
     // 모임원의 소리 관련
     VOC_ERROR_REPORT("오류 보고"),
-    VOC_FEATURE_REQUEST("요청 기능");
+    VOC_FEATURE_REQUEST("요청 기능"),
+
+    // 활동 내역 관련
+    ACTION_HISTORY_LIST_VIEW("활동 내역 조회");
+
 
     private final String description;
 

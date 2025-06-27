@@ -1,4 +1,4 @@
-package com.geulnamu.controller.meeting.dto.response;
+package com.geulnamu.controller.actionHistory.dto.response;
 
 import com.geulnamu.infrastructure.response.paging.PagingResponse;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class MeetingListResponse {
+public class ActionHistoryListResponse {
     private PagingResponse pagingResponse;
-    private List<MeetingInfoResponse> meetingList;
+    private List<ActionHistoryResponse> actionHistoryResponseList;
 }

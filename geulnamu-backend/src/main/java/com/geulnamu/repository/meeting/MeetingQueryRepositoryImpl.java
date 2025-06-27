@@ -133,7 +133,8 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
                 filterByIsPrivateOrNot(request.getIsPrivate())
             )
             .orderBy(customSorting(request.getSortBy(), request.getIsAsc()),
-                meeting.id.desc())
+                meeting.id.desc()
+            )
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();

@@ -67,7 +67,8 @@ public class SecurityConfig {
         "/meetings/{meetingId}/make-private",
         "/meetings/{meetingId}/make-public",
         "/attendances/{attendanceId}/delete",
-        "/discussions/groups/assign-member"
+        "/discussions/groups/assign-member",
+        "/action-histories/list"
     };
 
 

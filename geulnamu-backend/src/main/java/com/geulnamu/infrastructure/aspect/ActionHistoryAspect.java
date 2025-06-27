@@ -1,13 +1,15 @@
 package com.geulnamu.infrastructure.aspect;
 
+import com.geulnamu.domain.actionHistory.ApiMethod;
 import com.geulnamu.domain.shared.enums.ActionStatus;
 import com.geulnamu.domain.shared.enums.ActionType;
+import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.infrastructure.annotation.ErrorLogAction;
 import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.aspect.dto.ActionLogContext;
 import com.geulnamu.infrastructure.exception.GlobalExceptionHandler;
 import com.geulnamu.infrastructure.response.BaseResponse;
-import com.geulnamu.service.actionHistory.ActionHistoryService;
+import com.geulnamu.service.actionHistory.ActionHistoryLoggingService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +35,7 @@ import java.lang.reflect.Parameter;
 @RequiredArgsConstructor
 public class ActionHistoryAspect {
 
-    private final ActionHistoryService actionHistoryService;
+    private final ActionHistoryLoggingService actionHistoryLoggingService;
     private final GlobalExceptionHandler globalExceptionHandler;
     
     // ThreadLocal로 처리 시간 측정을 위한 시작 시간 저장
@@ -106,16 +108,16 @@ public class ActionHistoryAspect {
         Long processingTime = calculateProcessingTime();
 
         ActionType actionType;
-        String actionDomain;
+        DomainType actionDomain;
 
         if(annotation instanceof LogAction) {
             LogAction logAction = (LogAction) annotation;
             actionType = logAction.value();
-            actionDomain = logAction.actionDomain().isEmpty() ? null : logAction.actionDomain();
+            actionDomain = logAction.actionDomain() == null ? null : logAction.actionDomain();
         } else if (annotation instanceof ErrorLogAction) {
             ErrorLogAction errorLogAction = (ErrorLogAction) annotation;
             actionType = errorLogAction.value();
-            actionDomain = errorLogAction.actionDomain().isEmpty() ? null : errorLogAction.actionDomain();;
+            actionDomain = errorLogAction.actionDomain() == null ? null : errorLogAction.actionDomain();;
             processingTime = null;
         } else {
             throw new IllegalArgumentException("지원하지 않는 어노테이션 타입: " + annotation.getClass());
@@ -129,7 +131,7 @@ public class ActionHistoryAspect {
                 .targetId(extractTargetId(joinPoint))
                 .requestData(extractRequestData(joinPoint))
                 .responseData(responseData)
-                .requestMethod(request.getMethod())
+                .requestMethod(ApiMethod.valueOf(request.getMethod()))
                 .requestUri(buildFullRequestUri(request))
                 .processingTimeMs(processingTime)
                 .ipAddress(getClientIpAddress(request))
@@ -141,7 +143,7 @@ public class ActionHistoryAspect {
      * ActionHistory 저장
      */
     private void saveActionHistory(ActionLogContext context) {
-        actionHistoryService.saveActionHistory(context);
+        actionHistoryLoggingService.saveActionHistory(context);
     }
 
     /**

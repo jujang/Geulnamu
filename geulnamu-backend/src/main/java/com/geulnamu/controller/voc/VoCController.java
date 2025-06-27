@@ -2,6 +2,7 @@ package com.geulnamu.controller.voc;
 
 import com.geulnamu.controller.voc.dto.VoCRequest;
 import com.geulnamu.domain.shared.enums.ActionType;
+import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
@@ -23,7 +24,7 @@ public class VoCController {
     private final VoCService voCService;
 
 
-    @LogAction(value = ActionType.VOC_ERROR_REPORT, actionDomain = "voc")
+    @LogAction(value = ActionType.VOC_ERROR_REPORT, actionDomain = DomainType.VOC)
     @AccessLevel(Level.MEMBER)
     @PostMapping(value = "/error-report", name = "에러 보고")
     public BaseResponse<Void> reportError(@AuthMemberId Long memberId,
@@ -32,7 +33,7 @@ public class VoCController {
         return BaseResponse.ofSuccess();
     }
 
-    @LogAction(value = ActionType.VOC_FEATURE_REQUEST, actionDomain = "voc")
+    @LogAction(value = ActionType.VOC_FEATURE_REQUEST, actionDomain = DomainType.VOC)
     @AccessLevel(Level.MEMBER)
     @PostMapping(value = "/feature-request", name = "기능 요청")
     public BaseResponse<Void> requestFeature(@AuthMemberId Long memberId,
