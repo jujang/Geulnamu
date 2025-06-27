@@ -43,4 +43,5 @@ public class ResponseMessage {
     public static final String BOOK_QUESTION_TIME_RESTRICTION = "발제문 수정 및 삭제는 토론 시간 2시간 이내까지만 가능합니다.";
     public static final String BOOK_QUESTION_VIEW_RESTRICTION = "그룹 발제문 조회는 토론 그룹을 지정받은 경우에만 조회 가능합니다.";
 
+    public static final String ONLY_ADMIN_ROLE_RESTRICTION = "해당 기능은 관리자만 사용 가능합니다.";
 }

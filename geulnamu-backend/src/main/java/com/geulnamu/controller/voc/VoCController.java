@@ -1,18 +1,18 @@
 package com.geulnamu.controller.voc;
 
 import com.geulnamu.controller.voc.dto.request.VoCCreateRequest;
+import com.geulnamu.controller.voc.dto.request.VoCManageRequest;
 import com.geulnamu.controller.voc.dto.request.VoCViewListRequest;
 import com.geulnamu.controller.voc.dto.response.VoCViewListResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.domain.shared.enums.Level;
-import com.geulnamu.infrastructure.annotation.AccessLevel;
-import com.geulnamu.infrastructure.annotation.AuthMemberId;
-import com.geulnamu.infrastructure.annotation.ErrorLogAction;
-import com.geulnamu.infrastructure.annotation.LogAction;
+import com.geulnamu.domain.shared.enums.Role;
+import com.geulnamu.infrastructure.annotation.*;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.voc.VoCService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,6 +48,15 @@ public class VoCController {
     public BaseResponse<VoCViewListResponse> getIssueList(@Valid VoCViewListRequest request) {
         VoCViewListResponse response = voCService.getIssueList(request);
         return BaseResponse.ofSuccess(response);
+    }
+
+    @ErrorLogAction(value = ActionType.VOC_ISSUE_STATUS_MODIFY, actionDomain = DomainType.VOC)
+    @AccessLevel(Level.ADMIN)
+    @PatchMapping(value = "/{vocId}/status", name = "이슈 상태 변경")
+    public BaseResponse<Void> modifyIssueStatus(@PathVariable @Min(value = 1) Long vocId, @AuthRole Role role,
+                                                @Valid @RequestBody VoCManageRequest request) {
+        voCService.modifyIssueStatus(vocId, role, request);
+        return BaseResponse.ofSuccess();
     }
 
 }

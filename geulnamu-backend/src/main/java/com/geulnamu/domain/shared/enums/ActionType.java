@@ -59,6 +59,7 @@ public enum ActionType {
     VOC_ERROR_REPORT("오류 보고"),
     VOC_FEATURE_REQUEST("요청 기능"),
     VOC_ISSUE_LIST_VIEW("이슈 목록 조회"),
+    VOC_ISSUE_STATUS_MODIFY("이슈 상태 변경"),
 
     // 활동 내역 관련
     ACTION_HISTORY_LIST_VIEW("활동 내역 조회");

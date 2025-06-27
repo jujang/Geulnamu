@@ -70,7 +70,8 @@ public class SecurityConfig {
         "/attendances/{attendanceId}/delete",
         "/discussions/groups/assign-member",
         "/action-histories/list",
-        "/voc/list"
+        "/voc/list",
+        "/voc/{vocId}/status"
     };
 
 

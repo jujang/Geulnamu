@@ -42,4 +42,10 @@ public class VoC extends DateColumn {
             .issueStatus(IssueStatus.PENDING)
             .build();
     }
+
+    public void updateIssueStatus(IssueStatus issueStatus, String adminComment) {
+        this.issueStatus = issueStatus;
+        this.adminComment = adminComment;
+    }
+
 }
