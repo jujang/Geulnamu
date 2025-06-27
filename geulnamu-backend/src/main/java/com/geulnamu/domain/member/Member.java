@@ -5,7 +5,6 @@ import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.shared.*;
 import com.geulnamu.domain.shared.converter.GenderConverter;
 import com.geulnamu.domain.shared.enums.Role;
-import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.exception.ExistDataException;
 import com.geulnamu.infrastructure.exception.TokenException;
