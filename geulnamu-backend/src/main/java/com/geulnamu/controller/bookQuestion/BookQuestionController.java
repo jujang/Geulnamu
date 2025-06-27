@@ -4,6 +4,7 @@ import com.geulnamu.controller.bookQuestion.dto.request.BookQuestionCreateReques
 import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionViewResponse;
 import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionGroupViewResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
+import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.annotation.*;
@@ -25,7 +26,7 @@ public class BookQuestionController {
 
 
     // 실제와는 다르게 모임 출석 당일, 토론 시간만 설정되어 있다면 발제문 작성이 가능함! => 실제 모임에서도 이렇게 사용해도 될 듯 함
-    @LogAction(value = ActionType.BOOK_QUESTION_CREATE, actionDomain = "bookQuestion")
+    @LogAction(value = ActionType.BOOK_QUESTION_CREATE, actionDomain = DomainType.BOOK_QUESTION)
     @AccessLevel(Level.MEMBER)
     @PostMapping(value = "/create", name = "발제문 작성")
     public BaseResponse<Long> writeBookQuestion(@AuthMemberId Long memberId,
@@ -35,7 +36,7 @@ public class BookQuestionController {
         return BaseResponse.ofSuccess(bookQuestionId);
     }
 
-    @ErrorLogAction(value = ActionType.BOOK_QUESTION_MY_GROUP_LIST_VIEW, actionDomain = "bookQuestion")
+    @ErrorLogAction(value = ActionType.BOOK_QUESTION_MY_GROUP_LIST_VIEW, actionDomain = DomainType.BOOK_QUESTION)
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/my-group", name = "토론 그룹별 발제문 리스트 조회 - 본인 토론 그룹")
     public BaseResponse<List<BookQuestionViewResponse>> getMyGroupBookQuestions(@RequestParam @Min(value = 1) Long attendanceId) {
@@ -43,7 +44,7 @@ public class BookQuestionController {
         return BaseResponse.ofSuccess(responseList);
     }
 
-    @ErrorLogAction(value = ActionType.BOOK_QUESTION_ALL_GROUP_LIST_VIEW, actionDomain = "bookQuestion")
+    @ErrorLogAction(value = ActionType.BOOK_QUESTION_ALL_GROUP_LIST_VIEW, actionDomain = DomainType.BOOK_QUESTION)
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/meeting", name = "모임별 발제문 리스트 조회")
     public BaseResponse<List<BookQuestionGroupViewResponse>> getMeetingBookQuestions(@RequestParam @Min(value = 1) Long meetingId) {
@@ -51,7 +52,7 @@ public class BookQuestionController {
         return BaseResponse.ofSuccess(responseList);
     }
 
-    @LogAction(value = ActionType.BOOK_QUESTION_MODIFY, actionDomain = "bookQuestion")
+    @LogAction(value = ActionType.BOOK_QUESTION_MODIFY, actionDomain = DomainType.BOOK_QUESTION)
     @AccessLevel(Level.MEMBER)
     @PatchMapping(value = "/{bookQuestionId}", name = "발제문 수정")
     public BaseResponse<Void> modifyBookQuestion(@PathVariable @Min(value = 1) Long bookQuestionId,
@@ -61,7 +62,7 @@ public class BookQuestionController {
         return BaseResponse.ofSuccess();
     }
 
-    @LogAction(value = ActionType.BOOK_QUESTION_DELETE, actionDomain = "bookQuestion")
+    @LogAction(value = ActionType.BOOK_QUESTION_DELETE, actionDomain = DomainType.BOOK_QUESTION)
     @AccessLevel(Level.MEMBER)
     @DeleteMapping(value = "/{bookQuestionId}", name = "발제문 삭제")
     public BaseResponse<Void> removeBookQuestion(@PathVariable @Min(value = 1) Long bookQuestionId,

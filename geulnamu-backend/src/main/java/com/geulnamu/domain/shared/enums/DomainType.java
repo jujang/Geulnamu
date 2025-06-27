@@ -6,11 +6,13 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum DomainType {
+    LOGIN("login"),
     MEMBER("member"),
     MEETING("meeting"),
     ATTENDANCE("attendance"),
-    BOOK_QUESTION("book_question"),
-    ACTION_HISTORY("action_history");
+    BOOK_QUESTION("bookQuestion"),
+    VOC("voc"),
+    ACTION_HISTORY("actionHistory");
 
     private final String description;
 }

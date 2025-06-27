@@ -1,14 +1,12 @@
 package com.geulnamu.repository.attendance;
 
 import com.geulnamu.controller.attendance.dto.MemberInfoWithGroup;
-import com.geulnamu.controller.attendance.dto.response.DiscussionGroupResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.attendance.QAttendance;
 import com.geulnamu.domain.meeting.QMeeting;
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -17,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -93,6 +89,7 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
             .orderBy(attendance.createdAt.desc())
             .fetch();
     }
+
 
     private NumberExpression<Long> normalAttendanceCount() {
         return new CaseBuilder()

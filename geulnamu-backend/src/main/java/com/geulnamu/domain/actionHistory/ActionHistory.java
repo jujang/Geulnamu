@@ -3,6 +3,7 @@ package com.geulnamu.domain.actionHistory;
 import com.geulnamu.domain.shared.DateColumn;
 import com.geulnamu.domain.shared.enums.ActionStatus;
 import com.geulnamu.domain.shared.enums.ActionType;
+import com.geulnamu.domain.shared.enums.DomainType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +24,6 @@ public class ActionHistory extends DateColumn {
     @Column(name = "action_type", nullable = false, length = 30)
     private ActionType actionType;
 
-
     // 요청 결과 (성공/실패)
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10, nullable = false)
@@ -34,8 +34,9 @@ public class ActionHistory extends DateColumn {
     private Long actorMemberId;
 
     // 대상 도메인
+    @Enumerated(EnumType.STRING)
     @Column(name = "action_domain", length = 20)
-    private String actionDomain;
+    private DomainType actionDomain;
 
     @Column(name = "target_id")
     private Long targetId;
@@ -48,8 +49,9 @@ public class ActionHistory extends DateColumn {
     @Column(name = "response_data", columnDefinition = "TEXT")
     private String responseData;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "request_method", length = 10)
-    private String requestMethod;
+    private ApiMethod requestMethod;
 
     @Column(name = "request_uri", length = 500)
     private String requestUri;

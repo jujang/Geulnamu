@@ -44,7 +44,7 @@ include::{snippets}/meetings/create/response-fields.adoc[]
 == GET
 
 === 운영진 명단 조회 - 필터링용
-* 접근 가능 권한 레벨: MEMBER
+* 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
 * 모임 목록 조회 기능에서 필터링 기준으로 사용하는 모임원 리스트를 제공받는 용도의 API
 
 ==== request
@@ -64,7 +64,7 @@ include::{snippets}/meetings/staff-list/view/response-fields.adoc[]
 ---
 
 === 모임 목록 조회
-* 접근 가능 권한 레벨: MEMBER
+* 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
 * 모임 목록을 조회하는 용도의 API
 ** 비공개 처리된 모임의 경우, 해당 요청에서 조회되지 않음
 * 페이지네이션이 적용됨
@@ -89,7 +89,7 @@ include::{snippets}/meetings/list/view/response-fields.adoc[]
 ---
 
 === 모임 목록 조회
-* 접근 가능 권한 레벨: MEMBER
+* 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
 * 오늘의 모임 목록을 조회하는 용도의 API
 ** 비공개 처리된 모임의 경우, 해당 요청에서 조회되지 않음
 
@@ -114,7 +114,7 @@ include::{snippets}/meetings/list/today/view/response-fields.adoc[]
 ---
 
 === 모임 목록 조회 (운영진용)
-* 접근 가능 권한 레벨: STAFF
+* 접근 가능 권한 레벨: STAFF / 에러 로그만 생성
 * 운영진 모임원이 운영진 페이지에서 모임 목록을 조회하는 용도의 API (운영진 제공 정보에는 모임 비활성화여부가 함께 보여짐)
 * 페이지네이션이 적용됨
 
@@ -138,7 +138,7 @@ include::{snippets}/meetings/list/staff/view/response-fields.adoc[]
 ---
 
 === 모임 단일 조회 (운영진용)
-* 접근 가능 권한 레벨: STAFF
+* 접근 가능 권한 레벨: STAFF / 에러 로그만 생성
 * 운영진 모임원이 운영진 페이지에서 모임을 단일 조회하는 데에 사용하는 API
 
 ==== request
@@ -217,7 +217,7 @@ include::{snippets}/meetings/discussion/modify/response-fields.adoc[]
 ---
 
 === 지난 모임 비공개 처리
-* 접근 가능 권한 레벨: ADMIN
+* 접근 가능 권한 레벨: ADMIN / 에러 로그만 생성
 * 관리자급 모임원이 지난 모임을 비공개 처리해서 일반 모임원은 조회가 불가능하게 만드는 용도의 API
 * 모임 익일부터 처리 가능
 
@@ -242,7 +242,7 @@ include::{snippets}/meetings/make-private/modify/response-fields.adoc[]
 ---
 
 === 비공개 모임 공개 처리
-* 접근 가능 권한 레벨: ADMIN
+* 접근 가능 권한 레벨: ADMIN / 에러 로그만 생성
 * 관리자급 모임원이 비공개했던 모임을 다시 공개하는 용도의 API
 
 ==== request
