@@ -1,17 +1,11 @@
 package com.geulnamu.controller.voc;
 
-import com.geulnamu.controller.actionHistory.dto.request.ActionHistoryListRequest;
-import com.geulnamu.controller.actionHistory.dto.response.ActionHistoryListResponse;
-import com.geulnamu.controller.actionHistory.dto.response.ActionHistoryResponse;
 import com.geulnamu.controller.shared.ControllerTest;
 import com.geulnamu.controller.voc.dto.request.VoCCreateRequest;
+import com.geulnamu.controller.voc.dto.request.VoCManageRequest;
 import com.geulnamu.controller.voc.dto.request.VoCViewListRequest;
 import com.geulnamu.controller.voc.dto.response.VoCViewListResponse;
 import com.geulnamu.controller.voc.dto.response.VoCViewResponse;
-import com.geulnamu.domain.actionHistory.ApiMethod;
-import com.geulnamu.domain.shared.enums.ActionStatus;
-import com.geulnamu.domain.shared.enums.ActionType;
-import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.domain.voc.IssueStatus;
 import com.geulnamu.domain.voc.VoCType;
 import com.geulnamu.infrastructure.response.ResponseMessage;
@@ -20,6 +14,7 @@ import com.geulnamu.service.voc.VoCService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -39,8 +34,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -222,6 +216,56 @@ public class VoCControllerTest extends ControllerTest {
                     fieldWithPath("data.voCViewResponseList[].adminComment").type(JsonFieldType.STRING).description("관리자 코멘트").optional(),
                     fieldWithPath("data.voCViewResponseList[].createdAt").type(JsonFieldType.STRING).description("이슈 등록일자"),
                     fieldWithPath("data.voCViewResponseList[].lastModifiedAt").type(JsonFieldType.STRING).description("이슈 수정일자")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void modifyIssueStatusTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+
+        VoCManageRequest voCManageRequest = new VoCManageRequest(
+            "IN_PROGRESS", "확인중~"
+        );
+
+        doNothing().when(voCService).modifyIssueStatus(any(), any(), any());
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                RestDocumentationRequestBuilders.patch("/voc/{vocId}/status", 1L)
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(voCManageRequest))
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andExpect(jsonPath("data").value((Object) null))
+            .andDo(document(
+                "/voc/status/modify",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("vocId").attributes(key("format").value("1 이상의 정수")).description("이슈 고유번호")
+                ),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                requestFields(
+                    fieldWithPath("issueStatus").type(JsonFieldType.STRING).attributes(key("format").value("'PENDING', 'IN_PROGRESS', 'RESOLVED', 'REJECTED', 'ON_HOLD' 중 하나의 값")).description("변경할 이슈 상태"),
+                    fieldWithPath("adminComment").type(JsonFieldType.STRING).attributes(key("format").value("형식의 제한이 없는 255자 이내의 문자열")).description("관리자 코멘트")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("-")
                 )
             ));
     }
