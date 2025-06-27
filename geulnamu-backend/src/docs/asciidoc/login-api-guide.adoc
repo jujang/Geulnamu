@@ -62,7 +62,7 @@ include::{snippets}/login/logout/response-fields.adoc[]
 
 == GET
 
-=== 카카오 OAuth 로그인
+=== 카카오 OAuth 로그인 (로그인 redirect url)
 * 접근 가능 권한 레벨: PUBLIC / 로그 생성
 * kakao OAuth 2.0을 통한 로그인 방식 (앱 계정이 없다면 생성 후 로그인, 있다면 바로 로그인)
 

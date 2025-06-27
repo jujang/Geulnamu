@@ -27,7 +27,7 @@ public class AttendanceController {
 
     @LogAction(value = ActionType.ATTENDANCE_CREATE, actionDomain = DomainType.ATTENDANCE)
     @AccessLevel(Level.MEMBER)
-    @PostMapping(value = "/check-in", name = "출석")
+    @PostMapping(value = "/check-in", name = "모임 출석")
     public BaseResponse<Long> meetingAttend(@AuthMemberId Long memberId, @RequestParam @Min(value = 1) Long meetingId) {
         Long attendanceId = attendanceService.createAttendance(memberId, meetingId);
         return BaseResponse.ofSuccess(attendanceId);
@@ -35,7 +35,7 @@ public class AttendanceController {
 
     @ErrorLogAction(value = ActionType.ATTENDANCE_MY_VIEW, actionDomain = DomainType.ATTENDANCE)
     @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/my-info", name = "개인 출석 정보 조회")
+    @GetMapping(value = "/my-info", name = "본인 출석 정보 조회")
     public BaseResponse<AttendanceInfoResponse> getMyAttendanceInfo(@AuthMemberId Long memberId,
                                                                     @RequestParam @Min(value = 1) Long meetingId) {
         AttendanceInfoResponse response = attendanceService.getMyAttendanceInfo(memberId, meetingId);
