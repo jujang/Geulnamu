@@ -68,7 +68,7 @@ include::{snippets}/attendances/my-info/view/response-fields.adoc[]
 
 ---
 
-=== 모임원 참석 현황 조회
+=== (모임별) 모임원 참석 현황 조회
 * 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
 * 자신을 포함한 모임원들의 모임 출석 현황을 조회하는 API
 

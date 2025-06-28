@@ -38,7 +38,7 @@ public class BookQuestionController {
 
     @ErrorLogAction(value = ActionType.BOOK_QUESTION_MY_GROUP_LIST_VIEW, actionDomain = DomainType.BOOK_QUESTION)
     @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/my-group", name = "토론 그룹별 발제문 리스트 조회 - 본인 토론 그룹")
+    @GetMapping(value = "/my-group", name = "발제문 리스트 조회 - 본인 토론 그룹")
     public BaseResponse<List<BookQuestionViewResponse>> getMyGroupBookQuestions(@RequestParam @Min(value = 1) Long attendanceId) {
         List<BookQuestionViewResponse> responseList = bookQuestionService.findMyDiscussionGroupBookQuestions(attendanceId);
         return BaseResponse.ofSuccess(responseList);
@@ -46,7 +46,7 @@ public class BookQuestionController {
 
     @ErrorLogAction(value = ActionType.BOOK_QUESTION_ALL_GROUP_LIST_VIEW, actionDomain = DomainType.BOOK_QUESTION)
     @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/meeting", name = "모임별 발제문 리스트 조회")
+    @GetMapping(value = "/meeting", name = "발제문 리스트 조회 - 모임 단위")
     public BaseResponse<List<BookQuestionGroupViewResponse>> getMeetingBookQuestions(@RequestParam @Min(value = 1) Long meetingId) {
         List<BookQuestionGroupViewResponse> responseList = bookQuestionService.findMeetingBookQuestions(meetingId);
         return BaseResponse.ofSuccess(responseList);
