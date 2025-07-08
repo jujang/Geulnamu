@@ -16,14 +16,14 @@ class GeulnamuApp extends StatelessWidget {
     return MaterialApp(
       title: '글나무',
       debugShowCheckedModeBanner: false,
-      
+
       // 글나무 테마 적용
       theme: GeulnamuTheme.lightTheme,
       // darkTheme: GeulnamuTheme.darkTheme, // 추후 구현
-      
+
       // PWA 지원을 위한 라우터 설정
       home: const GeulnamuHomePage(),
-      
+
       // 웹 환경에서만 실행되는 PWA 초기화
       builder: (context, child) {
         if (kIsWeb) {
@@ -33,7 +33,7 @@ class GeulnamuApp extends StatelessWidget {
       },
     );
   }
-  
+
   /// PWA 기능 초기화
   void _initializePWA() {
     // 나중에 서비스 워커 등록 및 PWA 기능 초기화
@@ -72,13 +72,12 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
         ),
         centerTitle: true,
       ),
-      
+
       body: Container(
-        decoration: BoxDecoration(
-          gradient: GeulnamuColors.backgroundGradient,
-        ),
+        decoration: BoxDecoration(gradient: GeulnamuColors.backgroundGradient),
         child: SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
+            // 🔥 스크롤 기능 추가!
             padding: EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,18 +85,18 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
                 // 환영 메시지
                 _buildWelcomeCard(),
                 SizedBox(height: 24),
-                
+
                 // 주요 기능 버튼들
-                Text(
-                  '주요 기능',
-                  style: GeulnamuTextStyles.heading3,
-                ),
+                Text('주요 기능', style: GeulnamuTextStyles.heading3),
                 SizedBox(height: 16),
                 _buildMainFeatures(),
                 SizedBox(height: 24),
-                
+
                 // PWA 설치 안내
                 _buildInstallPrompt(),
+
+                // 추가 여백 (스크롤의 끝부분을 위해)
+                SizedBox(height: 32),
               ],
             ),
           ),
@@ -105,10 +104,11 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
       ),
     );
   }
-  
+
   /// 환영 카드
   Widget _buildWelcomeCard() {
     return Card(
+      elevation: 4,
       child: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
@@ -152,7 +152,7 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
       ),
     );
   }
-  
+
   /// 주요 기능 버튼들
   Widget _buildMainFeatures() {
     final features = [
@@ -181,58 +181,68 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
         'color': GeulnamuColors.info,
       },
     ];
-    
+
     return GridView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.2,
+        crossAxisSpacing: 11, // 12에서 8로 축소 (카드 간 가로 간격)
+        mainAxisSpacing: 11, // 12에서 8로 축소 (카드 간 세로 간격)
+        childAspectRatio: 1.12, // 1.1에서 1.3으로 카드 높이 축소
       ),
       itemCount: features.length,
       itemBuilder: (context, index) {
         final feature = features[index];
         return Card(
+          elevation: 2,
           child: InkWell(
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('${feature['title']} 기능은 추후 추가될 예정입니다'),
                   duration: Duration(seconds: 2),
+                  backgroundColor: GeulnamuColors.primary,
                 ),
               );
             },
             borderRadius: BorderRadius.circular(16),
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(10, 10, 10, 10), // 전체 패딩 축소로 꽉 찬 느낌
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: EdgeInsets.all(12),
+                    padding: EdgeInsets.all(8), // 8에서 6으로 축소 (아이콘 주변 여백 축소)
                     decoration: BoxDecoration(
                       color: (feature['color'] as Color).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10), // 12에서 10으로
                     ),
                     child: Icon(
                       feature['icon'] as IconData,
                       color: feature['color'] as Color,
-                      size: 32,
+                      size: 44, // 28에서 32로 확대 (아이콘 자체 크기 증가)
                     ),
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 9), // 8에서 6으로 축소 (아이콘-제목 간격 축소)
                   Text(
                     feature['title'] as String,
-                    style: GeulnamuTextStyles.heading4,
+                    style: GeulnamuTextStyles.heading4.copyWith(
+                      fontSize: 14, // 폰트 크기 명시적 설정
+                    ),
                     textAlign: TextAlign.center,
+                    maxLines: 1, // 단일 라인 제한
+                    overflow: TextOverflow.ellipsis, // 텍스트 오버플로우 방지
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 3), // 2에서 1로 축소 (제목-부제목 간격 최소화)
                   Text(
                     feature['subtitle'] as String,
-                    style: GeulnamuTextStyles.caption,
+                    style: GeulnamuTextStyles.caption.copyWith(
+                      fontSize: 12, // 작은 폰트 크기
+                    ),
                     textAlign: TextAlign.center,
+                    maxLines: 1, // 단일 라인 제한
+                    overflow: TextOverflow.ellipsis, // 텍스트 오버플로우 방지
                   ),
                 ],
               ),
@@ -242,31 +252,25 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
       },
     );
   }
-  
+
   /// PWA 설치 안내
   Widget _buildInstallPrompt() {
     if (!kIsWeb) return SizedBox.shrink();
-    
+
     return Card(
       color: GeulnamuColors.secondary,
+      elevation: 2,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(
-              Icons.install_mobile,
-              color: GeulnamuColors.primary,
-              size: 32,
-            ),
+            Icon(Icons.install_mobile, color: GeulnamuColors.primary, size: 32),
             SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '앱으로 설치하기',
-                    style: GeulnamuTextStyles.heading4,
-                  ),
+                  Text('앱으로 설치하기', style: GeulnamuTextStyles.heading4),
                   Text(
                     '홈 화면에 추가하여 더 빠른 접근을 해보세요!',
                     style: GeulnamuTextStyles.body2,
@@ -285,25 +289,31 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
       ),
     );
   }
-  
+
   /// 설치 방법 안내
   void _showInstallInstructions() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('앱 설치 방법'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('크롬 브라우저 (추천)', style: GeulnamuTextStyles.bodyBold),
-            Text('• 주소창 오른쪽 설치 버튼 클릭'),
-            Text('• "홈 화면에 추가" 선택'),
-            SizedBox(height: 12),
-            Text('사파리 (아이폰)', style: GeulnamuTextStyles.bodyBold),
-            Text('• 공유 버튼 클릭'),
-            Text('• "홈 화면에 추가" 선택'),
-          ],
+        content: SingleChildScrollView(
+          // 다이얼로그도 스크롤 가능하게
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('크롬 브라우저 (추천)', style: GeulnamuTextStyles.bodyBold),
+              Text('• 주소창 오른쪽 설치 버튼 클릭'),
+              Text('• "홈 화면에 추가" 선택'),
+              SizedBox(height: 12),
+              Text('사파리 (아이폰)', style: GeulnamuTextStyles.bodyBold),
+              Text('• 공유 버튼 클릭'),
+              Text('• "홈 화면에 추가" 선택'),
+              SizedBox(height: 12),
+              Text('안드로이드 브라우저', style: GeulnamuTextStyles.bodyBold),
+              Text('• 메뉴 → "홈 화면에 추가" 선택'),
+            ],
+          ),
         ),
         actions: [
           TextButton(
