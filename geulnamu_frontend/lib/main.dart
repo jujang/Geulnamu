@@ -159,7 +159,7 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
     );
   }
 
-  /// 주요 기능 버튼들 - 반응형
+  /// 주요 기능 버튼들 - 실제 화면 크기 기반 반응형
   Widget _buildMainFeatures() {
     final features = [
       {
@@ -189,36 +189,46 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
     ];
 
     return LayoutBuilder(
-      // 화면 크기에 따른 반응형 레이아웃
+      // 실제 화면 크기에 따른 반응형 레이아웃
       builder: (context, constraints) {
-        // 화면 크기에 따른 카드 개수 결정
+        // 실제 화면 크기 기준으로 반응형 설정
+        final screenWidth = MediaQuery.of(context).size.width;
+
+        // 화면 크기에 따른 설정값 결정
         int crossAxisCount;
         double cardPadding;
         double iconSize;
         double titleFontSize;
         double subtitleFontSize;
 
-        if (constraints.maxWidth > 720) {
-          // PC/태블릿 (큰 화면) - 2열 유지
+        if (screenWidth >= 1024) {
+          // PC/데스크톱 (1024px 이상)
           crossAxisCount = 2;
-          cardPadding = 12.0;
-          iconSize = 72;
+          cardPadding = 16.0;
+          iconSize = 96;
+          titleFontSize = 24;
+          subtitleFontSize = 15;
+        } else if (screenWidth >= 768) {
+          // 태블릿 (768px ~ 1023px)
+          crossAxisCount = 2;
+          cardPadding = 14.0;
+          iconSize = 78;
           titleFontSize = 20;
           subtitleFontSize = 14;
-        } else if (constraints.maxWidth > 420) {
-          // 작은 태블릿/큰 폰 - 2열 유지
+        } else if (screenWidth >= 480) {
+          // 큰 모바일/작은 태블릿 (480px ~ 767px)
+          crossAxisCount = 2;
+          cardPadding = 12.0;
+          iconSize = 60;
+          titleFontSize = 17;
+          subtitleFontSize = 13;
+        } else {
+          // 작은 모바일 (480px 미만)
           crossAxisCount = 2;
           cardPadding = 10.0;
-          iconSize = 56;
-          titleFontSize = 16;
+          iconSize = 44;
+          titleFontSize = 15;
           subtitleFontSize = 12;
-        } else {
-          // 모바일 (작은 화면) - 2열 유지
-          crossAxisCount = 2;
-          cardPadding = 8.0;
-          iconSize = 40;
-          titleFontSize = 14;
-          subtitleFontSize = 11;
         }
 
         return GridView.builder(
@@ -265,14 +275,14 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
                         child: Icon(
                           feature['icon'] as IconData,
                           color: feature['color'] as Color,
-                          size: iconSize, // 동적 아이콘 크기
+                          size: iconSize, // 실제 화면 크기 기반 동적 아이콘 크기
                         ),
                       ),
                       SizedBox(height: 6),
                       Text(
                         feature['title'] as String,
                         style: GeulnamuTextStyles.heading4.copyWith(
-                          fontSize: titleFontSize, // 동적 폰트 크기
+                          fontSize: titleFontSize, // 실제 화면 크기 기반 동적 폰트 크기
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 1,
@@ -282,7 +292,7 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
                       Text(
                         feature['subtitle'] as String,
                         style: GeulnamuTextStyles.caption.copyWith(
-                          fontSize: subtitleFontSize, // 동적 폰트 크기
+                          fontSize: subtitleFontSize, // 실제 화면 크기 기반 동적 폰트 크기
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 1,
@@ -299,16 +309,17 @@ class _GeulnamuHomePageState extends State<GeulnamuHomePage> {
     );
   }
 
-  /// PWA 설치 안내 - 반응형 (모든 플랫폼)
+  /// PWA 설치 안내 - 실제 화면 크기 기반 반응형
   Widget _buildInstallPrompt() {
     // PWA는 모바일 브라우저에서도 설치 가능하므로 모든 웹 환경에서 표시
     if (!kIsWeb) return SizedBox.shrink(); // 네이티브 앱일 때만 숨김
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 화면 크기에 따른 패딩 조정
-        double cardPadding = constraints.maxWidth > 600 ? 20.0 : 16.0;
-        double iconSize = constraints.maxWidth > 600 ? 36.0 : 32.0;
+        // 실제 화면 크기 기준으로 패딩 조정
+        final screenWidth = MediaQuery.of(context).size.width;
+        double cardPadding = screenWidth >= 768 ? 20.0 : 16.0;
+        double iconSize = screenWidth >= 768 ? 36.0 : 32.0;
 
         return Card(
           color: GeulnamuColors.secondary,
