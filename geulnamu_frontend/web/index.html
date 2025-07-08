@@ -18,21 +18,58 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
+  <meta name="description" content="독서 토론 모임을 위한 출석 관리 및 커뮤니티 서비스입니다. 모임 출석, 발제문 작성, 토론 참여를 간편하게 관리하세요.">
+  <meta name="keywords" content="독서, 토론, 모임, 출석, 발제, 글나무, 책, 커뮤니티">
+  <meta name="author" content="글나무 팀">
+  
+  <!-- PWA meta tags -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="geulnamu_frontend">
+  <meta name="mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-title" content="글나무">
+  
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="글나무">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
+  <link rel="apple-touch-startup-image" href="icons/Icon-512.png">
+  
+  <!-- Android Chrome meta tags -->
+  <meta name="theme-color" content="#7DD3C0">
+  <meta name="msapplication-TileColor" content="#7DD3C0">
+  <meta name="msapplication-navbutton-color" content="#7DD3C0">
+  
+  <!-- Viewport settings -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="shortcut icon" type="image/png" href="favicon.png"/>
 
-  <title>geulnamu_frontend</title>
+  <title>글나무 - 독서 토론 모임 관리 서비스</title>
+  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Preload critical resources -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
+  <!-- Service Worker 등록 -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('flutter-first-frame', function () {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('글나무 서비스 워커 등록 성공:', registration.scope);
+          })
+          .catch((error) => {
+            console.log('서비스 워커 등록 실패:', error);
+          });
+      });
+    }
+  </script>
+  
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 name: geulnamu_frontend
-description: "A new Flutter project."
+description: "글나무 - 독서 토론 모임 관리 서비스. 모임 출석, 발제문 작성, 토론 참여를 간편하게 관리하는 PWA 앱입니다."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -34,6 +34,26 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  
+  # PWA and Web support
+  flutter_web_plugins:
+    sdk: flutter
+  
+  # UI and Design
+  google_fonts: ^6.2.1
+  
+  # HTTP and API
+  dio: ^5.6.0
+  
+  # Local Storage
+  shared_preferences: ^2.3.2
+  
+  # State Management (나중에 필요시 사용)
+  # provider: ^6.1.2
+  # riverpod: ^2.5.1
+  
+  # Utilities
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
@@ -57,10 +77,12 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  # Assets for 글나무 app
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/logo/
+    # - assets/screenshots/  # PWA 스크린샷용 (나중에 추가)
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
