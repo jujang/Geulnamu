@@ -1,41 +1,45 @@
 import 'package:flutter/material.dart';
 
 /// 글나무 앱의 브랜딩 색상 정의
-/// 책갈피 디자인 컨셉을 기반으로 한 따뜻하고 친근한 색상 팔레트
+/// Material Theme + 다크모드 완벽 지원 + 명확한 카드/배경 대비
 class GeulnamuColors {
-  // ========== 메인 색상 팔레트 ==========
+  // ========== 라이트 테마 색상 ==========
   
-  /// 메인 컬러: 연한 청록색/민트
-  /// 책갈피의 마스코트 캐릭터에서 영감을 받은 메인 컬러
-  static const Color primary = Color(0xFF7DD3C0);
-  static const Color primaryLight = Color(0xFF6BC4AE);
+  /// 메인 컬러: 책갈피 디자인 컨셉의 민트색
+  static const Color primaryLight = Color(0xFF7DD3C0);
+  static const Color primaryVariantLight = Color(0xFF6BC4AE);
+  static const Color secondaryLight = Color(0xFFF5F1E8);
+  
+  /// 배경 및 표면 색상 (라이트) - 🎯 명확한 대비 보장
+  static const Color backgroundLight = Color(0xFFFAFAFA);      // 오프화이트 배경 (유지)
+  static const Color surfaceLight = Color(0xFFFFFFFF);        // 카드는 완전한 흰색 (명확한 대비!)
+  static const Color surfaceVariantLight = Color(0xFFF5F5F5); // 입력 필드 등
+  
+  /// 텍스트 색상 (라이트)
+  static const Color onPrimaryLight = Color(0xFFFFFFFF);
+  static const Color onBackgroundLight = Color(0xFF2C3E50);
+  static const Color onSurfaceLight = Color(0xFF2C3E50);
+  static const Color onSurfaceVariantLight = Color(0xFF757575);
+  
+  // ========== 다크 테마 색상 (업데이트) ==========
+  
+  /// 메인 컬러: 다크 모드용 조정된 민트색
   static const Color primaryDark = Color(0xFF5BAB98);
+  static const Color primaryVariantDark = Color(0xFF4A9B8E);
+  static const Color secondaryDark = Color(0xFF3A3A3A);
   
-  /// 서브 컬러: 베이지/크림색
-  /// 따뜻하고 편안한 느낌을 주는 보조 색상
-  static const Color secondary = Color(0xFFF5F1E8);
-  static const Color secondaryLight = Color(0xFFEDE7D3);
-  static const Color secondaryDark = Color(0xFFE5DCC5);
+  /// 배경 및 표면 색상 (다크) - 🎯 더 명확한 대비 제공
+  static const Color backgroundDark = Color(0xFF0F0F0F);       // 더 어두운 배경 (거의 검정)
+  static const Color surfaceDark = Color(0xFF1E1E1E);         // 카드는 충분히 밝은 회색 (명확한 대비!)
+  static const Color surfaceVariantDark = Color(0xFF2A2A2A);  // 입력 필드는 더 밝게
   
-  // ========== 배경 및 표면 색상 ==========
+  /// 텍스트 색상 (다크)
+  static const Color onPrimaryDark = Color(0xFFFFFFFF);
+  static const Color onBackgroundDark = Color(0xFFE1E1E1);
+  static const Color onSurfaceDark = Color(0xFFE1E1E1);
+  static const Color onSurfaceVariantDark = Color(0xFFB0B0B0);
   
-  /// 배경 컬러: 오프화이트
-  static const Color background = Color(0xFFF8F8F8);
-  static const Color backgroundSecondary = Color(0xFFFAFAFA);
-  
-  /// 표면 색상 (카드, 다이얼로그 등)
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceVariant = Color(0xFFF5F5F5);
-  
-  // ========== 텍스트 색상 ==========
-  
-  /// 텍스트: 진한 청록색 및 일반 텍스트
-  static const Color textPrimary = Color(0xFF4A9B8E);
-  static const Color textSecondary = Color(0xFF757575);
-  static const Color textTertiary = Color(0xFF9E9E9E);
-  static const Color textOnPrimary = Color(0xFFFFFFFF);
-  
-  // ========== 기능별 색상 ==========
+  // ========== 공통 의미별 색상 ==========
   
   /// 성공 (출석 완료, 저장 완료 등)
   static const Color success = Color(0xFF4CAF50);
@@ -53,56 +57,31 @@ class GeulnamuColors {
   static const Color info = Color(0xFF2196F3);
   static const Color infoLight = Color(0xFF64B5F6);
   
-  // ========== 특수 색상 ==========
+  // ========== 그라데이션 및 특수 색상 ==========
   
-  /// 그림자 색상
-  static const Color shadow = Color(0x1A000000);
-  static const Color shadowLight = Color(0x0D000000);
-  
-  /// 구분선 색상
-  static const Color divider = Color(0xFFE0E0E0);
-  static const Color border = Color(0xFFBDBDBD);
-  
-  /// 비활성화된 요소
-  static const Color disabled = Color(0xFFBDBDBD);
-  static const Color disabledText = Color(0xFF9E9E9E);
-  
-  // ========== 투명도 적용된 색상 ==========
-  
-  /// 메인 컬러의 투명도 변형
-  static Color get primaryWithOpacity10 => primary.withOpacity(0.1);
-  static Color get primaryWithOpacity20 => primary.withOpacity(0.2);
-  static Color get primaryWithOpacity30 => primary.withOpacity(0.3);
-  
-  /// 배경 오버레이 (모달, 로딩 화면 등)
-  static Color get overlay => Colors.black.withOpacity(0.5);
-  static Color get overlayLight => Colors.black.withOpacity(0.3);
-  
-  // ========== 그라데이션 ==========
-  
-  /// 메인 그라데이션 (버튼, 헤더 등에 사용)
-  static const LinearGradient primaryGradient = LinearGradient(
+  /// 메인 그라데이션 (라이트 모드)
+  static const LinearGradient primaryGradientLight = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF7DD3C0),
-      Color(0xFF6BC4AE),
-    ],
+    colors: [primaryLight, primaryVariantLight],
   );
   
-  /// 배경 그라데이션 (전체 배경에 사용)
-  static const LinearGradient backgroundGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFFFAFAFA),
-      Color(0xFFF8F8F8),
-    ],
+  /// 메인 그라데이션 (다크 모드)
+  static const LinearGradient primaryGradientDark = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [primaryDark, primaryVariantDark],
   );
-}
-
-/// 다크 모드 지원을 위한 확장 (추후 구현 예정)
-extension GeulnamuColorsDark on GeulnamuColors {
-  // TODO: 다크 모드 색상 팔레트 정의
-  // 현재는 라이트 모드만 지원
+  
+  /// 그림자 색상
+  static const Color shadowLight = Color(0x1A000000);
+  static const Color shadowDark = Color(0x4A000000);
+  
+  /// 구분선 색상
+  static const Color dividerLight = Color(0xFFE0E0E0);
+  static const Color dividerDark = Color(0xFF424242);
+  
+  /// 비활성화된 요소
+  static const Color disabledLight = Color(0xFFBDBDBD);
+  static const Color disabledDark = Color(0xFF616161);
 }
