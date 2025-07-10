@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../common/responsive_widget.dart';
-import '../../core/theme.dart';  // 확장 메서드 사용
+import '../../core/theme.dart'; // 확장 메서드 사용
 
 class WelcomeCard extends SimpleResponsiveWidget {
   final String title;
@@ -9,7 +9,7 @@ class WelcomeCard extends SimpleResponsiveWidget {
 
   const WelcomeCard({
     super.key,
-    this.title = '글나무에 오신 것을 환영합니다!',
+    this.title = '글나무 앱에 오신 것을 환영합니다!',
     this.subtitle = '독서 토론 모임 관리를 쉽게 해보세요',
     this.icon = Icons.waving_hand,
   });
@@ -31,7 +31,7 @@ class WelcomeCard extends SimpleResponsiveWidget {
               ),
               child: Icon(
                 icon,
-                color: context.colors.primary,  // 🎯 primary 색상 자동 사용
+                color: context.colors.primary, // 🎯 primary 색상 자동 사용
                 size: 32,
               ),
             ),

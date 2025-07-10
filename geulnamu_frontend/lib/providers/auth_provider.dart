@@ -66,7 +66,7 @@ class AuthProvider with ChangeNotifier {
       _setStatus(AuthStatus.authenticated);
       
       print('✅ 카카오 로그인 성공!');
-      print('👤 사용자: ${_userInfo?['nickname'] ?? '알 수 없음'}');
+      print('👤 사용자: ${_userInfo?['memberName'] ?? '이름 미등록'}'); // null 처리
       
       return true;
     } catch (e) {
@@ -132,7 +132,15 @@ class AuthProvider with ChangeNotifier {
 
   /// 사용자 닉네임 가져오기
   String get userNickname {
-    return _userInfo?['nickname'] ?? '사용자';
+    final memberName = _userInfo?['memberName'];
+    // memberName이 null이면 임시 텍스트 반환 (나중에 다른 텍스트로 변경 가능)
+    return memberName ?? '사용자';
+  }
+
+  /// 사용자 이름 등록 여부 확인
+  bool get hasUserName {
+    final memberName = _userInfo?['memberName'];
+    return memberName != null && memberName.toString().trim().isNotEmpty;
   }
 
   /// 사용자 이메일 가져오기
