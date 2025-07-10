@@ -1,5 +1,6 @@
 package com.geulnamu.controller.login;
 
+import com.geulnamu.controller.login.dto.request.LoginRequest;
 import com.geulnamu.controller.login.dto.response.LoginResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.DomainType;
@@ -11,6 +12,7 @@ import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.service.login.LoginFacade;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -24,13 +26,12 @@ public class LoginController {
     private final LoginFacade loginFacade;
 
 
-    // TODO: redirect_uri를 프론트엔드에서 받아서 POST로 code를 전달하는 방식으로 변경할 것
     // 계정이 없었다면 생성 후 토큰 발급, 있었다면 바로 토큰 발급
     @LogAction(value = ActionType.ACCOUNT_LOGIN, actionDomain = DomainType.LOGIN)
     @AccessLevel(Level.PUBLIC)
-    @GetMapping(value = "/oauth/kakao", name = "로그인 redirect url")
-    public BaseResponse<LoginResponse> processKakaoLogin(@RequestParam("code") String authorizationCode, HttpServletResponse response) {
-        LoginResponse loginResponse = loginFacade.loginWithKakao(authorizationCode, response);
+    @PostMapping(value = "/oauth/kakao", name = "로그인 - 카카오 OAuth")
+    public BaseResponse<LoginResponse> processKakaoLogin(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+        LoginResponse loginResponse = loginFacade.loginWithKakao(request.getCode(), response);
         return BaseResponse.ofSuccess(loginResponse);
     }
 

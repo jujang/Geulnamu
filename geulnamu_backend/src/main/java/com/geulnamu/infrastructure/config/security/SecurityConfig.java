@@ -12,6 +12,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -19,7 +24,6 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final JwtTokenUtil jwtTokenUtil;
-//    private final CorsFilter corsFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
@@ -75,9 +79,25 @@ public class SecurityConfig {
     };
 
 
+    // CORS 설정
+    @Bean
+    public CorsConfigurationSource configurationSource() {
+        return request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedHeaders(Collections.singletonList("*"));
+            config.setAllowedMethods(Collections.singletonList("*"));
+            config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3030", "https://localhost:3030"));
+            config.setAllowCredentials(true);
+//            config.addExposedHeader("Content-Disposition"); // 첨부파일 파일명 조회 위한 커스텀 헤더 접근 허용 설정
+            return config;
+        };
+    }
+
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .cors(corsConfigurer -> corsConfigurer.configurationSource(configurationSource()))
             .csrf(AbstractHttpConfigurer::disable)  // TODO: 추후 토큰을 사용하는 빙식으로 사용할 것이라면 이대로 두면 됨
             .exceptionHandling(exceptionHandling -> exceptionHandling
                 .accessDeniedHandler(jwtAccessDeniedHandler)

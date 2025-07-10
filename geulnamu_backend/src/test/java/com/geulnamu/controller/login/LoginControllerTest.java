@@ -1,5 +1,6 @@
 package com.geulnamu.controller.login;
 
+import com.geulnamu.controller.login.dto.request.LoginRequest;
 import com.geulnamu.controller.login.dto.response.LoginResponse;
 import com.geulnamu.controller.shared.ControllerTest;
 import com.geulnamu.domain.shared.enums.Role;
@@ -19,7 +20,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import static com.geulnamu.common.ApiDocumentUtils.getDocumentRequest;
 import static com.geulnamu.common.ApiDocumentUtils.getDocumentResponse;
-import static com.geulnamu.infrastructure.format.DocumentOptionalGenerator.setAttributes;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
 import static org.springframework.restdocs.cookies.CookieDocumentation.requestCookies;
@@ -27,10 +27,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.restdocs.snippet.Attributes.key;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -46,6 +43,7 @@ public class LoginControllerTest extends ControllerTest {
     public void processKakaoLoginTest() throws Exception {
         // given
         String accessToken = "Bearer accessToken";
+        LoginRequest loginRequest = new LoginRequest("random_code");
         LoginResponse loginResponse = new LoginResponse(1L, Role.MEMBER, accessToken, true);
         Cookie cookie = new Cookie("refreshToken", "random_refreshToken_code");
         cookie.setMaxAge((int) (TokenInfo.REFRESH_TOKEN_VALID_TIME/1000));
@@ -54,16 +52,15 @@ public class LoginControllerTest extends ControllerTest {
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
 
-        String authorizationCode = "random_code";
-
         given(loginFacade.loginWithKakao(any(), any())).willReturn(loginResponse);
 
         // when
         ResultActions actions =
             mockMvc.perform(
-                get("/login/oauth/kakao")
-                    .param("code", authorizationCode)
+                post("/login/oauth/kakao")
                     .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(loginRequest))
             );
 
         // then
@@ -86,8 +83,8 @@ public class LoginControllerTest extends ControllerTest {
                 responseHeaders(
                     headerWithName(HttpHeaders.SET_COOKIE).description("리프레시 토큰")
                 ),
-                queryParameters(
-                    parameterWithName("code").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("카카오 oauth를 통해 받은 code")).description("kakao oauth code")
+                requestFields(
+                    fieldWithPath("code").type(JsonFieldType.STRING).attributes(key("format").value("카카오 oauth를 통해 받은 code")).description("kakao oauth code")
                 ),
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
