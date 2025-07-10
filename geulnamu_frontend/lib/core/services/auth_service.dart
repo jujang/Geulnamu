@@ -45,12 +45,16 @@ class AuthService {
     _dio.options.headers['Content-Type'] = 'application/json';
     _dio.options.headers['Accept'] = 'application/json';
     _dio.options.headers['User-Agent'] = 'GeulnamuApp/${AppConfig.appVersion}';
+    
+    // 쿠키 포함 요청 활성화
+    _dio.options.extra['withCredentials'] = true;
 
     // 인터셉터 설정
     _setupInterceptors();
 
     if (AppConfig.debugMode) {
       print('🔧 AuthService Dio 초기화 완료');
+      print('🍪 withCredentials: 활성화됨');
     }
   }
 
@@ -347,7 +351,7 @@ class AuthService {
 
   /// 📱 콜백 스킴 결정
   String _getCallbackScheme() {
-    return kIsWeb ? 'http' : 'geulnamu';
+    return kIsWeb ? 'http' : 'geulnamu';  // 웹에서 HTTP 사용 (개발용)
   }
 
   /// 🔄 Authorization Code 처리 및 토큰 교환
@@ -355,20 +359,31 @@ class AuthService {
     try {
       if (AppConfig.debugMode) {
         print('🔄 백엔드로 Authorization Code 전송 중...');
+        print('📡 POST 요청으로 변경: RequestBody에 code 포함');
       }
 
-      // ApiUtils를 사용한 백엔드 API 호출
-      final response = await _dio.get(
+      // ✅ POST + RequestBody로 변경
+      final response = await _dio.post(
         AppConfig.getApiEndpoint('login/oauth/kakao'),
-        queryParameters: {'code': code},
+        data: {
+          'code': code,
+        },
         options: Options(
           headers: {
             'Accept': 'application/json',
+            'Content-Type': 'application/json',  // JSON 형태로 전송
             'User-Agent': 'GeulnamuApp/${AppConfig.appVersion}',
           },
           followRedirects: false,
+          extra: {
+            'withCredentials': true,  // 쿠키 포함 요청
+          },
         ),
       );
+
+      if (AppConfig.debugMode) {
+        print('📤 요청 데이터: {"code": "${code.substring(0, 20)}..."}');
+      }
 
       if (response.statusCode == 200) {
         // ✅ ApiUtils 통합 응답 처리

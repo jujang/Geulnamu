@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html show document;
 import '../config/app_config.dart';
 
 /// 🔧 백엔드 API 통합 처리 유틸리티
@@ -104,6 +106,37 @@ class ApiUtils {
 
   /// RefreshToken 추출 헬퍼 메서드
   static String? extractRefreshToken(Response response) {
+    // 웹 환경에서는 브라우저 쿠키를 직접 읽기 (보안상 Dio가 Set-Cookie 헤더를 읽지 못함)
+    if (kIsWeb) {
+      try {
+        final cookies = html.document.cookie ?? '';
+        final cookieParts = cookies.split(';');
+        
+        for (final cookiePart in cookieParts) {
+          final trimmed = cookiePart.trim();
+          if (trimmed.startsWith('refreshToken=')) {
+            final token = trimmed.substring('refreshToken='.length);
+            
+            if (AppConfig.debugMode) {
+              print('🍪 리프레시 토큰 추출 성공: ${token.substring(0, 20)}...');
+            }
+            
+            return token;
+          }
+        }
+        
+        if (AppConfig.debugMode) {
+          print('⚠️ 브라우저 쿠키에서 refreshToken을 찾을 수 없음');
+        }
+      } catch (e) {
+        if (AppConfig.debugMode) {
+          print('❌ 브라우저 쿠키 읽기 오류: $e');
+        }
+      }
+      return null;
+    }
+    
+    // 비웹 환경: Response 헤더에서 찾기
     final setCookieHeader = response.headers['set-cookie'];
     if (setCookieHeader != null) {
       for (final cookie in setCookieHeader) {
@@ -112,16 +145,12 @@ class ApiUtils {
           final token = tokenPart.split('=')[1];
           
           if (AppConfig.debugMode) {
-            print('🍪 리프레시 토큰 추출: ${token.substring(0, 20)}...');
+            print('🍪 리프레시 토큰 추출 성공: ${token.substring(0, 20)}...');
           }
           
           return token;
         }
       }
-    }
-    
-    if (AppConfig.debugMode) {
-      print('⚠️ Set-Cookie 헤더에서 refreshToken을 찾을 수 없습니다');
     }
     
     return null;

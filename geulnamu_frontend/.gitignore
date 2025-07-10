@@ -59,3 +59,14 @@ app.*.map.json
 .env.production
 lib/core/config/keys.dart
 # app_config.dart는 템플릿이므로 커밋 허용
+
+# 🔒 SSL 인증서 파일들 (보안상 Git에 포함 금지)
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+# mkcert로 생성된 인증서들
+localhost*.pem
+localhost*.key
