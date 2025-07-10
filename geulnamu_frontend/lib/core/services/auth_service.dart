@@ -400,6 +400,7 @@ class AuthService {
           'refreshToken': refreshToken ?? '',
           'userInfo': {
             'memberId': processedResponse['data']['memberId'],
+            'memberName': processedResponse['data']['memberName'], // null일 수 있음 (정보 미등록 상태)
             'role': processedResponse['data']['role'],
             'newMember': processedResponse['data']['newMember'],
           },
@@ -411,6 +412,7 @@ class AuthService {
         if (AppConfig.debugMode) {
           print('✅ 카카오 OAuth 로그인 완료');
           print('👤 멤버 ID: ${authData['userInfo']['memberId']}');
+          print('📝 사용자 이름: ${authData['userInfo']['memberName'] ?? '미등록'}'); // null 처리
           print('🎭 역할: ${authData['userInfo']['role']}');
           print('🆕 신규 회원: ${authData['userInfo']['newMember']}');
         }
@@ -688,6 +690,12 @@ class AuthService {
     return userInfo?['newMember'] ?? false;
   }
 
+  /// 📝 사용자 이름 가져오기
+  Future<String?> getMemberName() async {
+    final userInfo = await getUserInfo();
+    return userInfo?['memberName'];
+  }
+
   /// 🔍 디버그용 - 저장된 인증 정보 출력
   Future<void> printStoredInfo() async {
     if (AppConfig.debugMode) {
@@ -701,6 +709,7 @@ class AuthService {
       print('Refresh Token: ${refreshToken?.substring(0, 30) ?? 'null'}...');
       print('User Info: $userInfo');
       print('Member ID: ${userInfo?['memberId']}');
+      print('Member Name: ${userInfo?['memberName'] ?? '미등록'}'); // null 처리
       print('Role: ${userInfo?['role']}');
       print('New Member: ${userInfo?['newMember']}');
       print('========================');
