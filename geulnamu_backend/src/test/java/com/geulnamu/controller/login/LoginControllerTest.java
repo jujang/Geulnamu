@@ -44,7 +44,7 @@ public class LoginControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer accessToken";
         LoginRequest loginRequest = new LoginRequest("random_code");
-        LoginResponse loginResponse = new LoginResponse(1L, Role.MEMBER, accessToken, true);
+        LoginResponse loginResponse = new LoginResponse(1L, null, Role.MEMBER, accessToken, true);
         Cookie cookie = new Cookie("refreshToken", "random_refreshToken_code");
         cookie.setMaxAge((int) (TokenInfo.REFRESH_TOKEN_VALID_TIME/1000));
         cookie.setPath("/");
@@ -90,6 +90,7 @@ public class LoginControllerTest extends ControllerTest {
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
                     fieldWithPath("data.memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
+                    fieldWithPath("data.memberName").type(JsonFieldType.NUMBER).description("모임원 이름").optional(),
                     fieldWithPath("data.role").type(JsonFieldType.STRING).description("모임원 역할"),
                     fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰 값"),
                     fieldWithPath("data.newMember").type(JsonFieldType.BOOLEAN).description("멤버 신규 여부")

@@ -53,7 +53,7 @@ public class LoginFacade {
         // 4. 회원의 리프레시 토큰 업데이트(DB)
         member.updateMemberRefreshToken(tokenPair.refreshToken());
 
-        return LoginResponse.of(member.getId(), member.getRole(), tokenPair.accessToken(), isNewMember);
+        return LoginResponse.of(member.getId(), member.getName(), member.getRole(), tokenPair.accessToken(), isNewMember);
     }
 
     /**
@@ -114,7 +114,7 @@ public class LoginFacade {
 
         member.updateMemberRefreshToken(tokenPair.refreshToken());
 
-        return LoginResponse.of(member.getId(), member.getRole(), tokenPair.accessToken(), false);
+        return LoginResponse.of(member.getId(), member.getName(), member.getRole(), tokenPair.accessToken(), false);
     }
 
 
