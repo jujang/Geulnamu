@@ -7,6 +7,7 @@ import '../../widgets/common/responsive_container.dart';
 import '../../widgets/home/welcome_card.dart';
 import '../../widgets/home/pwa_install_card.dart';
 import '../../core/theme.dart'; // 확장 메서드 사용
+import '../meeting/meeting_detail_screen.dart'; // 🎯 모임 소개 페이지 import
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -361,9 +362,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _handleMenuTap(String menuTitle, AuthProvider authProvider) {
     if (menuTitle == '모임 소개') {
-      _showFeatureDialog(
-        '모임 소개',
-        '글나무는 독서를 사랑하는 사람들이 모여\n생각을 나누고 성장할 수 있는 공간입니다.',
+      // 🎯 모임 소개 페이지로 이동
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MeetingDetailScreen(),
+        ),
       );
     } else if (authProvider.isAuthenticated) {
       // 로그인 후: 실제 기능 사용 (현재는 개발 중 메시지)
