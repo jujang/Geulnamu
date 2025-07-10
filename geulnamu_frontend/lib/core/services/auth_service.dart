@@ -1,104 +1,157 @@
-import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html show window;
 import '../config/app_config.dart';
+import '../utils/api_utils.dart';
 
-/// 🔐 인증 서비스
-/// 카카오 OAuth 로그인 및 토큰 관리를 담당합니다.
+/// 🔐 글나무 인증 서비스
+/// 
+/// 백엔드 API와 완전 호환되는 카카오 OAuth 로그인 시스템
+/// - 웹/모바일 환경 자동 감지 및 처리
+/// - ApiUtils 통합 사용으로 일관된 에러 처리
+/// - 자동 토큰 갱신 및 인터셉터 설정
+/// 
+/// 사용법:
+/// ```dart
+/// final authService = AuthService();
+/// final result = await authService.loginWithKakao();
+/// ```
 class AuthService {
   static final AuthService _instance = AuthService._internal();
   factory AuthService() => _instance;
   AuthService._internal() {
-    // Dio 기본 설정
-    _dio.options.connectTimeout = const Duration(seconds: 10);
-    _dio.options.receiveTimeout = const Duration(seconds: 10);
-    _dio.options.sendTimeout = const Duration(seconds: 10);
+    _initializeDio();
   }
 
   final Dio _dio = Dio();
+  
+  // 🔑 로컬 저장소 키
+  static const String _accessTokenKey = 'access_token';
+  static const String _refreshTokenKey = 'refresh_token';
+  static const String _userInfoKey = 'user_info';
 
-  /// 카카오 로그인
+  /// 🔧 Dio 초기화 및 설정
+  void _initializeDio() {
+    // 기본 타임아웃 설정
+    _dio.options.connectTimeout = const Duration(seconds: 30);
+    _dio.options.receiveTimeout = const Duration(seconds: 30);
+    _dio.options.sendTimeout = const Duration(seconds: 30);
+
+    // 기본 헤더 설정
+    _dio.options.headers['Content-Type'] = 'application/json';
+    _dio.options.headers['Accept'] = 'application/json';
+    _dio.options.headers['User-Agent'] = 'GeulnamuApp/${AppConfig.appVersion}';
+
+    // 인터셉터 설정
+    _setupInterceptors();
+
+    if (AppConfig.debugMode) {
+      print('🔧 AuthService Dio 초기화 완료');
+    }
+  }
+
+  /// 🔄 인터셉터 설정 - 자동 토큰 관리
+  void _setupInterceptors() {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          // 인증이 필요한 API에 액세스 토큰 자동 추가
+          if (_needsAuthentication(options.path)) {
+            final accessToken = await getAccessToken();
+            if (accessToken != null && accessToken.isNotEmpty) {
+              // Bearer 접두사 추가하여 표준 Authorization 헤더 형식 사용
+              options.headers['Authorization'] = 'Bearer $accessToken';
+              
+              if (AppConfig.debugMode) {
+                print('🔑 Authorization 헤더 추가: Bearer ${accessToken.substring(0, 20)}...');
+              }
+            }
+          }
+
+          if (AppConfig.debugMode) {
+            print('📡 [${options.method}] ${options.uri}');
+          }
+
+          handler.next(options);
+        },
+        onResponse: (response, handler) {
+          if (AppConfig.debugMode) {
+            print('📨 [${response.statusCode}] ${response.requestOptions.uri}');
+          }
+          handler.next(response);
+        },
+        onError: (error, handler) async {
+          if (AppConfig.debugMode) {
+            print('❌ [${error.response?.statusCode}] ${error.requestOptions.uri}');
+          }
+
+          // 401 에러 시 자동 토큰 갱신 시도
+          if (error.response?.statusCode == 401 && 
+              _needsAuthentication(error.requestOptions.path)) {
+            final refreshed = await _attemptTokenRefresh();
+            
+            if (refreshed) {
+              // 토큰 갱신 성공 시 원래 요청 재시도
+              final accessToken = await getAccessToken();
+              error.requestOptions.headers['Authorization'] = 'Bearer $accessToken';
+
+              try {
+                final response = await _dio.fetch(error.requestOptions);
+                handler.resolve(response);
+                return;
+              } catch (e) {
+                if (AppConfig.debugMode) {
+                  print('🔄 토큰 갱신 후 재요청도 실패: $e');
+                }
+              }
+            }
+          }
+
+          handler.next(error);
+        },
+      ),
+    );
+  }
+
+  /// 🔍 인증이 필요한 API인지 확인
+  bool _needsAuthentication(String path) {
+    // 로그인, 회원가입 등은 인증 불필요
+    if (path.contains('/login/oauth/') || path.contains('/login/re-issue/')) {
+      return false;
+    }
+    
+    // 로그아웃은 인증 필요
+    if (path.contains('/login/logout')) {
+      return true;
+    }
+    
+    // /api/ 경로는 인증 필요
+    if (path.contains('/api/')) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  /// 🥕 카카오 OAuth 로그인 - 메인 진입점
+  /// 
+  /// 웹/모바일 환경을 자동 감지하여 적절한 OAuth 플로우 실행
   Future<Map<String, dynamic>> loginWithKakao() async {
     try {
       if (AppConfig.debugMode) {
-        print('🥕 카카오 로그인 시작...');
+        print('🥕 카카오 OAuth 로그인 시작...');
+        print('🌐 환경: ${kIsWeb ? "웹" : "모바일"}');
       }
-
-      OAuthToken token;
 
       if (kIsWeb) {
-        // 웹에서는 JavaScript SDK 사용
-        if (AppConfig.debugMode) {
-          print('🌐 웹에서 카카오 계정 로그인 시도');
-        }
-        token = await UserApi.instance.loginWithKakaoAccount();
+        return await _webLoginFlow();
       } else {
-        // 모바일에서는 카카오톡 앱 또는 웹뷰 사용
-        if (await isKakaoTalkInstalled()) {
-          if (AppConfig.debugMode) {
-            print('📱 카카오톡 앱 로그인 시도');
-          }
-          token = await UserApi.instance.loginWithKakaoTalk();
-        } else {
-          if (AppConfig.debugMode) {
-            print('🌐 카카오 계정 로그인 시도');
-          }
-          token = await UserApi.instance.loginWithKakaoAccount();
-        }
+        return await _mobileLoginFlow();
       }
-
-      if (AppConfig.debugMode) {
-        print('✅ 카카오 토큰 획득 성공');
-      }
-
-      // 카카오 사용자 정보 가져오기
-      if (AppConfig.debugMode) {
-        print('👤 사용자 정보 조회 중...');
-      }
-      final kakaoUser = await UserApi.instance.me();
-      if (AppConfig.debugMode) {
-        print('✅ 사용자 정보 조회 성공: ${kakaoUser.kakaoAccount?.profile?.nickname}');
-      }
-
-      // 백엔드 연동 시도 (실패해도 계속 진행)
-      Map<String, dynamic> authResponse;
-      try {
-        authResponse = await _sendKakaoTokenToBackend(
-          token.accessToken,
-          kakaoUser,
-        );
-        if (AppConfig.debugMode) {
-          print('✅ 백엔드 연동 성공');
-        }
-      } catch (e) {
-        if (AppConfig.debugMode) {
-          print('⚠️ 백엔드 연동 실패, 로컬 모드로 계속: $e');
-        }
-        // 백엔드 없이도 동작하도록 로컬 데이터 생성
-        authResponse = {
-          'accessToken': token.accessToken,
-          'refreshToken': token.refreshToken ?? '',
-          'userInfo': {
-            'id': kakaoUser.id,
-            'nickname': kakaoUser.kakaoAccount?.profile?.nickname ?? '사용자',
-            'email': kakaoUser.kakaoAccount?.email,
-            'profileImageUrl': kakaoUser.kakaoAccount?.profile?.profileImageUrl,
-            'isEmailVerified': kakaoUser.kakaoAccount?.isEmailVerified,
-            'ageRange': kakaoUser.kakaoAccount?.ageRange?.toString(),
-            'gender': kakaoUser.kakaoAccount?.gender?.toString(),
-          },
-        };
-      }
-
-      // 토큰 저장
-      await _saveTokens(authResponse);
-      if (AppConfig.debugMode) {
-        print('✅ 카카오 로그인 완료');
-      }
-
-      return authResponse;
     } catch (error) {
       if (AppConfig.debugMode) {
         print('❌ 카카오 로그인 실패: $error');
@@ -107,88 +160,282 @@ class AuthService {
     }
   }
 
-  /// 백엔드로 카카오 토큰 전송
-  Future<Map<String, dynamic>> _sendKakaoTokenToBackend(
-    String kakaoAccessToken,
-    User kakaoUser,
-  ) async {
-    try {
-      if (AppConfig.debugMode) {
-        print('🔄 백엔드로 토큰 전송 중...');
-      }
+  /// 🌐 웹 환경 OAuth 플로우
+  Future<Map<String, dynamic>> _webLoginFlow() async {
+    final kakaoAuthUrl = _buildKakaoAuthUrl();
 
-      final response = await _dio.post(
-        '${AppConfig.apiBaseUrl}/auth/kakao/login',
-        data: {
-          'kakaoAccessToken': kakaoAccessToken,
-          'kakaoUserId': kakaoUser.id,
-          'nickname': kakaoUser.kakaoAccount?.profile?.nickname,
-          'email': kakaoUser.kakaoAccount?.email,
-          'profileImageUrl': kakaoUser.kakaoAccount?.profile?.profileImageUrl,
-        },
+    if (AppConfig.debugMode) {
+      print('🔗 카카오 인증 URL: $kakaoAuthUrl');
+      print('🌐 웹 팝업 OAuth 진행 중...');
+    }
+
+    try {
+      // 팝업으로 카카오 인증 페이지 열기
+      final popup = html.window.open(
+        kakaoAuthUrl,
+        'kakao_login',
+        'width=500,height=600,scrollbars=yes,resizable=yes',
       );
 
-      if (response.statusCode == 200) {
-        return response.data;
-      } else {
-        throw Exception('백엔드 인증 실패: ${response.statusCode}');
+      if (popup == null) {
+        throw Exception('팝업이 차단되었습니다. 브라우저 팝업 차단을 해제해주세요.');
       }
+
+      // Authorization Code 대기
+      final authCode = await _waitForAuthCode(popup);
+      
+      if (AppConfig.debugMode) {
+        print('🔑 Authorization Code 획득 성공');
+      }
+
+      // 백엔드로 코드 전송 및 토큰 교환
+      return await _processAuthCode(authCode);
     } catch (e) {
       if (AppConfig.debugMode) {
-        print('백엔드 인증 오류: $e');
+        print('❌ 웹 OAuth 플로우 오류: $e');
       }
       rethrow;
     }
   }
 
-  /// 토큰 저장
-  Future<void> _saveTokens(Map<String, dynamic> authResponse) async {
-    final prefs = await SharedPreferences.getInstance();
-
-    await prefs.setString('access_token', authResponse['accessToken'] ?? '');
-    await prefs.setString('refresh_token', authResponse['refreshToken'] ?? '');
-    await prefs.setString('user_info', jsonEncode(authResponse['userInfo']));
+  /// 📱 모바일 환경 OAuth 플로우
+  Future<Map<String, dynamic>> _mobileLoginFlow() async {
+    final kakaoAuthUrl = _buildKakaoAuthUrl();
 
     if (AppConfig.debugMode) {
-      print('💾 토큰 저장 완료');
+      print('🔗 카카오 인증 URL: $kakaoAuthUrl');
+      print('📱 모바일 WebView OAuth 진행 중...');
     }
-  }
 
-  /// 저장된 토큰 가져오기
-  Future<String?> getAccessToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('access_token');
-  }
-
-  /// 리프레시 토큰 가져오기
-  Future<String?> getRefreshToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('refresh_token');
-  }
-
-  /// 사용자 정보 가져오기
-  Future<Map<String, dynamic>?> getUserInfo() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final userInfoString = prefs.getString('user_info');
+      // FlutterWebAuth2로 OAuth 진행
+      final result = await FlutterWebAuth2.authenticate(
+        url: kakaoAuthUrl,
+        callbackUrlScheme: _getCallbackScheme(),
+        options: const FlutterWebAuth2Options(
+          intentFlags: 0x10000000, // FLAG_ACTIVITY_NEW_TASK
+          preferEphemeral: true,
+        ),
+      );
 
-      if (userInfoString != null) {
-        return jsonDecode(userInfoString);
+      if (AppConfig.debugMode) {
+        print('🔗 OAuth 콜백 결과: $result');
       }
-      return null;
+
+      // Authorization Code 추출
+      final uri = Uri.parse(result);
+      final code = uri.queryParameters['code'];
+
+      if (code == null || code.isEmpty) {
+        throw Exception('카카오 OAuth에서 인증 코드를 받지 못했습니다.');
+      }
+
+      if (AppConfig.debugMode) {
+        print('🔑 Authorization Code 획득 성공');
+      }
+
+      // 백엔드로 코드 전송 및 토큰 교환
+      return await _processAuthCode(code);
     } catch (e) {
       if (AppConfig.debugMode) {
-        print('사용자 정보 가져오기 오류: $e');
+        print('❌ 모바일 OAuth 플로우 오류: $e');
       }
-      return null;
+      rethrow;
     }
   }
 
-  /// 토큰 갱신
+  /// 🔗 카카오 인증 URL 생성
+  String _buildKakaoAuthUrl() {
+    final clientId = kIsWeb
+        ? AppConfig.kakaoJavaScriptAppKey
+        : AppConfig.kakaoNativeAppKey;
+    
+    final redirectUri = AppConfig.kakaoRedirectUri;
+    final state = DateTime.now().millisecondsSinceEpoch.toString();
+
+    final params = {
+      'client_id': clientId,
+      'redirect_uri': redirectUri,
+      'response_type': 'code',
+      'scope': 'profile_nickname',
+      'state': state,
+    };
+
+    final queryString = params.entries
+        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+
+    return 'https://kauth.kakao.com/oauth/authorize?$queryString';
+  }
+
+  /// 🕒 웹 팝업에서 Authorization Code 대기
+  Future<String> _waitForAuthCode(dynamic popup) async {
+    final completer = Completer<String>();
+    late StreamSubscription messageSubscription;
+    late Timer popupCheckTimer;
+    late Timer timeoutTimer;
+    
+    // PostMessage 리스너 등록
+    messageSubscription = html.window.onMessage.listen((event) {
+      if (AppConfig.debugMode) {
+        print('📬 PostMessage 수신: ${event.data}');
+      }
+
+      if (event.data is String) {
+        final data = event.data as String;
+        if (data.startsWith('KAKAO_AUTH_CODE:')) {
+          final code = data.replaceFirst('KAKAO_AUTH_CODE:', '');
+          if (code.isNotEmpty && !completer.isCompleted) {
+            _cleanupListeners(messageSubscription, popupCheckTimer, timeoutTimer);
+            _closePopup(popup);
+            completer.complete(code);
+          }
+        }
+      }
+    });
+
+    // 팝업 상태 주기적 확인
+    popupCheckTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      try {
+        if (popup?.closed == true && !completer.isCompleted) {
+          _cleanupListeners(messageSubscription, timer, timeoutTimer);
+          completer.completeError(Exception('사용자가 로그인을 취소했습니다.'));
+        }
+      } catch (e) {
+        if (AppConfig.debugMode) {
+          print('⚠️ 팝업 상태 확인 오류: $e');
+        }
+      }
+    });
+
+    // 타임아웃 설정 (5분)
+    timeoutTimer = Timer(const Duration(minutes: 5), () {
+      if (!completer.isCompleted) {
+        _cleanupListeners(messageSubscription, popupCheckTimer, timeoutTimer);
+        _closePopup(popup);
+        completer.completeError(Exception('로그인 시간이 초과되었습니다.'));
+      }
+    });
+
+    return completer.future;
+  }
+
+  /// 🧹 리스너 정리 헬퍼
+  void _cleanupListeners(StreamSubscription messageSubscription, 
+                        Timer popupCheckTimer, Timer timeoutTimer) {
+    try {
+      messageSubscription.cancel();
+      popupCheckTimer.cancel();
+      timeoutTimer.cancel();
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('⚠️ 리스너 정리 중 오류: $e');
+      }
+    }
+  }
+
+  /// 🪟 팝업 닫기 헬퍼
+  void _closePopup(dynamic popup) {
+    try {
+      popup?.close();
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('⚠️ 팝업 닫기 실패: $e');
+      }
+    }
+  }
+
+  /// 📱 콜백 스킴 결정
+  String _getCallbackScheme() {
+    return kIsWeb ? 'http' : 'geulnamu';
+  }
+
+  /// 🔄 Authorization Code 처리 및 토큰 교환
+  Future<Map<String, dynamic>> _processAuthCode(String code) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🔄 백엔드로 Authorization Code 전송 중...');
+      }
+
+      // ApiUtils를 사용한 백엔드 API 호출
+      final response = await _dio.get(
+        AppConfig.getApiEndpoint('login/oauth/kakao'),
+        queryParameters: {'code': code},
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'GeulnamuApp/${AppConfig.appVersion}',
+          },
+          followRedirects: false,
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        // ✅ ApiUtils 통합 응답 처리
+        final processedResponse = ApiUtils.processBackendResponse(
+          response, 
+          '카카오 로그인'
+        );
+
+        // ✅ ApiUtils 통합 토큰 추출
+        final refreshToken = ApiUtils.extractRefreshToken(response);
+        
+        final authData = {
+          'accessToken': processedResponse['data']['accessToken'],
+          'refreshToken': refreshToken ?? '',
+          'userInfo': {
+            'memberId': processedResponse['data']['memberId'],
+            'role': processedResponse['data']['role'],
+            'newMember': processedResponse['data']['newMember'],
+          },
+        };
+
+        // 토큰 저장
+        await _saveAuthData(authData);
+
+        if (AppConfig.debugMode) {
+          print('✅ 카카오 OAuth 로그인 완료');
+          print('👤 멤버 ID: ${authData['userInfo']['memberId']}');
+          print('🎭 역할: ${authData['userInfo']['role']}');
+          print('🆕 신규 회원: ${authData['userInfo']['newMember']}');
+        }
+
+        return authData;
+      } else {
+        throw Exception('백엔드 인증 실패: HTTP ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        // ✅ ApiUtils 통합 에러 처리
+        throw ApiUtils.processDioException(e, '카카오 로그인');
+      }
+      rethrow;
+    }
+  }
+
+  /// 웹 환경에서 OAuth 코드 처리 (콜백 화면용)
+  /// 
+  /// 카카오 OAuth 콜백 페이지에서 직접 호출하는 메서드
+  Future<Map<String, dynamic>> processOAuthCode(String code) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🔄 웹 OAuth 코드 직접 처리 시작...');
+      }
+
+      return await _processAuthCode(code);
+    } catch (error) {
+      if (AppConfig.debugMode) {
+        print('❌ 웹 OAuth 코드 처리 실패: $error');
+      }
+      rethrow;
+    }
+  }
+
+  /// 🔄 토큰 갱신
   Future<Map<String, dynamic>?> refreshToken() async {
     try {
       if (AppConfig.debugMode) {
-        print('🔄 토큰 갱신 시도...');
+        print('🔄 액세스 토큰 갱신 시도...');
       }
 
       final refreshToken = await getRefreshToken();
@@ -199,132 +446,98 @@ class AuthService {
         return null;
       }
 
-      // 백엔드가 있는 경우 토큰 갱신 시도
-      try {
-        final response = await _dio.post(
-          '${AppConfig.apiBaseUrl}/auth/refresh',
-          data: {'refreshToken': refreshToken},
+      final response = await _dio.post(
+        AppConfig.getApiEndpoint('login/re-issue/accessToken'),
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Cookie': 'refreshToken=$refreshToken',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        // ✅ ApiUtils 통합 응답 처리
+        final processedResponse = ApiUtils.processBackendResponse(
+          response, 
+          '토큰 갱신'
         );
 
-        if (response.statusCode == 200) {
-          await _saveTokens(response.data);
-          if (AppConfig.debugMode) {
-            print('✅ 토큰 갱신 성공');
-          }
-          return response.data;
-        }
-      } catch (e) {
-        if (AppConfig.debugMode) {
-          print('⚠️ 백엔드 토큰 갱신 실패: $e');
-        }
-      }
-
-      // 백엔드 갱신 실패 시 카카오 사용자 정보로 토큰 유효성 확인
-      try {
-        final kakaoUser = await UserApi.instance.me();
-        if (AppConfig.debugMode) {
-          print('✅ 카카오 토큰 유효함: ${kakaoUser.kakaoAccount?.profile?.nickname}');
-        }
-
-        // 현재 저장된 사용자 정보 반환
+        // ✅ ApiUtils 통합 토큰 추출
+        final newRefreshToken = ApiUtils.extractRefreshToken(response);
         final userInfo = await getUserInfo();
-        return {
-          'accessToken': await getAccessToken(),
-          'refreshToken': refreshToken,
+
+        final refreshedData = {
+          'accessToken': processedResponse['data'],
+          'refreshToken': newRefreshToken ?? refreshToken,
           'userInfo': userInfo,
         };
-      } catch (e) {
+
+        await _saveAuthData(refreshedData);
+
         if (AppConfig.debugMode) {
-          print('❌ 카카오 토큰도 만료됨: $e');
+          print('✅ 토큰 갱신 완료');
         }
-        return null;
+
+        return refreshedData;
+      } else {
+        throw Exception('토큰 갱신 실패: HTTP ${response.statusCode}');
       }
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ 토큰 갱신 오류: $e');
       }
+
+      if (e is DioException) {
+        final statusCode = e.response?.statusCode;
+        if (statusCode == 401 || statusCode == 403) {
+          // 리프레시 토큰도 만료된 경우 로그아웃 처리
+          await _clearAuthData();
+        }
+        
+        // ✅ ApiUtils 통합 에러 처리 (로그만 출력, null 반환)
+        final processedException = ApiUtils.processDioException(e, '토큰 갱신');
+        if (AppConfig.debugMode) {
+          print('⚠️ 토큰 갱신 세부 오류: $processedException');
+        }
+      }
+
       return null;
     }
   }
 
-  /// 로그인 상태 확인
-  Future<bool> isLoggedIn() async {
-    try {
-      final accessToken = await getAccessToken();
-      if (accessToken == null || accessToken.isEmpty) {
-        if (AppConfig.debugMode) {
-          print('📝 저장된 토큰이 없습니다');
-        }
-        return false;
-      }
-
-      // 백엔드가 있는 경우 토큰 유효성 검사
-      try {
-        final response = await _dio.get(
-          '${AppConfig.apiBaseUrl}/auth/verify',
-          options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
-        );
-
-        if (response.statusCode == 200) {
-          if (AppConfig.debugMode) {
-            print('✅ 백엔드 토큰 유효');
-          }
-          return true;
-        }
-      } catch (e) {
-        if (AppConfig.debugMode) {
-          print('⚠️ 백엔드 토큰 검증 실패: $e');
-        }
-      }
-
-      // 백엔드 검증 실패 시 카카오 사용자 정보로 토큰 유효성 확인
-      try {
-        final kakaoUser = await UserApi.instance.me();
-        if (AppConfig.debugMode) {
-          print('✅ 카카오 토큰 유효: ${kakaoUser.id}');
-        }
-        return true;
-      } catch (e) {
-        if (AppConfig.debugMode) {
-          print('❌ 카카오 토큰 만료: $e');
-        }
-        return false;
-      }
-    } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ 로그인 상태 확인 오류: $e');
-      }
-      return false;
-    }
-  }
-
-  /// 로그아웃
+  /// 👋 로그아웃
   Future<void> logout() async {
     try {
       if (AppConfig.debugMode) {
         print('👋 로그아웃 시작...');
       }
 
-      // 카카오 로그아웃
-      try {
-        await UserApi.instance.logout();
-        if (AppConfig.debugMode) {
-          print('✅ 카카오 로그아웃 완료');
-        }
-      } catch (e) {
-        if (AppConfig.debugMode) {
-          print('⚠️ 카카오 로그아웃 오류 (계속 진행): $e');
-        }
-      }
-
-      // 백엔드 로그아웃 (선택사항)
+      // 백엔드 로그아웃 시도
       try {
         final accessToken = await getAccessToken();
         if (accessToken != null && accessToken.isNotEmpty) {
-          await _dio.post(
-            '${AppConfig.apiBaseUrl}/auth/logout',
-            options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+          final response = await _dio.post(
+            AppConfig.getApiEndpoint('login/logout'),
+            options: Options(
+              headers: {
+                'Authorization': 'Bearer $accessToken',  // Bearer 접두사 추가
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            ),
           );
+          
+          if (AppConfig.debugMode) {
+            print('🔑 로그아웃 Authorization 헤더: Bearer ${accessToken.substring(0, 20)}...');
+          }
+
+          if (response.statusCode == 200) {
+            // ✅ ApiUtils 통합 응답 처리
+            ApiUtils.processBackendResponse(response, '로그아웃');
+          }
+
           if (AppConfig.debugMode) {
             print('✅ 백엔드 로그아웃 완료');
           }
@@ -333,48 +546,148 @@ class AuthService {
         if (AppConfig.debugMode) {
           print('⚠️ 백엔드 로그아웃 오류 (계속 진행): $e');
         }
+        
+        // ✅ ApiUtils 통합 에러 처리
+        if (e is DioException) {
+          final processedException = ApiUtils.processDioException(e, '로그아웃');
+          if (AppConfig.debugMode) {
+            print('⚠️ 로그아웃 세부 오류: $processedException');
+          }
+        }
       }
 
-      // 로컬 토큰 삭제
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('access_token');
-      await prefs.remove('refresh_token');
-      await prefs.remove('user_info');
+      // 로컬 데이터 삭제
+      await _clearAuthData();
 
       if (AppConfig.debugMode) {
-        print('✅ 로컬 데이터 삭제 완료');
         print('✅ 로그아웃 완료');
       }
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ 로그아웃 오류: $e');
       }
-      // 오류가 있어도 로컬 데이터는 삭제
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('access_token');
-        await prefs.remove('refresh_token');
-        await prefs.remove('user_info');
-      } catch (e2) {
-        if (AppConfig.debugMode) {
-          print('❌ 로컬 데이터 삭제 실패: $e2');
-        }
-      }
+      // 오류가 발생해도 로컬 데이터는 삭제
+      await _clearAuthData();
+      rethrow;
     }
   }
 
-  /// 디버그용 - 저장된 정보 출력
+  /// 🔍 로그인 상태 확인
+  Future<bool> isLoggedIn() async {
+    try {
+      final accessToken = await getAccessToken();
+      final userInfo = await getUserInfo();
+
+      return accessToken != null && 
+             accessToken.isNotEmpty && 
+             userInfo != null;
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ 로그인 상태 확인 오류: $e');
+      }
+      return false;
+    }
+  }
+
+  /// 🔄 자동 토큰 갱신 시도 (내부 메서드)
+  Future<bool> _attemptTokenRefresh() async {
+    try {
+      final result = await refreshToken();
+      return result != null;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 💾 인증 데이터 저장
+  Future<void> _saveAuthData(Map<String, dynamic> authData) async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    await prefs.setString(_accessTokenKey, authData['accessToken'] ?? '');
+    await prefs.setString(_refreshTokenKey, authData['refreshToken'] ?? '');
+    await prefs.setString(_userInfoKey, jsonEncode(authData['userInfo'] ?? {}));
+
+    if (AppConfig.debugMode) {
+      print('💾 인증 데이터 저장 완료');
+    }
+  }
+
+  /// 🗑️ 인증 데이터 삭제
+  Future<void> _clearAuthData() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    await prefs.remove(_accessTokenKey);
+    await prefs.remove(_refreshTokenKey);
+    await prefs.remove(_userInfoKey);
+
+    if (AppConfig.debugMode) {
+      print('🗑️ 인증 데이터 삭제 완료');
+    }
+  }
+
+  /// 🔑 액세스 토큰 가져오기
+  Future<String?> getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_accessTokenKey);
+  }
+
+  /// 🔄 리프레시 토큰 가져오기
+  Future<String?> getRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_refreshTokenKey);
+  }
+
+  /// 👤 사용자 정보 가져오기
+  Future<Map<String, dynamic>?> getUserInfo() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userInfoString = prefs.getString(_userInfoKey);
+      
+      if (userInfoString != null && userInfoString.isNotEmpty) {
+        return jsonDecode(userInfoString);
+      }
+      return null;
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ 사용자 정보 파싱 오류: $e');
+      }
+      return null;
+    }
+  }
+
+  /// 🎭 사용자 역할 가져오기
+  Future<String?> getUserRole() async {
+    final userInfo = await getUserInfo();
+    return userInfo?['role'];
+  }
+
+  /// 🆔 사용자 ID 가져오기
+  Future<int?> getMemberId() async {
+    final userInfo = await getUserInfo();
+    return userInfo?['memberId'];
+  }
+
+  /// 🆕 신규 회원 여부 확인
+  Future<bool> isNewMember() async {
+    final userInfo = await getUserInfo();
+    return userInfo?['newMember'] ?? false;
+  }
+
+  /// 🔍 디버그용 - 저장된 인증 정보 출력
   Future<void> printStoredInfo() async {
     if (AppConfig.debugMode) {
-      final prefs = await SharedPreferences.getInstance();
       print('🔍 === 저장된 인증 정보 ===');
-      print(
-        'Access Token: ${(await getAccessToken())?.substring(0, 20) ?? 'null'}...',
-      );
-      print(
-        'Refresh Token: ${(await getRefreshToken())?.substring(0, 20) ?? 'null'}...',
-      );
-      print('User Info: ${await getUserInfo()}');
+
+      final accessToken = await getAccessToken();
+      final refreshToken = await getRefreshToken();
+      final userInfo = await getUserInfo();
+
+      print('Access Token: ${accessToken?.substring(0, 30) ?? 'null'}...');
+      print('Refresh Token: ${refreshToken?.substring(0, 30) ?? 'null'}...');
+      print('User Info: $userInfo');
+      print('Member ID: ${userInfo?['memberId']}');
+      print('Role: ${userInfo?['role']}');
+      print('New Member: ${userInfo?['newMember']}');
       print('========================');
     }
   }

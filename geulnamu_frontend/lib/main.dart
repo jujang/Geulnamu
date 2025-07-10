@@ -12,6 +12,7 @@ import 'providers/auth_provider.dart';
 // Screen imports
 import 'screens/splash/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
+// import 'screens/auth/oauth_callback_screen.dart'; // HTML에서 처리
 import 'screens/home/home_screen.dart';
 
 void main() async {
@@ -59,6 +60,7 @@ class GeulnamuApp extends StatelessWidget {
         routes: {
           '/splash': (context) => const SplashScreen(),
           '/login': (context) => const LoginScreen(),
+          // '/auth/callback': (context) => const OAuthCallbackScreen(), // 주석 처리 - HTML에서 처리
           '/home': (context) => const HomeScreen(),
         },
 

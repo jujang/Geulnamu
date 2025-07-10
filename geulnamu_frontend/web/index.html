@@ -55,6 +55,70 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
+  <!-- OAuth 콜백 처리 스크립트 -->
+  <script>
+    // 페이지 로드 즉시 OAuth 콜백 처리
+    (function() {
+      // URL에서 코드 확인
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const isOAuthCallback = window.location.pathname === '/auth/callback' && code;
+      
+      // OAuth 콜백이고 팡업인 경우 즉시 처리
+      if (isOAuthCallback && window.opener) {
+        console.log('🔄 OAuth 콜백 처리 (팡업)');
+        console.log('🔑 코드:', code.substring(0, 20) + '...');
+        
+        // 부모 창으로 코드 전송
+        window.opener.postMessage('KAKAO_AUTH_CODE:' + code, '*');
+        
+        // 성공 메시지 표시
+        document.body.innerHTML = `
+          <div style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+          ">
+            <div style="
+              background: white;
+              padding: 30px;
+              border-radius: 10px;
+              text-align: center;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            ">
+              <div style="
+                width: 60px;
+                height: 60px;
+                background: #7DD3C0;
+                border-radius: 50%;
+                margin: 0 auto 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 24px;
+              ">📚</div>
+              <h2 style="color: #333; margin: 0 0 10px 0;">글나무</h2>
+              <p style="color: #666; margin: 0;">로그인 성공!</p>
+              <p style="color: #999; font-size: 14px; margin: 10px 0 0 0;">생시만 기다려주세요...</p>
+            </div>
+          </div>
+        `;
+        
+        // 1초 후 창 닫기
+        setTimeout(function() {
+          window.close();
+        }, 1000);
+        
+        // Flutter 앱 로드 중단
+        return;
+      }
+    })();
+  </script>
+  
   <!-- Service Worker 등록 -->
   <script>
     if ('serviceWorker' in navigator) {
