@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# 🔐 환경변수 및 민감한 정보 파일들
+.env
+.env.local
+.env.development
+.env.production
+lib/core/config/keys.dart
+# app_config.dart는 템플릿이므로 커밋 허용
