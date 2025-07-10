@@ -99,7 +99,7 @@ public class AuthTokenService {
             .maxAge(TokenInfo.REFRESH_TOKEN_VALID_TIME / 1000)
             .path("/")
             .secure(true)
-            .httpOnly(true)
+            .httpOnly(false) // cors 관련 필요 설정, TODO: 추후 https 적용 후에 다시 필요한 설정인지 확인해 볼 것
             .sameSite("None")
             .build();
         response.setHeader("Set-Cookie", cookie.toString());
