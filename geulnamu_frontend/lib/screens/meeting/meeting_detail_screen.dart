@@ -159,7 +159,7 @@ class MeetingDetailScreen extends StatelessWidget {
 
                   const SizedBox(height: 30),
 
-                  // 📖 독서급벙
+                  // 📖 독서벙
                   _buildBookClubSection(context),
 
                   const SizedBox(height: 30),
@@ -540,7 +540,7 @@ class MeetingDetailScreen extends StatelessWidget {
     );
   }
 
-  /// 📖 독서급벙 섹션
+  /// 📖 독서벙 섹션
   Widget _buildBookClubSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,7 +554,7 @@ class MeetingDetailScreen extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '독서급벙',
+              '독서벙',
               style: context.textStyles.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: context.colors.secondary,
@@ -638,7 +638,7 @@ class MeetingDetailScreen extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          '현재 독서법 개설은 운영진(혹은 운영진과 협의가 된 자)에 한 해서 열리고 있습니다',
+                          '현재 독서벙 개설은 운영진(혹은 운영진과 협의가 된 자)에 한 해서 열리고 있습니다',
                           style: context.textStyles.bodySmall?.copyWith(
                             color: context.infoColor,
                             height: 1.4,
@@ -656,7 +656,7 @@ class MeetingDetailScreen extends StatelessWidget {
     );
   }
 
-  /// 독서급벙 정보 행 위젯
+  /// 독서벙 정보 행 위젯
   Widget _buildBookClubInfoRow({
     required BuildContext context,
     required IconData icon,
@@ -689,8 +689,8 @@ class MeetingDetailScreen extends StatelessWidget {
   Widget _buildRulesSection(BuildContext context) {
     final rules = [
       '노쇼는 2회시 무통보 강퇴입니다.',
-      '당일 취소 및 당일 참여: 08시 30분 전 댓글에 \'당일 참석\'을 달고 참여하시면 됩니다. 취소는 사유와 함께 취소 여부를 댓글로 남겨주세요.\n(당일 취소 최대한 자제해주세요. 운영진 자제 평가 후 무통보 강퇴처리 될 수 있습니다)',
-      '지각이 잦을 시에, 운영진 면담을 진행합니다. 그 후 여전히 변화 의지가 없다면 강퇴처리 하겠습니다\n*10시 45분까지는 지각이 아닙니다.',
+      '당일 취소 및 당일 참여: 08시 30분 전 댓글에 \'당일 참석\'을 달고 참여하시면 됩니다. 취소는 사유와 함께 취소 여부를 댓글로 남겨주세요.\n(당일 취소 최대한 자제해주세요. 운영진 자체 평가 후 무통보 강퇴처리 될 수 있습니다)',
+      '지각이 잦을 시에, 운영진 면담을 진행합니다. 그 후 여전히 변화 의지가 없다면 강퇴처리 하겠습니다\n(10시 45분까지는 지각이 아닙니다.)',
     ];
 
     return Column(
