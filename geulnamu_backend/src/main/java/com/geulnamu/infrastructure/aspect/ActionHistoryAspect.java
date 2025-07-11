@@ -195,7 +195,7 @@ public class ActionHistoryAspect {
             
             return null;
         } catch (Exception e) {
-            log.warn("멤버 ID 추출 실패", e);
+            log.warn("모임원 ID 추출 실패", e);
             return null;
         }
     }

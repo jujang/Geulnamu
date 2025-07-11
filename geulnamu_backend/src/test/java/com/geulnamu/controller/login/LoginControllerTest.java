@@ -93,7 +93,7 @@ public class LoginControllerTest extends ControllerTest {
                     fieldWithPath("data.memberName").type(JsonFieldType.NUMBER).description("모임원 이름").optional(),
                     fieldWithPath("data.role").type(JsonFieldType.STRING).description("모임원 역할"),
                     fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰 값"),
-                    fieldWithPath("data.newMember").type(JsonFieldType.BOOLEAN).description("멤버 신규 여부")
+                    fieldWithPath("data.newMember").type(JsonFieldType.BOOLEAN).description("모임원 신규 여부")
                 )
             ));
     }

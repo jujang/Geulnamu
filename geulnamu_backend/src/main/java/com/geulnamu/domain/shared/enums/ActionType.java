@@ -12,6 +12,7 @@ public enum ActionType {
     // 모임원 관련
     MEMBER_CREATE("모임원 생성"), // TODO: 임시 기능
     MEMBER_CHECK_PROFILE_STATUS("개인 정보 입력 여부 확인"),
+    MEMBER_MY_VIEW("모임원 조회 - 본인용"),
     MEMBER_VIEW("모임원 조회 - 관리자용"),
     MEMBER_LIST_VIEW("모임원 목록 조회"),
     MEMBER_INFO_UPDATE("개인 정보 수정"),

@@ -39,7 +39,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -90,6 +89,53 @@ public class MemberControllerTest extends ControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "MEMBER")
+    public void findMyInfoTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+
+        MemberInfoResponse memberInfoResponse = new MemberInfoResponse(
+            1L, "나뭉일", Gender.valueOf("MALE"), LocalDate.of(2022, 1, 1), "namu_1", Role.LEADER, LocalDateTime.of(2022, 1, 3, 11, 30, 0)
+        );
+
+        given(memberService.findMember(any())).willReturn(memberInfoResponse);
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                RestDocumentationRequestBuilders.get("/members/me/profile")
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andDo(document(
+                "/members/my/view",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data.memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
+                    fieldWithPath("data.name").type(JsonFieldType.STRING).description("이름"),
+                    fieldWithPath("data.gender").type(JsonFieldType.STRING).description("성별"),
+                    fieldWithPath("data.birthDate").type(JsonFieldType.STRING).description("생년월일"),
+                    fieldWithPath("data.nickname").type(JsonFieldType.STRING).description("닉네임(카카오 닉네임)"),
+                    fieldWithPath("data.role").type(JsonFieldType.STRING).description("권한 등급"),
+                    fieldWithPath("data.deletedAt").type(JsonFieldType.STRING).optional().description("삭제일자 (삭제되지 않은 경우 null)")
+                )
+            ));
+    }
+
+    @Test
     @WithMockUser(roles = "ADMIN")
     public void findMemberTest() throws Exception {
         // given
@@ -128,7 +174,7 @@ public class MemberControllerTest extends ControllerTest {
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
-                    fieldWithPath("data.memberId").type(JsonFieldType.NUMBER).description("멤버 고유번호"),
+                    fieldWithPath("data.memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
                     fieldWithPath("data.name").type(JsonFieldType.STRING).description("이름"),
                     fieldWithPath("data.gender").type(JsonFieldType.STRING).description("성별"),
                     fieldWithPath("data.birthDate").type(JsonFieldType.STRING).description("생년월일"),
@@ -208,7 +254,7 @@ public class MemberControllerTest extends ControllerTest {
                     fieldWithPath("data.pagingResponse.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
                     fieldWithPath("data.pagingResponse.totalElements").type(JsonFieldType.NUMBER).description("전체 데이터 수"),
                     fieldWithPath("data.memberList[]").type(JsonFieldType.ARRAY).description("데이터 정보"),
-                    fieldWithPath("data.memberList[].memberId").type(JsonFieldType.NUMBER).description("멤버 고유번호"),
+                    fieldWithPath("data.memberList[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
                     fieldWithPath("data.memberList[].name").type(JsonFieldType.STRING).description("이름"),
                     fieldWithPath("data.memberList[].gender").type(JsonFieldType.STRING).description("성별"),
                     fieldWithPath("data.memberList[].birthDate").type(JsonFieldType.STRING).description("생년월일"),

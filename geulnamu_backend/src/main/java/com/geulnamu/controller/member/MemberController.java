@@ -41,9 +41,17 @@ public class MemberController {
         return BaseResponse.ofSuccess(response);
     }
 
+    @ErrorLogAction(value = ActionType.MEMBER_MY_VIEW, actionDomain = DomainType.MEMBER)
+    @AccessLevel(Level.MEMBER)
+    @GetMapping(value = "/me/profile", name = "본인 정보 조회")
+    public BaseResponse<MemberInfoResponse> findMyInfo(@AuthMemberId Long memberId) {
+        MemberInfoResponse response = memberService.findMember(memberId);
+        return BaseResponse.ofSuccess(response);
+    }
+
     @ErrorLogAction(value = ActionType.MEMBER_VIEW, actionDomain = DomainType.MEMBER)
     @AccessLevel(Level.ADMIN)
-    @GetMapping(value = "/{memberId}", name = "모임원 조회")
+    @GetMapping(value = "/{memberId}", name = "모임원 정보 조회")
     public BaseResponse<MemberInfoResponse> findMember(@PathVariable @Min(value = 1) Long memberId) {
         MemberInfoResponse response = memberService.findMember(memberId);
         return BaseResponse.ofSuccess(response);
@@ -51,7 +59,7 @@ public class MemberController {
 
     @ErrorLogAction(value = ActionType.MEMBER_LIST_VIEW, actionDomain = DomainType.MEMBER)
     @AccessLevel(Level.STAFF)
-    @GetMapping(value = "/list", name = "모임원 목록 조회")
+    @GetMapping(value = "/list", name = "모임원 정보 목록 조회")
     public BaseResponse<MemberListResponse> getMembers(@Valid MemberListRequest request) {
         MemberListResponse response = memberService.getMembers(request);
         return BaseResponse.ofSuccess(response);
