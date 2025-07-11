@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../services/home/home_route_service.dart';
+import '../../../providers/auth_provider.dart';
 
 /// RouteAware 기능을 담당하는 mixin
 /// 
@@ -34,6 +36,9 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
     super.didPush();
     debugPrint('🏠 [RouteAwareMixin] 화면 진입 감지');
     _routeService.onPush();
+    
+    // 개인정보 상태 확인 (로그인 상태에서만)
+    _checkProfileStatusOnScreenEnter();
   }
 
   @override
@@ -48,6 +53,9 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
     super.didPopNext();
     debugPrint('🔄 [RouteAwareMixin] 화면 복귀 감지');
     _routeService.onPopNext(context);
+    
+    // 개인정보 상태 확인 (로그인 상태에서만)
+    _checkProfileStatusOnScreenEnter();
   }
 
   @override
@@ -55,5 +63,26 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
     super.didPop();
     debugPrint('🚪 [RouteAwareMixin] 화면 종료 감지');
     _routeService.onPop();
+  }
+
+  // 🔍 개인정보 상태 확인 (화면 진입/복귀 시)
+  void _checkProfileStatusOnScreenEnter() {
+    // 비동기로 실행하여 UI 블록킹 방지
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        
+        // 로그인 상태에서만 실행
+        if (authProvider.isAuthenticated) {
+          debugPrint('🔍 [RouteAwareMixin] 개인정보 상태 확인 시작');
+          await authProvider.checkProfileStatus();
+        } else {
+          debugPrint('🔍 [RouteAwareMixin] 비로그인 상태 - 개인정보 확인 스킵');
+        }
+      } catch (e) {
+        debugPrint('❌ [RouteAwareMixin] 개인정보 상태 확인 오류: $e');
+        // 오류가 발생해도 UI에 영향주지 않음
+      }
+    });
   }
 }

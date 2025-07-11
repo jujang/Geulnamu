@@ -55,4 +55,10 @@ mixin HomeLogicMixin<T extends StatefulWidget> on State<T> {
     debugPrint('🎯 [HomeLogicMixin] PWA 설치 안내');
     _homeService.showInstallInstructions(context);
   }
+
+  // 🔍 개인정보 입력 화면으로 이동
+  void navigateToProfileInput() {
+    debugPrint('🔍 [HomeLogicMixin] 개인정보 입력 화면으로 이동');
+    _homeService.navigateToProfileInput(context);
+  }
 }

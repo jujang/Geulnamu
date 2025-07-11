@@ -15,8 +15,9 @@ class HomeWidgets {
   // 🎯 동적 환영 카드 - 로그인 상태에 따라 메시지 변경
   static Widget buildDynamicWelcomeCard(
     BuildContext context,
-    AuthProvider authProvider,
-  ) {
+    AuthProvider authProvider, {
+    VoidCallback? onProfileInputTap, // 개인정보 입력 버튼 클릭 핸들러
+  }) {
     if (authProvider.isAuthenticated) {
       // 로그인 후: 개인화된 환영 메시지
       return Card(
@@ -51,6 +52,18 @@ class HomeWidgets {
                     color: context.colors.onPrimary.withOpacity(0.7),
                   ),
                 ),
+              ],
+              
+              // 개인정보 입력 버튼 (필요한 경우에만 표시)
+              if (authProvider.needsProfile) ...[
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: onProfileInputTap,
+                  child: _buildProfileInputButton(context),
+                ),
+              ] else if (authProvider.profileStatusUnknown) ...[
+                const SizedBox(height: 16),
+                _buildProfileStatusLoading(context),
               ],
             ],
           ),
@@ -264,6 +277,102 @@ class HomeWidgets {
         ),
       ],
       onSelected: onMenuSelection,
+    );
+  }
+
+  // 🔍 개인정보 입력 버튼
+  static Widget _buildProfileInputButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.colors.surface.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: context.colors.onPrimary.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: context.colors.surface.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.person_add_outlined,
+              size: 20,
+              color: context.colors.onPrimary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '개인정보 입력하기',
+                  style: context.textStyles.bodyMedium?.copyWith(
+                    color: context.colors.onPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '사용자 이름 등 기본 정보를 입력해주세요',
+                  style: context.textStyles.bodySmall?.copyWith(
+                    color: context.colors.onPrimary.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: context.colors.onPrimary.withOpacity(0.7),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 🔄 개인정보 상태 로딩
+  static Widget _buildProfileStatusLoading(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.colors.surface.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: context.colors.onPrimary.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                context.colors.onPrimary.withOpacity(0.7),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            '개인정보 상태 확인 중...',
+            style: context.textStyles.bodyMedium?.copyWith(
+              color: context.colors.onPrimary.withOpacity(0.8),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

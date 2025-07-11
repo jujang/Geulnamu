@@ -98,7 +98,11 @@ class _HomeScreenState extends State<HomeScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 🎯 동적 환영 카드 (Static Method 사용)
-                      HomeWidgets.buildDynamicWelcomeCard(context, authProvider),
+                      HomeWidgets.buildDynamicWelcomeCard(
+                        context, 
+                        authProvider,
+                        onProfileInputTap: navigateToProfileInput, // 개인정보 입력 버튼 핸들러
+                      ),
                       const SizedBox(height: 24),
 
                       // 🎯 통일된 빠른 메뉴 (Static Method 사용)
