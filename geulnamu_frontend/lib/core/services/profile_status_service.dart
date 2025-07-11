@@ -3,49 +3,44 @@ import '../config/app_config.dart';
 import '../utils/api_utils.dart';
 
 /// 🔧 개인정보 상태 확인 서비스 (스마트 캐싱 + 강제 로그아웃 감지)
-/// 
+///
 /// 개선된 버전: 토큰을 파라미터로 받아서 더 유연하게 사용 + HTTP 캐싱 비활성화
 class ProfileStatusService {
-  static final ProfileStatusService _instance = ProfileStatusService._internal();
+  static final ProfileStatusService _instance =
+      ProfileStatusService._internal();
   factory ProfileStatusService() => _instance;
   ProfileStatusService._internal() {
     _setupDio(); // 🔧 Dio 초기 설정
   }
 
   late final Dio _dio;
-  
+
   // 🕒 캐싱 관련 변수들
   bool? _cachedProfileStatus;
   DateTime? _lastFetchTime;
-  static const Duration _cacheExpiryDuration = Duration(minutes: 5);
+  static const Duration _cacheExpiryDuration = Duration(
+    minutes: 1,
+  ); // 테스트 용으로 1분으로 사용, TODO: 실 운용시 5분으로 복구할 것
 
   /// 🔧 Dio 초기 설정 - HTTP 캐싱 완전 비활성화
   void _setupDio() {
     _dio = Dio();
-    
+
     // 🚫 HTTP 캐싱 완전 비활성화 설정
     _dio.options.headers.addAll({
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0',
     });
-    
-    // 🔍 디버깅용 인터셉터 추가
+
+    // 🔍 디버깅용 인터셉터 추가 (에러만 로깅)
     if (AppConfig.debugMode) {
       _dio.interceptors.add(
         InterceptorsWrapper(
-          onRequest: (options, handler) {
-            print('🌐 [ProfileStatusService] 실제 HTTP 요청 시작');
-            print('🔗 URL: ${options.uri}');
-            print('📤 Headers: ${options.headers}');
-            handler.next(options);
-          },
-          onResponse: (response, handler) {
-            print('📨 [ProfileStatusService] HTTP 응답 수신: ${response.statusCode}');
-            handler.next(response);
-          },
           onError: (error, handler) {
-            print('❌ [ProfileStatusService] HTTP 오류: ${error.type} - ${error.message}');
+            print(
+              '❌ [ProfileStatusService] HTTP 오류: ${error.type} - ${error.message}',
+            );
             handler.next(error);
           },
         ),
@@ -54,11 +49,11 @@ class ProfileStatusService {
   }
 
   /// 🎯 개인정보 상태 확인 (스마트 캐싱) - 개선된 버전
-  /// 
+  ///
   /// [accessToken]: JWT 액세스 토큰
   /// [forceRefresh]: 캐시 무시하고 강제 새로고침
-  /// [onAutoLogout]: 401 오류 시 호출될 콜백 함수
-  /// 
+  /// [onAutoLogout]: 401 오류 시 호출될 즉시 실행 콜백 함수
+  ///
   /// 반환값:
   /// - true: 개인정보 입력 완료
   /// - false: 개인정보 미입력
@@ -66,7 +61,7 @@ class ProfileStatusService {
   Future<bool?> checkProfileStatus({
     required String accessToken,
     bool forceRefresh = false,
-    required Function() onAutoLogout,
+    required void Function() onAutoLogout,
   }) async {
     // 🔄 캐시 유효성 검사
     if (!forceRefresh && _isCacheValid()) {
@@ -79,8 +74,7 @@ class ProfileStatusService {
     // 🚀 API 호출
     try {
       if (AppConfig.debugMode) {
-        print('🚀 [개인정보 상태 확인] API 요청 시작... (캐시 만료 또는 강제 새로고침)');
-        print('🔗 [개인정보 상태 확인] 요청 URL: ${AppConfig.getApiEndpoint('members/me/profile-status')}');
+        print('🔍 [개인정보 상태 확인] API 호출 시작...');
       }
 
       final response = await _dio.get(
@@ -97,51 +91,89 @@ class ProfileStatusService {
           },
         ),
         // 🚫 쿼리 파라미터로도 캐싱 방지
-        queryParameters: {
-          '_t': DateTime.now().millisecondsSinceEpoch,
-        },
+        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch},
       );
 
       if (AppConfig.debugMode) {
-        print('📨 [개인정보 상태 확인] HTTP 응답 수신 완료: ${response.statusCode}');
+        print('📨 === [개인정보 상태 확인] HTTP 응답 수신 ===');
+        print('📈 [개인정보 상태 확인] 상태 코드: ${response.statusCode}');
+        print('📝 [개인정보 상태 확인] 응답 데이터: ${response.data}');
       }
 
       if (response.statusCode == 200) {
         // ✅ 성공: 백엔드 응답 처리
         final processedResponse = ApiUtils.processBackendResponse(
           response,
-          '개인정보 상태 확인'
+          '개인정보 상태 확인',
         );
 
         final profileStatus = processedResponse['data'] as bool;
-        
+
         // 캐시 업데이트
         _updateCache(profileStatus);
-        
+
         if (AppConfig.debugMode) {
           print('✅ [개인정보 상태 확인] 성공 - 상태: $profileStatus');
         }
-        
+
         return profileStatus;
       } else {
         throw Exception('[개인정보 상태 확인] HTTP 오류: ${response.statusCode}');
       }
     } catch (e) {
       if (e is DioException) {
-        // 🚨 401 오류 감지: 강제 로그아웃 처리
+        // 🚨 HTTP 401 오류 감지: 강제 로그아웃 처리
         if (e.response?.statusCode == 401) {
-          await _handleForceLogout(e, onAutoLogout);
+          if (AppConfig.debugMode) {
+            print('🚨 === [개인정보 상태 확인] HTTP 401 오류 감지 ===');
+            print('📝 [개인정보 상태 확인] HTTP 상태: ${e.response?.statusCode}');
+            print('📝 [개인정보 상태 확인] 응답 데이터: ${e.response?.data}');
+            print('📝 [개인정보 상태 확인] 에러 타입: ${e.type}');
+            print('📝 [개인정보 상태 확인] 에러 메시지: ${e.message}');
+          }
+          _handleForceLogout(e, onAutoLogout);
           return null; // 로그아웃 처리됨
         } else {
           // 다른 네트워크 오류
           throw ApiUtils.processDioException(e, '개인정보 상태 확인');
         }
       } else {
-        // 기타 오류
+        // 🚨 ApiUtils에서 던진 Exception (백엔드 비즈니스 코드 401 포함) 처리
+        final errorString = e.toString().toLowerCase();
+
         if (AppConfig.debugMode) {
-          print('❌ [개인정보 상태 확인] 예상치 못한 오류: $e');
+          print('🚨 === [개인정보 상태 확인] ApiUtils Exception 감지 ===');
+          print('📝 [개인정보 상태 확인] Exception 내용: $e');
+          print('📝 [개인정보 상태 확인] 에러 문자열: $errorString');
         }
-        rethrow;
+
+        // 백엔드 비즈니스 코드 401 또는 인증 관련 에러 감지
+        if (_isBackendAuthError(e)) {
+          if (AppConfig.debugMode) {
+            print('🚨 [개인정보 상태 확인] 백엔드 인증 에러 감지 - 강제 로그아웃 처리');
+          }
+
+          // DioException이 아닌 경우를 위한 더미 DioException 생성
+          final dummyDioException = DioException(
+            requestOptions: RequestOptions(path: ''),
+            response: Response(
+              requestOptions: RequestOptions(path: ''),
+              statusCode: 401,
+              data: {'message': e.toString()},
+            ),
+            type: DioExceptionType.badResponse,
+            message: e.toString(),
+          );
+
+          _handleForceLogout(dummyDioException, onAutoLogout);
+          return null; // 로그아웃 처리됨
+        } else {
+          // 다른 일반 오류
+          if (AppConfig.debugMode) {
+            print('❌ [개인정보 상태 확인] 예상치 못한 오류: $e');
+          }
+          rethrow;
+        }
       }
     }
   }
@@ -151,15 +183,18 @@ class ProfileStatusService {
     if (_cachedProfileStatus == null || _lastFetchTime == null) {
       return false;
     }
-    
+
     final now = DateTime.now();
     final isValid = now.difference(_lastFetchTime!) < _cacheExpiryDuration;
-    
+
     if (AppConfig.debugMode) {
-      final remainingTime = _cacheExpiryDuration - now.difference(_lastFetchTime!);
-      print('⏰ [개인정보 상태 확인] 캐시 유효성: $isValid (남은 시간: ${remainingTime.inMinutes}분 ${remainingTime.inSeconds % 60}초)');
+      final remainingTime =
+          _cacheExpiryDuration - now.difference(_lastFetchTime!);
+      print(
+        '⏰ [개인정보 상태 확인] 캐시 유효성: $isValid (남은 시간: ${remainingTime.inMinutes}분 ${remainingTime.inSeconds % 60}초)',
+      );
     }
-    
+
     return isValid;
   }
 
@@ -167,52 +202,51 @@ class ProfileStatusService {
   void _updateCache(bool profileStatus) {
     _cachedProfileStatus = profileStatus;
     _lastFetchTime = DateTime.now();
-    
-    if (AppConfig.debugMode) {
-      print('💾 [개인정보 상태 확인] 캐시 업데이트: $profileStatus (${_lastFetchTime})');
-    }
   }
 
   /// 🚨 강제 로그아웃 처리
-  Future<void> _handleForceLogout(
-    DioException e,
-    Function() onAutoLogout,
-  ) async {
+  void _handleForceLogout(DioException e, void Function() onAutoLogout) {
     if (AppConfig.debugMode) {
-      print('🚨 [개인정보 상태 확인] 401 오류 감지 - 강제 로그아웃 처리 시작');
+      print('🚨 === [개인정보 상태 확인] 강제 로그아웃 처리 시작 ===');
+      print('🔍 [강제 로그아웃] HTTP 상태: ${e.response?.statusCode}');
+      print('🔍 [강제 로그아웃] 에러 타입: ${e.type}');
     }
 
     // 백엔드 에러 메시지 추출
     String logoutReason = '인증이 만료되었습니다';
-    
+
     if (e.response?.data != null && e.response!.data is Map) {
       final backendMessage = e.response!.data['message']?.toString();
       if (backendMessage != null && backendMessage.isNotEmpty) {
         logoutReason = backendMessage;
-        
+
         if (AppConfig.debugMode) {
-          print('📝 [개인정보 상태 확인] 백엔드 메시지: $backendMessage');
+          print('📝 [강제 로그아웃] 백엔드 메시지: $backendMessage');
         }
       }
     }
 
     // 캐시 초기화
     _clearCache();
-    
-    // 콜백을 통한 자동 로그아웃 처리
+    if (AppConfig.debugMode) {
+      print('✅ [강제 로그아웃] 캐시 초기화 완료');
+    }
+
+    // 콜백을 통한 자동 로그아웃 처리 (즉시 실행)
     try {
       if (AppConfig.debugMode) {
-        print('🔄 [개인정보 상태 확인] 자동 로그아웃 콜백 실행');
+        print('🔄 [강제 로그아웃] AuthProvider 콜백 실행 시작');
       }
-      
-      onAutoLogout();
-      
+
+      onAutoLogout(); // 🎯 즉시 실행: 대기 시간 없이 바로 로그아웃
+
       if (AppConfig.debugMode) {
-        print('✅ [개인정보 상태 확인] 자동 로그아웃 완료: $logoutReason');
+        print('✅ [강제 로그아웃] AuthProvider 콜백 실행 완료');
+        print('✅ === [강제 로그아웃] 전체 처리 완료: $logoutReason ===');
       }
     } catch (logoutError) {
       if (AppConfig.debugMode) {
-        print('❌ [개인정보 상태 확인] 자동 로그아웃 처리 중 오류: $logoutError');
+        print('❌ [강제 로그아웃] AuthProvider 콜백 실행 중 오류: $logoutError');
       }
     }
   }
@@ -221,7 +255,7 @@ class ProfileStatusService {
   void _clearCache() {
     _cachedProfileStatus = null;
     _lastFetchTime = null;
-    
+
     if (AppConfig.debugMode) {
       print('🧹 [개인정보 상태 확인] 캐시 초기화 완료');
     }
@@ -230,7 +264,7 @@ class ProfileStatusService {
   /// 🎯 수동 캐시 무효화 (프로필 수정 완료 시 호출)
   void invalidateCache() {
     _clearCache();
-    
+
     if (AppConfig.debugMode) {
       print('🔄 [개인정보 상태 확인] 수동 캐시 무효화');
     }
@@ -242,20 +276,66 @@ class ProfileStatusService {
       'cachedStatus': _cachedProfileStatus,
       'lastFetchTime': _lastFetchTime?.toIso8601String(),
       'isValid': _isCacheValid(),
-      'cacheExpiry': _lastFetchTime?.add(_cacheExpiryDuration).toIso8601String(),
-      'remainingMinutes': _lastFetchTime != null 
-          ? (_cacheExpiryDuration - DateTime.now().difference(_lastFetchTime!)).inMinutes
+      'cacheExpiry': _lastFetchTime
+          ?.add(_cacheExpiryDuration)
+          .toIso8601String(),
+      'remainingMinutes': _lastFetchTime != null
+          ? (_cacheExpiryDuration - DateTime.now().difference(_lastFetchTime!))
+                .inMinutes
           : null,
     };
   }
 
+  /// 🔍 백엔드 인증 에러 여부 정확히 감지
+  ///
+  /// ApiUtils에서 던진 Exception을 기반으로 백엔드 인증 에러를 판단
+  /// 예상 예외: "Exception: [개인정보 상태 확인] 백엔드 오류 (401): 리프레시 토큰이 유효하지 않습니다..."
+  bool _isBackendAuthError(dynamic error) {
+    try {
+      final errorString = error.toString();
+
+      // 🎯 우선: 백엔드 오류 코드 401 정확히 감지
+      final backendErrorPattern = RegExp(r'백엔드 오류 \((\d+)\):');
+      final match = backendErrorPattern.firstMatch(errorString);
+
+      if (match != null) {
+        final errorCode = int.tryParse(match.group(1) ?? '');
+        if (errorCode == 401) {
+          if (AppConfig.debugMode) {
+            print('🎯 [ProfileStatusService] 백엔드 401 에러 코드 감지');
+          }
+          return true;
+        }
+      }
+
+      // 🔄 폴백: 인증 관련 키워드 검색
+      final lowerError = errorString.toLowerCase();
+      if (lowerError.contains('백엔드 오류 (401)') ||
+          lowerError.contains('인증') ||
+          lowerError.contains('토큰') ||
+          lowerError.contains('만료') ||
+          lowerError.contains('unauthorized') ||
+          lowerError.contains('token')) {
+        if (AppConfig.debugMode) {
+          print('🔄 [ProfileStatusService] 인증 관련 키워드 감지');
+        }
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      // 파싱 오류 시 안전하게 false 반환
+      return false;
+    }
+  }
+
   /// 🎯 편의 메서드: 간단한 사용을 위한 래퍼
-  /// 
+  ///
   /// 이 메서드는 AuthProvider에서 직접 호출하기 편리합니다
   static Future<bool?> checkStatus({
     required String accessToken,
     bool forceRefresh = false,
-    required Function() onAutoLogout,
+    required void Function() onAutoLogout,
   }) async {
     return await ProfileStatusService().checkProfileStatus(
       accessToken: accessToken,

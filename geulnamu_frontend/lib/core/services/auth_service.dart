@@ -704,6 +704,23 @@ class AuthService {
     return userInfo?['memberName'];
   }
 
+  /// 🗑️ 로컬 인증 데이터만 삭제 (백엔드 API 호출 없이)
+  /// 
+  /// 강제 로그아웃 시 사용 - 토큰이 이미 만료된 상황에서 로컬 데이터만 정리
+  Future<void> clearLocalAuthData() async {
+    try {
+      await _clearAuthData();
+      if (AppConfig.debugMode) {
+        print('🗑️ 로컬 인증 데이터 삭제 완료 (백엔드 호출 없이)');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ 로컬 인증 데이터 삭제 중 오류: $e');
+      }
+      rethrow;
+    }
+  }
+
   /// 🔍 디버그용 - 저장된 인증 정보 출력
   Future<void> printStoredInfo() async {
     if (AppConfig.debugMode) {

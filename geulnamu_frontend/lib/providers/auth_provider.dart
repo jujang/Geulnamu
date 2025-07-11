@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../core/services/auth_service.dart';
 import '../core/services/profile_status_service.dart';
+import '../core/config/app_config.dart'; // 🎯 AppConfig import
+import '../main.dart'; // 🎯 global navigatorKey import
 
 enum AuthStatus {
   uninitialized,
@@ -200,12 +202,117 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// 디버그용 - 강제 로그아웃
+  /// 🚨 강제 로그아웃 (즉시 처리)
+  /// 
+  /// 토큰 만료 등으로 인한 자동 로그아웃 시 사용
+  /// 백엔드 API 호출 없이 로컬 데이터만 즉시 삭제
+  void _forceLogoutWithoutContext() {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚨 [AuthProvider] 강제 로그아웃 시작');
+      }
+      
+      _setStatus(AuthStatus.loading);
+      
+      // 🎯 로컬 데이터 즉시 삭제
+      _userInfo = null;
+      _profileCompleted = null;
+      _setStatus(AuthStatus.unauthenticated);
+      _clearError();
+      
+      // 🔥 SharedPreferences 삭제는 백그라운드에서 처리 (Fire-and-Forget)
+      _authService.clearLocalAuthData().catchError((e) {
+        if (AppConfig.debugMode) {
+          print('⚠️ [AuthProvider] 로컬 데이터 삭제 중 오류: $e');
+        }
+      });
+      
+      // 📢 사용자에게 로그아웃 알림 다이얼로그 표시 (비동기)
+      _showLogoutNotificationDialog();
+      
+      if (AppConfig.debugMode) {
+        print('✅ [AuthProvider] 강제 로그아웃 완료');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [AuthProvider] 강제 로그아웃 오류: $e');
+      }
+      // 오류가 발생해도 로컬 데이터는 반드시 삭제
+      _userInfo = null;
+      _profileCompleted = null;
+      _setStatus(AuthStatus.unauthenticated);
+    }
+  }
+
+  /// 📢 강제 로그아웃 알림 다이얼로그 표시
+  /// 
+  /// Global NavigatorKey를 사용하여 어디서나 다이얼로그 표시 가능
+  void _showLogoutNotificationDialog() {
+    // 비동기로 실행하여 강제 로그아웃 프로세스를 블록하지 않음
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        final context = navigatorKey.currentContext; // 🎯 Global Navigator Key 사용
+        
+        if (context != null) {
+          showDialog(
+            context: context,
+            barrierDismissible: false, // 사용자가 배경 탭으로 닫을 수 없도록
+            builder: (BuildContext dialogContext) {
+              return AlertDialog(
+                title: Row(
+                  children: [
+                    Icon(
+                      Icons.logout,
+                      color: Theme.of(dialogContext).colorScheme.error,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '자동 로그아웃',
+                      style: TextStyle(
+                        color: Theme.of(dialogContext).colorScheme.error,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                content: const Text(
+                  '로그인 세션이 만료되어 자동으로 로그아웃되었습니다.\n다시 로그인해 주세요.',
+                  style: TextStyle(fontSize: 16),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                    },
+                    child: Text(
+                      '확인',
+                      style: TextStyle(
+                        color: Theme.of(dialogContext).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } catch (e) {
+        if (AppConfig.debugMode) {
+          print('❌ [강제 로그아웃] 다이얼로그 표시 중 오류: $e');
+        }
+        // 다이얼로그 실패해도 로그아웃은 이미 완료된 상태이므로 무시
+      }
+    });
+  }
+
+  /// 🔧 디버그용 - 강제 로그아웃
   void forceLogout() {
     _userInfo = null;
     _profileCompleted = null; // 개인정보 상태 초기화
     _setStatus(AuthStatus.unauthenticated);
-    print('🔧 강제 로그아웃 완료');
+    print('🔧 디버그용 강제 로그아웃 완료');
   }
 
   /// 디버그용 - 개인정보 상태 강제 설정
@@ -232,13 +339,17 @@ class AuthProvider with ChangeNotifier {
       }
 
       print('🔍 [개인정보 상태 확인] API 호출 시작...');
+      print('🔑 [개인정보 상태 확인] 액세스 토큰: ${accessToken.substring(0, 20)}...');
       
       final profileStatus = await _profileStatusService.checkProfileStatus(
         accessToken: accessToken,
         forceRefresh: forceRefresh,
-        onAutoLogout: () async {
-          print('🚨 [개인정보 상태 확인] 자동 로그아웃 처리');
-          await logout(); // AuthProvider의 로그아웃 메서드 호출
+        onAutoLogout: () {
+          print('🚨 === [개인정보 상태 확인] 자동 로그아웃 콜백 호출 ===');
+          print('🔍 [자동 로그아웃] 현재 AuthProvider 상태: $_status');
+          print('🔍 [자동 로그아웃] 사용자 정보: ${_userInfo != null ? '있음' : '없음'}');
+          _forceLogoutWithoutContext(); // 즉시 실행
+          print('✅ [자동 로그아웃] 강제 로그아웃 콜백 완료');
         },
       );
 
@@ -252,7 +363,20 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e) {
       print('❌ [개인정보 상태 확인] 오류: $e');
-      // 오류 시에도 상태를 업데이트하지 않음 (기존 캠시 유지)
+      
+      // 🎯 인증 관련 에러는 다시 throw 하여 상위에서 처리
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('401') || 
+          errorString.contains('인증') || 
+          errorString.contains('만료') ||
+          errorString.contains('unauthorized') ||
+          errorString.contains('token')) {
+        print('🚨 [개인정보 상태 확인] 인증 관련 에러 감지 - 다시 throw');
+        rethrow; // RouteAwareMixin에서 처리하도록
+      }
+      
+      // 다른 에러들은 조용히 처리
+      // 오류 시에도 상태를 업데이트하지 않음 (기존 캐시 유지)
     }
   }
 

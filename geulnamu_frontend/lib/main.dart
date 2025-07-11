@@ -16,6 +16,9 @@ import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 
+// 🎯 Global Navigator Key - 전역에서 접근 가능
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   // Flutter 바인딩 초기화
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +51,7 @@ class GeulnamuApp extends StatelessWidget {
         // 추후 다른 Provider들 추가 가능
       ],
       child: MaterialApp(
+        navigatorKey: navigatorKey,  // 🎯 Global Navigator Key 설정
         title: '글나무 - 독서 토론 커뮤니티',
         debugShowCheckedModeBanner: false,
 
