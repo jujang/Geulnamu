@@ -27,7 +27,7 @@ class MeetingDetailScreen extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: false, // 🎯 제목을 왼쪽 정렬로 변경
               titlePadding: const EdgeInsets.only(
-                left: 48,
+                left: 44,
                 bottom: 16,
               ), // 🎯 뒤로가기 버튼 간격 고려
               title: Text(
@@ -90,7 +90,7 @@ class MeetingDetailScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            '독서 토론 모임',
+                            '독서 토론 모임 - 글나무',
                             style: context.textStyles.headlineMedium?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

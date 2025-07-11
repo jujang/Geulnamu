@@ -1,11 +1,37 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
 import 'dart:html' as html show document;
 import '../config/app_config.dart';
+import '../../widgets/common/error_dialog.dart';
 
 /// 🔧 백엔드 API 통합 처리 유틸리티
 /// 모든 서비스에서 백엔드 커스텀 응답 구조와 에러 처리를 일관되게 처리
 class ApiUtils {
+  // ⏰ API 타임아웃 설정 (초 단위)
+  static const int connectionTimeoutSeconds = 5;
+  static const int receiveTimeoutSeconds = 3;  // 적절한 사용자 경험을 위한 3초 설정
+  static const int sendTimeoutSeconds = 5;
+
+  /// 🔧 타임아웃이 설정된 Dio 인스턴스 생성
+  static Dio createDioWithTimeout({
+    String? baseUrl,
+    Map<String, String>? headers,
+  }) {
+    final dio = Dio(BaseOptions(
+      baseUrl: baseUrl ?? AppConfig.apiBaseUrl,
+      connectTimeout: Duration(seconds: connectionTimeoutSeconds),
+      receiveTimeout: Duration(seconds: receiveTimeoutSeconds),
+      sendTimeout: Duration(seconds: sendTimeoutSeconds),
+      headers: headers,
+    ));
+
+    if (AppConfig.debugMode) {
+      print('🔧 [ApiUtils] Dio 인스턴스 생성 완료 (타임아웃: 연결=${connectionTimeoutSeconds}초, 수신=${receiveTimeoutSeconds}초)');
+    }
+
+    return dio;
+  }
   /// 🔧 백엔드 커스텀 응답 구조 통합 처리 메서드
   static Map<String, dynamic> processBackendResponse(
     Response response, 
@@ -50,17 +76,40 @@ class ApiUtils {
     }
   }
 
-  /// 통합 DioException 처리 메서드
-  static Exception processDioException(DioException e, String apiName) {
+  /// 통합 DioException 처리 메서드 (에러 다이얼로그 포함)
+  static Exception processDioException(
+    DioException e, 
+    String apiName, {
+    BuildContext? context,
+    bool showDialog = true,
+  }) {
     if (AppConfig.debugMode) {
       print('❌ [$apiName] API 요청 오류: $e');
     }
 
+    Exception resultException;
+    
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return Exception('[$apiName] 서버 연결 시간이 초과되었습니다.');
+        if (AppConfig.debugMode) {
+          print('⏰ [$apiName] 타임아웃 에러 발생! 유형: ${e.type}');
+          print('📊 [$apiName] 요청 시간: ${e.requestOptions.connectTimeout}');
+          print('📊 [$apiName] 수신 시간: ${e.requestOptions.receiveTimeout}');
+        }
+        resultException = Exception('[$apiName] 서버 연결 시간이 초과되었습니다.');
+        if (context != null && showDialog) {
+          if (AppConfig.debugMode) {
+            print('📦 [$apiName] 타임아웃 다이얼로그 표시 시도...');
+          }
+          ErrorDialog.showTimeoutError(context);
+        } else {
+          if (AppConfig.debugMode) {
+            print('⚠️ [$apiName] 다이얼로그 표시 안함: context=${context != null}, showDialog=$showDialog');
+          }
+        }
+        break;
         
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode ?? 0;
@@ -86,22 +135,44 @@ class ApiUtils {
             message = backendMessage;
           }
           
-          return Exception('[$apiName] 백엔드 오류 (HTTP: $statusCode, 코드: $backendCode): $message');
+          resultException = Exception('[$apiName] 백엔드 오류 (HTTP: $statusCode, 코드: $backendCode): $message');
         } else if (responseData is String) {
           message = responseData;
+          resultException = Exception('[$apiName] 서버 오류 ($statusCode): $message');
+        } else {
+          resultException = Exception('[$apiName] 서버 오류 ($statusCode): $message');
         }
         
-        return Exception('[$apiName] 서버 오류 ($statusCode): $message');
+        if (context != null && showDialog) {
+          ErrorDialog.showServerError(
+            context,
+            customMessage: message,
+            errorCode: '$statusCode - $apiName',
+          );
+        }
+        break;
         
       case DioExceptionType.connectionError:
-        return Exception('[$apiName] 서버에 연결할 수 없습니다.');
+        resultException = Exception('[$apiName] 서버에 연결할 수 없습니다.');
+        if (context != null && showDialog) {
+          ErrorDialog.showNetworkError(context);
+        }
+        break;
         
       case DioExceptionType.cancel:
-        return Exception('[$apiName] 요청이 취소되었습니다.');
+        resultException = Exception('[$apiName] 요청이 취소되었습니다.');
+        // 취소는 사용자 의도이므로 다이얼로그 표시 안함
+        break;
         
       default:
-        return Exception('[$apiName] 네트워크 오류가 발생했습니다: ${e.message ?? '알 수 없는 오류'}');
+        resultException = Exception('[$apiName] 네트워크 오류가 발생했습니다: ${e.message ?? '알 수 없는 오류'}');
+        if (context != null && showDialog) {
+          ErrorDialog.showErrorFromException(context, resultException, apiName: apiName);
+        }
+        break;
     }
+    
+    return resultException;
   }
 
   /// RefreshToken 추출 헬퍼 메서드

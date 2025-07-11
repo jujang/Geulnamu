@@ -14,6 +14,10 @@ import 'screens/splash/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 // import 'screens/auth/oauth_callback_screen.dart'; // HTML에서 처리
 import 'screens/home/home_screen.dart';
+import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
+
+// 🎯 Global Navigator Key - 전역에서 접근 가능
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   // Flutter 바인딩 초기화
@@ -47,6 +51,7 @@ class GeulnamuApp extends StatelessWidget {
         // 추후 다른 Provider들 추가 가능
       ],
       child: MaterialApp(
+        navigatorKey: navigatorKey,  // 🎯 Global Navigator Key 설정
         title: '글나무 - 독서 토론 커뮤니티',
         debugShowCheckedModeBanner: false,
 
@@ -55,7 +60,8 @@ class GeulnamuApp extends StatelessWidget {
         darkTheme: GeulnamuTheme.darkTheme,   // 다크 테마 (0F0F0F 배경 + 회색 카드)
         themeMode: ThemeMode.system,          // 시스템 설정에 따라 자동 전환
 
-        // 라우트 설정
+        // 라우트 설정 + RouteObserver 등록
+        navigatorObservers: [HomeRouteService.routeObserver], // 🎯 RouteObserver 등록
         initialRoute: '/splash',
         routes: {
           '/splash': (context) => const SplashScreen(),
