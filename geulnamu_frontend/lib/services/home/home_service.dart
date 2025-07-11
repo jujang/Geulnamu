@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../screens/meeting/meeting_detail_screen.dart';
+import '../../core/enums/permission_level.dart';
+import '../../core/constants/permission_constants.dart';
 
 /// 홈화면 비즈니스 로직을 담당하는 Singleton Service
 ///
 /// 기능:
+/// - 권한 레벨 + 개인정보 이중 체크 시스템
 /// - 메뉴 탭 처리
 /// - 로그아웃 처리
 /// - 프로필 메뉴 선택 처리
@@ -16,34 +19,24 @@ class HomeService {
   factory HomeService() => _instance;
   HomeService._internal();
 
-  // 🎯 메뉴 탭 처리
+  // 🎯 메뉴 탭 처리 (권한 레벨 + 개인정보 이중 체크)
   void handleMenuTap(BuildContext context, String menuTitle) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    if (menuTitle == '모임 소개') {
-      // 🎯 모임 소개 페이지로 이동
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const MeetingDetailScreen()),
-      );
-    } else if (authProvider.isAuthenticated) {
-      // 로그인 후: 실제 기능 사용 (현재는 개발 중 메시지)
-      _showSnackBar(context, '$menuTitle 기능은 개발 중입니다.');
-    } else {
-      // 로그인 전: 로그인 유도
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$menuTitle 기능은 로그인 후 이용할 수 있습니다'),
-          duration: const Duration(seconds: 2),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          action: SnackBarAction(
-            label: '로그인',
-            textColor: Theme.of(context).colorScheme.onPrimary,
-            onPressed: () => navigateToLogin(context),
-          ),
-        ),
-      );
+    // 🔒 종합 접근 가능 체크
+    if (!canAccessFeature(menuTitle, authProvider)) {
+      if (!hasRolePermission(menuTitle, authProvider)) {
+        // 권한 부족
+        _showInsufficientPermissionDialog(context, menuTitle);
+      } else {
+        // 개인정보 입력 필요
+        _showProfileRequiredDialog(context, menuTitle);
+      }
+      return;
     }
+
+    // 정상 메뉴 처리
+    _processMenuAction(context, menuTitle);
   }
 
   // 🎯 프로필 메뉴 선택 처리
@@ -78,8 +71,21 @@ class HomeService {
     }
   }
 
-  // 🎯 모임 만들기 다이얼로그
+  // 🎯 모임 만들기 다이얼로그 (권한 체크 포함)
   void showCreateMeetingDialog(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    // 🔒 종합 접근 가능 체크
+    if (!canAccessFeature('모임 만들기', authProvider)) {
+      if (!hasRolePermission('모임 만들기', authProvider)) {
+        _showInsufficientPermissionDialog(context, '모임 만들기');
+      } else {
+        _showProfileRequiredDialog(context, '모임 만들기');
+      }
+      return;
+    }
+    
+    // 정상 처리 (현재는 개발 중)
     _showSnackBar(context, '모임 만들기 기능은 개발 중입니다.');
   }
 
@@ -198,5 +204,195 @@ class HomeService {
     
     // 나중에 이것으로 대체:
     // Navigator.pushNamed(context, '/profile/input');
+  }
+
+  // 🔒 종합 접근 가능 체크
+  bool canAccessFeature(String feature, AuthProvider authProvider) {
+    return hasRolePermission(feature, authProvider) && 
+           hasProfilePermission(feature, authProvider);
+  }
+
+  // 🔑 권한 레벨 체크
+  bool hasRolePermission(String feature, AuthProvider authProvider) {
+    final requiredLevel = PermissionConstants.getRequiredPermissionLevel(feature);
+    final userLevel = _getUserPermissionLevel(authProvider);
+    return userLevel.hasPermission(requiredLevel);
+  }
+
+  // 📝 개인정보 체크
+  bool hasProfilePermission(String feature, AuthProvider authProvider) {
+    // PermissionConstants의 예외 리스트 사용
+    if (PermissionConstants.isProfileExemptMenu(feature)) {
+      return true;
+    }
+    
+    // 그 외에는 개인정보 입력 필수
+    return authProvider.hasProfile;
+  }
+
+  // 📊 사용자 권한 레벨 결정
+  PermissionLevel _getUserPermissionLevel(AuthProvider authProvider) {
+    if (!authProvider.isAuthenticated) {
+      return PermissionLevel.PUBLIC;
+    }
+    
+    // PermissionConstants를 사용하여 백엔드 role 매핑
+    final role = authProvider.userInfo?['role'] as String?;
+    return PermissionConstants.convertRoleToPermissionLevel(role);
+  }
+
+  // 🛠️ 메뉴 액션 처리
+  void _processMenuAction(BuildContext context, String menuTitle) {
+    switch (menuTitle) {
+      case '모임 소개':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MeetingDetailScreen()),
+        );
+        break;
+      case '개인정보 입력하기':
+        navigateToProfileInput(context);
+        break;
+      default:
+        _showSnackBar(context, '$menuTitle 기능은 개발 중입니다.');
+    }
+  }
+
+  // 🔒 개인정보 입력 요구 다이얼로그
+  void _showProfileRequiredDialog(BuildContext context, String featureName) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.lock_outline,
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            const Text('개인정보 입력 필요'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$featureName 기능을 사용하려면\n기본 개인정보를 먼저 입력해주세요.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '사용자 이름 등 기본 정보만 있으면 됩니다!',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              '나중에',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              navigateToProfileInput(context);
+            },
+            child: const Text('지금 입력하기'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 🚫 권한 부족 다이얼로그
+  void _showInsufficientPermissionDialog(BuildContext context, String featureName) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.security_outlined,
+              color: Theme.of(context).colorScheme.error,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            const Text('접근 권한 부족'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$featureName 기능에 접근할 권한이 없습니다.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.errorContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '로그인이 필요하거나 상위 권한이 요구됩니다.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_header.dart';
 import '../../widgets/common/responsive_container.dart';
 import '../../widgets/home/pwa_install_card.dart';
+import '../../services/home/home_service.dart';
 import 'mixins/home_logic_mixin.dart';
 import 'mixins/route_aware_mixin.dart';
 import 'widgets/home_widgets.dart';
@@ -69,6 +70,12 @@ class _HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
+  // 🔒 모임 만들기 FAB 표시 여부 결정
+  bool _shouldShowCreateMeetingFAB(AuthProvider authProvider) {
+    final homeService = HomeService();
+    return homeService.canAccessFeature('모임 만들기', authProvider);
+  }
+
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
@@ -132,8 +139,8 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
             ),
-            // 🎯 로그인 후에만 FAB 표시
-            floatingActionButton: authProvider.isAuthenticated
+            // 🎯 권한 체크를 통해 FAB 표시 여부 결정
+            floatingActionButton: _shouldShowCreateMeetingFAB(authProvider)
                 ? FloatingActionButton.extended(
                     onPressed: showCreateMeetingDialog, // mixin 메서드 사용
                     label: const Text('모임 만들기'),
