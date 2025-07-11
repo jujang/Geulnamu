@@ -1,0 +1,135 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../core/theme.dart';
+import '../../meeting/meeting_detail_screen.dart';
+import 'route_service.dart';
+
+/// 홈화면 비즈니스 로직 서비스
+/// 
+/// 기능:
+/// - 메뉴 탭 처리
+/// - 프로필 메뉴 처리
+/// - 로그아웃 처리
+/// - 스낵바 표시
+class HomeService {
+  static final _instance = HomeService._internal();
+  factory HomeService() => _instance;
+  HomeService._internal();
+
+  final HomeRouteService _routeService = HomeRouteService();
+
+  // 🎯 이벤트 핸들러들
+
+  void navigateToLogin(BuildContext context) {
+    Navigator.pushNamed(context, '/login');
+  }
+
+  void handleMenuTap(
+    String menuTitle, 
+    AuthProvider authProvider, 
+    BuildContext context,
+  ) {
+    if (menuTitle == '모임 소개') {
+      // 🎯 모임 소개 페이지로 이동
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MeetingDetailScreen(),
+        ),
+      );
+    } else if (authProvider.isAuthenticated) {
+      // 로그인 후: 실제 기능 사용 (현재는 개발 중 메시지)
+      _showSnackBar(context, '$menuTitle 기능은 개발 중입니다.');
+    } else {
+      // 로그인 전: 로그인 유도
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$menuTitle 기능은 로그인 후 이용할 수 있습니다'),
+          duration: const Duration(seconds: 2),
+          backgroundColor: context.colors.primary,
+          action: SnackBarAction(
+            label: '로그인',
+            textColor: context.colors.onPrimary,
+            onPressed: () => navigateToLogin(context),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> handleProfileMenuSelection(
+    String value,
+    AuthProvider authProvider,
+    BuildContext context,
+  ) async {
+    switch (value) {
+      case 'profile':
+        _showSnackBar(context, '프로필 기능은 개발 중입니다.');
+        break;
+      case 'settings':
+        _showSnackBar(context, '설정 기능은 개발 중입니다.');
+        break;
+      case 'logout':
+        await _handleLogout(authProvider, context);
+        break;
+    }
+  }
+
+  void showCreateMeetingDialog(BuildContext context) {
+    _showSnackBar(context, '모임 만들기 기능은 개발 중입니다.');
+  }
+
+  // 🚨 로그아웃 처리
+  Future<void> _handleLogout(AuthProvider authProvider, BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          '로그아웃',
+          style: GoogleFonts.notoSans(fontWeight: FontWeight.w600),
+        ),
+        content: Text('정말 로그아웃하시겠습니까?', style: GoogleFonts.notoSans()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              '취소',
+              style: GoogleFonts.notoSans(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              '로그아웃',
+              style: GoogleFonts.notoSans(color: context.colors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await authProvider.logout();
+      _showSnackBar(context, '로그아웃되었습니다.');
+      
+      // 🔧 로그아웃 시 캐시 체크 시간 초기화
+      _routeService.resetCacheCheckTime();
+    }
+  }
+
+  // 🎯 공통 스낵바 메서드
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: GoogleFonts.notoSans(color: Colors.white),
+        ),
+        backgroundColor: context.colors.inverseSurface,
+      ),
+    );
+  }
+}

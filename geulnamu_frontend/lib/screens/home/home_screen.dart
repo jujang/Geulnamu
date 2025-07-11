@@ -4,9 +4,23 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_header.dart';
 import '../../widgets/common/responsive_container.dart';
 import '../../widgets/home/pwa_install_card.dart';
-import 'home_screen_logic.dart';
-import 'home_screen_widgets.dart';
+import 'mixins/home_logic_mixin.dart';
+import 'mixins/route_aware_mixin.dart';
+import 'widgets/home_widgets.dart';
 
+/// 홈화면 - 완전한 하이브리드 방식
+/// 
+/// 구조:
+/// - StatefulWidget + Mixin 조합 (HomeLogicMixin, RouteAwareMixin)
+/// - Service 클래스 활용 (HomeService, HomeRouteService)
+/// - Static Widgets 사용 (HomeWidgets)
+/// 
+/// 제공 기능:
+/// - 동적 환영 카드 (로그인 상태별)
+/// - 빠른 메뉴 그리드
+/// - 최근 모임 섹션
+/// - PWA 설치 안내
+/// - RouteAware 화면 전환 감지
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,8 +32,9 @@ class _HomeScreenState extends State<HomeScreen>
     with
         TickerProviderStateMixin,
         RouteAware,
-        HomeScreenLogic,
-        HomeScreenWidgets {
+        HomeLogicMixin,
+        RouteAwareMixin {
+  
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -68,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen>
                   : navigateToLogin,
               showLoginButton: !authProvider.isAuthenticated,
               profileWidget: authProvider.isAuthenticated
-                  ? buildProfileMenu(
+                  ? HomeWidgets.buildProfileMenu(
                       context,
                       authProvider,
                       handleProfileMenuSelection,
@@ -82,23 +97,26 @@ class _HomeScreenState extends State<HomeScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 🎯 동적 환영 카드 (로그인 상태에 따라 메시지 변경)
-                      buildDynamicWelcomeCard(context, authProvider),
+                      // 🎯 동적 환영 카드 (Static Method 사용)
+                      HomeWidgets.buildDynamicWelcomeCard(context, authProvider),
                       const SizedBox(height: 24),
 
-                      // 🎯 통일된 빠른 메뉴 (카드 콘텐츠는 요청사항 반영)
-                      buildQuickMenuGrid(context, authProvider, handleMenuTap),
+                      // 🎯 통일된 빠른 메뉴 (Static Method 사용)
+                      HomeWidgets.buildQuickMenuGrid(
+                        context, 
+                        authProvider, 
+                        handleMenuTap, // mixin 메서드 사용
+                      ),
                       const SizedBox(height: 24),
 
                       // 🎯 로그인 상태에 따른 추가 콘텐츠
                       if (authProvider.isAuthenticated) ...[
-                        buildRecentMeetingsSection(context),
+                        HomeWidgets.buildRecentMeetingsSection(context),
                         const SizedBox(height: 24),
                       ] else ...[
                         // PWA 설치 안내 (로그인 전에만 표시)
                         PWAInstallCard(
-                          onInstallPressed: () =>
-                              showInstallInstructions(context),
+                          onInstallPressed: showInstallInstructions, // mixin 메서드 사용
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -113,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen>
             // 🎯 로그인 후에만 FAB 표시
             floatingActionButton: authProvider.isAuthenticated
                 ? FloatingActionButton.extended(
-                    onPressed: showCreateMeetingDialog,
+                    onPressed: showCreateMeetingDialog, // mixin 메서드 사용
                     label: const Text('모임 만들기'),
                     icon: const Icon(Icons.add),
                   )

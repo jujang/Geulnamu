@@ -14,7 +14,7 @@ import 'screens/splash/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 // import 'screens/auth/oauth_callback_screen.dart'; // HTML에서 처리
 import 'screens/home/home_screen.dart';
-import 'screens/home/home_screen_logic.dart'; // 🎯 RouteObserver import
+import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 
 void main() async {
   // Flutter 바인딩 초기화
@@ -57,7 +57,7 @@ class GeulnamuApp extends StatelessWidget {
         themeMode: ThemeMode.system,          // 시스템 설정에 따라 자동 전환
 
         // 라우트 설정 + RouteObserver 등록
-        navigatorObservers: [HomeScreenLogic.routeObserver], // 🎯 RouteObserver 등록
+        navigatorObservers: [HomeRouteService.routeObserver], // 🎯 RouteObserver 등록
         initialRoute: '/splash',
         routes: {
           '/splash': (context) => const SplashScreen(),
