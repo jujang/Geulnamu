@@ -66,7 +66,7 @@ class HomeService {
     final confirmed = await _showLogoutDialog(context);
 
     if (confirmed == true) {
-      await authProvider.logout();
+      await authProvider.logout(context: context);
       _showSnackBar(context, '로그아웃되었습니다.');
     }
   }

@@ -65,13 +65,13 @@ class AuthProvider with ChangeNotifier {
   }
 
   /// 카카오 로그인
-  Future<bool> loginWithKakao() async {
+  Future<bool> loginWithKakao({BuildContext? context}) async {
     try {
       print('🥕 카카오 로그인 시작...');
       _setStatus(AuthStatus.loading);
       _clearError();
 
-      final authResponse = await _authService.loginWithKakao();
+      final authResponse = await _authService.loginWithKakao(context: context);
       
       // 사용자 정보 설정
       _userInfo = authResponse['userInfo'];
@@ -93,12 +93,12 @@ class AuthProvider with ChangeNotifier {
   }
 
   /// 로그아웃
-  Future<void> logout() async {
+  Future<void> logout({BuildContext? context}) async {
     try {
       print('👋 로그아웃 중...');
       _setStatus(AuthStatus.loading);
       
-      await _authService.logout();
+      await _authService.logout(context: context);
       
       _userInfo = null;
       _setStatus(AuthStatus.unauthenticated);

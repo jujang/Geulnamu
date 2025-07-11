@@ -339,7 +339,7 @@ class _LoginScreenState extends State<LoginScreen>
   void _handleKakaoLogin() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
-    final success = await authProvider.loginWithKakao();
+    final success = await authProvider.loginWithKakao(context: context);
     
     if (success && mounted) {
       // 로그인 성공 시 현재 화면을 닫고 홈 화면으로 돌아가기

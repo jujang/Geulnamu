@@ -1,6 +1,7 @@
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -27,7 +28,7 @@ class AuthService {
     _initializeDio();
   }
 
-  final Dio _dio = Dio();
+  late final Dio _dio;
   
   // 🔑 로컬 저장소 키
   static const String _accessTokenKey = 'access_token';
@@ -36,16 +37,14 @@ class AuthService {
 
   /// 🔧 Dio 초기화 및 설정
   void _initializeDio() {
-    // 기본 타임아웃 설정
-    _dio.options.connectTimeout = const Duration(seconds: 30);
-    _dio.options.receiveTimeout = const Duration(seconds: 30);
-    _dio.options.sendTimeout = const Duration(seconds: 30);
+    // ⏰ ApiUtils의 타임아웃 설정을 사용하여 Dio 인스턴스 생성
+    _dio = ApiUtils.createDioWithTimeout(
+      baseUrl: AppConfig.apiBaseUrl,
+      headers: {
+        'User-Agent': 'GeulnamuApp/${AppConfig.appVersion}',
+      },
+    );
 
-    // 기본 헤더 설정
-    _dio.options.headers['Content-Type'] = 'application/json';
-    _dio.options.headers['Accept'] = 'application/json';
-    _dio.options.headers['User-Agent'] = 'GeulnamuApp/${AppConfig.appVersion}';
-    
     // 쿠키 포함 요청 활성화
     _dio.options.extra['withCredentials'] = true;
 
@@ -144,7 +143,7 @@ class AuthService {
   /// 🥕 카카오 OAuth 로그인 - 메인 진입점
   /// 
   /// 웹/모바일 환경을 자동 감지하여 적절한 OAuth 플로우 실행
-  Future<Map<String, dynamic>> loginWithKakao() async {
+  Future<Map<String, dynamic>> loginWithKakao({BuildContext? context}) async {
     try {
       if (AppConfig.debugMode) {
         print('🥕 카카오 OAuth 로그인 시작...');
@@ -152,9 +151,9 @@ class AuthService {
       }
 
       if (kIsWeb) {
-        return await _webLoginFlow();
+        return await _webLoginFlow(context);
       } else {
-        return await _mobileLoginFlow();
+        return await _mobileLoginFlow(context);
       }
     } catch (error) {
       if (AppConfig.debugMode) {
@@ -165,7 +164,7 @@ class AuthService {
   }
 
   /// 🌐 웹 환경 OAuth 플로우
-  Future<Map<String, dynamic>> _webLoginFlow() async {
+  Future<Map<String, dynamic>> _webLoginFlow(BuildContext? context) async {
     final kakaoAuthUrl = _buildKakaoAuthUrl();
 
     if (AppConfig.debugMode) {
@@ -193,7 +192,7 @@ class AuthService {
       }
 
       // 백엔드로 코드 전송 및 토큰 교환
-      return await _processAuthCode(authCode);
+      return await _processAuthCode(authCode, context);
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ 웹 OAuth 플로우 오류: $e');
@@ -203,7 +202,7 @@ class AuthService {
   }
 
   /// 📱 모바일 환경 OAuth 플로우
-  Future<Map<String, dynamic>> _mobileLoginFlow() async {
+  Future<Map<String, dynamic>> _mobileLoginFlow(BuildContext? context) async {
     final kakaoAuthUrl = _buildKakaoAuthUrl();
 
     if (AppConfig.debugMode) {
@@ -239,7 +238,7 @@ class AuthService {
       }
 
       // 백엔드로 코드 전송 및 토큰 교환
-      return await _processAuthCode(code);
+      return await _processAuthCode(code, context);
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ 모바일 OAuth 플로우 오류: $e');
@@ -355,7 +354,7 @@ class AuthService {
   }
 
   /// 🔄 Authorization Code 처리 및 토큰 교환
-  Future<Map<String, dynamic>> _processAuthCode(String code) async {
+  Future<Map<String, dynamic>> _processAuthCode(String code, BuildContext? context) async {
     try {
       if (AppConfig.debugMode) {
         print('🔄 백엔드로 Authorization Code 전송 중...');
@@ -423,8 +422,13 @@ class AuthService {
       }
     } catch (e) {
       if (e is DioException) {
-        // ✅ ApiUtils 통합 에러 처리
-        throw ApiUtils.processDioException(e, '카카오 로그인');
+        // ✅ ApiUtils 통합 에러 처리 (에러 다이얼로그 표시)
+        throw ApiUtils.processDioException(
+          e, 
+          '카카오 로그인',
+          context: context,
+          showDialog: context != null,  // context가 있을 때만 다이얼로그 표시
+        );
       }
       rethrow;
     }
@@ -433,13 +437,13 @@ class AuthService {
   /// 웹 환경에서 OAuth 코드 처리 (콜백 화면용)
   /// 
   /// 카카오 OAuth 콜백 페이지에서 직접 호출하는 메서드
-  Future<Map<String, dynamic>> processOAuthCode(String code) async {
+  Future<Map<String, dynamic>> processOAuthCode(String code, {BuildContext? context}) async {
     try {
       if (AppConfig.debugMode) {
         print('🔄 웹 OAuth 코드 직접 처리 시작...');
       }
 
-      return await _processAuthCode(code);
+      return await _processAuthCode(code, context);
     } catch (error) {
       if (AppConfig.debugMode) {
         print('❌ 웹 OAuth 코드 처리 실패: $error');
@@ -525,7 +529,7 @@ class AuthService {
   }
 
   /// 👋 로그아웃
-  Future<void> logout() async {
+  Future<void> logout({BuildContext? context}) async {
     try {
       if (AppConfig.debugMode) {
         print('👋 로그아웃 시작...');
@@ -564,9 +568,13 @@ class AuthService {
           print('⚠️ 백엔드 로그아웃 오류 (계속 진행): $e');
         }
         
-        // ✅ ApiUtils 통합 에러 처리
+        // ✅ ApiUtils 통합 에러 처리 (로그아웃은 자체 처리)
         if (e is DioException) {
-          final processedException = ApiUtils.processDioException(e, '로그아웃');
+          final processedException = ApiUtils.processDioException(
+            e, 
+            '로그아웃',
+            showDialog: false,  // 로그아웃은 사용자 의도이므로 다이얼로그 표시 안함
+          );
           if (AppConfig.debugMode) {
             print('⚠️ 로그아웃 세부 오류: $processedException');
           }
