@@ -53,7 +53,7 @@ class HomeService {
         Navigator.pushNamed(context, '/profile'); // 프로필 화면으로 이동
         break;
       case 'settings':
-        _showSnackBar(context, '설정 기능은 개발 중입니다.');
+        Navigator.pushNamed(context, '/settings');
         break;
       case 'logout':
         await handleLogout(context, authProvider);
@@ -252,7 +252,7 @@ class HomeService {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.inverseSurface,
+        backgroundColor: Theme.of(context).colorScheme.primary, // 🎨 글나무 민트색
       ),
     );
   }

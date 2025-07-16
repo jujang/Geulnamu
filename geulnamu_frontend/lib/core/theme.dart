@@ -184,10 +184,14 @@ class GeulnamuTheme {
       
       // 🎯 SnackBar 테마
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: const Color(0xFF2C3E50),
-        contentTextStyle: GoogleFonts.notoSans(color: Colors.white),
+        backgroundColor: colorScheme.primary, // 🎨 글나무 민트색
+        contentTextStyle: GoogleFonts.notoSans(
+          color: colorScheme.onPrimary, // 민트색 배경에 대비되는 텍스트 색상
+          fontWeight: FontWeight.w500,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         behavior: SnackBarBehavior.floating,
+        elevation: 3,
       ),
       
       // 🎯 Divider 테마
@@ -402,10 +406,14 @@ class GeulnamuTheme {
       ),
       
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: colorScheme.surfaceVariant,
-        contentTextStyle: GoogleFonts.notoSans(color: colorScheme.onSurfaceVariant),
+        backgroundColor: colorScheme.primary, // 🎨 글나무 민트색 (다크 모드)
+        contentTextStyle: GoogleFonts.notoSans(
+          color: colorScheme.onPrimary, // 민트색 배경에 대비되는 텍스트 색상
+          fontWeight: FontWeight.w500,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         behavior: SnackBarBehavior.floating,
+        elevation: 3,
       ),
       
       dividerTheme: DividerThemeData(
@@ -473,6 +481,11 @@ extension GeulnamuThemeExtension on BuildContext {
   Color get warningColor => GeulnamuColors.warning;
   Color get errorColor => GeulnamuColors.error;
   Color get infoColor => GeulnamuColors.info;
+  
+  /// 어두운 베이지 색상 (테마 자동 선택)
+  Color get darkBeigeColor => isDarkMode 
+      ? GeulnamuColors.darkBeigeDark 
+      : GeulnamuColors.darkBeigeLight;
   
   /// 현재 테마에 맞는 그라데이션
   LinearGradient get primaryGradient => isDarkMode 

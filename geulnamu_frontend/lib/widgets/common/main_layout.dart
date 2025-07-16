@@ -36,6 +36,9 @@ class MainLayout extends StatelessWidget {
   /// 사용자 메뉴 위젯 (null이면 기본 프로필 메뉴 사용)
   final Widget? customProfileWidget;
   
+  /// 사용자 메뉴 표시 여부 (기본: true)
+  final bool showProfileMenu;
+  
   /// 로고 클릭 핸들러 (홈으로 이동 등)
   final VoidCallback? onLogoTap;
   
@@ -60,6 +63,7 @@ class MainLayout extends StatelessWidget {
     this.floatingActionButton,
     this.bottomNavigationBar,
     this.customProfileWidget,
+    this.showProfileMenu = true, // 기본값: true
     this.onLogoTap,
     this.onMenuTap,
     this.onLoginTap,
@@ -82,8 +86,8 @@ class MainLayout extends StatelessWidget {
             // 🔐 로그인 상태별 처리
             showLoginButton: !authProvider.isAuthenticated,
             onLoginPressed: authProvider.isAuthenticated ? null : onLoginTap,
-            // 👤 사용자 메뉴 (로그인 시에만)
-            profileWidget: authProvider.isAuthenticated 
+            // 👤 사용자 메뉴 (로그인 시에만 + showProfileMenu가 true일 때만)
+            profileWidget: authProvider.isAuthenticated && showProfileMenu
                 ? (customProfileWidget ?? _buildDefaultProfileMenu(context, authProvider))
                 : null,
             // 🏠 로고 클릭으로 홈 이동
@@ -285,10 +289,7 @@ class MainLayout extends StatelessWidget {
         Navigator.pushNamed(context, '/profile');
         break;
       case 'settings':
-        // TODO: 설정 화면 구현 후 연결
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('설정 화면은 준비 중입니다.')),
-        );
+        Navigator.pushNamed(context, '/settings');
         break;
       case 'help':
         // TODO: 도움말 화면 구현 후 연결
@@ -320,6 +321,7 @@ class MainLayoutHelpers {
     Widget? floatingActionButton,
     Widget? bottomNavigationBar,
     Widget? customProfileWidget,
+    bool showProfileMenu = true, // 기본값: true
     VoidCallback? onLogoTap,
     Function(String)? onMenuTap,
     VoidCallback? onLoginTap,
@@ -333,6 +335,7 @@ class MainLayoutHelpers {
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       customProfileWidget: customProfileWidget,
+      showProfileMenu: showProfileMenu, // 사용자 메뉴 표시 여부
       onLogoTap: onLogoTap,
       onMenuTap: onMenuTap,
       onLoginTap: onLoginTap,
@@ -348,6 +351,7 @@ class MainLayoutHelpers {
     Widget? floatingActionButton,
     Widget? bottomNavigationBar,
     Widget? customProfileWidget,
+    bool showProfileMenu = true, // 기본값: true
     VoidCallback? onLogoTap,
     Function(String)? onMenuTap,
     VoidCallback? onLoginTap,
@@ -362,6 +366,7 @@ class MainLayoutHelpers {
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       customProfileWidget: customProfileWidget,
+      showProfileMenu: showProfileMenu, // 사용자 메뉴 표시 여부
       onLogoTap: onLogoTap,
       onMenuTap: onMenuTap,
       onLoginTap: onLoginTap,

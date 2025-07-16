@@ -9,6 +9,7 @@ import 'core/theme.dart';  // 🎯 모든 테마 설정이 여기에!
 
 // Provider imports
 import 'providers/auth_provider.dart';
+import 'providers/theme_provider.dart';
 
 // Screen imports
 import 'screens/splash/splash_screen.dart';
@@ -17,6 +18,7 @@ import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/introduction/introduction_screen.dart'; // 글나무 소개 화면
+import 'screens/settings_screen.dart'; // 설정 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 
 // 🎯 Global Navigator Key - 전역에서 접근 가능
@@ -43,25 +45,39 @@ void main() async {
   }
 }
 
-class GeulnamuApp extends StatelessWidget {
+class GeulnamuApp extends StatefulWidget {
   const GeulnamuApp({super.key});
+
+  @override
+  State<GeulnamuApp> createState() => _GeulnamuAppState();
+}
+
+class _GeulnamuAppState extends State<GeulnamuApp> {
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) {
+          final themeProvider = ThemeProvider();
+          // 비동기로 초기화 실행
+          Future.microtask(() => themeProvider.initialize());
+          return themeProvider;
+        }),
         // 추후 다른 Provider들 추가 가능
       ],
-      child: MaterialApp(
-        navigatorKey: navigatorKey,  // 🎯 Global Navigator Key 설정
-        title: '글나무 - 독서 토론 커뮤니티',
-        debugShowCheckedModeBanner: false,
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            navigatorKey: navigatorKey,  // 🎯 Global Navigator Key 설정
+            title: '글나무 - 독서 토론 커뮤니티',
+            debugShowCheckedModeBanner: false,
 
-        // 🎯 핵심: Material Theme + 시스템 다크모드 지원
-        theme: GeulnamuTheme.lightTheme,      // 라이트 테마 (FAFAFA 배경 + 흰색 카드)
-        darkTheme: GeulnamuTheme.darkTheme,   // 다크 테마 (0F0F0F 배경 + 회색 카드)
-        themeMode: ThemeMode.system,          // 시스템 설정에 따라 자동 전환
+            // 🎯 핵심: ThemeProvider와 연동된 테마 시스템
+            theme: GeulnamuTheme.lightTheme,      // 라이트 테마 (FAFAFA 배경 + 흰색 카드)
+            darkTheme: GeulnamuTheme.darkTheme,   // 다크 테마 (0F0F0F 배경 + 회색 카드)
+            themeMode: themeProvider.themeMode,   // 🎯 ThemeProvider에서 관리하는 테마 모드
 
         // 🎯 한국어 지원 추가
         localizationsDelegates: const [
@@ -85,11 +101,14 @@ class GeulnamuApp extends StatelessWidget {
           '/home': (context) => const HomeScreen(),
           '/profile': (context) => const ProfileScreen(), // 프로필 화면
           '/introduction': (context) => const IntroductionScreen(), // 글나무 소개 화면
+          '/settings': (context) => const SettingsScreen(), // 설정 화면
         },
 
-        // 404 처리
-        onUnknownRoute: (settings) {
-          return MaterialPageRoute(builder: (context) => const LoginScreen());
+            // 404 처리
+            onUnknownRoute: (settings) {
+              return MaterialPageRoute(builder: (context) => const LoginScreen());
+            },
+          );
         },
       ),
     );
