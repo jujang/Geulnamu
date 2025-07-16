@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/config/app_config.dart';
 import '../../widgets/common/app_header.dart';
+import '../../widgets/common/app_drawer.dart';
 import '../../widgets/common/responsive_container.dart';
 import '../../widgets/home/pwa_install_card.dart';
 import '../../services/home/home_service.dart';
@@ -117,6 +118,8 @@ class _HomeScreenState extends State<HomeScreen>
                   ? null
                   : navigateToLogin,
               showLoginButton: !authProvider.isAuthenticated,
+              showDrawerButton: true, // 🍔 Drawer 버튼 표시
+              onLogoTap: navigateToHome, // 🏠 로고 클릭으로 홈 이동
               profileWidget: authProvider.isAuthenticated
                   ? HomeWidgets.buildProfileMenu(
                       context,
@@ -124,6 +127,12 @@ class _HomeScreenState extends State<HomeScreen>
                       handleProfileMenuSelection,
                     )
                   : null,
+            ),
+            // 🎨 Drawer 추가!
+            drawer: AppDrawer(
+              onMenuTap: handleMenuTap, // mixin 메서드 재사용
+              onLoginTap: navigateToLogin,
+              onLogoutTap: handleLogout,
             ),
             body: SafeArea(
               child: ResponsiveContainer(

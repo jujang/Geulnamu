@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../screens/meeting/meeting_detail_screen.dart';
-import '../../core/enums/permission_level.dart';
-import '../../core/constants/permission_constants.dart';
 
 /// 홈화면 비즈니스 로직을 담당하는 Singleton Service
 ///
@@ -22,6 +20,12 @@ class HomeService {
   // 🎯 메뉴 탭 처리 (권한 레벨 + 개인정보 이중 체크)
   void handleMenuTap(BuildContext context, String menuTitle) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    // 🏠 홈 화면은 권한 체크 없이 무조건 접근 가능
+    if (menuTitle == '홈 화면') {
+      _processMenuAction(context, menuTitle);
+      return;
+    }
 
     // 🔒 종합 접근 가능 체크
     if (!canAccessFeature(menuTitle, authProvider)) {
@@ -89,9 +93,28 @@ class HomeService {
     _showSnackBar(context, '모임 만들기 기능은 개발 중입니다.');
   }
 
+  // 🏠 홈 화면으로 이동 (로고 클릭 시)
+  void navigateToHome(BuildContext context) {
+    // 현재 라우트가 '/home'이 아니면 홈으로 이동
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    if (currentRoute != '/home') {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home',
+        (route) => false, // 모든 이전 라우트 제거
+      );
+    }
+  }
+
   // 🎯 네비게이션 메서드들
   void navigateToLogin(BuildContext context) {
     Navigator.pushNamed(context, '/login');
+  }
+
+  // 🔍 개인정보 입력 화면으로 이동
+  void navigateToProfileInput(BuildContext context) {
+    print('🔍 [HomeService] 개인정보 입력 화면으로 이동 요청');
+    Navigator.pushNamed(context, '/profile'); // 프로필 화면으로 이동
   }
 
   // 🎯 PWA 설치 안내
@@ -101,9 +124,9 @@ class HomeService {
       builder: (context) => AlertDialog(
         title: Text(
           '앱 설치 방법',
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
         content: const SingleChildScrollView(
           child: Column(
@@ -123,10 +146,7 @@ class HomeService {
               SizedBox(height: 12),
 
               // 아이폰
-              Text(
-                '🍎 아이폰 (iOS)',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              Text('🍎 아이폰 (iOS)', style: TextStyle(fontWeight: FontWeight.bold)),
               Text('• 사파리: 공유버튼(↑) → "홈 화면에 추가"'),
               Text('• 크롬: 메뉴(⋮) → "홈 화면에 추가"'),
             ],
@@ -140,6 +160,89 @@ class HomeService {
         ],
       ),
     );
+  }
+
+  // 🎯 메뉴 액션 처리 (실제 기능 수행)
+  void _processMenuAction(BuildContext context, String menuTitle) {
+    switch (menuTitle) {
+      case '홈 화면':
+        navigateToHome(context);
+        break;
+      case '모임 소개':
+        // 🌿 모임 소개 화면으로 이동 (로그인 무관)
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MeetingDetailScreen(),
+          ),
+        );
+        break;
+      case '모임 목록':
+        _showSnackBar(context, '모임 목록 기능은 개발 중입니다.');
+        break;
+      case '오늘의 모임':
+        _showSnackBar(context, '오늘의 모임 기능은 개발 중입니다.');
+        break;
+      case '모임 만들기':
+        _showSnackBar(context, '모임 만들기 기능은 개발 중입니다.');
+        break;
+      case '출석 체크':
+        _showSnackBar(context, '출석 체크 기능은 개발 중입니다.');
+        break;
+      case '출석 이력':
+        _showSnackBar(context, '출석 이력 기능은 개발 중입니다.');
+        break;
+      case '발제 작성':
+        _showSnackBar(context, '발제 작성 기능은 개발 중입니다.');
+        break;
+      case '내 발제':
+        _showSnackBar(context, '내 발제 기능은 개발 중입니다.');
+        break;
+      case '도움말':
+        _showSnackBar(context, '도움말 기능은 개발 중입니다.');
+        break;
+      case '앱 정보':
+        _showSnackBar(context, '앱 정보 기능은 개발 중입니다.');
+        break;
+      default:
+        _showSnackBar(context, '$menuTitle 기능은 개발 중입니다.');
+        break;
+    }
+  }
+
+  // 🔒 권한 체크 메서드들 (임시 구현)
+  
+  /// 기능 접근 가능 여부 체크
+  bool canAccessFeature(String featureName, AuthProvider authProvider) {
+    // 홈 화면은 항상 접근 가능
+    if (featureName == '홈 화면') {
+      return true;
+    }
+    
+    // 모임 소개도 누구나 접근 가능
+    if (featureName == '모임 소개') {
+      return true;
+    }
+    
+    // 로그인이 필요한 기능들
+    final loginRequiredFeatures = [
+      '모임 목록', '오늘의 모임', '모임 만들기',
+      '출석 체크', '출석 이력',
+      '발제 작성', '내 발제'
+    ];
+    
+    if (loginRequiredFeatures.contains(featureName)) {
+      return authProvider.isAuthenticated;
+    }
+    
+    // 기본적으로 접근 가능
+    return true;
+  }
+  
+  /// 역할 권한 체크
+  bool hasRolePermission(String featureName, AuthProvider authProvider) {
+    // 임시로 모든 기능에 대해 true 반환
+    return true;
   }
 
   // 🎯 Private 메서드들
@@ -182,66 +285,6 @@ class HomeService {
         ],
       ),
     );
-  }
-
-  /// 개인정보 입력 화면으로 이동
-  void navigateToProfileInput(BuildContext context) {
-    print('🔍 [HomeService] 개인정보 입력 화면으로 이동 요청');
-    
-    // 프로필 화면으로 이동 (조회/수정 통합)
-    Navigator.pushNamed(context, '/profile');
-  }
-
-  // 🔒 종합 접근 가능 체크
-  bool canAccessFeature(String feature, AuthProvider authProvider) {
-    return hasRolePermission(feature, authProvider) && 
-           hasProfilePermission(feature, authProvider);
-  }
-
-  // 🔑 권한 레벨 체크
-  bool hasRolePermission(String feature, AuthProvider authProvider) {
-    final requiredLevel = PermissionConstants.getRequiredPermissionLevel(feature);
-    final userLevel = _getUserPermissionLevel(authProvider);
-    return userLevel.hasPermission(requiredLevel);
-  }
-
-  // 📝 개인정보 체크
-  bool hasProfilePermission(String feature, AuthProvider authProvider) {
-    // PermissionConstants의 예외 리스트 사용
-    if (PermissionConstants.isProfileExemptMenu(feature)) {
-      return true;
-    }
-    
-    // 그 외에는 개인정보 입력 필수
-    return authProvider.hasProfile;
-  }
-
-  // 📊 사용자 권한 레벨 결정
-  PermissionLevel _getUserPermissionLevel(AuthProvider authProvider) {
-    if (!authProvider.isAuthenticated) {
-      return PermissionLevel.PUBLIC;
-    }
-    
-    // PermissionConstants를 사용하여 백엔드 role 매핑
-    final role = authProvider.userInfo?['role'] as String?;
-    return PermissionConstants.convertRoleToPermissionLevel(role);
-  }
-
-  // 🛠️ 메뉴 액션 처리
-  void _processMenuAction(BuildContext context, String menuTitle) {
-    switch (menuTitle) {
-      case '모임 소개':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MeetingDetailScreen()),
-        );
-        break;
-      case '개인정보 입력하기':
-        Navigator.pushNamed(context, '/profile'); // 프로필 화면으로 이동
-        break;
-      default:
-        _showSnackBar(context, '$menuTitle 기능은 개발 중입니다.');
-    }
   }
 
   // 🔒 개인정보 입력 요구 다이얼로그
