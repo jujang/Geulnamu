@@ -203,6 +203,34 @@ class GeulnamuTheme {
         labelStyle: GoogleFonts.notoSans(fontSize: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
+      
+      // 🎯 스크롤바 테마 - 우측 끝 정렬 + 적당한 두께
+      scrollbarTheme: ScrollbarThemeData(
+        // 스크롤바 두께 (기본값보다 약간 두껍게, 이전보다는 얇게)
+        thickness: MaterialStateProperty.all(8.0),
+        // 스크롤바 색상 (라이트 모드)
+        thumbColor: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.hovered)) {
+            return colorScheme.primary.withOpacity(0.8);
+          }
+          if (states.contains(MaterialState.dragged)) {
+            return colorScheme.primary;
+          }
+          return colorScheme.primary.withOpacity(0.6);
+        }),
+        // 스크롤바 트랙 색상
+        trackColor: MaterialStateProperty.all(
+          colorScheme.outline.withOpacity(0.2),
+        ),
+        // 스크롤바 모양
+        radius: const Radius.circular(6),
+        // 스크롤바가 우측 끝에 정확히 위치하도록
+        crossAxisMargin: 0,
+        mainAxisMargin: 4,
+        // 항상 표시 설정 제거 (개별 Scrollbar 위젯에서 제어)
+        thumbVisibility: MaterialStateProperty.all(false),
+        trackVisibility: MaterialStateProperty.all(false),
+      ),
     );
   }
   
@@ -390,6 +418,34 @@ class GeulnamuTheme {
         selectedColor: colorScheme.primary,
         labelStyle: GoogleFonts.notoSans(fontSize: 14, color: colorScheme.onSurfaceVariant),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      
+      // 🎯 스크롤바 테마 - 다크 모드용
+      scrollbarTheme: ScrollbarThemeData(
+        // 스크롤바 두께 (기본값보다 약간 두껍게, 이전보다는 얇게)
+        thickness: MaterialStateProperty.all(8.0),
+        // 스크롤바 색상 (다크 모드)
+        thumbColor: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.hovered)) {
+            return colorScheme.primary.withOpacity(0.9);
+          }
+          if (states.contains(MaterialState.dragged)) {
+            return colorScheme.primary;
+          }
+          return colorScheme.primary.withOpacity(0.7);
+        }),
+        // 스크롤바 트랙 색상 (다크 모드에서 더 밝게)
+        trackColor: MaterialStateProperty.all(
+          colorScheme.outline.withOpacity(0.3),
+        ),
+        // 스크롤바 모양
+        radius: const Radius.circular(6),
+        // 스크롤바가 우측 끝에 정확히 위치하도록
+        crossAxisMargin: 0,
+        mainAxisMargin: 4,
+        // 항상 표시 설정 제거 (개별 Scrollbar 위젯에서 제어)
+        thumbVisibility: MaterialStateProperty.all(false),
+        trackVisibility: MaterialStateProperty.all(false),
       ),
     );
   }

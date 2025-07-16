@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
 import '../common/responsive_widget.dart';
 import '../../core/responsive.dart';
-import '../../core/theme.dart';  // 확장 메서드 사용
+import '../../core/theme.dart'; // 확장 메서드 사용
 import 'feature_card.dart';
 
 class FeatureGrid extends SimpleResponsiveWidget {
   final Function(String)? onFeatureTap;
 
-  const FeatureGrid({
-    super.key,
-    this.onFeatureTap,
-  });
+  const FeatureGrid({super.key, this.onFeatureTap});
 
   static const features = [
     {
       'icon': Icons.menu_book_rounded,
-      'title': '모임 소개',
-      'subtitle': '모임 정보 및 소개',
+      'title': '글나무 소개',
+      'subtitle': '글나무 및 모임 진행 방식 소개',
       // 🎯 색상 제거! FeatureCard에서 테마 색상 사용
     },
     {
