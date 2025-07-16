@@ -44,6 +44,12 @@ mixin HomeLogicMixin<T extends StatefulWidget> on State<T> {
     _homeService.showCreateMeetingDialog(context);
   }
 
+  // 🏠 홈 화면으로 이동 (로고 클릭 시)
+  void navigateToHome() {
+    debugPrint('🏠 [HomeLogicMixin] 홈 화면으로 이동');
+    _homeService.navigateToHome(context);
+  }
+
   // 🎯 로그인 화면으로 이동
   void navigateToLogin() {
     debugPrint('🎯 [HomeLogicMixin] 로그인 화면으로 이동');

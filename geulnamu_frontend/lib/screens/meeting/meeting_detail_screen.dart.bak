@@ -31,7 +31,7 @@ class MeetingDetailScreen extends StatelessWidget {
                 bottom: 16,
               ), // 🎯 뒤로가기 버튼 간격 고려
               title: Text(
-                '모임 소개',
+                '글나무 소개',
                 style: context.textStyles.headlineSmall?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

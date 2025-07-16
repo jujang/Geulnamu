@@ -4,14 +4,13 @@ import '../../../widgets/home/welcome_card.dart';
 import '../../../core/theme.dart';
 
 /// HomeScreen의 UI 위젯들을 제공하는 Static Methods 클래스
-/// 
+///
 /// 포함하는 위젯들:
 /// - 환영 카드 (로그인 상태별)
 /// - 빠른 메뉴 그리드
 /// - 최근 모임 섹션
 /// - 프로필 메뉴
 class HomeWidgets {
-  
   // 🎯 동적 환영 카드 - 로그인 상태에 따라 메시지 변경
   static Widget buildDynamicWelcomeCard(
     BuildContext context,
@@ -53,7 +52,7 @@ class HomeWidgets {
                   ),
                 ),
               ],
-              
+
               // 개인정보 입력 버튼 (필요한 경우에만 표시)
               if (authProvider.needsProfile) ...[
                 const SizedBox(height: 16),
@@ -81,12 +80,12 @@ class HomeWidgets {
     AuthProvider authProvider,
     Function(String) onMenuTap,
   ) {
-    // 🎯 카드 콘텐츠: '모임 소개', '오늘의 모임', '출석 체크', '발제 작성'
+    // 🎯 카드 콘텐츠: '글나무 소개', '오늘의 모임', '출석 체크', '발제 작성'
     final menuItems = [
       {
         'icon': Icons.menu_book_rounded,
-        'title': '모임 소개',
-        'subtitle': '모임 정보 및 소개',
+        'title': '글나무 소개',
+        'subtitle': '글나무 및 모임 진행방식 소개',
       },
       {
         'icon': Icons.event_outlined,
@@ -98,11 +97,7 @@ class HomeWidgets {
         'title': '출석 체크',
         'subtitle': 'QR 코드로 간편 출석',
       },
-      {
-        'icon': Icons.edit_outlined, 
-        'title': '발제 작성', 
-        'subtitle': '독서 발제문 작성'
-      },
+      {'icon': Icons.edit_outlined, 'title': '발제 작성', 'subtitle': '독서 발제문 작성'},
     ];
 
     return Column(
