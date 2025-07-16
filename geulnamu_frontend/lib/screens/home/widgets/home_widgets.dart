@@ -85,7 +85,7 @@ class HomeWidgets {
       {
         'icon': Icons.menu_book_rounded,
         'title': '글나무 소개',
-        'subtitle': '글나무 및 모임 진행 방식 소개',
+        'subtitle': '글나무 및 모임 진행방식 소개',
       },
       {
         'icon': Icons.event_outlined,

@@ -13,7 +13,7 @@ class FeatureGrid extends SimpleResponsiveWidget {
     {
       'icon': Icons.menu_book_rounded,
       'title': '글나무 소개',
-      'subtitle': '글나무 및 모임 진행 방식 소개',
+      'subtitle': '글나무 및 모임 진행방식 소개',
       // 🎯 색상 제거! FeatureCard에서 테마 색상 사용
     },
     {

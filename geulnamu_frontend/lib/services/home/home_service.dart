@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../screens/meeting/meeting_detail_screen.dart';
 
 /// 홈화면 비즈니스 로직을 담당하는 Singleton Service
 ///
@@ -173,10 +172,7 @@ class HomeService {
         break;
       case '글나무 소개':
         // 🌿 글나무 소개 화면으로 이동 (로그인 무관)
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MeetingDetailScreen()),
-        );
+        Navigator.pushNamed(context, '/introduction');
         break;
       case '모임 목록':
         _showSnackBar(context, '모임 목록 기능은 개발 중입니다.');

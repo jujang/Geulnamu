@@ -16,6 +16,7 @@ import 'screens/auth/login_screen.dart';
 // import 'screens/auth/oauth_callback_screen.dart'; // HTML에서 처리
 import 'screens/home/home_screen.dart';
 import 'screens/profile/profile_screen.dart';
+import 'screens/introduction/introduction_screen.dart'; // 글나무 소개 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 
 // 🎯 Global Navigator Key - 전역에서 접근 가능
@@ -83,6 +84,7 @@ class GeulnamuApp extends StatelessWidget {
           // '/auth/callback': (context) => const OAuthCallbackScreen(), // 주석 처리 - HTML에서 처리
           '/home': (context) => const HomeScreen(),
           '/profile': (context) => const ProfileScreen(), // 프로필 화면
+          '/introduction': (context) => const IntroductionScreen(), // 글나무 소개 화면
         },
 
         // 404 처리
