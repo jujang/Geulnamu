@@ -131,6 +131,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return MainLayout(
           title: '설정',
           isHomePage: false, // 뒤로가기 버튼 표시
+          showProfileMenu: false, // 설정 페이지에서는 사용자 메뉴 숨김
           onBackPressed: _handleBackPressed,
           body: _isLoading 
               ? SettingsWidgets.buildLoadingIndicator(context)

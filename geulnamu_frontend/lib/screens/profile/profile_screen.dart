@@ -80,6 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     return MainLayoutHelpers.sub(
       title: isEditMode ? '프로필 편집' : '프로필',
       body: _buildBody(),
+      showProfileMenu: false, // 프로필 페이지에서는 사용자 메뉴 숨김
       // 🎯 편집 모드에 따른 액션 버튼들
       actions: _buildAppBarActions(),
       // 🎯 하단 액션 버튼 (편집 모드에서만)
