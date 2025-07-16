@@ -482,6 +482,11 @@ extension GeulnamuThemeExtension on BuildContext {
   Color get errorColor => GeulnamuColors.error;
   Color get infoColor => GeulnamuColors.info;
   
+  /// 어두운 베이지 색상 (테마 자동 선택)
+  Color get darkBeigeColor => isDarkMode 
+      ? GeulnamuColors.darkBeigeDark 
+      : GeulnamuColors.darkBeigeLight;
+  
   /// 현재 테마에 맞는 그라데이션
   LinearGradient get primaryGradient => isDarkMode 
       ? GeulnamuColors.primaryGradientDark 

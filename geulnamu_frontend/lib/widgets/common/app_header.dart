@@ -57,7 +57,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       
       // 🏷️ 제목 또는 로고
       title: _buildTitleWidget(context),
-      centerTitle: title != null, // 제목이 있으면 가운데 정렬
+      centerTitle: true, // 항상 가운데 정렬 (제목과 로고 모두)
       
       // ⚙️ 액션 버튼들 + 사용자 메뉴
       actions: _buildActions(context),
@@ -141,6 +141,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
             '로그인',
             style: context.textStyles.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
+              color: context.colors.onPrimary, // 한 색상 명시적 지정
             ),
           ),
           style: TextButton.styleFrom(

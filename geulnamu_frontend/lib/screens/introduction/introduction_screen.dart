@@ -546,7 +546,7 @@ class IntroductionScreen extends StatelessWidget {
           children: [
             Icon(
               Icons.flash_on_rounded,
-              color: context.colors.secondary,
+              color: context.darkBeigeColor,
               size: 24,
             ),
             const SizedBox(width: 8),
@@ -554,7 +554,7 @@ class IntroductionScreen extends StatelessWidget {
               '독서벙',
               style: context.textStyles.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: context.colors.secondary,
+                color: context.darkBeigeColor,
               ),
             ),
           ],
@@ -572,8 +572,8 @@ class IntroductionScreen extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  context.colors.secondary.withOpacity(0.1),
-                  context.colors.secondary.withOpacity(0.05),
+                  context.darkBeigeColor.withOpacity(0.1),
+                  context.darkBeigeColor.withOpacity(0.05),
                 ],
               ),
             ),
@@ -663,13 +663,13 @@ class IntroductionScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: context.colors.secondary, size: 18),
+        Icon(icon, color: context.darkBeigeColor, size: 18),
         const SizedBox(width: 8),
         Text(
           '$title: ',
           style: context.textStyles.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: context.colors.secondary,
+            color: context.darkBeigeColor,
           ),
         ),
         Expanded(

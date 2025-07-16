@@ -10,6 +10,9 @@ class GeulnamuColors {
   static const Color primaryVariantLight = Color(0xFF6BC4AE);
   static const Color secondaryLight = Color(0xFFF5F1E8);
   
+  /// 어두운 베이지 색상: 가독성 개선된 베이지 계열 (따뜻한 브라운 베이지)
+  static const Color darkBeigeLight = Color(0xFF8B7355);
+  
   /// 배경 및 표면 색상 (라이트) - 🎯 명확한 대비 보장
   static const Color backgroundLight = Color(0xFFFAFAFA);      // 오프화이트 배경 (유지)
   static const Color surfaceLight = Color(0xFFFFFFFF);        // 카드는 완전한 흰색 (명확한 대비!)
@@ -27,6 +30,9 @@ class GeulnamuColors {
   static const Color primaryDark = Color(0xFF5BAB98);
   static const Color primaryVariantDark = Color(0xFF4A9B8E);
   static const Color secondaryDark = Color(0xFF3A3A3A);
+  
+  /// 어두운 베이지 색상 (다크 모드): 더 밝게 조정된 브라운 베이지
+  static const Color darkBeigeDark = Color(0xFFB8A082);
   
   /// 배경 및 표면 색상 (다크) - 🎯 더 명확한 대비 제공
   static const Color backgroundDark = Color(0xFF0F0F0F);       // 더 어두운 배경 (거의 검정)
