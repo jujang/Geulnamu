@@ -7,31 +7,30 @@ import '../../../core/utils/date_utils.dart' as app_date_utils;
 import '../../../core/config/app_config.dart';
 
 /// 프로필 화면 비즈니스 로직 Mixin
-/// 
+///
 /// 제공 기능:
 /// - 프로필 데이터 로드/저장
 /// - 편집 모드 토글
 /// - 폼 데이터 관리 및 유효성 검증
 /// - 에러 처리
 mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
-  
   // 🎯 Service 클래스 사용
   final ProfileService _profileService = ProfileService();
-  
+
   // 🎯 상태 관리
   ProfileModel? _profile;
   bool _isEditMode = false;
   bool _isLoading = false;
   bool _isSaving = false;
-  
+
   // 🎯 수정 폼 데이터
   String _editingName = '';
   String _editingGender = '';
   DateTime? _editingBirthDate;
-  
+
   // 🎯 TextEditingController 추가
   late TextEditingController _nameController;
-  
+
   // 🎯 유효성 검증 에러
   Map<String, String?> _errors = {};
 
@@ -44,7 +43,8 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
   String get editingGender => _editingGender;
   DateTime? get editingBirthDate => _editingBirthDate;
   Map<String, String?> get errors => _errors;
-  TextEditingController get nameController => _nameController; // 🎯 Controller getter 추가
+  TextEditingController get nameController =>
+      _nameController; // 🎯 Controller getter 추가
 
   @override
   void initState() {
@@ -54,18 +54,18 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
   }
 
   /// 🎯 화면에 다시 들어올 때 호출되는 메서드
-  /// 
-  /// ProfileScreen에서 RouteAware로 호출하거나, 
+  ///
+  /// ProfileScreen에서 RouteAware로 호출하거나,
   /// 수동으로 호출할 수 있음
   Future<void> refreshProfileData() async {
     print('🔄 [ProfileLogicMixin] refreshProfileData() 호출 - 데이터 새로고침 시작');
-    
+
     if (AppConfig.debugMode) {
       print('🔄 [ProfileLogicMixin] 화면 재진입 - 프로필 데이터 새로고침');
     }
-    
+
     await _loadProfile();
-    
+
     print('✅ [ProfileLogicMixin] refreshProfileData() 완료');
   }
 
@@ -78,7 +78,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
   /// 프로필 정보 로드
   Future<void> _loadProfile() async {
     if (!mounted) return;
-    
+
     setState(() {
       _isLoading = true;
       _errors.clear();
@@ -86,7 +86,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       if (!authProvider.isAuthenticated) {
         throw Exception('로그인이 필요합니다.');
       }
@@ -101,7 +101,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
       }
 
       final profile = await _profileService.getMyProfile(accessToken);
-      
+
       if (mounted) {
         setState(() {
           _profile = profile;
@@ -131,20 +131,22 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 편집 데이터 초기화
   void _initializeEditingData(ProfileModel profile) {
-    _editingName = profile.name ?? '';          // null인 경우 빈 문자열
-    _editingGender = profile.gender ?? 'MALE';   // null인 경우 기본값 'MALE'
-    
+    _editingName = profile.name ?? ''; // null인 경우 빈 문자열
+    _editingGender = profile.gender ?? 'MALE'; // null인 경우 기본값 'MALE'
+
     // 🎯 TextEditingController 업데이트
     _nameController.text = _editingName;
-    
+
     // 생년월일 null 처리
     if (profile.birthDate != null) {
-      _editingBirthDate = app_date_utils.DateUtils.parseBackendDate(profile.birthDate!);
+      _editingBirthDate = app_date_utils.DateUtils.parseBackendDate(
+        profile.birthDate!,
+      );
     } else {
-      // null인 경우 기본값 (1990년 1월 1일)
-      _editingBirthDate = DateTime(1990, 1, 1);
+      // null인 경우 기본값 (1997년 1월 1일)
+      _editingBirthDate = DateTime(1997, 1, 1);
     }
-    
+
     _errors.clear();
   }
 
@@ -154,7 +156,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
 
     setState(() {
       _isEditMode = !_isEditMode;
-      
+
       if (_isEditMode && _profile != null) {
         // 편집 모드 진입 - 현재 데이터로 초기화
         _initializeEditingData(_profile!);
@@ -244,7 +246,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       if (!authProvider.isAuthenticated) {
         throw Exception('로그인이 필요합니다.');
       }
@@ -278,10 +280,10 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
 
         // 성공 - 프로필 다시 로드하여 최신 데이터 반영
         await _loadProfile();
-        
+
         // 🎯 AuthProvider에 저장된 사용자 정보도 업데이트
         await authProvider.updateUserInfo();
-        
+
         setState(() {
           _isEditMode = false;
           _isSaving = false;
@@ -318,7 +320,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
     setState(() {
       _isEditMode = false;
       _errors.clear();
-      
+
       // 원본 데이터로 복원
       if (_profile != null) {
         _initializeEditingData(_profile!);
