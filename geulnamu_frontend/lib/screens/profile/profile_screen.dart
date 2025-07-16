@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/common/main_layout.dart';
 import '../../widgets/common/responsive_container.dart';
 import '../../services/home/home_route_service.dart'; // 🎯 RouteObserver import
+import '../../services/home/home_service.dart';
 import 'mixins/profile_logic_mixin_debug.dart';
 import 'widgets/profile_widgets.dart';
 
@@ -12,6 +14,7 @@ import 'widgets/profile_widgets.dart';
 /// - StatefulWidget + ProfileLogicMixin 조합
 /// - ProfileService 활용 (API 연동)
 /// - ProfileWidgets 사용 (Static Methods)
+/// - MainLayout 적용으로 통일된 UI/UX
 ///
 /// 제공 기능:
 /// - 조회 모드: 프로필 정보 표시
@@ -19,6 +22,7 @@ import 'widgets/profile_widgets.dart';
 /// - 모드 토글: 편집 ↔ 조회 전환
 /// - 실시간 유효성 검증
 /// - 에러 처리 및 로딩 상태 관리
+/// - 통일된 네비게이션 및 사용자 메뉴
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -73,41 +77,12 @@ class _ProfileScreenState extends State<ProfileScreen>
   
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // 🎯 backgroundColor 제거! 테마에서 자동 처리
-      appBar: AppBar(
-        title: const Text('프로필'),
-        centerTitle: true,
-        // 🎯 편집 모드에 따른 액션 버튼
-        actions: [
-          // 🎯 새로고침 버튼 (로딩 중이 아닀 때만)
-          if (!isLoading && !isEditMode)
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: refreshProfileData,
-              tooltip: '새로고침',
-            ),
-          
-          if (!isLoading && profile != null)
-            isEditMode
-                ? IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: cancelEdit,
-                    tooltip: '취소',
-                  )
-                : IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: toggleEditMode,
-                    tooltip: '편집',
-                  ),
-        ],
-      ),
-      
-      body: SafeArea(
-        child: _buildBody(),
-      ),
-      
-      // 🎯 수정 모드에서 저장 버튼
+    return MainLayoutHelpers.sub(
+      title: isEditMode ? '프로필 편집' : '프로필',
+      body: _buildBody(),
+      // 🎯 편집 모드에 따른 액션 버튼들
+      actions: _buildAppBarActions(),
+      // 🎯 하단 액션 버튼 (편집 모드에서만)
       bottomNavigationBar: isEditMode && profile != null
           ? ProfileWidgets.buildActionButtons(
               context,
@@ -116,6 +91,84 @@ class _ProfileScreenState extends State<ProfileScreen>
               isLoading: isSaving,
             )
           : null,
+      // 🎯 메뉴 및 로그인/로그아웃 핸들러
+      onMenuTap: _handleMenuTap,
+      onLoginTap: _handleLoginTap,
+      onLogoutTap: _handleLogoutTap,
+      onLogoTap: _handleLogoTap,
+    );
+  }
+
+  /// 상단바 액션 버튼들 빌드
+  List<Widget> _buildAppBarActions() {
+    final actions = <Widget>[];
+    
+    // 🔄 새로고침 버튼 (조회 모드 + 로딩 중 아닐 때)
+    if (!isLoading && !isEditMode) {
+      actions.add(
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: refreshProfileData,
+          tooltip: '새로고침',
+        ),
+      );
+    }
+    
+    // ✏️ 편집/저장/취소 버튼
+    if (!isLoading && profile != null) {
+      if (isEditMode) {
+        // 편집 모드: 취소 + 저장 버튼
+        actions.addAll([
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: cancelEdit,
+            tooltip: '취소',
+          ),
+          IconButton(
+            icon: const Icon(Icons.check),
+            onPressed: isSaving ? null : saveProfile,
+            tooltip: '저장',
+          ),
+        ]);
+      } else {
+        // 조회 모드: 편집 버튼
+        actions.add(
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: toggleEditMode,
+            tooltip: '편집',
+          ),
+        );
+      }
+    }
+    
+    return actions;
+  }
+
+  /// 메뉴 탭 핸들러
+  void _handleMenuTap(String menu) {
+    final homeService = HomeService();
+    homeService.handleMenuTap(context, menu);
+  }
+
+  /// 로그인 탭 핸들러
+  void _handleLoginTap() {
+    Navigator.pushNamed(context, '/login');
+  }
+
+  /// 로그아웃 핸들러
+  void _handleLogoutTap() {
+    final homeService = HomeService();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    homeService.handleLogout(context, authProvider);
+  }
+
+  /// 로고 탭 핸들러 (홈으로 이동)
+  void _handleLogoTap() {
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/home',
+      (route) => false,
     );
   }
 

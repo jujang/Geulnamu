@@ -87,11 +87,176 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-
   // 🔒 모임 만들기 FAB 표시 여부 결정
   bool _shouldShowCreateMeetingFAB(AuthProvider authProvider) {
     final homeService = HomeService();
     return homeService.canAccessFeature('모임 만들기', authProvider);
+  }
+
+  /// 홈화면용 프로필 메뉴 빌드
+  Widget _buildProfileMenu(BuildContext context, AuthProvider authProvider) {
+    return PopupMenuButton<String>(
+      // 더 시각적으로 구분되는 아바타 스타일
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 사용자 아바타
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                  width: 2,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  authProvider.userNickname.isNotEmpty 
+                      ? authProvider.userNickname[0].toUpperCase()
+                      : '?',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // 드롭다운 아이콘
+            Icon(
+              Icons.arrow_drop_down,
+              color: Theme.of(context).colorScheme.onPrimary,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+      tooltip: '사용자 메뉴',
+      onSelected: handleProfileMenuSelection,
+      // 메뉴 스타일링
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: 8,
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'profile',
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.person_outline, 
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '프로필',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'settings',
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.settings_outlined, 
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '설정',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 'help',
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.help_outline, 
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '도움말',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'logout',
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.logout, 
+                  size: 18, 
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '로그아웃', 
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -121,11 +286,7 @@ class _HomeScreenState extends State<HomeScreen>
               showDrawerButton: true, // 🍔 Drawer 버튼 표시
               onLogoTap: navigateToHome, // 🏠 로고 클릭으로 홈 이동
               profileWidget: authProvider.isAuthenticated
-                  ? HomeWidgets.buildProfileMenu(
-                      context,
-                      authProvider,
-                      handleProfileMenuSelection,
-                    )
+                  ? _buildProfileMenu(context, authProvider) // 직접 프로필 메뉴 생성
                   : null,
             ),
             // 🎨 Drawer 추가!
