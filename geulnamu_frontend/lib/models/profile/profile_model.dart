@@ -1,21 +1,21 @@
 /// 프로필 데이터 모델
-/// 
+///
 /// 백엔드 API 응답과 매핑되는 사용자 프로필 정보
 /// 개인정보 미입력 시 name, gender, birthDate가 모두 null일 수 있음
 class ProfileModel {
   final int memberId;
-  final String? name;        // null 허용 - 이름 미입력
-  final String? gender;      // null 허용 - 성별 미선택  
-  final String? birthDate;   // null 허용 - 생년월일 미입력
+  final String? name; // null 허용 - 이름 미입력
+  final String? gender; // null 허용 - 성별 미선택
+  final String? birthDate; // null 허용 - 생년월일 미입력
   final String nickname;
   final String role;
   final String? deletedAt;
 
   const ProfileModel({
     required this.memberId,
-    this.name,                // nullable
-    this.gender,              // nullable
-    this.birthDate,           // nullable
+    this.name, // nullable
+    this.gender, // nullable
+    this.birthDate, // nullable
     required this.nickname,
     required this.role,
     this.deletedAt,
@@ -25,8 +25,8 @@ class ProfileModel {
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
     return ProfileModel(
       memberId: json['memberId'] as int,
-      name: json['name'] as String?,       // null 허용
-      gender: json['gender'] as String?,   // null 허용
+      name: json['name'] as String?, // null 허용
+      gender: json['gender'] as String?, // null 허용
       birthDate: json['birthDate'] as String?, // null 허용
       nickname: json['nickname'] as String,
       role: json['role'] as String,
@@ -37,9 +37,9 @@ class ProfileModel {
   /// 수정용 JSON 변환 (이름, 성별, 생년월일만)
   Map<String, dynamic> toUpdateJson() {
     return {
-      'name': name ?? '',                    // null인 경우 빈 문자열
-      'gender': gender ?? 'MALE',            // null인 경우 기본값 'MALE'
-      'birthDate': birthDate ?? '19900101',  // null인 경우 기본값 (1990년 1월 1일)
+      'name': name ?? '', // null인 경우 빈 문자열
+      'gender': gender ?? 'MALE', // null인 경우 기본값 'MALE'
+      'birthDate': birthDate ?? '19970101', // null인 경우 기본값 (1997년 1월 1일)
     };
   }
 
@@ -47,7 +47,7 @@ class ProfileModel {
   @override
   String toString() {
     return 'ProfileModel(memberId: $memberId, name: $name, gender: $gender, '
-           'birthDate: $birthDate, nickname: $nickname, role: $role, deletedAt: $deletedAt)';
+        'birthDate: $birthDate, nickname: $nickname, role: $role, deletedAt: $deletedAt)';
   }
 
   /// 수정 가능한 필드만으로 새 인스턴스 생성
@@ -62,7 +62,7 @@ class ProfileModel {
       gender: gender ?? this.gender,
       birthDate: birthDate ?? this.birthDate,
       nickname: nickname, // 수정 불가
-      role: role,         // 수정 불가
+      role: role, // 수정 불가
       deletedAt: deletedAt,
     );
   }
@@ -72,8 +72,8 @@ class ProfileModel {
 
   /// 성별 한국어 표시
   String get genderDisplayName {
-    if (gender == null) return '미선택';  // null 처리
-    
+    if (gender == null) return '미선택'; // null 처리
+
     switch (gender!) {
       case 'MALE':
         return '남성';
@@ -122,9 +122,10 @@ class ProfileModel {
 
   /// 프로필 완성도 확인
   bool get isProfileComplete {
-    return name != null && name!.trim().isNotEmpty &&
-           gender != null &&
-           birthDate != null;
+    return name != null &&
+        name!.trim().isNotEmpty &&
+        gender != null &&
+        birthDate != null;
   }
 
   /// 각 필드별 입력 상태 확인
