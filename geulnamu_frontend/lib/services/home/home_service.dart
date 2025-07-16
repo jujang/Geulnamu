@@ -47,7 +47,7 @@ class HomeService {
   ) async {
     switch (value) {
       case 'profile':
-        _showSnackBar(context, '프로필 기능은 개발 중입니다.');
+        Navigator.pushNamed(context, '/profile'); // 프로필 화면으로 이동
         break;
       case 'settings':
         _showSnackBar(context, '설정 기능은 개발 중입니다.');
@@ -186,24 +186,10 @@ class HomeService {
 
   /// 개인정보 입력 화면으로 이동
   void navigateToProfileInput(BuildContext context) {
-    // TODO: 개인정보 입력 화면 경로가 준비되면 업데이트
     print('🔍 [HomeService] 개인정보 입력 화면으로 이동 요청');
     
-    // 임시로 스낵바 메시지 표시
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('개인정보 입력 화면을 준비 중입니다.'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        action: SnackBarAction(
-          label: '확인',
-          textColor: Theme.of(context).colorScheme.onPrimary,
-          onPressed: () {},
-        ),
-      ),
-    );
-    
-    // 나중에 이것으로 대체:
-    // Navigator.pushNamed(context, '/profile/input');
+    // 프로필 화면으로 이동 (조회/수정 통합)
+    Navigator.pushNamed(context, '/profile');
   }
 
   // 🔒 종합 접근 가능 체크
@@ -251,7 +237,7 @@ class HomeService {
         );
         break;
       case '개인정보 입력하기':
-        navigateToProfileInput(context);
+        Navigator.pushNamed(context, '/profile'); // 프로필 화면으로 이동
         break;
       default:
         _showSnackBar(context, '$menuTitle 기능은 개발 중입니다.');

@@ -662,7 +662,7 @@ class AuthService {
     return prefs.getString(_refreshTokenKey);
   }
 
-  /// 👤 사용자 정보 가져오기
+  /// 👤 사용자 정보 가져오기 (로컬 저장소)
   Future<Map<String, dynamic>?> getUserInfo() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -677,6 +677,98 @@ class AuthService {
         print('❌ 사용자 정보 파싱 오류: $e');
       }
       return null;
+    }
+  }
+
+  /// 🔄 백엔드에서 최신 사용자 정보 가져오기 및 로컬 업데이트
+  /// 
+  /// AuthProvider.updateUserInfo()에서 호출
+  Future<Map<String, dynamic>?> fetchAndUpdateUserInfo() async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🔄 [AuthService] 백엔드에서 최신 사용자 정보 조회 시작...');
+      }
+
+      final accessToken = await getAccessToken();
+      if (accessToken == null || accessToken.isEmpty) {
+        if (AppConfig.debugMode) {
+          print('❌ [AuthService] 액세스 토큰이 없습니다');
+        }
+        return null;
+      }
+
+      // 🚫 캐시 방지 전용 Dio 인스턴스 생성 (ProfileService와 동일한 방식)
+      final noCacheDio = Dio();
+      noCacheDio.options.headers.addAll({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      });
+
+      // 백엔드 API 호출 (강력한 캐시 방지 적용)
+      final response = await noCacheDio.get(
+        AppConfig.getApiEndpoint('members/me/profile'),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+            // 🚫 강력한 캐시 방지 헤더 추가
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            // 🔄 매번 다른 요청으로 인식하도록 타임스탬프 추가
+            'X-Request-Time': DateTime.now().millisecondsSinceEpoch.toString(),
+          },
+        ),
+        // 🚫 쿼리 파라미터로도 캐싱 방지
+        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch},
+      );
+
+      if (response.statusCode == 200) {
+        // ApiUtils를 사용하여 백엔드 커스텀 응답 처리
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '사용자 정보 조회',
+        );
+
+        if (processedResponse['success']) {
+          final profileData = processedResponse['data'];
+          
+          // 기존 사용자 정보 가져오기
+          final existingUserInfo = await getUserInfo() ?? {};
+          
+          // 새로운 사용자 정보 생성 (프로필 데이터로 업데이트)
+          final updatedUserInfo = {
+            ...existingUserInfo,
+            'memberName': profileData['name'], // 🎯 이름 업데이트
+            // 다른 필드들은 기존 값 유지
+          };
+
+          // 로컬 저장소에 업데이트된 정보 저장
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_userInfoKey, jsonEncode(updatedUserInfo));
+
+          if (AppConfig.debugMode) {
+            print('✅ [AuthService] 사용자 정보 업데이트 완료: ${updatedUserInfo['memberName']}');
+          }
+
+          return updatedUserInfo;
+        } else {
+          throw Exception('[사용자 정보 조회] ${processedResponse['message']}');
+        }
+      } else {
+        throw Exception('[사용자 정보 조회] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [AuthService] 사용자 정보 조회 실패: $e');
+      }
+
+      if (e is DioException) {
+        // ApiUtils를 사용하여 통합 에러 처리
+        throw ApiUtils.processDioException(e, '사용자 정보 조회');
+      }
+      rethrow;
     }
   }
 
