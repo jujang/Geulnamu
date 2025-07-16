@@ -285,10 +285,7 @@ class MainLayout extends StatelessWidget {
         Navigator.pushNamed(context, '/profile');
         break;
       case 'settings':
-        // TODO: 설정 화면 구현 후 연결
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('설정 화면은 준비 중입니다.')),
-        );
+        Navigator.pushNamed(context, '/settings');
         break;
       case 'help':
         // TODO: 도움말 화면 구현 후 연결
