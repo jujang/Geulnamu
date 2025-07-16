@@ -28,6 +28,16 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _status == AuthStatus.loading;
   bool get isUninitialized => _status == AuthStatus.uninitialized;
   
+  // AccessToken getter 추가
+  Future<String?> get accessToken async {
+    try {
+      return await _authService.getAccessToken();
+    } catch (e) {
+      print('❌ AccessToken 가져오기 실패: $e');
+      return null;
+    }
+  }
+  
   // 개인정보 상태 접근자
   bool? get profileCompleted => _profileCompleted;
   bool get hasProfile => _profileCompleted == true;
@@ -134,17 +144,34 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// 사용자 정보 업데이트
+  /// 사용자 정보 업데이트 (백엔드에서 최신 데이터 가져오기)
   Future<void> updateUserInfo() async {
     try {
-      final userInfo = await _authService.getUserInfo();
-      if (userInfo != null) {
-        _userInfo = userInfo;
+      if (AppConfig.debugMode) {
+        print('🔄 [AuthProvider] 사용자 정보 업데이트 시작...');
+      }
+
+      // 백엔드에서 최신 사용자 정보 가져오기
+      final updatedUserInfo = await _authService.fetchAndUpdateUserInfo();
+      
+      if (updatedUserInfo != null) {
+        // 🎯 핵심 수정: _userInfo 업데이트 + notifyListeners 호출
+        _userInfo = updatedUserInfo;
         notifyListeners();
-        print('✅ 사용자 정보 업데이트 완료');
+        
+        if (AppConfig.debugMode) {
+          print('✅ [AuthProvider] 사용자 정보 업데이트 완료: ${_userInfo?['memberName'] ?? 'null'}');
+        }
+      } else {
+        if (AppConfig.debugMode) {
+          print('⚠️ [AuthProvider] 사용자 정보 업데이트 실패: null 반환');
+        }
       }
     } catch (e) {
-      print('❌ 사용자 정보 업데이트 실패: $e');
+      if (AppConfig.debugMode) {
+        print('❌ [AuthProvider] 사용자 정보 업데이트 실패: $e');
+      }
+      // 에러가 발생해도 기존 상태 유지
     }
   }
 
@@ -354,10 +381,14 @@ class AuthProvider with ChangeNotifier {
       );
 
       if (profileStatus != null) {
+        final previousStatus = _profileCompleted;
         _profileCompleted = profileStatus;
         notifyListeners();
         
         print('✅ [개인정보 상태 확인] 성공: ${profileStatus ? '완료' : '미입력'}');
+        if (AppConfig.debugMode && previousStatus != profileStatus) {
+          print('🔍 [AuthProvider] 개인정보 상태 변경: $previousStatus -> $profileStatus');
+        }
       } else {
         print('⚠️ [개인정보 상태 확인] 자동 로그아웃 처리됨');
       }

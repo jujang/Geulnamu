@@ -41,6 +41,9 @@ dependencies:
   
   # Utilities
   url_launcher: ^6.3.0
+  intl: ^0.20.2  # 🎯 버전 업데이트 (flutter_localizations 호환성)
+  flutter_localizations:
+    sdk: flutter  # 🎯 한국어 지원을 위해 이 위치로 이동
 
 dev_dependencies:
   flutter_test:

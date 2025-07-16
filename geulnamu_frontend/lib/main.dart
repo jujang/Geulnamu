@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; // 🎯 한국어 지원
 
 // Core imports
 import 'core/config/app_config.dart';
@@ -14,6 +15,7 @@ import 'screens/splash/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 // import 'screens/auth/oauth_callback_screen.dart'; // HTML에서 처리
 import 'screens/home/home_screen.dart';
+import 'screens/profile/profile_screen.dart';
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 
 // 🎯 Global Navigator Key - 전역에서 접근 가능
@@ -60,6 +62,18 @@ class GeulnamuApp extends StatelessWidget {
         darkTheme: GeulnamuTheme.darkTheme,   // 다크 테마 (0F0F0F 배경 + 회색 카드)
         themeMode: ThemeMode.system,          // 시스템 설정에 따라 자동 전환
 
+        // 🎯 한국어 지원 추가
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('ko', 'KR'), // 한국어
+          Locale('en', 'US'), // 영어
+        ],
+        locale: const Locale('ko', 'KR'), // 기본 로케일 한국어
+
         // 라우트 설정 + RouteObserver 등록
         navigatorObservers: [HomeRouteService.routeObserver], // 🎯 RouteObserver 등록
         initialRoute: '/splash',
@@ -68,6 +82,7 @@ class GeulnamuApp extends StatelessWidget {
           '/login': (context) => const LoginScreen(),
           // '/auth/callback': (context) => const OAuthCallbackScreen(), // 주석 처리 - HTML에서 처리
           '/home': (context) => const HomeScreen(),
+          '/profile': (context) => const ProfileScreen(), // 프로필 화면
         },
 
         // 404 처리
