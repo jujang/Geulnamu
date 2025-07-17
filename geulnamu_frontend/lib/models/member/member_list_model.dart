@@ -310,9 +310,10 @@ enum RoleOption {
     );
   }
 
-  /// 해당 권한이 항상 활성 계정만 보여야 하는지 확인
-  /// 이 옵션은 사용하지 않음 (모든 권한에 대해 계정 상태 선택 가능)
+  /// 해당 권한이 비활성 계정 필터를 사용할 수 있는지 확인
+  /// 더 이상 사용하지 않음 - MemberService.canUseDeletedFilter() 사용
+  @Deprecated('더 이상 사용하지 않음. MemberService.canUseDeletedFilter() 사용하세요.')
   bool get forceActiveOnly {
-    return false; // 모든 권한에 대해 계정 상태 선택 가능도록 수정
+    return false;
   }
 }

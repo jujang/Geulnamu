@@ -49,7 +49,21 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
       print('🚀 [MemberLogicMixin] 모임원 목록 초기화 시작');
     }
 
+    // 🎯 사용자 권한에 따른 필터 표시 가능 여부 설정
+    await _updateDeletedFilterPermission();
+
     await loadMemberList(isInitial: true);
+  }
+
+  /// 비활성 계정 필터 표시 권한 업데이트
+  Future<void> _updateDeletedFilterPermission() async {
+    final userRole = await _getUserRole();
+    _canShowDeletedFilterSync = MemberService.canUseDeletedFilter(userRole);
+    
+    if (AppConfig.debugMode) {
+      print('🔍 [MemberLogicMixin] 사용자 권한: $userRole');
+      print('🔍 [MemberLogicMixin] 비활성 계정 필터 사용 가능: $_canShowDeletedFilterSync');
+    }
   }
 
   /// 모임원 목록 조회
@@ -76,9 +90,13 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
         throw Exception('인증 토큰을 가져올 수 없습니다.');
       }
 
+      // 🎯 사용자 권한 정보 가져오기
+      final userRole = await _getUserRole();
+      
       final response = await _memberService.getMemberList(
         filter: filter,
         accessToken: accessToken,
+        userRole: userRole,
       );
 
       _memberListResponse = response;
@@ -180,17 +198,23 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
     await applyFilter(resetFilter);
   }
 
-  /// 특정 권한의 필터링 가능 여부 확인
+  /// 현재 사용자가 비활성 계정 필터를 사용할 수 있는지 확인
   /// 
-  /// 모든 권한에 대해 계정 상태 선택 가능
-  bool canShowDeletedFilter(String? selectedRole) {
-    return true; // 모든 권한에 대해 계정 상태 선택 가능
+  /// 운영진·준운영진은 비활성 계정 필터 사용 불가
+  Future<bool> get canShowDeletedFilter async {
+    final userRole = await _getUserRole();
+    return MemberService.canUseDeletedFilter(userRole);
   }
 
-  /// 현재 필터에 비활성 계정 필터가 적용 가능한지 확인
+  /// 현재 필터에 비활성 계정 필터가 적용 가능한지 확인 (동기 버전)
   bool get canShowCurrentDeletedFilter {
-    return canShowDeletedFilter(_currentFilter.role);
+    // 🎯 이 메서드는 UI에서 즉시 사용되므로 임시로 true 반환
+    // 실제 확인은 _canShowDeletedFilterSync에서 수행
+    return _canShowDeletedFilterSync;
   }
+  
+  /// 동기적으로 비활성 계정 필터 표시 가능 여부 저장
+  bool _canShowDeletedFilterSync = true;
 
   // Private methods
 
@@ -202,6 +226,19 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ [MemberLogicMixin] 액세스 토큰 가져오기 실패: $e');
+      }
+      return null;
+    }
+  }
+
+  /// 사용자 권한 가져오기
+  Future<String?> _getUserRole() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      return authProvider.userRole;
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [MemberLogicMixin] 사용자 권한 가져오기 실패: $e');
       }
       return null;
     }

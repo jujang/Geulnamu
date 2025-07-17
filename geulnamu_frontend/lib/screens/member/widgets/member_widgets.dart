@@ -652,10 +652,6 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                   onSelected: (selected) {
                     setState(() {
                       selectedRole = selected ? option : RoleOption.all;
-                      // 권한 변경 시 비활성 필터 옵션 확인
-                      if (selected && option.forceActiveOnly) {
-                        selectedDeleted = false;
-                      }
                     });
                   },
                   selectedColor: context.colors.primary.withOpacity(0.2),
@@ -668,8 +664,8 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
           
           const SizedBox(height: 16),
           
-          // 활성/비활성 필터 (조건부 표시)
-          if (widget.canShowDeletedFilter && !selectedRole.forceActiveOnly) ...[
+          // 활성/비활성 필터 (조건부 표시) - 🎯 운영진·준운영진은 표시하지 않음
+          if (widget.canShowDeletedFilter) ...[
             MemberWidgets._buildFilterSection(
               context,
               title: '계정 상태',

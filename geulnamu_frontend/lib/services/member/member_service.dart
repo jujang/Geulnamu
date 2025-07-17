@@ -17,19 +17,26 @@ class MemberService {
   /// 
   /// [filter] 필터 및 정렬 옵션
   /// [accessToken] 인증 토큰 (임원진 이상 권한 필요)
+  /// [userRole] 사용자 권한 (운영진·준운영진은 활성 계정만 조회)
   Future<MemberListResponse> getMemberList({
     required MemberListFilter filter,
     required String accessToken,
+    required String? userRole,
   }) async {
     try {
+      // 🎯 운영진·준운영진은 자동으로 활성 계정만 조회
+      final adjustedFilter = _adjustFilterForUserRole(filter, userRole);
+      
       if (AppConfig.debugMode) {
         print('🚀 [모임원 목록 조회] API 요청 시작...');
-        print('🔍 [모임원 목록 조회] 필터: $filter');
+        print('🔍 [모임원 목록 조회] 사용자 권한: $userRole');
+        print('🔍 [모임원 목록 조회] 원본 필터: $filter');
+        print('🔍 [모임원 목록 조회] 조정된 필터: $adjustedFilter');
       }
 
       final response = await _dio.get(
         AppConfig.getApiEndpoint('members/list'),
-        queryParameters: filter.toQueryParameters(),
+        queryParameters: adjustedFilter.toQueryParameters(),
         options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken',
@@ -126,13 +133,42 @@ class MemberService {
     throw UnimplementedError('모임원 상태 변경 기능은 향후 구현 예정입니다.');
   }
 
+  /// 사용자 권한에 따른 필터 조정
+  /// 
+  /// 운영진·준운영진은 자동으로 활성 계정만 조회하도록 필터 조정
+  MemberListFilter _adjustFilterForUserRole(MemberListFilter filter, String? userRole) {
+    // 🎯 운영진·준운영진은 항상 활성 계정만 조회
+    if (userRole == 'STAFF' || userRole == 'VICE_STAFF') {
+      return filter.copyWith(isDeleted: false);
+    }
+    
+    // 다른 권한(관리자, 부모임장, 모임장)은 원본 필터 그대로 사용
+    return filter;
+  }
+
+  /// 사용자 권한이 비활성 계정 필터를 사용할 수 있는지 확인
+  /// 
+  /// 운영진·준운영진은 비활성 계정 필터 사용 불가
+  static bool canUseDeletedFilter(String? userRole) {
+    if (userRole == null) return false;
+    
+    // 🎯 운영진·준운영진은 비활성 계정 필터 사용 불가
+    if (userRole == 'STAFF' || userRole == 'VICE_STAFF') {
+      return false;
+    }
+    
+    // 관리자, 부모임장, 모임장은 비활성 계정 필터 사용 가능
+    return true;
+  }
+
   /// 디버그용 - 서비스 상태 출력
   void printServiceInfo() {
     print('📊 === MemberService 정보 ===');
     print('서비스: 모임원 관리');
     print('권한: STAFF 이상 (임원진 이상)');
     print('주요 기능: 모임원 목록 조회, 필터링, 정렬');
-    print('특별 규칙: 준운영진/운영진은 활성 계정만 표시');
+    print('🆕 특별 규칙: 운영진·준운영진은 활성 계정만 조회');
+    print('🆕 필터 제한: 운영진·준운영진은 비활성 계정 필터 사용 불가');
     print('==========================');
   }
 }
