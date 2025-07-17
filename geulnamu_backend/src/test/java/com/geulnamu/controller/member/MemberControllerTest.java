@@ -255,9 +255,9 @@ public class MemberControllerTest extends ControllerTest {
                     fieldWithPath("data.pagingResponse.totalElements").type(JsonFieldType.NUMBER).description("전체 데이터 수"),
                     fieldWithPath("data.memberList[]").type(JsonFieldType.ARRAY).description("데이터 정보"),
                     fieldWithPath("data.memberList[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
-                    fieldWithPath("data.memberList[].name").type(JsonFieldType.STRING).description("이름"),
-                    fieldWithPath("data.memberList[].gender").type(JsonFieldType.STRING).description("성별"),
-                    fieldWithPath("data.memberList[].birthDate").type(JsonFieldType.STRING).description("생년월일"),
+                    fieldWithPath("data.memberList[].name").type(JsonFieldType.STRING).description("이름").optional(),
+                    fieldWithPath("data.memberList[].gender").type(JsonFieldType.STRING).description("성별").optional(),
+                    fieldWithPath("data.memberList[].birthDate").type(JsonFieldType.STRING).description("생년월일").optional(),
                     fieldWithPath("data.memberList[].nickname").type(JsonFieldType.STRING).description("닉네임(카카오 닉네임)"),
                     fieldWithPath("data.memberList[].role").type(JsonFieldType.STRING).description("권한 등급"),
                     fieldWithPath("data.memberList[].deletedAt").type(JsonFieldType.STRING).optional().description("삭제일자 (삭제되지 않은 경우 null)")

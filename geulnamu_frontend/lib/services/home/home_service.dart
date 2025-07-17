@@ -174,6 +174,9 @@ class HomeService {
         // 🌿 글나무 소개 화면으로 이동 (로그인 무관)
         Navigator.pushNamed(context, '/introduction');
         break;
+      case '모임원 목록':
+        Navigator.pushNamed(context, '/member-list');
+        break;
       case '모임 목록':
         _showSnackBar(context, '모임 목록 기능은 개발 중입니다.');
         break;
@@ -230,6 +233,7 @@ class HomeService {
       '출석 이력',
       '발제 작성',
       '내 발제',
+      '모임원 목록', // 임원진 이상 기능
     ];
 
     if (loginRequiredFeatures.contains(featureName)) {
@@ -242,7 +246,12 @@ class HomeService {
 
   /// 역할 권한 체크
   bool hasRolePermission(String featureName, AuthProvider authProvider) {
-    // 임시로 모든 기능에 대해 true 반환
+    // 모임원 목록은 임원진 이상 권한 필요
+    if (featureName == '모임원 목록') {
+      return authProvider.isStaffLevel;
+    }
+    
+    // 다른 기능들은 임시로 모두 접근 가능
     return true;
   }
 
