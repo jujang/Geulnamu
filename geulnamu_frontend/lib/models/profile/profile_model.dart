@@ -89,13 +89,13 @@ class ProfileModel {
     switch (role) {
       case 'LEADER':
         return '모임장';
-      case 'SUB_LEADER':
+      case 'VICE_LEADER':
         return '부모임장';
       case 'ADMIN':
         return '관리자';
       case 'STAFF':
         return '운영진';
-      case 'SUB_STAFF':
+      case 'VICE_STAFF':
         return '준운영진';
       case 'MEMBER':
         return '일반 회원';

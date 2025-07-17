@@ -5,6 +5,7 @@ import com.geulnamu.controller.member.dto.response.MemberInfoResponse;
 import com.geulnamu.domain.member.Gender;
 import com.geulnamu.domain.member.QMember;
 import com.geulnamu.domain.shared.enums.Role;
+import com.geulnamu.infrastructure.util.EnumOrderUtil;
 import com.geulnamu.infrastructure.util.QueryDslUtil;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -30,13 +31,13 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
     public Page<MemberInfoResponse> findMembersWithPaging(MemberListRequest request) {
         Pageable pageable = request.toPageable();
 
-        List<Long> count = queryFactory
+        final Long totalCount = queryFactory
             .select(member.count())
             .from(member)
             .where(filterByGender(request.getGender()),
                 filterByRole(request.getRole()),
                 filterByIsDeleted(request.getIsDeleted()))
-            .fetch();
+            .fetchOne();
 
         List<MemberInfoResponse> content = queryFactory
             .select(Projections.constructor(MemberInfoResponse.class,
@@ -51,12 +52,12 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
             .limit(pageable.getPageSize())
             .fetch();
 
-        return PageableExecutionUtils.getPage(content, pageable, count::size);
+        return PageableExecutionUtils.getPage(content, pageable, () -> totalCount != null ? totalCount : 0L);
     }
 
 
     BooleanExpression filterByGender(Gender gender) {
-        if(gender == null) return member.gender.isNotNull();
+        if(gender == null) return null;
         else if(gender.equals(Gender.MALE)) return member.gender.eq(Gender.MALE);
         else return member.gender.eq(Gender.FEMALE);
     }
@@ -75,7 +76,7 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
 
     BooleanExpression filterByIsDeleted(Boolean isDeleted) {
         if(isDeleted == null) {
-            return member.deletedAt.isNull().or(member.deletedAt.isNotNull());
+            return null;
         } else if(isDeleted) {
             return member.deletedAt.isNotNull();
         } else {
@@ -88,7 +89,12 @@ public class MemberQueryRepositoryImpl implements MemberQueryRepositoryCustom {
         if(sortBy == null) return QueryDslUtil.getSortedColumn(Order.ASC, member, "name");
         if(isAsc == null) isAsc = false;
 
-        return (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, member, sortBy)
-            : QueryDslUtil.getSortedColumn(Order.DESC, member, sortBy);
+        if(sortBy.equals("role")) {
+            return EnumOrderUtil.createEnumOrder(member.role, Role.class, isAsc);
+        } else {
+            return (isAsc) ? QueryDslUtil.getSortedColumn(Order.ASC, member, sortBy)
+                : QueryDslUtil.getSortedColumn(Order.DESC, member, sortBy);
+        }
+
     }
 }

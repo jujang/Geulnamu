@@ -198,6 +198,47 @@ class AuthProvider with ChangeNotifier {
     return _userInfo?['profileImageUrl'];
   }
 
+  /// 사용자 권한 가져오기
+  String? get userRole {
+    return _userInfo?['role'];
+  }
+
+  /// 임원진 이상 권한 확인 (운영진, 준운영진, 관리자, 부모임장, 모임장)
+  bool get isStaffLevel {
+    if (userRole == null) return false;
+    const staffRoles = ['STAFF', 'VICE_STAFF', 'ADMIN', 'VICE_LEADER', 'LEADER'];
+    return staffRoles.contains(userRole);
+  }
+
+  /// 관리자급 이상 권한 확인 (관리자, 부모임장, 모임장)
+  bool get isAdminLevel {
+    if (userRole == null) return false;
+    const adminRoles = ['ADMIN', 'VICE_LEADER', 'LEADER'];
+    return adminRoles.contains(userRole);
+  }
+
+  /// 권한 레벨 표시명 가져오기
+  String get roleDisplayName {
+    if (userRole == null) return '알 수 없음';
+    
+    switch (userRole!) {
+      case 'LEADER':
+        return '모임장';
+      case 'VICE_LEADER':
+        return '부모임장';
+      case 'ADMIN':
+        return '관리자';
+      case 'STAFF':
+        return '운영진';
+      case 'VICE_STAFF':
+        return '준운영진';
+      case 'MEMBER':
+        return '일반 회원';
+      default:
+        return '알 수 없음';
+    }
+  }
+
   // Private methods
   void _setStatus(AuthStatus status) {
     _status = status;

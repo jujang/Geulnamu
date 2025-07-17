@@ -30,12 +30,12 @@ public class VoCQueryRepositoryImpl implements VoCQueryRepositoryCustom {
     public Page<VoCViewResponse> findVoCIssuesWithPaging(VoCViewListRequest request) {
         Pageable pageable = request.toPageable();
 
-        List<Long> count = queryFactory
+        final Long totalCount = queryFactory
             .select(voC.count())
             .from(voC)
             .where(filterByIssueStatus(request.getIssueStatus()),
                 filterByVoCType(request.getVoCType()))
-            .fetch();
+            .fetchOne();
 
         List<VoCViewResponse> content = queryFactory
             .select(Projections.constructor(VoCViewResponse.class,
@@ -51,7 +51,7 @@ public class VoCQueryRepositoryImpl implements VoCQueryRepositoryCustom {
             .limit(pageable.getPageSize())
             .fetch();
 
-        return PageableExecutionUtils.getPage(content, pageable, count::size);
+        return PageableExecutionUtils.getPage(content, pageable, () -> totalCount != null ? totalCount : 0L);
     }
 
 
