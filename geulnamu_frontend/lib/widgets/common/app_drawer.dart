@@ -54,6 +54,18 @@ class AppDrawer extends StatelessWidget {
                       ),
                     ]),
 
+                    // 👥 모임원 섹션 (임원진 이상만)
+                    if (authProvider.isAuthenticated &&
+                        authProvider.isStaffLevel)
+                      _buildMenuSection(context, '모임원', [
+                        _DrawerMenuItem(
+                          icon: Icons.people_outlined,
+                          title: '모임원 목록',
+                          subtitle: '전체 모임원 보기',
+                          onTap: () => _handleMenuTap(context, '모임원 목록'),
+                        ),
+                      ]),
+
                     // 📚 모임 섹션 (로그인 후에만)
                     if (authProvider.isAuthenticated) ...[
                       _buildMenuSection(context, '모임', [
