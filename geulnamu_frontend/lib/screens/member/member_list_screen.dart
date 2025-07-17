@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../core/theme.dart';
 import '../../models/member/member_list_model.dart';
+import '../../services/home/home_service.dart'; // 🎯 HomeService import 추가
 import 'mixins/member_logic_mixin.dart';
 import 'widgets/member_widgets.dart';
 
@@ -23,6 +24,8 @@ class MemberListScreen extends StatefulWidget {
 
 class _MemberListScreenState extends State<MemberListScreen> 
     with MemberLogicMixin {
+
+  final HomeService _homeService = HomeService(); // 🎯 HomeService 인스턴스 추가
 
   @override
   void initState() {
@@ -59,7 +62,10 @@ class _MemberListScreenState extends State<MemberListScreen>
   Widget build(BuildContext context) {
     return MainLayout(
       title: '모임원 목록',
-      isHomePage: false, // 서브 화면이므로 뒤로가기 버튼 표시
+      isHomePage: true, // 🎯 메인 기능이므로 사이드바 버튼 표시
+      // 🎯 HomeService를 통한 메뉴 및 로그아웃 처리
+      onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
+      onLogoutTap: () => _handleLogout(),
       body: Stack(
         children: [
           // 메인 콘텐츠
@@ -165,6 +171,12 @@ class _MemberListScreenState extends State<MemberListScreen>
         canShowDeletedFilter: canShowCurrentDeletedFilter,
       ),
     );
+  }
+
+  /// 로그아웃 처리 (HomeService 활용)
+  Future<void> _handleLogout() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await _homeService.handleLogout(context, authProvider);
   }
 
   /// 모임원 카드 탭 처리

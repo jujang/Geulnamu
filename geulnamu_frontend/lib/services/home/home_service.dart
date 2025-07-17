@@ -70,7 +70,24 @@ class HomeService {
 
     if (confirmed == true) {
       await authProvider.logout(context: context);
-      _showSnackBar(context, '로그아웃되었습니다.');
+      
+      // 🎯 로그아웃 후 자동으로 홈으로 이동 (모든 이전 라우트 제거)
+      if (context.mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/home',
+          (route) => false, // 모든 이전 라우트 제거
+        );
+      }
+      
+      // 🎯 홈 이동 후 스낵바 표시 (약간의 딜레이)
+      if (context.mounted) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (context.mounted) {
+            _showSnackBar(context, '로그아웃되었습니다.');
+          }
+        });
+      }
     }
   }
 
