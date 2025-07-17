@@ -31,7 +31,7 @@ public class ActionHistoryQueryRepositoryImpl implements ActionHistoryQueryRepos
     public Page<ActionHistoryResponse> findActionHistoriesWithPaging(ActionHistoryListRequest request) {
         Pageable pageable = request.toPageable();
 
-        List<Long> count = queryFactory
+        final Long totalCount = queryFactory
             .select(actionHistory.count())
             .from(actionHistory)
             .where(
@@ -39,7 +39,7 @@ public class ActionHistoryQueryRepositoryImpl implements ActionHistoryQueryRepos
                 filterByActionDomain(request.getActionDomain()),
                 filterByApiMethod(request.getApiMethod())
             )
-            .fetch();
+            .fetchOne();
 
         List<ActionHistoryResponse> content = queryFactory
             .select(Projections.constructor(ActionHistoryResponse.class,
@@ -63,7 +63,7 @@ public class ActionHistoryQueryRepositoryImpl implements ActionHistoryQueryRepos
             .limit(pageable.getPageSize())
             .fetch();
 
-        return PageableExecutionUtils.getPage(content, pageable, count::size);
+        return PageableExecutionUtils.getPage(content, pageable, () -> totalCount != null ? totalCount : 0L);
     }
 
 

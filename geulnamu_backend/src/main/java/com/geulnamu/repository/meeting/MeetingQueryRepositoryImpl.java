@@ -50,7 +50,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
     public Page<MeetingInfoResponse> findMeetingsWithPaging(MeetingListRequest request, Long myMemberId) {
         Pageable pageable = request.toPageable();
 
-        List<Long> count = queryFactory
+        final Long totalCount = queryFactory
             .select(meeting.count())
             .from(meeting)
             .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id)
@@ -60,7 +60,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
                 filterByMemberId(request.getMeetingCreatorId()),
                 filterByAttendanceStatus(request.getAttendanceStatus())
             )
-            .fetch();
+            .fetchOne();
 
         List<MeetingInfoResponse> content = queryFactory
             .select(Projections.constructor(MeetingInfoResponse.class,
@@ -82,7 +82,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
             .limit(pageable.getPageSize())
             .fetch();
 
-        return PageableExecutionUtils.getPage(content, pageable, count::size);
+        return PageableExecutionUtils.getPage(content, pageable, () -> totalCount != null ? totalCount : 0L);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
     public Page<MeetingInfoForStaffResponse> findMeetingsForAdminWithPaging(MeetingListRequest request) {
         Pageable pageable = request.toPageable();
 
-        List<Long> count = queryFactory
+        final Long totalCount = queryFactory
             .select(meeting.count())
             .from(meeting)
             .where(
@@ -118,7 +118,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
                 filterByMemberId(request.getMeetingCreatorId()),
                 filterByIsPrivateOrNot(request.getIsPrivate())
             )
-            .fetch();
+            .fetchOne();
 
         List<MeetingInfoForStaffResponse> content = queryFactory
             .select(Projections.constructor(MeetingInfoForStaffResponse.class,
@@ -139,7 +139,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
             .limit(pageable.getPageSize())
             .fetch();
 
-        return PageableExecutionUtils.getPage(content, pageable, count::size);
+        return PageableExecutionUtils.getPage(content, pageable, () -> totalCount != null ? totalCount : 0L);
     }
 
 
