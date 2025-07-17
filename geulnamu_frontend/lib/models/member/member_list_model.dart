@@ -187,10 +187,10 @@ class MemberListFilter {
     this.gender,
     this.role,
     this.isDeleted,
-    this.sortBy = 'role', // 기본값: 권한순
-    this.isAsc = false, // 기본값: 내림차순 (높은 권한부터)
+    this.sortBy = 'id', // 기본값: ID순으로 변경
+    this.isAsc = false, // 기본값: 내림차순 (높은 ID부터)
     this.page = 1,
-    this.size = 20,
+    this.size = 10, // 페이지 크기 10명으로 변경
   });
 
   /// 쿼리 파라미터로 변환
@@ -264,7 +264,7 @@ enum SortOption {
   static SortOption fromValue(String value) {
     return values.firstWhere(
       (option) => option.value == value,
-      orElse: () => SortOption.role,
+      orElse: () => SortOption.id, // 기본값을 ID순으로 변경
     );
   }
 }
@@ -311,8 +311,8 @@ enum RoleOption {
   }
 
   /// 해당 권한이 항상 활성 계정만 보여야 하는지 확인
-  /// 준운영진, 운영진은 비활성 필터 옵션 제공 안함
+  /// 이 옵션은 사용하지 않음 (모든 권한에 대해 계정 상태 선택 가능)
   bool get forceActiveOnly {
-    return this == RoleOption.viceStaff || this == RoleOption.staff;
+    return false; // 모든 권한에 대해 계정 상태 선택 가능도록 수정
   }
 }

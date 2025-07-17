@@ -182,10 +182,9 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 특정 권한의 필터링 가능 여부 확인
   /// 
-  /// 준운영진, 운영진은 비활성 계정 필터 옵션 제공 안함
+  /// 모든 권한에 대해 계정 상태 선택 가능
   bool canShowDeletedFilter(String? selectedRole) {
-    final roleOption = RoleOption.fromValue(selectedRole);
-    return !roleOption.forceActiveOnly;
+    return true; // 모든 권한에 대해 계정 상태 선택 가능
   }
 
   /// 현재 필터에 비활성 계정 필터가 적용 가능한지 확인

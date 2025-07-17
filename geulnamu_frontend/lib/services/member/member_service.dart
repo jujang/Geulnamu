@@ -17,10 +17,6 @@ class MemberService {
   /// 
   /// [filter] 필터 및 정렬 옵션
   /// [accessToken] 인증 토큰 (임원진 이상 권한 필요)
-  /// 
-  /// 권한별 비활성 계정 필터링:
-  /// - 준운영진, 운영진: 항상 활성 계정만 조회
-  /// - 기타 권한: 필터 옵션에 따라 조회
   Future<MemberListResponse> getMemberList({
     required MemberListFilter filter,
     required String accessToken,
@@ -31,12 +27,9 @@ class MemberService {
         print('🔍 [모임원 목록 조회] 필터: $filter');
       }
 
-      // 🎯 특별 처리: 준운영진/운영진 선택 시 강제로 활성 계정만 조회
-      final adjustedFilter = _adjustFilterForStaffRoles(filter);
-
       final response = await _dio.get(
         AppConfig.getApiEndpoint('members/list'),
-        queryParameters: adjustedFilter.toQueryParameters(),
+        queryParameters: filter.toQueryParameters(),
         options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken',
@@ -56,6 +49,7 @@ class MemberService {
         if (AppConfig.debugMode) {
           print('✅ [모임원 목록 조회] 성공: ${memberListResponse.memberList.length}명');
           print('📄 [모임원 목록 조회] 페이지: ${memberListResponse.pagingResponse.pageNumber}/${memberListResponse.pagingResponse.totalPages}');
+          print('📄 [모임원 목록 조회] 전체 인원: ${memberListResponse.pagingResponse.totalElements}명');
         }
 
         return memberListResponse;
@@ -68,23 +62,6 @@ class MemberService {
       }
       rethrow;
     }
-  }
-
-  /// 준운영진/운영진 선택 시 필터 조정
-  /// 
-  /// 해당 권한들은 항상 활성 계정만 보여야 함
-  MemberListFilter _adjustFilterForStaffRoles(MemberListFilter filter) {
-    final selectedRole = RoleOption.fromValue(filter.role);
-    
-    // 준운영진 또는 운영진 선택 시 강제로 활성 계정만 조회
-    if (selectedRole.forceActiveOnly) {
-      if (AppConfig.debugMode) {
-        print('🔒 [모임원 목록 조회] ${selectedRole.displayName} 선택 - 활성 계정만 조회');
-      }
-      return filter.copyWith(isDeleted: false);
-    }
-
-    return filter;
   }
 
   /// 특정 모임원 상세 조회 (관리자급 이상)

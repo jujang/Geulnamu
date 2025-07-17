@@ -19,16 +19,15 @@ class MemberWidgets {
     final isActive = member.isActive;
     
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4), // 세로 간격 줄임
-      elevation: isActive ? null : 0, // 비활성 계정은 그림자 제거
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      elevation: isActive ? null : 0,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(12), // 패딩 줄임 (16 → 12)
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            // 🎯 비활성 계정 강화된 시각적 구분
             color: isActive 
                 ? null 
                 : context.colors.surfaceVariant.withOpacity(0.3),
@@ -41,14 +40,15 @@ class MemberWidgets {
           ),
           child: Row(
             children: [
+              // 🎯 첫 번째 열: 이름, 닉네임, 성별, 생년월일
               Expanded(
+                flex: 3,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 🎯 이름 + 닉네임 (한 줄로 슬림화)
+                    // 이름 + 닉네임
                     Row(
                       children: [
-                        // 이름 (메인)
                         Text(
                           member.displayName,
                           style: context.textStyles.titleMedium?.copyWith(
@@ -59,7 +59,6 @@ class MemberWidgets {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        // 🎯 닉네임 (소괄호로 이름 옆에)
                         Text(
                           '(${member.nickname})',
                           style: context.textStyles.bodySmall?.copyWith(
@@ -71,19 +70,18 @@ class MemberWidgets {
                       ],
                     ),
                     
-                    const SizedBox(height: 6), // 간격 줄임 (12 → 6)
+                    const SizedBox(height: 6),
                     
-                    // 🎯 성별 + 생년월일 + ID (한 줄로 압축)
+                    // 성별 + 생년월일
                     Row(
                       children: [
-                        // 성별 아이콘
                         Icon(
                           member.gender == 'MALE' 
                               ? Icons.male 
                               : member.gender == 'FEMALE'
                                   ? Icons.female
                                   : Icons.help_outline,
-                          size: 14, // 아이콘 크기 줄임
+                          size: 14,
                           color: isActive
                               ? context.colors.onSurfaceVariant
                               : context.colors.onSurfaceVariant.withOpacity(0.5),
@@ -100,10 +98,9 @@ class MemberWidgets {
                         
                         const SizedBox(width: 12),
                         
-                        // 생년월일 아이콘
                         Icon(
                           Icons.cake_outlined,
-                          size: 14, // 아이콘 크기 줄임
+                          size: 14,
                           color: isActive
                               ? context.colors.onSurfaceVariant
                               : context.colors.onSurfaceVariant.withOpacity(0.5),
@@ -119,27 +116,55 @@ class MemberWidgets {
                             ),
                           ),
                         ),
-                        
-                        // ID 표시 (우측 끝)
-                        Text(
-                          '#${member.memberId}',
-                          style: context.textStyles.bodySmall?.copyWith(
-                            color: isActive
-                                ? context.colors.outline
-                                : context.colors.outline.withOpacity(0.5),
-                            fontFamily: 'monospace',
-                          ),
-                        ),
                       ],
                     ),
                   ],
                 ),
               ),
               
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               
-              // 🎯 권한 배지 (우측)
-              _buildRoleBadge(context, member.roleDisplayName, isActive),
+              // 🎯 두 번째 열: 권한 배지 + 모임원 ID (정밀한 정렬)
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 3), // 🎯 우측 여백 4 → 3으로 수정
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // 🎯 권한 배지 (이름/닉네임과 정확히 같은 높이)
+                      SizedBox(
+                        height: 26, // 🎯 높이 증가: 20 → 26 (배지가 짤리지 않도록)
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: _buildRoleBadge(context, member.roleDisplayName, isActive),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 10), // 🎯 간격 증가: 6 → 10
+                      
+                      // 🎯 모임원 ID (성별/생년월일과 같은 높이, 추가 패딩)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 3), // 🎯 ID만 추가 패딩 3
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            '#${member.memberId}',
+                            style: context.textStyles.bodySmall?.copyWith(
+                              color: isActive
+                                  ? context.colors.outline
+                                  : context.colors.outline.withOpacity(0.5),
+                              fontFamily: 'monospace',
+                              fontSize: 11,
+                              height: 1.0, // 라인 높이 조정
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -172,18 +197,17 @@ class MemberWidgets {
         badgeColor = Colors.grey;
     }
 
-    // 🎯 비활성 계정 색상 강화된 대비
     if (!isActive) {
-      badgeColor = badgeColor.withOpacity(0.3); // 더 연한 색상
+      badgeColor = badgeColor.withOpacity(0.3);
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3), // 크기 아주 조금 줄임
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4), // 🎯 패딩 조정: 원래 6,3에서 살짝만 증가
       decoration: BoxDecoration(
         color: badgeColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10), // 더 작은 보던
+        borderRadius: BorderRadius.circular(11), // 🎯 둥근 모서리 조정: 10에서 살짝만 증가
         border: Border.all(
-          color: badgeColor.withOpacity(isActive ? 0.3 : 0.2), // 비활성 시 더 연한 테두리
+          color: badgeColor.withOpacity(isActive ? 0.3 : 0.2),
           width: 1,
         ),
       ),
@@ -192,15 +216,13 @@ class MemberWidgets {
         style: context.textStyles.labelSmall?.copyWith(
           color: badgeColor,
           fontWeight: FontWeight.w600,
-          fontSize: 10, // 택스트 크기 조금 줄임
+          fontSize: 10,
         ),
       ),
     );
   }
 
   /// 플로팅 필터 버튼
-  /// 
-  /// [onPressed] 필터 버튼 탭 콜백
   static Widget buildFilterFab(BuildContext context, VoidCallback onPressed) {
     return FloatingActionButton(
       onPressed: onPressed,
@@ -211,253 +233,16 @@ class MemberWidgets {
   }
 
   /// 필터 바텀시트
-  /// 
-  /// [currentFilter] 현재 필터 설정
-  /// [onFilterChanged] 필터 변경 콜백
-  /// [canShowDeletedFilter] 비활성 계정 필터 표시 여부
   static Widget buildFilterBottomSheet(
     BuildContext context, {
     required MemberListFilter currentFilter,
     required Function(MemberListFilter) onFilterChanged,
     required bool canShowDeletedFilter,
   }) {
-    return StatefulBuilder(
-      builder: (context, setModalState) {
-        // 지역 상태 변수들
-        GenderOption selectedGender = GenderOption.fromValue(currentFilter.gender);
-        RoleOption selectedRole = RoleOption.fromValue(currentFilter.role);
-        bool? selectedDeleted = currentFilter.isDeleted;
-        SortOption selectedSort = SortOption.fromValue(currentFilter.sortBy);
-        bool isAscending = currentFilter.isAsc;
-
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 헤더
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '필터 및 정렬',
-                    style: context.textStyles.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // 필터 초기화
-                      setModalState(() {
-                        selectedGender = GenderOption.all;
-                        selectedRole = RoleOption.all;
-                        selectedDeleted = null;
-                        selectedSort = SortOption.role;
-                        isAscending = false;
-                      });
-                    },
-                    child: Text(
-                      '초기화',
-                      style: TextStyle(color: context.colors.primary),
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // 성별 필터
-              _buildFilterSection(
-                context,
-                title: '성별',
-                child: Wrap(
-                  spacing: 8,
-                  children: GenderOption.values.map((option) {
-                    final isSelected = selectedGender == option;
-                    return ChoiceChip( // FilterChip 대신 ChoiceChip 사용
-                      label: Text(option.displayName),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        if (selected) {
-                          setModalState(() {
-                            selectedGender = option;
-                          });
-                        }
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // 권한 필터
-              _buildFilterSection(
-                context,
-                title: '권한',
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: RoleOption.values.map((option) {
-                    final isSelected = selectedRole == option;
-                    return ChoiceChip( // FilterChip 대신 ChoiceChip 사용
-                      label: Text(option.displayName),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        if (selected) {
-                          setModalState(() {
-                            selectedRole = option;
-                            // 권한 변경 시 비활성 필터 옵션 확인
-                            if (option.forceActiveOnly) {
-                              selectedDeleted = false;
-                            }
-                          });
-                        }
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // 활성/비활성 필터 (조건부 표시)
-              if (canShowDeletedFilter && !selectedRole.forceActiveOnly) ...[
-                _buildFilterSection(
-                  context,
-                  title: '계정 상태',
-                  child: Wrap(
-                    spacing: 8,
-                    children: [
-                      ChoiceChip( // FilterChip 대신 ChoiceChip 사용
-                        label: const Text('전체'),
-                        selected: selectedDeleted == null,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setModalState(() {
-                              selectedDeleted = null;
-                            });
-                          }
-                        },
-                      ),
-                      ChoiceChip(
-                        label: const Text('활성만'),
-                        selected: selectedDeleted == false,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setModalState(() {
-                              selectedDeleted = false;
-                            });
-                          }
-                        },
-                      ),
-                      ChoiceChip(
-                        label: const Text('비활성만'),
-                        selected: selectedDeleted == true,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setModalState(() {
-                              selectedDeleted = true;
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-              
-              // 정렬
-              _buildFilterSection(
-                context,
-                title: '정렬',
-                child: Column(
-                  children: [
-                    // 정렬 기준
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: SortOption.values.map((option) {
-                        final isSelected = selectedSort == option;
-                        return ChoiceChip( // FilterChip 대신 ChoiceChip 사용
-                          label: Text(option.displayName),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            if (selected) {
-                              setModalState(() {
-                                selectedSort = option;
-                              });
-                            }
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    
-                    const SizedBox(height: 8),
-                    
-                    // 정렬 순서
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ChoiceChip( // FilterChip 대신 ChoiceChip 사용
-                          label: const Text('오름차순'),
-                          selected: isAscending,
-                          onSelected: (selected) {
-                            if (selected) {
-                              setModalState(() {
-                                isAscending = true;
-                              });
-                            }
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        ChoiceChip(
-                          label: const Text('내림차순'),
-                          selected: !isAscending,
-                          onSelected: (selected) {
-                            if (selected) {
-                              setModalState(() {
-                                isAscending = false;
-                              });
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // 적용 버튼
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final newFilter = MemberListFilter(
-                      gender: selectedGender.value,
-                      role: selectedRole.value,
-                      isDeleted: selectedDeleted,
-                      sortBy: selectedSort.value,
-                      isAsc: isAscending,
-                    );
-                    
-                    Navigator.pop(context);
-                    onFilterChanged(newFilter);
-                  },
-                  child: const Text('적용'),
-                ),
-              ),
-              
-              // 하단 여백 (키보드 대응)
-              SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-            ],
-          ),
-        );
-      },
+    return _FilterBottomSheetContent(
+      currentFilter: currentFilter,
+      onFilterChanged: onFilterChanged,
+      canShowDeletedFilter: canShowDeletedFilter,
     );
   }
 
@@ -484,10 +269,6 @@ class MemberWidgets {
   }
 
   /// 페이지네이션 위젯
-  /// 
-  /// [currentPage] 현재 페이지
-  /// [totalPages] 전체 페이지 수
-  /// [onPageChanged] 페이지 변경 콜백
   static Widget buildPagination(
     BuildContext context, {
     required int currentPage,
@@ -621,9 +402,6 @@ class MemberWidgets {
   }
 
   /// 에러 위젯
-  /// 
-  /// [message] 에러 메시지
-  /// [onRetry] 재시도 콜백
   static Widget buildError(
     BuildContext context, {
     required String message,
@@ -698,9 +476,6 @@ class MemberWidgets {
   }
 
   /// 목록 정보 헤더
-  /// 
-  /// [totalElements] 전체 요소 수
-  /// [currentFilter] 현재 필터
   static Widget buildListHeader(
     BuildContext context, {
     required int totalElements,
@@ -715,12 +490,15 @@ class MemberWidgets {
             '총 ${totalElements}명',
             style: context.textStyles.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
+              // 🎯 다크모드 대비 강화: 더 밝은 텍스트 색상 사용
+              color: context.colors.onBackground,
             ),
           ),
           Text(
             _getFilterSummary(currentFilter),
             style: context.textStyles.bodySmall?.copyWith(
-              color: context.colors.onSurfaceVariant,
+              // 🎯 다크모드 대비 강화: onSurfaceVariant 대신 onBackground 사용
+              color: context.colors.onBackground.withOpacity(0.7),
             ),
           ),
         ],
@@ -757,5 +535,281 @@ class MemberWidgets {
     filterParts.add('${sort.displayName}$order');
 
     return filterParts.join(' · ');
+  }
+}
+
+/// 🎯 필터 바텀시트 콘텐츠 위젯 (StatefulWidget으로 분리)
+class _FilterBottomSheetContent extends StatefulWidget {
+  final MemberListFilter currentFilter;
+  final Function(MemberListFilter) onFilterChanged;
+  final bool canShowDeletedFilter;
+
+  const _FilterBottomSheetContent({
+    required this.currentFilter,
+    required this.onFilterChanged,
+    required this.canShowDeletedFilter,
+  });
+
+  @override
+  State<_FilterBottomSheetContent> createState() => _FilterBottomSheetContentState();
+}
+
+class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
+  late GenderOption selectedGender;
+  late RoleOption selectedRole;
+  late bool? selectedDeleted;
+  late SortOption selectedSort;
+  late bool isAscending;
+
+  @override
+  void initState() {
+    super.initState();
+    // 🎯 초기값 설정 - ID순, 내림차순으로 변경
+    selectedGender = GenderOption.fromValue(widget.currentFilter.gender);
+    selectedRole = RoleOption.fromValue(widget.currentFilter.role);
+    selectedDeleted = widget.currentFilter.isDeleted;
+    selectedSort = SortOption.fromValue(widget.currentFilter.sortBy);
+    isAscending = widget.currentFilter.isAsc;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 헤더
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '필터 및 정렬',
+                style: context.textStyles.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  // 필터 초기화 - ID순, 내림차순으로 설정
+                  setState(() {
+                    selectedGender = GenderOption.all;
+                    selectedRole = RoleOption.all;
+                    selectedDeleted = null;
+                    selectedSort = SortOption.id; // ID순으로 초기화
+                    isAscending = false; // 내림차순으로 초기화
+                  });
+                },
+                child: Text(
+                  '초기화',
+                  style: TextStyle(color: context.colors.primary),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // 성별 필터
+          MemberWidgets._buildFilterSection(
+            context,
+            title: '성별',
+            child: Wrap(
+              spacing: 8,
+              children: GenderOption.values.map((option) {
+                final isSelected = selectedGender == option;
+                return FilterChip(
+                  label: Text(option.displayName),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      selectedGender = selected ? option : GenderOption.all;
+                    });
+                  },
+                  selectedColor: context.colors.primary.withOpacity(0.2),
+                  checkmarkColor: context.colors.primary,
+                  backgroundColor: context.colors.surfaceVariant,
+                );
+              }).toList(),
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // 권한 필터
+          MemberWidgets._buildFilterSection(
+            context,
+            title: '권한',
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: RoleOption.values.map((option) {
+                final isSelected = selectedRole == option;
+                return FilterChip(
+                  label: Text(option.displayName),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      selectedRole = selected ? option : RoleOption.all;
+                      // 권한 변경 시 비활성 필터 옵션 확인
+                      if (selected && option.forceActiveOnly) {
+                        selectedDeleted = false;
+                      }
+                    });
+                  },
+                  selectedColor: context.colors.primary.withOpacity(0.2),
+                  checkmarkColor: context.colors.primary,
+                  backgroundColor: context.colors.surfaceVariant,
+                );
+              }).toList(),
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // 활성/비활성 필터 (조건부 표시)
+          if (widget.canShowDeletedFilter && !selectedRole.forceActiveOnly) ...[
+            MemberWidgets._buildFilterSection(
+              context,
+              title: '계정 상태',
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  FilterChip(
+                    label: const Text('전체'),
+                    selected: selectedDeleted == null,
+                    onSelected: (selected) {
+                      setState(() {
+                        selectedDeleted = selected ? null : false;
+                      });
+                    },
+                    selectedColor: context.colors.primary.withOpacity(0.2),
+                    checkmarkColor: context.colors.primary,
+                    backgroundColor: context.colors.surfaceVariant,
+                  ),
+                  FilterChip(
+                    label: const Text('활성만'),
+                    selected: selectedDeleted == false,
+                    onSelected: (selected) {
+                      setState(() {
+                        selectedDeleted = selected ? false : null;
+                      });
+                    },
+                    selectedColor: context.colors.primary.withOpacity(0.2),
+                    checkmarkColor: context.colors.primary,
+                    backgroundColor: context.colors.surfaceVariant,
+                  ),
+                  FilterChip(
+                    label: const Text('비활성만'),
+                    selected: selectedDeleted == true,
+                    onSelected: (selected) {
+                      setState(() {
+                        selectedDeleted = selected ? true : null;
+                      });
+                    },
+                    selectedColor: context.colors.primary.withOpacity(0.2),
+                    checkmarkColor: context.colors.primary,
+                    backgroundColor: context.colors.surfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          
+          // 정렬
+          MemberWidgets._buildFilterSection(
+            context,
+            title: '정렬',
+            child: Column(
+              children: [
+                // 정렬 기준
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: SortOption.values.map((option) {
+                    final isSelected = selectedSort == option;
+                    return FilterChip(
+                      label: Text(option.displayName),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                        selectedSort = selected ? option : SortOption.id; // 기본값을 ID순으로
+                        });
+                      },
+                      selectedColor: context.colors.primary.withOpacity(0.2),
+                      checkmarkColor: context.colors.primary,
+                      backgroundColor: context.colors.surfaceVariant,
+                    );
+                  }).toList(),
+                ),
+                
+                const SizedBox(height: 8),
+                
+                // 정렬 순서 (ChoiceChip 유지 - 단일 선택)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ChoiceChip(
+                      label: const Text('오름차순'),
+                      selected: isAscending,
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() {
+                            isAscending = true;
+                          });
+                        }
+                      },
+                      selectedColor: context.colors.primary.withOpacity(0.2),
+                      backgroundColor: context.colors.surfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    ChoiceChip(
+                      label: const Text('내림차순'),
+                      selected: !isAscending,
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() {
+                            isAscending = false;
+                          });
+                        }
+                      },
+                      selectedColor: context.colors.primary.withOpacity(0.2),
+                      backgroundColor: context.colors.surfaceVariant,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // 적용 버튼
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                final newFilter = MemberListFilter(
+                  gender: selectedGender.value,
+                  role: selectedRole.value,
+                  isDeleted: selectedDeleted,
+                  sortBy: selectedSort.value,
+                  isAsc: isAscending,
+                );
+                
+                Navigator.pop(context);
+                widget.onFilterChanged(newFilter);
+              },
+              child: const Text('적용'),
+            ),
+          ),
+          
+          // 하단 여백 (키보드 대응)
+          SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+        ],
+      ),
+    );
   }
 }
