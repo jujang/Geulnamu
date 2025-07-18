@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../core/theme.dart';
+import '../../core/config/app_config.dart'; // 🎯 AppConfig import 추가
 import '../../models/member/member_list_model.dart';
 import '../../services/home/home_service.dart'; // 🎯 HomeService import 추가
 import 'mixins/member_logic_mixin.dart';
@@ -181,12 +182,31 @@ class _MemberListScreenState extends State<MemberListScreen>
 
   /// 모임원 카드 탭 처리
   void _handleMemberTap(MemberListItem member) {
-    // TODO: 향후 모임원 상세보기 기능 구현
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${member.displayName} 상세보기 (향후 구현 예정)'),
-        duration: const Duration(seconds: 1),
-      ),
+    // 🎯 권한 체크: 관리자 이상만 접근 가능
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    // ADMIN, LEADER, VICE_LEADER 만 접근 가능
+    final userRole = authProvider.userInfo?['role'] as String?;
+    final isAdminLevel = userRole != null && ['ADMIN', 'LEADER', 'VICE_LEADER'].contains(userRole);
+    
+    if (!isAdminLevel) {
+      // 권한 없음 - 아무 반응 없음 (사용자가 요청한 대로)
+      if (AppConfig.debugMode) {
+        print('🚫 [MemberListScreen] 모임원 카드 클릭 - 권한 없음 (역할: $userRole)');
+      }
+      return; // 아무 동작 안 함
+    }
+    
+    // 권한 있음 - 관리자 모드로 모임원 상세 페이지로 이동
+    if (AppConfig.debugMode) {
+      print('✅ [MemberListScreen] 모임원 카드 클릭 - 관리자 모드 접근 (ID: ${member.memberId})');
+    }
+    
+    final currentPageNum = currentPage;
+    
+    Navigator.pushNamed(
+      context,
+      '/profile?memberId=${member.memberId}&mode=admin&returnPage=$currentPageNum',
     );
   }
 }

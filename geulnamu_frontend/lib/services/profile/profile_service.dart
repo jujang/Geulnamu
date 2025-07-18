@@ -148,6 +148,68 @@ class ProfileService {
     }
   }
 
+  /// 🎯 관리자를 위한 모임원 정보 조회
+  /// 
+  /// API: GET /api/members/{memberId}
+  /// 권한: ADMIN 이상
+  Future<ProfileModel> getMemberProfile(String accessToken, int memberId) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [ProfileService] 모임원 정보 조회 시작... (ID: $memberId)');
+      }
+
+      // 🚫 캐시 방지 전용 Dio 인스턴스 사용
+      final noCacheDio = _createNoCacheDio();
+      
+      final response = await noCacheDio.get(
+        AppConfig.getApiEndpoint('members/$memberId'),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+            // 🚫 강력한 캐시 방지 헤더 추가
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            // 🔄 매번 다른 요청으로 인식하도록 타임스탬프 추가
+            'X-Request-Time': DateTime.now().millisecondsSinceEpoch.toString(),
+          },
+        ),
+        // 🚫 쿼리 파라미터로도 캐싱 방지
+        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch},
+      );
+
+      if (response.statusCode == 200) {
+        // ✅ ApiUtils 사용하여 백엔드 커스텀 응답 처리
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '모임원 정보 조회',
+        );
+
+        if (processedResponse['success']) {
+          final profileData = processedResponse['data'];
+          final profile = ProfileModel.fromJson(profileData);
+          
+          if (AppConfig.debugMode) {
+            print('✅ [ProfileService] 모임원 정보 조회 성공: ${profile.displayName}');
+          }
+          
+          return profile;
+        } else {
+          throw Exception('[모임원 정보 조회] ${processedResponse['message']}');
+        }
+      } else {
+        throw Exception('[모임원 정보 조회] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        // ✅ ApiUtils 사용하여 통합 에러 처리
+        throw ApiUtils.processDioException(e, '모임원 정보 조회', showDialog: false);
+      }
+      rethrow;
+    }
+  }
+
   /// 프로필 수정 데이터 유효성 검증
   /// 
   /// 백엔드 제약조건에 맞춰 검증:

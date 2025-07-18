@@ -24,7 +24,21 @@ import 'widgets/profile_widgets.dart';
 /// - 에러 처리 및 로딩 상태 관리
 /// - 통일된 네비게이션 및 사용자 메뉴
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  /// 조회할 모임원 ID (null이면 본인)
+  final int? memberId;
+  
+  /// 화면 모드 ('self': 본인, 'admin': 관리자)
+  final String mode;
+  
+  /// 돌아갈 페이지 번호 (모임원 목록에서 온 경우)
+  final int? returnPage;
+  
+  const ProfileScreen({
+    super.key,
+    this.memberId,
+    this.mode = 'self',
+    this.returnPage,
+  });
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -75,10 +89,33 @@ class _ProfileScreenState extends State<ProfileScreen>
     print('🚜 [ProfileScreen] didPop - 화면 종료');
   }
   
+  // 🎯 관리자 모드 관련 getter들
+  
+  /// 관리자 모드인지 확인
+  bool get isAdminMode => widget.mode == 'admin';
+  
+  /// 본인 모드인지 확인
+  bool get isSelfMode => widget.mode == 'self';
+  
+  /// 조회할 모임원 ID (본인 모드일 때 null)
+  int? get targetMemberId => widget.memberId;
+  
+  /// 돌아갈 페이지 번호
+  int? get returnPage => widget.returnPage;
+  
+  /// 화면 제목 결정
+  String _getScreenTitle() {
+    if (isAdminMode) {
+      return '모임원 상세';
+    } else {
+      return isEditMode ? '프로필 편집' : '프로필';
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return MainLayoutHelpers.sub(
-      title: isEditMode ? '프로필 편집' : '프로필',
+      title: _getScreenTitle(),
       body: _buildBody(),
       showProfileMenu: false, // 프로필 페이지에서는 사용자 메뉴 숨김
       // 🎯 편집 모드에 따른 액션 버튼들
@@ -116,7 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
     
     // ✏️ 편집/저장/취소 버튼
-    if (!isLoading && profile != null) {
+    if (!isLoading && profile != null && isSelfMode) {
       if (isEditMode) {
         // 편집 모드: 취소 + 저장 버튼
         actions.addAll([
@@ -164,13 +201,23 @@ class _ProfileScreenState extends State<ProfileScreen>
     homeService.handleLogout(context, authProvider);
   }
 
-  /// 로고 탭 핸들러 (홈으로 이동)
+  /// 로고 탭 핸들러 (모드에 따라 다른 이동)
   void _handleLogoTap() {
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/home',
-      (route) => false,
-    );
+    if (isAdminMode && returnPage != null) {
+      // 🎯 관리자 모드: 모임원 목록으로 돌아가기 (페이지 상태 복원)
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/member-list',
+        (route) => false,
+      );
+    } else {
+      // 🎯 본인 모드: 홈으로 이동
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home',
+        (route) => false,
+      );
+    }
   }
 
   /// 메인 바디 빌드
@@ -185,7 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       return ProfileWidgets.buildErrorWidget(
         context,
         '프로필 정보를 불러올 수 없습니다.',
-        refreshProfile,
+        refreshProfileData,
       );
     }
 
@@ -247,12 +294,51 @@ class _ProfileScreenState extends State<ProfileScreen>
 
         const SizedBox(height: 24),
 
+        // 🎯 모드별 위젯 분기
+        if (isAdminMode) 
+          _buildAdminModeWidgets()
+        else
+          _buildSelfModeWidgets(),
+      ],
+    );
+  }
+
+  /// 관리자 모드 위젯들
+  Widget _buildAdminModeWidgets() {
+    return Column(
+      children: [
+        // 🎯 기본 정보 섹션 (관리자용 - 이름 수정 가능)
+        ProfileWidgets.buildAdminBasicInfoSection(
+          context,
+          profile!,
+          onNameEdit: handleNameEdit,
+          isProcessing: isProcessingAdmin,
+        ),
+
+        const SizedBox(height: 16),
+
+        // 🎯 계정 관리 섹션 (권한 및 상태 수정)
+        ProfileWidgets.buildAdminAccountInfoSection(
+          context,
+          profile!,
+          onRoleEdit: handleRoleEdit,
+          onNameEdit: handleNameEdit,
+          onStatusToggle: handleStatusToggle,
+          isProcessing: isProcessingAdmin,
+        ),
+      ],
+    );
+  }
+
+  /// 본인 모드 위젯들
+  Widget _buildSelfModeWidgets() {
+    return Column(
+      children: [
         // 🎯 기본 정보 섹션 (수정 가능)
         ProfileWidgets.buildBasicInfoSection(context, profile!),
 
         const SizedBox(height: 16),
 
-        // 🎯 계정 정보 섹션 (읽기 전용)
         ProfileWidgets.buildAccountInfoSection(context, profile!),
       ],
     );
