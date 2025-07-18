@@ -202,8 +202,8 @@ class _LoginScreenState extends State<LoginScreen>
       builder: (context, authProvider, child) {
         return Column(
           children: [
-            // 에러 메시지 표시
-            if (authProvider.errorMessage != null) ...[
+            // 에러 메시지 표시 (빈 문자열인 경우 숨김)
+            if (authProvider.errorMessage != null && authProvider.errorMessage!.trim().isNotEmpty) ...[
               Container(
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 16),
