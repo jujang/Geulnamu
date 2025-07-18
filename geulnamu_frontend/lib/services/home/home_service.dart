@@ -70,7 +70,7 @@ class HomeService {
 
     if (confirmed == true) {
       await authProvider.logout(context: context);
-      
+
       // 🎯 로그아웃 후 자동으로 홈으로 이동 (모든 이전 라우트 제거)
       if (context.mounted) {
         Navigator.pushNamedAndRemoveUntil(
@@ -79,7 +79,7 @@ class HomeService {
           (route) => false, // 모든 이전 라우트 제거
         );
       }
-      
+
       // 🎯 홈 이동 후 스낵바 표시 (약간의 딜레이)
       if (context.mounted) {
         Future.delayed(const Duration(milliseconds: 300), () {
@@ -267,7 +267,7 @@ class HomeService {
     if (featureName == '모임원 목록') {
       return authProvider.isStaffLevel;
     }
-    
+
     // 다른 기능들은 임시로 모두 접근 가능
     return true;
   }
@@ -433,7 +433,7 @@ class HomeService {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '로그인이 필요하거나 상위 권한이 요구됩니다.',
+                      '로그인이 필요합니다.',
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(context).colorScheme.onErrorContainer,
