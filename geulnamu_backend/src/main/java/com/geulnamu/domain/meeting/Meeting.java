@@ -6,7 +6,6 @@ import com.geulnamu.domain.shared.DateColumn;
 import com.geulnamu.domain.shared.converter.MeetingTypeConverter;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.ExistDataException;
-import com.geulnamu.infrastructure.exception.ForbiddenException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import jakarta.persistence.*;
 import lombok.*;
@@ -121,7 +120,7 @@ public class Meeting extends DateColumn {
 
     public void checkMemberIsDeActivated(Long memberId) {
         if(this.getMember().getDeletedAt() != null) {
-            throw new ForbiddenException(ResponseMessage.DEACTIVATE_MEMBER_ACCESS_DENIED);
+            throw new BadRequestException(460, ResponseMessage.DEACTIVATE_MEMBER_ACCESS_DENIED);
         }
     }
 

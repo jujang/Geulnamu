@@ -7,6 +7,7 @@ public class ResponseMessage {
     public static final String NOT_SUITABLE_MEMBER = "해당 기능을 수행할 수 있는 당사자가 아닙니다.";
     public static final String NO_AUTHENTICATION = "인증 정보가 존재하지 않습니다."; // 401
     public static final String FORBIDDEN = "접근 권한이 없습니다."; // 403
+    public static final String NOT_HAVE_PERMISSION = "해당 기능을 수행할 권한이 없습니다.";
     public static final String NOT_FOUND = "조회된 데이터가 없습니다."; // 404
     public static final String NOT_FOUND_URL = "존재하지 않는 URL 입니다.";
     public static final String INVALID_REQ_VALUE = "유효성 검사를 충족하지 못했습니다."; // 417

@@ -88,7 +88,6 @@ public class Member extends DateColumn {
             throw new ExistDataException("role");
         }
         this.role = newRole;
-        this.refreshToken = null; // 역할에 따라 권한이 다르기에 재접속을 강제하기 위해 리프레시 토큰 말소시킴
     }
 
     public void updateMemberBirthDate(LocalDate birthDate) {
@@ -114,7 +113,6 @@ public class Member extends DateColumn {
         if(this.deletedAt != null) {
             throw new ExistDataException("deletedAt");
         }
-        this.refreshToken = null; // 비활성화 계정 강제 로그아웃을 위한 설정
         this.deletedAt = LocalDateTime.now();
     }
 

@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:html' as html show window;
 import '../config/app_config.dart';
 import '../utils/api_utils.dart';
+import '../../widgets/common/error_dialog.dart';
 
 /// 🔐 글나무 인증 서비스
 /// 
@@ -421,6 +422,7 @@ class AuthService {
         throw Exception('백엔드 인증 실패: HTTP ${response.statusCode}');
       }
     } catch (e) {
+      // 🎯 460 에러 등 processBackendResponse에서 발생한 Exception도 처리
       if (e is DioException) {
         // ✅ ApiUtils 통합 에러 처리 (에러 다이얼로그 표시)
         throw ApiUtils.processDioException(
@@ -429,8 +431,36 @@ class AuthService {
           context: context,
           showDialog: context != null,  // context가 있을 때만 다이얼로그 표시
         );
+      } else {
+        // 🎯 processBackendResponse에서 발생한 Exception 처리 (460 에러 등)
+        final errorMessage = e.toString();
+        
+        // 460 에러 감지 시 특별 처리
+        if (errorMessage.contains('460') || errorMessage.contains('비활성화된 계정')) {
+          if (AppConfig.debugMode) {
+            print('🚫 [카카오 로그인] 460 에러 감지 - 메인으로 리다이렉트');
+          }
+          
+          // 🏠 메인 화면으로 리다이렉트 후 다이얼로그 표시
+          if (context != null) {
+            Future.microtask(() {
+              // 메인 화면으로 이동 (로그인 화면 닫기)
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/home',
+                (route) => false,
+              );
+              
+              // 짧은 딜레이 후 다이얼로그 표시 (화면 전환 완료 대기)
+              Future.delayed(const Duration(milliseconds: 300), () {
+                ErrorDialog.showAccountDeactivatedError(context);
+              });
+            });
+          }
+        }
+        
+        rethrow;
       }
-      rethrow;
     }
   }
 

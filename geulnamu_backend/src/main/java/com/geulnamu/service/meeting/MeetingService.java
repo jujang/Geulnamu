@@ -12,7 +12,6 @@ import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.exception.BadRequestException;
-import com.geulnamu.infrastructure.exception.ForbiddenException;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.response.paging.PagingResponse;
@@ -173,7 +172,7 @@ public class MeetingService {
 
     public static void checkMeetingOpenedMember(Long meetingMemberId, Long requestedMemberId) {
         if(!meetingMemberId.equals(requestedMemberId)) {
-            throw new ForbiddenException(ResponseMessage.NOT_SUITABLE_MEMBER);
+            throw new BadRequestException(ResponseMessage.NOT_SUITABLE_MEMBER);
         }
     }
 
