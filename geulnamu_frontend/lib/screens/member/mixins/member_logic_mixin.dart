@@ -55,6 +55,9 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
     // 🎯 사용자 권한에 따른 필터 표시 가능 여부 설정
     await _updateDeletedFilterPermission();
 
+    // 🎯 초기 필터 설정 (비관리자급은 활성 계정만)
+    await _setInitialFilter();
+
     await loadMemberList(isInitial: true);
   }
 
@@ -66,6 +69,25 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
     if (AppConfig.debugMode) {
       print('🔍 [MemberLogicMixin] 사용자 권한: $userRole');
       print('🔍 [MemberLogicMixin] 비활성 계정 필터 사용 가능: $_canShowDeletedFilterSync');
+    }
+  }
+
+  /// 🎯 초기 필터 설정 (비관리자급은 활성 계정만)
+  Future<void> _setInitialFilter() async {
+    final userRole = await _getUserRole();
+    final isAdminLevel = userRole != null && ['ADMIN', 'LEADER', 'VICE_LEADER'].contains(userRole);
+    
+    if (!isAdminLevel) {
+      // 비관리자급은 초기 필터에 활성 계정만 조회로 설정
+      _currentFilter = _currentFilter.copyWith(isDeleted: false);
+      
+      if (AppConfig.debugMode) {
+        print('🎨 [MemberLogicMixin] 초기 필터 설정: 비관리자급($userRole) - 활성 계정만 조회');
+      }
+    } else {
+      if (AppConfig.debugMode) {
+        print('🎨 [MemberLogicMixin] 초기 필터 설정: 관리자급($userRole) - 모든 계정 조회 가능');
+      }
     }
   }
 
@@ -84,17 +106,32 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
       _clearError();
 
       // 초기 로드 시 첫 페이지로 설정
-      final filter = isInitial 
+      var filter = isInitial 
           ? _currentFilter.copyWith(page: 1)
           : _currentFilter;
+
+      // 🎯 사용자 권한 정보 가져오기
+      final userRole = await _getUserRole();
+      
+      // 🎯 관리자급이 아닌 경우 활성 계정만 조회하도록 필터 강제 설정
+      final isAdminLevel = userRole != null && ['ADMIN', 'LEADER', 'VICE_LEADER'].contains(userRole);
+      if (!isAdminLevel) {
+        // 비관리자급은 활성 계정만 볼 수 있음
+        filter = filter.copyWith(isDeleted: false);
+        
+        if (AppConfig.debugMode) {
+          print('🚫 [MemberLogicMixin] 비관리자급 ($userRole) - 활성 계정만 조회로 제한');
+        }
+      } else {
+        if (AppConfig.debugMode) {
+          print('✅ [MemberLogicMixin] 관리자급 ($userRole) - 모든 계정 조회 가능');
+        }
+      }
 
       final accessToken = await _getAccessToken();
       if (accessToken == null) {
         throw Exception('인증 토큰을 가져올 수 없습니다.');
       }
-
-      // 🎯 사용자 권한 정보 가져오기
-      final userRole = await _getUserRole();
       
       final response = await _memberService.getMemberList(
         filter: filter,
