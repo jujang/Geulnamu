@@ -20,6 +20,7 @@ endif::[]
 === 로그인 - 카카오 OAuth
 * 접근 가능 권한 레벨: PUBLIC / 로그 생성
 * kakao OAuth 2.0을 통한 로그인 방식 (앱 계정이 없다면 생성 후 로그인, 있다면 바로 로그인)
+* 비활성화된 모임원은 해당 기능이 제한됨 (460 에러)
 
 ==== request
 include::{snippets}/login/oauth/kakao/http-request.adoc[]

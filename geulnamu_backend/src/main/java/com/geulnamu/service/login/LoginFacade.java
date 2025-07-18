@@ -3,6 +3,7 @@ package com.geulnamu.service.login;
 import com.geulnamu.controller.login.dto.response.LoginResponse;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
+import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.security.token.TokenPair;
 import com.geulnamu.infrastructure.security.token.TokenReissueResult;
 import com.geulnamu.domain.shared.enums.Role;
@@ -132,6 +133,11 @@ public class LoginFacade {
             Member savedMember = memberCommandRepository.save(newMember);
             return new MemberResult(savedMember, true);
         } else {
+            if(memberOptional.get().getDeletedAt() != null) {
+                log.info("비활성화된 계정 로그인 시도: kakaoUserId={}, deletedAt={}",
+                    kakaoUserId, memberOptional.get().getDeletedAt());
+                throw new BadRequestException(460, ResponseMessage.DEACTIVATE_MEMBER_ACCESS_DENIED);
+            }
             log.info("기존 회원 로그인: kakaoUserId={}", kakaoUserId);
             return new MemberResult(memberOptional.get(), false);
         }

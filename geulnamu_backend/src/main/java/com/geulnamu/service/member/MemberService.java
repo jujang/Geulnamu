@@ -69,6 +69,7 @@ public class MemberService {
     public void updateMemberRole(Long memberId, Role targetRole) {
         Member member = findMemberOrThrow(memberId);
         member.updateMemberRole(targetRole);
+        member.updateMemberRefreshToken(null); // 역할에 따라 권한이 다르기에 재접속을 강제하기 위해 리프레시 토큰 말소시킴
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -87,6 +88,7 @@ public class MemberService {
     public void deactivateMember(Long memberId) {
         Member member = findMemberOrThrow(memberId);
         member.deactivate();
+        member.updateMemberRefreshToken(null); // 비활성화 계정 강제 로그아웃을 위한 설정
     }
 
     private Member findMemberOrThrow(Long memberId) {

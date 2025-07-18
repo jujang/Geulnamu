@@ -40,7 +40,7 @@ public class BookQuestion extends DateColumn {
     public void checkModificationOrDeletionAuthority(Long requestedMemberId, Role requestRole) {
         if(!hasManagementRole(requestRole)) {
             if(!isWriter(requestedMemberId)) {
-                throw new BadRequestException(ResponseMessage.FORBIDDEN);
+                throw new BadRequestException(ResponseMessage.NOT_HAVE_PERMISSION);
             }
             checkTimeCanModifyOrDeleteBookQuestionContent();
         }

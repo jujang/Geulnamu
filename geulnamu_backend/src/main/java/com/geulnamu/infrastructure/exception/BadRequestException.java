@@ -10,6 +10,10 @@ public class BadRequestException extends ServerException {
         super(400, message, field);
     }
 
+    public BadRequestException(int code, String message) {
+        super(code, message);
+    }
+
     public BadRequestException(int code, String message, String field) {
         super(code, message, field);
     }
