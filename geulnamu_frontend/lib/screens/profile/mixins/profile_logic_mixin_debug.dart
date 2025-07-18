@@ -2,27 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/profile/profile_service.dart';
+import '../../../services/member/member_service.dart'; // 🎯 MemberService 추가
 import '../../../models/profile/profile_model.dart';
 import '../../../core/utils/date_utils.dart' as app_date_utils;
 import '../../../core/config/app_config.dart';
+import '../widgets/profile_widgets.dart'; // 🎯 다이얼로그를 위해 추가
 
-/// 프로필 화면 비즈니스 로직 Mixin (디버그 강화 버전)
+/// 프로필 화면 비즈니스 로직 Mixin (디버그 강화 + 관리자 모드 지원)
 ///
 /// 제공 기능:
+/// - 본인/관리자 모드 지원
 /// - 프로필 데이터 로드/저장
-/// - 편집 모드 토글
+/// - 편집 모드 토글 (본인 모드만)
+/// - 관리자 기능: 등급/이름/상태 수정
 /// - 폼 데이터 관리 및 유효성 검증
 /// - 에러 처리
 /// - 🔍 상세 디버깅 로깅 (캐시 문제 진단용)
 mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
   // 🎯 Service 클래스 사용
   final ProfileService _profileService = ProfileService();
+  final MemberService _memberService = MemberService(); // 🎯 추가
 
   // 🎯 상태 관리
   ProfileModel? _profile;
   bool _isEditMode = false;
   bool _isLoading = false;
   bool _isSaving = false;
+  
+  // 🎯 관리자 모드 전용 상태
+  bool _isProcessingAdmin = false; // 관리자 작업 진행 중
 
   // 🎯 수정 폼 데이터
   String _editingName = '';
@@ -40,6 +48,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
   bool get isEditMode => _isEditMode;
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
+  bool get isProcessingAdmin => _isProcessingAdmin; // 🎯 추가
   String get editingName => _editingName;
   String get editingGender => _editingGender;
   DateTime? get editingBirthDate => _editingBirthDate;
@@ -47,11 +56,92 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
   TextEditingController get nameController =>
       _nameController; // 🎯 Controller getter 추가
 
+  // 🎯 위젯 속성 접근을 위한 추상 메서드들 (ProfileScreen에서 구현)
+  bool get isAdminMode;
+  bool get isSelfMode;
+  int? get targetMemberId;
+  int? get returnPage;
+
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(); // 🎯 Controller 초기화
-    _loadProfile(); // 🎯 초기 데이터 로드
+    
+    // 🎯 MemberService 초기화
+    _memberService.initialize();
+    
+    // 🛡️ 관리자 모드 권한 검증
+    if (isAdminMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _checkAdminPermission();
+      });
+    } else {
+      _loadProfile(); // 🎯 본인 모드는 바로 로드
+    }
+  }
+
+  /// 🛡️ 관리자 모드 권한 검증
+  Future<void> _checkAdminPermission() async {
+    if (!mounted) return;
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    // 권한 검증: 임원진 이상 (STAFF, ADMIN, VICE_LEADER, LEADER)
+    if (!authProvider.isStaffLevel) {
+      if (AppConfig.debugMode) {
+        print('❌ [ProfileLogicMixinDebug] 관리자 모드 접근 권한 없음 - 홈으로 리다이렉트');
+      }
+      
+      // 권한 없음 - 홈으로 리다이렉트
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home',
+        (route) => false,
+      );
+      
+      // 에러 메시지 표시
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.security, color: Colors.white),
+              SizedBox(width: 8),
+              Text('모임원 관리 권한이 없습니다.'),
+            ],
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      
+      return;
+    }
+    
+    // 권한 있음 - 정상 로드 진행
+    if (AppConfig.debugMode) {
+      print('✅ [ProfileLogicMixinDebug] 관리자 모드 접근 권한 확인 - 데이터 로드 시작');
+    }
+    
+    if (targetMemberId != null) {
+      await _loadMemberProfile(targetMemberId!);
+    } else {
+      // targetMemberId가 null이면 잘못된 접근
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/home',
+          (route) => false,
+        );
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('잘못된 접근입니다.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 
   /// 🎯 화면에 다시 들어올 때 호출되는 메서드
@@ -59,24 +149,26 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
   /// ProfileScreen에서 RouteAware로 호출하거나,
   /// 수동으로 호출할 수 있음
   Future<void> refreshProfileData() async {
-    print('🔄 [ProfileLogicMixinDebug] refreshProfileData() 호출 - 데이터 새로고침 시작');
-
     if (AppConfig.debugMode) {
+      print('🔄 [ProfileLogicMixinDebug] refreshProfileData() 호출 - 데이터 새로고침 시작');
       print('🔄 [ProfileLogicMixinDebug] 화면 재진입 - 프로필 데이터 새로고침');
       print(
         '🔄 [ProfileLogicMixinDebug] 기존 _profile 데이터: ${_profile?.toString() ?? "null"}',
       );
     }
 
-    await _loadProfile();
+    if (isAdminMode && targetMemberId != null) {
+      await _loadMemberProfile(targetMemberId!);
+    } else {
+      await _loadProfile();
+    }
 
     if (AppConfig.debugMode) {
       print(
         '🔄 [ProfileLogicMixinDebug] 새로고침 후 _profile 데이터: ${_profile?.toString() ?? "null"}',
       );
+      print('✅ [ProfileLogicMixinDebug] refreshProfileData() 완료');
     }
-
-    print('✅ [ProfileLogicMixinDebug] refreshProfileData() 완료');
   }
 
   @override
@@ -101,8 +193,8 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
         throw Exception('로그인이 필요합니다.');
       }
 
-      final accessToken = await authProvider.accessToken; // 수정: async getter 사용
-      if (accessToken == null) {
+      final accessToken = await authProvider.accessToken; // accessToken은 async getter
+      if (accessToken == null || accessToken.isEmpty) {
         throw Exception('인증 토큰이 없습니다.');
       }
 
@@ -261,8 +353,8 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
         throw Exception('로그인이 필요합니다.');
       }
 
-      final accessToken = await authProvider.accessToken; // 수정: async getter 사용
-      if (accessToken == null) {
+      final accessToken = await authProvider.accessToken; // accessToken은 async getter
+      if (accessToken == null || accessToken.isEmpty) {
         throw Exception('인증 토큰이 없습니다.');
       }
 
@@ -405,5 +497,261 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     authProvider.logout();
     Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+  }
+
+  // 🎯 관리자 모드 전용 메서드들
+
+  /// 특정 모임원 프로필 로드 (관리자용)
+  Future<void> _loadMemberProfile(int memberId) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _errors.clear();
+    });
+
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [ProfileLogicMixinDebug] 모임원 프로필 로드 시작... (ID: $memberId)');
+      }
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+
+      if (accessToken == null || accessToken.isEmpty) {
+        throw Exception('인증 토큰이 없습니다. 다시 로그인해주세요.');
+      }
+
+      final profile = await _profileService.getMemberProfile(accessToken, memberId);
+
+      if (mounted) {
+        setState(() {
+          _profile = profile;
+          _isLoading = false;
+          // 관리자 모드에서는 편집 모드 비활성화
+          _isEditMode = false;
+        });
+
+        _initializeEditingData(profile);
+
+        if (AppConfig.debugMode) {
+          print('✅ [ProfileLogicMixinDebug] 모임원 프로필 로드 성공: ${profile.displayName}');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _profile = null;
+          _isLoading = false;
+        });
+
+        if (AppConfig.debugMode) {
+          print('❌ [ProfileLogicMixinDebug] 모임원 프로필 로드 실패: $e');
+        }
+      }
+    }
+  }
+
+  /// 모임원 이름 수정 (관리자용)
+  Future<void> handleNameEdit(String currentName) async {
+    if (!isAdminMode || targetMemberId == null) return;
+
+    final newName = await ProfileWidgets.showNameEditDialog(context, currentName);
+    if (newName == null || newName == currentName) return;
+
+    await _updateMemberName(targetMemberId!, newName);
+  }
+
+  /// 모임원 권한 변경 (관리자용)
+  Future<void> handleRoleEdit(String currentRole) async {
+    if (!isAdminMode || targetMemberId == null) return;
+
+    final newRole = await ProfileWidgets.showRoleEditDialog(context, currentRole);
+    if (newRole == null || newRole == currentRole) return;
+
+    await _updateMemberRole(targetMemberId!, newRole);
+  }
+
+  /// 모임원 상태 토글 (관리자용)
+  Future<void> handleStatusToggle(bool newStatus) async {
+    if (!isAdminMode || targetMemberId == null || _profile == null) return;
+
+    final confirmed = await ProfileWidgets.showStatusToggleDialog(
+      context,
+      _profile!,
+      newStatus,
+    );
+
+    if (confirmed != true) return;
+
+    if (newStatus) {
+      await _activateMember(targetMemberId!);
+    } else {
+      await _deactivateMember(targetMemberId!);
+    }
+  }
+
+  /// 모임원 이름 변경 API 호출
+  Future<void> _updateMemberName(int memberId, String newName) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isProcessingAdmin = true;
+    });
+
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [ProfileLogicMixinDebug] 모임원 이름 변경 시작... (ID: $memberId, 새 이름: $newName)');
+      }
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+      
+      await _memberService.updateMemberName(memberId, newName, accessToken: accessToken);
+
+      if (mounted) {
+        // 성공 후 프로필 재로드
+        await _loadMemberProfile(memberId);
+        _showSuccessSnackBar('이름이 성공적으로 변경되었습니다.');
+
+        if (AppConfig.debugMode) {
+          print('✅ [ProfileLogicMixinDebug] 모임원 이름 변경 성공');
+        }
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [ProfileLogicMixinDebug] 모임원 이름 변경 실패: $e');
+      }
+      _showErrorDialog('이름 변경 실패', e.toString());
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessingAdmin = false;
+        });
+      }
+    }
+  }
+
+  /// 모임원 권한 변경 API 호출
+  Future<void> _updateMemberRole(int memberId, String newRole) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isProcessingAdmin = true;
+    });
+
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [ProfileLogicMixinDebug] 모임원 권한 변경 시작... (ID: $memberId, 새 권한: $newRole)');
+      }
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+      
+      await _memberService.updateMemberRole(memberId, newRole, accessToken: accessToken);
+
+      if (mounted) {
+        // 성공 후 프로필 재로드
+        await _loadMemberProfile(memberId);
+        _showSuccessSnackBar('권한이 성공적으로 변경되었습니다.');
+
+        if (AppConfig.debugMode) {
+          print('✅ [ProfileLogicMixinDebug] 모임원 권한 변경 성공');
+        }
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [ProfileLogicMixinDebug] 모임원 권한 변경 실패: $e');
+      }
+      _showErrorDialog('권한 변경 실패', e.toString());
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessingAdmin = false;
+        });
+      }
+    }
+  }
+
+  /// 모임원 활성화 API 호출
+  Future<void> _activateMember(int memberId) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isProcessingAdmin = true;
+    });
+
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [ProfileLogicMixinDebug] 모임원 활성화 시작... (ID: $memberId)');
+      }
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+      
+      await _memberService.activateMember(memberId, accessToken: accessToken);
+
+      if (mounted) {
+        // 성공 후 프로필 재로드
+        await _loadMemberProfile(memberId);
+        _showSuccessSnackBar('계정이 성공적으로 활성화되었습니다.');
+
+        if (AppConfig.debugMode) {
+          print('✅ [ProfileLogicMixinDebug] 모임원 활성화 성공');
+        }
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [ProfileLogicMixinDebug] 모임원 활성화 실패: $e');
+      }
+      _showErrorDialog('활성화 실패', e.toString());
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessingAdmin = false;
+        });
+      }
+    }
+  }
+
+  /// 모임원 비활성화 API 호출
+  Future<void> _deactivateMember(int memberId) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isProcessingAdmin = true;
+    });
+
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [ProfileLogicMixinDebug] 모임원 비활성화 시작... (ID: $memberId)');
+      }
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+      
+      await _memberService.deactivateMember(memberId, accessToken: accessToken);
+
+      if (mounted) {
+        // 성공 후 프로필 재로드
+        await _loadMemberProfile(memberId);
+        _showSuccessSnackBar('계정이 성공적으로 비활성화되었습니다.');
+
+        if (AppConfig.debugMode) {
+          print('✅ [ProfileLogicMixinDebug] 모임원 비활성화 성공');
+        }
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [ProfileLogicMixinDebug] 모임원 비활성화 실패: $e');
+      }
+      _showErrorDialog('비활성화 실패', e.toString());
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessingAdmin = false;
+        });
+      }
+    }
   }
 }

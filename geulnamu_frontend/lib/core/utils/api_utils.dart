@@ -122,6 +122,45 @@ class ApiUtils {
           print('Response Data: $responseData');
         }
         
+        // 🛡️ 403 금지된 접근 특별 처리
+        if (statusCode == 403) {
+          message = '접근 권한이 없습니다.';
+          
+          if (AppConfig.debugMode) {
+            print('🛡️ [$apiName] 403 금지된 접근 - 권한 없음');
+          }
+          
+          // 🛡️ 관리자 모드 관련 API인 경우 특별 처리
+          if (apiName.contains('모임원') && context != null && showDialog) {
+            // 비동기로 홈으로 리다이렉트
+            Future.microtask(() {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/home',
+                (route) => false,
+              );
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.security, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text('모임원 관리 권한이 없습니다.'),
+                    ],
+                  ),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+            });
+            
+            resultException = Exception('[$apiName] 권한 없음 (403): $message');
+            break;
+          }
+        }
+        
         if (responseData != null && responseData is Map) {
           final backendCode = responseData['code'];
           final backendMessage = responseData['message']?.toString();
@@ -143,7 +182,8 @@ class ApiUtils {
           resultException = Exception('[$apiName] 서버 오류 ($statusCode): $message');
         }
         
-        if (context != null && showDialog) {
+        // 🛡️ 403 에러가 아닌 경우에만 다이얼로그 표시
+        if (context != null && showDialog && statusCode != 403) {
           ErrorDialog.showServerError(
             context,
             customMessage: message,

@@ -95,15 +95,41 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
         // 라우트 설정 + RouteObserver 등록
         navigatorObservers: [HomeRouteService.routeObserver], // 🎯 RouteObserver 등록
         initialRoute: '/splash',
-        routes: {
-          '/splash': (context) => const SplashScreen(),
-          '/login': (context) => const LoginScreen(),
-          // '/auth/callback': (context) => const OAuthCallbackScreen(), // 주석 처리 - HTML에서 처리
-          '/home': (context) => const HomeScreen(),
-          '/profile': (context) => const ProfileScreen(), // 프로필 화면
-          '/introduction': (context) => const IntroductionScreen(), // 글나무 소개 화면
-          '/member-list': (context) => const MemberListScreen(), // 모임원 목록 화면
-          '/settings': (context) => const SettingsScreen(), // 설정 화면
+        onGenerateRoute: (settings) {
+          // 🎯 프로필 화면 라우트 처리 (쿼리 파라미터 지원)
+          if (settings.name != null && settings.name!.startsWith('/profile')) {
+            final uri = Uri.parse(settings.name!);
+            final memberId = uri.queryParameters['memberId'];
+            final mode = uri.queryParameters['mode'];
+            final returnPage = uri.queryParameters['returnPage'];
+            
+            return MaterialPageRoute(
+              builder: (context) => ProfileScreen(
+                memberId: memberId != null ? int.tryParse(memberId) : null,
+                mode: mode ?? 'self',
+                returnPage: returnPage != null ? int.tryParse(returnPage) : null,
+              ),
+              settings: settings,
+            );
+          }
+          
+          // 기본 라우트들
+          final routeMap = {
+            '/splash': (context) => const SplashScreen(),
+            '/login': (context) => const LoginScreen(),
+            '/home': (context) => const HomeScreen(),
+            '/profile': (context) => const ProfileScreen(), // 기본 프로필 (본인)
+            '/introduction': (context) => const IntroductionScreen(),
+            '/member-list': (context) => const MemberListScreen(),
+            '/settings': (context) => const SettingsScreen(),
+          };
+          
+          final builder = routeMap[settings.name];
+          if (builder != null) {
+            return MaterialPageRoute(builder: builder, settings: settings);
+          }
+          
+          return null;
         },
 
             // 404 처리
