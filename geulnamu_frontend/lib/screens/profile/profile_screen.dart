@@ -5,7 +5,7 @@ import '../../widgets/common/main_layout.dart';
 import '../../widgets/common/responsive_container.dart';
 import '../../services/home/home_route_service.dart'; // 🎯 RouteObserver import
 import '../../services/home/home_service.dart';
-import 'mixins/profile_logic_mixin_debug.dart';
+import 'mixins/profile_admin_logic_mixin.dart';
 import 'widgets/profile_widgets.dart';
 
 /// 프로필 화면 - 단일 페이지 + 토글 모드
@@ -45,7 +45,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> 
-    with ProfileLogicMixinDebug, RouteAware { // 🎯 RouteAware 추가
+    with ProfileAdminLogicMixin, RouteAware { // 🎯 RouteAware 추가
   
   @override
   void didChangeDependencies() {

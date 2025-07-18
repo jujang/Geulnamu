@@ -8,17 +8,17 @@ import '../../../core/utils/date_utils.dart' as app_date_utils;
 import '../../../core/config/app_config.dart';
 import '../widgets/profile_widgets.dart'; // 🎯 다이얼로그를 위해 추가
 
-/// 프로필 화면 비즈니스 로직 Mixin (디버그 강화 + 관리자 모드 지원)
+/// 프로필 화면 비즈니스 로직 Mixin (관리자 모드 + 디버그 강화)
 ///
 /// 제공 기능:
-/// - 본인/관리자 모드 지원
-/// - 프로필 데이터 로드/저장
-/// - 편집 모드 토글 (본인 모드만)
+/// - 관리자 모드: 모임원 관리 기능
+/// - 본인 모드: 일반 프로필 기능
 /// - 관리자 기능: 등급/이름/상태 수정
+/// - 편집 모드 토글 (본인 모드만)
 /// - 폼 데이터 관리 및 유효성 검증
 /// - 에러 처리
 /// - 🔍 상세 디버깅 로깅 (캐시 문제 진단용)
-mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
+mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
   // 🎯 Service 클래스 사용
   final ProfileService _profileService = ProfileService();
   final MemberService _memberService = MemberService(); // 🎯 추가
@@ -89,7 +89,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
     // 권한 검증: 임원진 이상 (STAFF, ADMIN, VICE_LEADER, LEADER)
     if (!authProvider.isStaffLevel) {
       if (AppConfig.debugMode) {
-        print('❌ [ProfileLogicMixinDebug] 관리자 모드 접근 권한 없음 - 홈으로 리다이렉트');
+        print('❌ [ProfileAdminLogicMixin] 관리자 모드 접근 권한 없음 - 홈으로 리다이렉트');
       }
       
       // 권한 없음 - 홈으로 리다이렉트
@@ -120,7 +120,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
     
     // 권한 있음 - 정상 로드 진행
     if (AppConfig.debugMode) {
-      print('✅ [ProfileLogicMixinDebug] 관리자 모드 접근 권한 확인 - 데이터 로드 시작');
+      print('✅ [ProfileAdminLogicMixin] 관리자 모드 접근 권한 확인 - 데이터 로드 시작');
     }
     
     if (targetMemberId != null) {
@@ -150,10 +150,10 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
   /// 수동으로 호출할 수 있음
   Future<void> refreshProfileData() async {
     if (AppConfig.debugMode) {
-      print('🔄 [ProfileLogicMixinDebug] refreshProfileData() 호출 - 데이터 새로고침 시작');
-      print('🔄 [ProfileLogicMixinDebug] 화면 재진입 - 프로필 데이터 새로고침');
+      print('🔄 [ProfileAdminLogicMixin] refreshProfileData() 호출 - 데이터 새로고침 시작');
+      print('🔄 [ProfileAdminLogicMixin] 화면 재진입 - 프로필 데이터 새로고침');
       print(
-        '🔄 [ProfileLogicMixinDebug] 기존 _profile 데이터: ${_profile?.toString() ?? "null"}',
+        '🔄 [ProfileAdminLogicMixin] 기존 _profile 데이터: ${_profile?.toString() ?? "null"}',
       );
     }
 
@@ -165,9 +165,9 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
 
     if (AppConfig.debugMode) {
       print(
-        '🔄 [ProfileLogicMixinDebug] 새로고침 후 _profile 데이터: ${_profile?.toString() ?? "null"}',
+        '🔄 [ProfileAdminLogicMixin] 새로고침 후 _profile 데이터: ${_profile?.toString() ?? "null"}',
       );
-      print('✅ [ProfileLogicMixinDebug] refreshProfileData() 완료');
+      print('✅ [ProfileAdminLogicMixin] refreshProfileData() 완료');
     }
   }
 
