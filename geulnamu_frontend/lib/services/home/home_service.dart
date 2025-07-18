@@ -84,7 +84,15 @@ class HomeService {
       if (context.mounted) {
         Future.delayed(const Duration(milliseconds: 300), () {
           if (context.mounted) {
-            _showSnackBar(context, '로그아웃되었습니다.');
+            // 🎯 로그아웃 스낵바도 동일하게 수정
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('로그아웃되었습니다.'),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                duration: const Duration(milliseconds: 2500),
+              ),
+            );
           }
         });
       }
@@ -275,10 +283,14 @@ class HomeService {
   // 🎯 Private 메서드들
 
   void _showSnackBar(BuildContext context, String message) {
+    // 🎯 기존 SnackBar가 있으면 즉시 제거 (걹치기 허용)
+    ScaffoldMessenger.of(context).clearSnackBars();
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.primary, // 🎨 글나무 민트색
+        duration: const Duration(milliseconds: 2500), // 🎯 4초 → 2.5초로 단축
       ),
     );
   }
