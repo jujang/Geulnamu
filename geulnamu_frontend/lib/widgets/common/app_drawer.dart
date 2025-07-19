@@ -367,66 +367,6 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  /// 🔐 하단 로그인/로그아웃 액션 버튼 (기존 버전 - 사용 안함)
-  Widget _buildBottomAction(BuildContext context, AuthProvider authProvider) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: context.colors.outline.withOpacity(0.5),
-            width: 1,
-          ),
-        ),
-      ),
-      child: authProvider.isAuthenticated
-          ? ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: context.colors.error.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.logout,
-                  size: 22,
-                  color: context.colors.error,
-                ),
-              ),
-              title: Text(
-                '로그아웃',
-                style: context.textStyles.bodyMedium?.copyWith(
-                  color: context.colors.error,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context); // Drawer 닫기
-                onLogoutTap?.call();
-              },
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            )
-          : SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pop(context); // Drawer 닫기
-                  onLoginTap?.call();
-                },
-                icon: const Icon(Icons.login),
-                label: const Text('로그인'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-    );
-  }
-
   /// 🎯 메뉴 탭 처리
   void _handleMenuTap(BuildContext context, String menu) {
     Navigator.pop(context); // Drawer 닫기

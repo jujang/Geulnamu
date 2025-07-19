@@ -26,19 +26,45 @@ class HomeService {
       return;
     }
 
-    // 🔒 종합 접근 가능 체크
-    if (!canAccessFeature(menuTitle, authProvider)) {
-      if (!hasRolePermission(menuTitle, authProvider)) {
-        // 권한 부족
-        _showInsufficientPermissionDialog(context, menuTitle);
-      } else {
-        // 개인정보 입력 필요
-        _showProfileRequiredDialog(context, menuTitle);
-      }
+    // 🌿 글나무 소개도 누구나 접근 가능
+    if (menuTitle == '글나무 소개') {
+      _processMenuAction(context, menuTitle);
       return;
     }
 
-    // 정상 메뉴 처리
+    // 🔒 로그인이 필요한 기능들 체크
+    final loginRequiredFeatures = [
+      '모임 목록',
+      '오늘의 모임',
+      '모임 만들기',
+      '출석 체크',
+      '출석 이력',
+      '발제 작성',
+      '내 발제',
+      '모임원 목록',
+    ];
+
+    if (loginRequiredFeatures.contains(menuTitle)) {
+      // 🚫 로그인이 안 된 상태 → 로그인 요구 다이얼로그
+      if (!authProvider.isAuthenticated) {
+        _showLoginRequiredDialog(context, menuTitle);
+        return;
+      }
+      
+      // 🔍 로그인은 됐지만 개인정보 입력이 안 된 경우 (우선 체크!)
+      if (authProvider.profileCompleted == false) {
+        _showProfileRequiredDialog(context, menuTitle);
+        return;
+      }
+      
+      // 🔐 개인정보가 있지만 권한이 부족한 경우
+      if (!hasRolePermission(menuTitle, authProvider)) {
+        _showInsufficientPermissionDialog(context, menuTitle);
+        return;
+      }
+    }
+
+    // ✅ 정상 메뉴 처리
     _processMenuAction(context, menuTitle);
   }
 
@@ -103,17 +129,25 @@ class HomeService {
   void showCreateMeetingDialog(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    // 🔒 종합 접근 가능 체크
-    if (!canAccessFeature('모임 만들기', authProvider)) {
-      if (!hasRolePermission('모임 만들기', authProvider)) {
-        _showInsufficientPermissionDialog(context, '모임 만들기');
-      } else {
-        _showProfileRequiredDialog(context, '모임 만들기');
-      }
+    // 🚫 로그인이 안 된 상태 → 로그인 요구 다이얼로그
+    if (!authProvider.isAuthenticated) {
+      _showLoginRequiredDialog(context, '모임 만들기');
+      return;
+    }
+    
+    // 🔍 로그인은 됐지만 개인정보 입력이 안 된 경우 (우선 체크!)
+    if (authProvider.profileCompleted == false) {
+      _showProfileRequiredDialog(context, '모임 만들기');
+      return;
+    }
+    
+    // 🔐 개인정보가 있지만 권한이 부족한 경우
+    if (!hasRolePermission('모임 만들기', authProvider)) {
+      _showInsufficientPermissionDialog(context, '모임 만들기');
       return;
     }
 
-    // 정상 처리 (현재는 개발 중)
+    // ✅ 정상 처리 (현재는 개발 중)
     _showSnackBar(context, '모임 만들기 기능은 개발 중입니다.');
   }
 
@@ -235,39 +269,7 @@ class HomeService {
     }
   }
 
-  // 🔒 권한 체크 메서드들 (임시 구현)
-
-  /// 기능 접근 가능 여부 체크
-  bool canAccessFeature(String featureName, AuthProvider authProvider) {
-    // 홈 화면은 항상 접근 가능
-    if (featureName == '홈 화면') {
-      return true;
-    }
-
-    // 글나무 소개도 누구나 접근 가능
-    if (featureName == '글나무 소개') {
-      return true;
-    }
-
-    // 로그인이 필요한 기능들
-    final loginRequiredFeatures = [
-      '모임 목록',
-      '오늘의 모임',
-      '모임 만들기',
-      '출석 체크',
-      '출석 이력',
-      '발제 작성',
-      '내 발제',
-      '모임원 목록', // 임원진 이상 기능
-    ];
-
-    if (loginRequiredFeatures.contains(featureName)) {
-      return authProvider.isAuthenticated;
-    }
-
-    // 기본적으로 접근 가능
-    return true;
-  }
+  // 🔒 권한 체크 메서드
 
   /// 역할 권한 체크
   bool hasRolePermission(String featureName, AuthProvider authProvider) {
@@ -320,6 +322,81 @@ class HomeService {
               '로그아웃',
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 🚫 로그인 요구 다이얼로그
+  void _showLoginRequiredDialog(BuildContext context, String featureName) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.login_outlined,
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            const Text('로그인 필요'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$featureName 기능을 사용하려면\n로그인이 필요합니다.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '카카오 계정으로 간편하게 로그인하세요!',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              '다음에',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              navigateToLogin(context);
+            },
+            child: const Text('로그인하기'),
           ),
         ],
       ),
@@ -445,7 +522,7 @@ class HomeService {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '로그인이 필요합니다.',
+                      '해당 기능은 특정 권한이 있는 사용자만 사용할 수 있습니다.',
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(context).colorScheme.onErrorContainer,
