@@ -53,8 +53,7 @@ class AuthService {
     _setupInterceptors();
 
     if (AppConfig.debugMode) {
-      print('🔧 AuthService Dio 초기화 완료');
-      print('🍪 withCredentials: 활성화됨');
+      print('🔧 AuthService 초기화 완료');
     }
   }
 
@@ -67,31 +66,16 @@ class AuthService {
           if (_needsAuthentication(options.path)) {
             final accessToken = await getAccessToken();
             if (accessToken != null && accessToken.isNotEmpty) {
-              // Bearer 접두사 추가하여 표준 Authorization 헤더 형식 사용
               options.headers['Authorization'] = 'Bearer $accessToken';
-              
-              if (AppConfig.debugMode) {
-                print('🔑 Authorization 헤더 추가: Bearer ${accessToken.substring(0, 20)}...');
-              }
             }
-          }
-
-          if (AppConfig.debugMode) {
-            print('📡 [${options.method}] ${options.uri}');
           }
 
           handler.next(options);
         },
         onResponse: (response, handler) {
-          if (AppConfig.debugMode) {
-            print('📨 [${response.statusCode}] ${response.requestOptions.uri}');
-          }
           handler.next(response);
         },
         onError: (error, handler) async {
-          if (AppConfig.debugMode) {
-            print('❌ [${error.response?.statusCode}] ${error.requestOptions.uri}');
-          }
 
           // 401 에러 시 자동 토큰 갱신 시도
           if (error.response?.statusCode == 401 && 
@@ -108,9 +92,7 @@ class AuthService {
                 handler.resolve(response);
                 return;
               } catch (e) {
-                if (AppConfig.debugMode) {
-                  print('🔄 토큰 갱신 후 재요청도 실패: $e');
-                }
+                // 재요청 실패 시 원래 에러로 진행
               }
             }
           }
@@ -147,8 +129,7 @@ class AuthService {
   Future<Map<String, dynamic>> loginWithKakao({BuildContext? context}) async {
     try {
       if (AppConfig.debugMode) {
-        print('🥕 카카오 OAuth 로그인 시작...');
-        print('🌐 환경: ${kIsWeb ? "웹" : "모바일"}');
+        print('🥕 카카오 로그인 시작 (${kIsWeb ? "웹" : "모바일"})...');
       }
 
       if (kIsWeb) {
@@ -169,8 +150,7 @@ class AuthService {
     final kakaoAuthUrl = _buildKakaoAuthUrl();
 
     if (AppConfig.debugMode) {
-      print('🔗 카카오 인증 URL: $kakaoAuthUrl');
-      print('🌐 웹 팝업 OAuth 진행 중...');
+      print('🌐 웹 OAuth 진행 중...');
     }
 
     try {
@@ -187,16 +167,13 @@ class AuthService {
 
       // Authorization Code 대기
       final authCode = await _waitForAuthCode(popup);
-      
-      if (AppConfig.debugMode) {
-        print('🔑 Authorization Code 획득 성공');
-      }
+
 
       // 백엔드로 코드 전송 및 토큰 교환
       return await _processAuthCode(authCode, context);
     } catch (e) {
       if (AppConfig.debugMode) {
-        print('❌ 웹 OAuth 플로우 오류: $e');
+        print('❌ 웹 OAuth 오류: $e');
       }
       rethrow;
     }
@@ -207,8 +184,7 @@ class AuthService {
     final kakaoAuthUrl = _buildKakaoAuthUrl();
 
     if (AppConfig.debugMode) {
-      print('🔗 카카오 인증 URL: $kakaoAuthUrl');
-      print('📱 모바일 WebView OAuth 진행 중...');
+      print('📱 모바일 OAuth 진행 중...');
     }
 
     try {
@@ -222,9 +198,7 @@ class AuthService {
         ),
       );
 
-      if (AppConfig.debugMode) {
-        print('🔗 OAuth 콜백 결과: $result');
-      }
+
 
       // Authorization Code 추출
       final uri = Uri.parse(result);
@@ -234,15 +208,13 @@ class AuthService {
         throw Exception('카카오 OAuth에서 인증 코드를 받지 못했습니다.');
       }
 
-      if (AppConfig.debugMode) {
-        print('🔑 Authorization Code 획득 성공');
-      }
+
 
       // 백엔드로 코드 전송 및 토큰 교환
       return await _processAuthCode(code, context);
     } catch (e) {
       if (AppConfig.debugMode) {
-        print('❌ 모바일 OAuth 플로우 오류: $e');
+        print('❌ 모바일 OAuth 오류: $e');
       }
       rethrow;
     }
@@ -281,9 +253,7 @@ class AuthService {
     
     // PostMessage 리스너 등록
     messageSubscription = html.window.onMessage.listen((event) {
-      if (AppConfig.debugMode) {
-        print('📬 PostMessage 수신: ${event.data}');
-      }
+
 
       if (event.data is String) {
         final data = event.data as String;
@@ -306,9 +276,7 @@ class AuthService {
           completer.completeError(Exception('사용자가 로그인을 취소했습니다.'));
         }
       } catch (e) {
-        if (AppConfig.debugMode) {
-          print('⚠️ 팝업 상태 확인 오류: $e');
-        }
+
       }
     });
 
@@ -332,9 +300,7 @@ class AuthService {
       popupCheckTimer.cancel();
       timeoutTimer.cancel();
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('⚠️ 리스너 정리 중 오류: $e');
-      }
+
     }
   }
 
@@ -343,9 +309,7 @@ class AuthService {
     try {
       popup?.close();
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('⚠️ 팝업 닫기 실패: $e');
-      }
+
     }
   }
 
@@ -358,8 +322,7 @@ class AuthService {
   Future<Map<String, dynamic>> _processAuthCode(String code, BuildContext? context) async {
     try {
       if (AppConfig.debugMode) {
-        print('🔄 백엔드로 Authorization Code 전송 중...');
-        print('📡 POST 요청으로 변경: RequestBody에 code 포함');
+        print('🔄 백엔드로 인증 코드 전송 중...');
       }
 
       // ✅ POST + RequestBody로 변경
@@ -381,9 +344,7 @@ class AuthService {
         ),
       );
 
-      if (AppConfig.debugMode) {
-        print('📤 요청 데이터: {"code": "${code.substring(0, 20)}..."}');
-      }
+
 
       if (response.statusCode == 200) {
         // ✅ ApiUtils 통합 응답 처리

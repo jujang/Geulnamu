@@ -26,9 +26,7 @@ class ApiUtils {
       headers: headers,
     ));
 
-    if (AppConfig.debugMode) {
-      print('🔧 [ApiUtils] Dio 인스턴스 생성 완료 (타임아웃: 연결=${connectionTimeoutSeconds}초, 수신=${receiveTimeoutSeconds}초)');
-    }
+
 
     return dio;
   }
@@ -38,9 +36,7 @@ class ApiUtils {
     String apiName,
     {bool expectData = true}
   ) {
-    if (AppConfig.debugMode) {
-      print('📝 [$apiName] 백엔드 응답 구조: ${response.data}');
-    }
+
 
     final data = response.data;
     
@@ -52,18 +48,10 @@ class ApiUtils {
     final responseMessage = data['message'] ?? '알 수 없는 오류';
     final responseData = data['data'];
     
-    if (AppConfig.debugMode) {
-      print('📝 [$apiName] 비즈니스 코드: $responseCode');
-      print('📝 [$apiName] 비즈니스 메시지: $responseMessage');
-      if (responseData != null) {
-        print('📝 [$apiName] 비즈니스 데이터: $responseData');
-      }
-    }
+
     
     if (responseCode == 200) {
-      if (AppConfig.debugMode) {
-        print('✅ [$apiName] 백엔드 처리 성공');
-      }
+
       
       return {
         'success': true,
@@ -83,9 +71,7 @@ class ApiUtils {
     BuildContext? context,
     bool showDialog = true,
   }) {
-    if (AppConfig.debugMode) {
-      print('❌ [$apiName] API 요청 오류: $e');
-    }
+
 
     Exception resultException;
     
@@ -93,21 +79,10 @@ class ApiUtils {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        if (AppConfig.debugMode) {
-          print('⏰ [$apiName] 타임아웃 에러 발생! 유형: ${e.type}');
-          print('📊 [$apiName] 요청 시간: ${e.requestOptions.connectTimeout}');
-          print('📊 [$apiName] 수신 시간: ${e.requestOptions.receiveTimeout}');
-        }
+
         resultException = Exception('[$apiName] 서버 연결 시간이 초과되었습니다.');
         if (context != null && showDialog) {
-          if (AppConfig.debugMode) {
-            print('📦 [$apiName] 타임아웃 다이얼로그 표시 시도...');
-          }
           ErrorDialog.showTimeoutError(context);
-        } else {
-          if (AppConfig.debugMode) {
-            print('⚠️ [$apiName] 다이얼로그 표시 안함: context=${context != null}, showDialog=$showDialog');
-          }
         }
         break;
         
@@ -116,17 +91,10 @@ class ApiUtils {
         final responseData = e.response?.data;
         String message = '서버 오류가 발생했습니다.';
         
-        if (AppConfig.debugMode) {
-          print('📝 [$apiName] DioException badResponse 디버그:');
-          print('HTTP Status: $statusCode');
-          print('Response Data: $responseData');
-        }
+
         
-        // 🚫 460 비활성화 계정 특별 처리
+        // 460 비활성화 계정 특별 처리
         if (statusCode == 460) {
-          if (AppConfig.debugMode) {
-            print('🚫 [$apiName] 460 비활성화 계정 감지');
-          }
           
           // 🏠 메인 화면으로 리다이렉트 후 다이얼로그 표시
           if (context != null) {
@@ -149,15 +117,11 @@ class ApiUtils {
           break;
         }
         
-        // 🛡️ 403 금지된 접근 특별 처리
+        // 403 금지된 접근 특별 처리
         if (statusCode == 403) {
           message = '접근 권한이 없습니다.';
           
-          if (AppConfig.debugMode) {
-            print('🛡️ [$apiName] 403 금지된 접근 - 권한 없음');
-          }
-          
-          // 🛡️ 관리자 모드 관련 API인 경우 특별 처리
+          // 관리자 모드 관련 API인 경우 특별 처리
           if (apiName.contains('모임원') && context != null && showDialog) {
             // 비동기로 홈으로 리다이렉트
             Future.microtask(() {
@@ -209,7 +173,7 @@ class ApiUtils {
           resultException = Exception('[$apiName] 서버 오류 ($statusCode): $message');
         }
         
-        // 🛡️ 403 에러가 아닌 경우에만 다이얼로그 표시
+        // 403 에러가 아닌 경우에만 다이얼로그 표시
         if (context != null && showDialog && statusCode != 403) {
           ErrorDialog.showServerError(
             context,
@@ -255,21 +219,15 @@ class ApiUtils {
           if (trimmed.startsWith('refreshToken=')) {
             final token = trimmed.substring('refreshToken='.length);
             
-            if (AppConfig.debugMode) {
-              print('🍪 리프레시 토큰 추출 성공: ${token.substring(0, 20)}...');
-            }
+
             
             return token;
           }
         }
         
-        if (AppConfig.debugMode) {
-          print('⚠️ 브라우저 쿠키에서 refreshToken을 찾을 수 없음');
-        }
+
       } catch (e) {
-        if (AppConfig.debugMode) {
-          print('❌ 브라우저 쿠키 읽기 오류: $e');
-        }
+        // 브라우저 쿠키 읽기 오류 무시
       }
       return null;
     }
@@ -282,9 +240,7 @@ class ApiUtils {
           final tokenPart = cookie.split(';')[0];
           final token = tokenPart.split('=')[1];
           
-          if (AppConfig.debugMode) {
-            print('🍪 리프레시 토큰 추출 성공: ${token.substring(0, 20)}...');
-          }
+
           
           return token;
         }

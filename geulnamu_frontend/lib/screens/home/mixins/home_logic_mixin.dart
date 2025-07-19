@@ -20,51 +20,43 @@ mixin HomeLogicMixin<T extends StatefulWidget> on State<T> {
 
   // 🎯 메뉴 탭 처리
   void handleMenuTap(String menu) {
-    debugPrint('🎯 [HomeLogicMixin] 메뉴 탭: $menu');
     _homeService.handleMenuTap(context, menu);
   }
 
   // 🎯 프로필 메뉴 선택 처리
   void handleProfileMenuSelection(String value) {
-    debugPrint('🎯 [HomeLogicMixin] 프로필 메뉴 선택: $value');
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     _homeService.handleProfileMenuSelection(context, value, authProvider);
   }
 
   // 🎯 로그아웃 처리
   void handleLogout() {
-    debugPrint('🎯 [HomeLogicMixin] 로그아웃 처리');
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     _homeService.handleLogout(context, authProvider);
   }
 
   // 🎯 모임 만들기 다이얼로그
   void showCreateMeetingDialog() {
-    debugPrint('🎯 [HomeLogicMixin] 모임 만들기 다이얼로그');
     _homeService.showCreateMeetingDialog(context);
   }
 
   // 🏠 홈 화면으로 이동 (로고 클릭 시)
   void navigateToHome() {
-    debugPrint('🏠 [HomeLogicMixin] 홈 화면으로 이동');
     _homeService.navigateToHome(context);
   }
 
   // 🎯 로그인 화면으로 이동
   void navigateToLogin() {
-    debugPrint('🎯 [HomeLogicMixin] 로그인 화면으로 이동');
     _homeService.navigateToLogin(context);
   }
 
   // 🎯 PWA 설치 안내
   void showInstallInstructions() {
-    debugPrint('🎯 [HomeLogicMixin] PWA 설치 안내');
     _homeService.showInstallInstructions(context);
   }
 
   // 🔍 개인정보 입력 화면으로 이동
   void navigateToProfileInput() {
-    debugPrint('🔍 [HomeLogicMixin] 개인정보 입력 화면으로 이동');
     _homeService.navigateToProfileInput(context);
   }
 }

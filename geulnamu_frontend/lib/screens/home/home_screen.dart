@@ -71,19 +71,9 @@ class _HomeScreenState extends State<HomeScreen>
   void _checkAuthStatus() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    if (AppConfig.debugMode) {
-      print('🔍 [HomeScreen] 인증 상태 확인: ${authProvider.status}');
-    }
 
-    // 🎯 비로그인 상태에서는 리다이렉트 하지 않음
-    // HomeScreen에서 로그인 버튼을 보여주면 됨
-    if (AppConfig.debugMode) {
-      if (authProvider.status == AuthStatus.unauthenticated) {
-        print('✅ [HomeScreen] 비로그인 상태 - 로그인 버튼 표시');
-      } else {
-        print('✅ [HomeScreen] 로그인 상태 - 일반 홈 화면 표시');
-      }
-    }
+
+    // 비로그인 상태에서는 리다이렉트 하지 않음
   }
 
   // 🔒 모임 만들기 FAB 표시 여부 결정
@@ -294,13 +284,13 @@ class _HomeScreenState extends State<HomeScreen>
                   ? null
                   : navigateToLogin,
               showLoginButton: !authProvider.isAuthenticated,
-              showDrawerButton: true, // 🍔 Drawer 버튼 표시
-              onLogoTap: navigateToHome, // 🏠 로고 클릭으로 홈 이동
+              showDrawerButton: true, // Drawer 버튼 표시
+              onLogoTap: navigateToHome, // 로고 클릭으로 홈 이동
               profileWidget: authProvider.isAuthenticated
                   ? _buildProfileMenu(context, authProvider) // 직접 프로필 메뉴 생성
                   : null,
             ),
-            // 🎨 Drawer 추가!
+            // Drawer 추가!
             drawer: AppDrawer(
               onMenuTap: handleMenuTap, // mixin 메서드 재사용
               onLoginTap: navigateToLogin,
@@ -310,13 +300,13 @@ class _HomeScreenState extends State<HomeScreen>
               child: ResponsiveContainer(
                 // 🎯 패딩 제거 - 스크롤바가 화면 끝에 위치하도록
                 child: SingleChildScrollView(
-                  child: Padding(
-                    // 🎯 콘텐츠에만 패딩 적용
+                child: Padding(
+                // 콘텐츠에만 패딩 적용
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 🎯 동적 환영 카드 (Static Method 사용)
+                        // 동적 환영 카드 (Static Method 사용)
                         HomeWidgets.buildDynamicWelcomeCard(
                           context,
                           authProvider,
@@ -325,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         const SizedBox(height: 24),
 
-                        // 🎯 통일된 빠른 메뉴 (Static Method 사용)
+                        // 통일된 빠른 메뉴 (Static Method 사용)
                         HomeWidgets.buildQuickMenuGrid(
                           context,
                           authProvider,
@@ -333,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         const SizedBox(height: 24),
 
-                        // 🎯 로그인 상태에 따른 추가 콘텐츠
+                        // 로그인 상태에 따른 추가 콘텐츠
                         if (authProvider.isAuthenticated) ...[
                           HomeWidgets.buildRecentMeetingsSection(context),
                           const SizedBox(height: 24),
@@ -354,7 +344,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
             ),
-            // 🎯 권한 체크를 통해 FAB 표시 여부 결정
+            // 권한 체크를 통해 FAB 표시 여부 결정
             floatingActionButton: _shouldShowCreateMeetingFAB(authProvider)
                 ? FloatingActionButton.extended(
                     onPressed: showCreateMeetingDialog, // mixin 메서드 사용
