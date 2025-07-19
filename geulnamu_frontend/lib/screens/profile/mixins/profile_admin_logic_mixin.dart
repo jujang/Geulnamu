@@ -8,17 +8,17 @@ import '../../../core/utils/date_utils.dart' as app_date_utils;
 import '../../../core/config/app_config.dart';
 import '../widgets/profile_widgets.dart'; // 🎯 다이얼로그를 위해 추가
 
-/// 프로필 화면 비즈니스 로직 Mixin (디버그 강화 + 관리자 모드 지원)
+/// 프로필 화면 비즈니스 로직 Mixin (관리자 모드 + 디버그 강화)
 ///
 /// 제공 기능:
-/// - 본인/관리자 모드 지원
-/// - 프로필 데이터 로드/저장
-/// - 편집 모드 토글 (본인 모드만)
+/// - 관리자 모드: 모임원 관리 기능
+/// - 본인 모드: 일반 프로필 기능
 /// - 관리자 기능: 등급/이름/상태 수정
+/// - 편집 모드 토글 (본인 모드만)
 /// - 폼 데이터 관리 및 유효성 검증
 /// - 에러 처리
 /// - 🔍 상세 디버깅 로깅 (캐시 문제 진단용)
-mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
+mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
   // 🎯 Service 클래스 사용
   final ProfileService _profileService = ProfileService();
   final MemberService _memberService = MemberService(); // 🎯 추가
@@ -89,7 +89,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
     // 권한 검증: 임원진 이상 (STAFF, ADMIN, VICE_LEADER, LEADER)
     if (!authProvider.isStaffLevel) {
       if (AppConfig.debugMode) {
-        print('❌ [ProfileLogicMixinDebug] 관리자 모드 접근 권한 없음 - 홈으로 리다이렉트');
+        print('❌ [ProfileAdminLogicMixin] 관리자 모드 접근 권한 없음 - 홈으로 리다이렉트');
       }
       
       // 권한 없음 - 홈으로 리다이렉트
@@ -120,7 +120,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
     
     // 권한 있음 - 정상 로드 진행
     if (AppConfig.debugMode) {
-      print('✅ [ProfileLogicMixinDebug] 관리자 모드 접근 권한 확인 - 데이터 로드 시작');
+      print('✅ [ProfileAdminLogicMixin] 관리자 모드 접근 권한 확인 - 데이터 로드 시작');
     }
     
     if (targetMemberId != null) {
@@ -144,30 +144,13 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
     }
   }
 
-  /// 🎯 화면에 다시 들어올 때 호출되는 메서드
-  ///
-  /// ProfileScreen에서 RouteAware로 호출하거나,
-  /// 수동으로 호출할 수 있음
+  /// 화면에 다시 들어올 때 호출되는 메서드
   Future<void> refreshProfileData() async {
-    if (AppConfig.debugMode) {
-      print('🔄 [ProfileLogicMixinDebug] refreshProfileData() 호출 - 데이터 새로고침 시작');
-      print('🔄 [ProfileLogicMixinDebug] 화면 재진입 - 프로필 데이터 새로고침');
-      print(
-        '🔄 [ProfileLogicMixinDebug] 기존 _profile 데이터: ${_profile?.toString() ?? "null"}',
-      );
-    }
 
     if (isAdminMode && targetMemberId != null) {
       await _loadMemberProfile(targetMemberId!);
     } else {
       await _loadProfile();
-    }
-
-    if (AppConfig.debugMode) {
-      print(
-        '🔄 [ProfileLogicMixinDebug] 새로고침 후 _profile 데이터: ${_profile?.toString() ?? "null"}',
-      );
-      print('✅ [ProfileLogicMixinDebug] refreshProfileData() 완료');
     }
   }
 
@@ -198,9 +181,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
         throw Exception('인증 토큰이 없습니다.');
       }
 
-      if (AppConfig.debugMode) {
-        print('🔍 [ProfileLogicMixinDebug] 프로필 로드 시작...');
-      }
+
 
       final profile = await _profileService.getMyProfile(accessToken);
 
@@ -211,9 +192,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
           _initializeEditingData(profile);
         });
 
-        if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixinDebug] 프로필 로드 성공: ${profile.displayName}');
-        }
+
       }
     } catch (e) {
       if (mounted) {
@@ -221,9 +200,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
           _isLoading = false;
         });
 
-        if (AppConfig.debugMode) {
-          print('❌ [ProfileLogicMixinDebug] 프로필 로드 실패: $e');
-        }
+
 
         // 에러 다이얼로그 표시
         _showErrorDialog('프로필 정보를 불러올 수 없습니다', e.toString());
@@ -268,9 +245,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
       }
     });
 
-    if (AppConfig.debugMode) {
-      print('🎯 [ProfileLogicMixinDebug] 편집 모드: ${_isEditMode ? '활성' : '비활성'}');
-    }
+
   }
 
   /// 이름 변경 핸들러
@@ -336,10 +311,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
 
     // 유효성 검증
     if (!_validateForm()) {
-      if (AppConfig.debugMode) {
-        print('❌ [ProfileLogicMixinDebug] 유효성 검증 실패: $_errors');
-      }
-      return;
+    return;
     }
 
     setState(() {
@@ -365,9 +337,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
         birthDate: app_date_utils.DateUtils.formatApiDate(_editingBirthDate!),
       );
 
-      if (AppConfig.debugMode) {
-        print('💾 [ProfileLogicMixinDebug] 프로필 저장 시작...');
-      }
+
 
       // API 호출
       final success = await _profileService.updateMyProfile(
@@ -376,17 +346,15 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
       );
 
       if (success && mounted) {
-        if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixinDebug] 프로필 저장 성공 - 데이터 새로고침 시작');
-        }
+
 
         // 성공 - 프로필 다시 로드하여 최신 데이터 반영
         await _loadProfile();
 
-        // 🎯 AuthProvider에 저장된 사용자 정보도 업데이트
+        // AuthProvider에 저장된 사용자 정보도 업데이트
         await authProvider.updateUserInfo();
 
-        // 🔄 개인정보 상태 캐시 무효화 및 강제 새로고침
+        // 개인정보 상태 캐시 무효화 및 강제 새로고침
         await authProvider.refreshProfileStatus();
 
         setState(() {
@@ -394,17 +362,9 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
           _isSaving = false;
         });
 
-        if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixinDebug] 프로필 새로고침 완료: ${_profile?.name}');
-          print('✅ [ProfileLogicMixinDebug] AuthProvider 업데이트 완료');
-        }
 
-        // 🔄 개인정보 상태 캐시 무효화 및 강제 새로고침
-        await authProvider.refreshProfileStatus();
 
-        if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixinDebug] 개인정보 상태 새로고침 완료');
-        }
+
 
         // 성공 메시지 표시
         _showSuccessSnackBar('프로필이 성공적으로 저장되었습니다.');
@@ -415,9 +375,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
           _isSaving = false;
         });
 
-        if (AppConfig.debugMode) {
-          print('❌ [ProfileLogicMixinDebug] 프로필 저장 실패: $e');
-        }
+
 
         // 에러 다이얼로그 표시
         _showErrorDialog('프로필 저장 실패', e.toString());
@@ -439,9 +397,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
       }
     });
 
-    if (AppConfig.debugMode) {
-      print('🔄 [ProfileLogicMixinDebug] 편집 취소');
-    }
+
   }
 
   /// 프로필 새로고침
@@ -511,9 +467,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
     });
 
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [ProfileLogicMixinDebug] 모임원 프로필 로드 시작... (ID: $memberId)');
-      }
+
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
@@ -534,9 +488,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
 
         _initializeEditingData(profile);
 
-        if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixinDebug] 모임원 프로필 로드 성공: ${profile.displayName}');
-        }
+
       }
     } catch (e) {
       if (mounted) {
@@ -545,9 +497,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
           _isLoading = false;
         });
 
-        if (AppConfig.debugMode) {
-          print('❌ [ProfileLogicMixinDebug] 모임원 프로필 로드 실패: $e');
-        }
+
       }
     }
   }
@@ -600,9 +550,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
     });
 
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [ProfileLogicMixinDebug] 모임원 이름 변경 시작... (ID: $memberId, 새 이름: $newName)');
-      }
+
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
@@ -614,14 +562,9 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
         await _loadMemberProfile(memberId);
         _showSuccessSnackBar('이름이 성공적으로 변경되었습니다.');
 
-        if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixinDebug] 모임원 이름 변경 성공');
-        }
+
       }
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [ProfileLogicMixinDebug] 모임원 이름 변경 실패: $e');
-      }
       _showErrorDialog('이름 변경 실패', e.toString());
     } finally {
       if (mounted) {
@@ -641,9 +584,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
     });
 
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [ProfileLogicMixinDebug] 모임원 권한 변경 시작... (ID: $memberId, 새 권한: $newRole)');
-      }
+
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
@@ -655,14 +596,9 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
         await _loadMemberProfile(memberId);
         _showSuccessSnackBar('권한이 성공적으로 변경되었습니다.');
 
-        if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixinDebug] 모임원 권한 변경 성공');
-        }
+
       }
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [ProfileLogicMixinDebug] 모임원 권한 변경 실패: $e');
-      }
       _showErrorDialog('권한 변경 실패', e.toString());
     } finally {
       if (mounted) {
@@ -682,9 +618,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
     });
 
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [ProfileLogicMixinDebug] 모임원 활성화 시작... (ID: $memberId)');
-      }
+
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
@@ -696,14 +630,9 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
         await _loadMemberProfile(memberId);
         _showSuccessSnackBar('계정이 성공적으로 활성화되었습니다.');
 
-        if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixinDebug] 모임원 활성화 성공');
-        }
+
       }
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [ProfileLogicMixinDebug] 모임원 활성화 실패: $e');
-      }
       _showErrorDialog('활성화 실패', e.toString());
     } finally {
       if (mounted) {
@@ -723,9 +652,7 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
     });
 
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [ProfileLogicMixinDebug] 모임원 비활성화 시작... (ID: $memberId)');
-      }
+
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
@@ -737,14 +664,9 @@ mixin ProfileLogicMixinDebug<T extends StatefulWidget> on State<T> {
         await _loadMemberProfile(memberId);
         _showSuccessSnackBar('계정이 성공적으로 비활성화되었습니다.');
 
-        if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixinDebug] 모임원 비활성화 성공');
-        }
+
       }
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [ProfileLogicMixinDebug] 모임원 비활성화 실패: $e');
-      }
       _showErrorDialog('비활성화 실패', e.toString());
     } finally {
       if (mounted) {

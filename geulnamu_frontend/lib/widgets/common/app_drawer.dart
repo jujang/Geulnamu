@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/home/home_service.dart';
 import '../../core/theme.dart';
 
 /// 글나무 앱의 메인 Drawer 메뉴
@@ -26,8 +27,8 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
+      child: Consumer2<AuthProvider, HomeService>(
+        builder: (context, authProvider, homeService, child) {
           return Column(
             children: [
               // 🎨 헤더: 민트색 그라데이션 + 책갈피 마스코트
@@ -62,7 +63,10 @@ class AppDrawer extends StatelessWidget {
                           icon: Icons.people_outlined,
                           title: '모임원 목록',
                           subtitle: '전체 모임원 보기',
-                          onTap: () => _handleMenuTap(context, '모임원 목록'),
+                          onTap: homeService.isProcessing 
+                              ? null // 로딩 중 비활성화
+                              : () => _handleMenuTap(context, '모임원 목록'),
+                          isDisabled: homeService.isProcessing,
                         ),
                       ]),
 
@@ -73,7 +77,10 @@ class AppDrawer extends StatelessWidget {
                           icon: Icons.group_outlined,
                           title: '모임 목록',
                           subtitle: '참여 중인 모임 보기',
-                          onTap: () => _handleMenuTap(context, '모임 목록'),
+                          onTap: homeService.isProcessing 
+                              ? null 
+                              : () => _handleMenuTap(context, '모임 목록'),
+                          isDisabled: homeService.isProcessing,
                         ),
                         _DrawerMenuItem(
                           icon: Icons.event_outlined,
@@ -301,37 +308,55 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  /// 🎯 개별 메뉴 아이템
+  /// 🎯 개별 메뉴 아이템 (로딩 상태 지원)
   Widget _buildMenuItem(BuildContext context, _DrawerMenuItem item) {
+    final isDisabled = item.isDisabled ?? false;
+    
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      enabled: !isDisabled,
       leading: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: context.colors.primary.withOpacity(0.1),
+          color: isDisabled 
+              ? context.colors.onSurface.withOpacity(0.1)
+              : context.colors.primary.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(item.icon, size: 22, color: context.colors.primary),
+        child: Icon(
+          item.icon, 
+          size: 22, 
+          color: isDisabled 
+              ? context.colors.onSurface.withOpacity(0.4)
+              : context.colors.primary,
+        ),
       ),
       title: Text(
         item.title,
         style: context.textStyles.bodyMedium?.copyWith(
           fontWeight: FontWeight.w600,
+          color: isDisabled 
+              ? context.colors.onSurface.withOpacity(0.4)
+              : null,
         ),
       ),
       subtitle: item.subtitle != null
           ? Text(
               item.subtitle!,
               style: context.textStyles.bodySmall?.copyWith(
-                color: context.colors.onSurfaceVariant,
+                color: isDisabled 
+                    ? context.colors.onSurface.withOpacity(0.3)
+                    : context.colors.onSurfaceVariant,
               ),
             )
           : null,
       trailing: Icon(
         Icons.arrow_forward_ios,
         size: 16,
-        color: context.colors.onSurfaceVariant,
+        color: isDisabled 
+            ? context.colors.onSurface.withOpacity(0.3)
+            : context.colors.onSurfaceVariant,
       ),
       onTap: item.onTap,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -367,66 +392,6 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  /// 🔐 하단 로그인/로그아웃 액션 버튼 (기존 버전 - 사용 안함)
-  Widget _buildBottomAction(BuildContext context, AuthProvider authProvider) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: context.colors.outline.withOpacity(0.5),
-            width: 1,
-          ),
-        ),
-      ),
-      child: authProvider.isAuthenticated
-          ? ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: context.colors.error.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.logout,
-                  size: 22,
-                  color: context.colors.error,
-                ),
-              ),
-              title: Text(
-                '로그아웃',
-                style: context.textStyles.bodyMedium?.copyWith(
-                  color: context.colors.error,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context); // Drawer 닫기
-                onLogoutTap?.call();
-              },
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            )
-          : SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pop(context); // Drawer 닫기
-                  onLoginTap?.call();
-                },
-                icon: const Icon(Icons.login),
-                label: const Text('로그인'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-    );
-  }
-
   /// 🎯 메뉴 탭 처리
   void _handleMenuTap(BuildContext context, String menu) {
     Navigator.pop(context); // Drawer 닫기
@@ -440,11 +405,13 @@ class _DrawerMenuItem {
   final String title;
   final String? subtitle;
   final VoidCallback? onTap;
+  final bool? isDisabled;
 
   const _DrawerMenuItem({
     required this.icon,
     required this.title,
     this.subtitle,
     this.onTap,
+    this.isDisabled,
   });
 }

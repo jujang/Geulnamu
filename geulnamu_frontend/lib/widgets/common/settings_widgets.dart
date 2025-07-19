@@ -66,6 +66,10 @@ class SettingsWidgets {
                   '테마 모드',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
+                    // 🎯 다크모드에서 더 밝은 색상으로 대비 개선
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFFE8E8E8)  // 다크모드: 밝은 회색
+                        : null,  // 라이트모드: 기본 색상 사용
                   ),
                 ),
               ],
@@ -145,7 +149,9 @@ class SettingsWidgets {
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                       color: isSelected 
                           ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurface,
+                          : (Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFFE8E8E8)  // 다크모드: 밝은 회색
+                              : Theme.of(context).colorScheme.onSurface),  // 라이트모드: 기본
                     ),
                   ),
                   Text(
@@ -211,6 +217,10 @@ class SettingsWidgets {
                     '모임 알림',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
+                      // 🎯 다크모드에서 더 밝은 색상으로 대비 개선
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFFE8E8E8)  // 다크모드: 밝은 회색
+                          : null,  // 라이트모드: 기본 색상 사용
                     ),
                   ),
                   const SizedBox(height: 4),

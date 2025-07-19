@@ -40,9 +40,6 @@ class AuthProvider with ChangeNotifier {
   
   // 개인정보 상태 접근자
   bool? get profileCompleted => _profileCompleted;
-  bool get hasProfile => _profileCompleted == true;
-  bool get needsProfile => _profileCompleted == false;
-  bool get profileStatusUnknown => _profileCompleted == null;
 
   /// 앱 시작 시 로그인 상태 확인
   Future<void> checkAuthStatus() async {

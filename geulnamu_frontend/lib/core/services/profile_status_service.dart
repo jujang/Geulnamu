@@ -94,12 +94,6 @@ class ProfileStatusService {
         queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch},
       );
 
-      if (AppConfig.debugMode) {
-        print('📨 === [개인정보 상태 확인] HTTP 응답 수신 ===');
-        print('📈 [개인정보 상태 확인] 상태 코드: ${response.statusCode}');
-        print('📝 [개인정보 상태 확인] 응답 데이터: ${response.data}');
-      }
-
       if (response.statusCode == 200) {
         // ✅ 성공: 백엔드 응답 처리
         final processedResponse = ApiUtils.processBackendResponse(
@@ -112,48 +106,23 @@ class ProfileStatusService {
         // 캐시 업데이트
         _updateCache(profileStatus);
 
-        if (AppConfig.debugMode) {
-          print('✅ [개인정보 상태 확인] 성공 - 상태: $profileStatus');
-        }
-
         return profileStatus;
       } else {
         throw Exception('[개인정보 상태 확인] HTTP 오류: ${response.statusCode}');
       }
     } catch (e) {
       if (e is DioException) {
-        // 🚨 HTTP 401 오류 감지: 강제 로그아웃 처리
+        // HTTP 401 오류 감지: 강제 로그아웃 처리
         if (e.response?.statusCode == 401) {
-          if (AppConfig.debugMode) {
-            print('🚨 === [개인정보 상태 확인] HTTP 401 오류 감지 ===');
-            print('📝 [개인정보 상태 확인] HTTP 상태: ${e.response?.statusCode}');
-            print('📝 [개인정보 상태 확인] 응답 데이터: ${e.response?.data}');
-            print('📝 [개인정보 상태 확인] 에러 타입: ${e.type}');
-            print('📝 [개인정보 상태 확인] 에러 메시지: ${e.message}');
-          }
           _handleForceLogout(e, onAutoLogout);
-          return null; // 로그아웃 처리됨
+          return null;
         } else {
-          // 다른 네트워크 오류
           throw ApiUtils.processDioException(e, '개인정보 상태 확인');
         }
       } else {
-        // 🚨 ApiUtils에서 던진 Exception (백엔드 비즈니스 코드 401 포함) 처리
-        final errorString = e.toString().toLowerCase();
-
-        if (AppConfig.debugMode) {
-          print('🚨 === [개인정보 상태 확인] ApiUtils Exception 감지 ===');
-          print('📝 [개인정보 상태 확인] Exception 내용: $e');
-          print('📝 [개인정보 상태 확인] 에러 문자열: $errorString');
-        }
-
         // 백엔드 비즈니스 코드 401 또는 인증 관련 에러 감지
         if (_isBackendAuthError(e)) {
-          if (AppConfig.debugMode) {
-            print('🚨 [개인정보 상태 확인] 백엔드 인증 에러 감지 - 강제 로그아웃 처리');
-          }
-
-          // DioException이 아닌 경우를 위한 더미 DioException 생성
+          // 더미 DioException 생성
           final dummyDioException = DioException(
             requestOptions: RequestOptions(path: ''),
             response: Response(
@@ -164,14 +133,9 @@ class ProfileStatusService {
             type: DioExceptionType.badResponse,
             message: e.toString(),
           );
-
           _handleForceLogout(dummyDioException, onAutoLogout);
-          return null; // 로그아웃 처리됨
+          return null;
         } else {
-          // 다른 일반 오류
-          if (AppConfig.debugMode) {
-            print('❌ [개인정보 상태 확인] 예상치 못한 오류: $e');
-          }
           rethrow;
         }
       }
@@ -185,17 +149,7 @@ class ProfileStatusService {
     }
 
     final now = DateTime.now();
-    final isValid = now.difference(_lastFetchTime!) < _cacheExpiryDuration;
-
-    if (AppConfig.debugMode) {
-      final remainingTime =
-          _cacheExpiryDuration - now.difference(_lastFetchTime!);
-      print(
-        '⏰ [개인정보 상태 확인] 캐시 유효성: $isValid (남은 시간: ${remainingTime.inMinutes}분 ${remainingTime.inSeconds % 60}초)',
-      );
-    }
-
-    return isValid;
+    return now.difference(_lastFetchTime!) < _cacheExpiryDuration;
   }
 
   /// 💾 캐시 업데이트
@@ -206,12 +160,6 @@ class ProfileStatusService {
 
   /// 🚨 강제 로그아웃 처리
   void _handleForceLogout(DioException e, void Function() onAutoLogout) {
-    if (AppConfig.debugMode) {
-      print('🚨 === [개인정보 상태 확인] 강제 로그아웃 처리 시작 ===');
-      print('🔍 [강제 로그아웃] HTTP 상태: ${e.response?.statusCode}');
-      print('🔍 [강제 로그아웃] 에러 타입: ${e.type}');
-    }
-
     // 백엔드 에러 메시지 추출
     String logoutReason = '인증이 만료되었습니다';
 
@@ -219,35 +167,17 @@ class ProfileStatusService {
       final backendMessage = e.response!.data['message']?.toString();
       if (backendMessage != null && backendMessage.isNotEmpty) {
         logoutReason = backendMessage;
-
-        if (AppConfig.debugMode) {
-          print('📝 [강제 로그아웃] 백엔드 메시지: $backendMessage');
-        }
       }
     }
 
     // 캐시 초기화
     _clearCache();
-    if (AppConfig.debugMode) {
-      print('✅ [강제 로그아웃] 캐시 초기화 완료');
-    }
 
     // 콜백을 통한 자동 로그아웃 처리 (즉시 실행)
     try {
-      if (AppConfig.debugMode) {
-        print('🔄 [강제 로그아웃] AuthProvider 콜백 실행 시작');
-      }
-
-      onAutoLogout(); // 🎯 즉시 실행: 대기 시간 없이 바로 로그아웃
-
-      if (AppConfig.debugMode) {
-        print('✅ [강제 로그아웃] AuthProvider 콜백 실행 완료');
-        print('✅ === [강제 로그아웃] 전체 처리 완료: $logoutReason ===');
-      }
+      onAutoLogout();
     } catch (logoutError) {
-      if (AppConfig.debugMode) {
-        print('❌ [강제 로그아웃] AuthProvider 콜백 실행 중 오류: $logoutError');
-      }
+      // 콜백 실행 중 오류 무시
     }
   }
 
@@ -255,19 +185,11 @@ class ProfileStatusService {
   void _clearCache() {
     _cachedProfileStatus = null;
     _lastFetchTime = null;
-
-    if (AppConfig.debugMode) {
-      print('🧹 [개인정보 상태 확인] 캐시 초기화 완료');
-    }
   }
 
   /// 🎯 수동 캐시 무효화 (프로필 수정 완료 시 호출)
   void invalidateCache() {
     _clearCache();
-
-    if (AppConfig.debugMode) {
-      print('🔄 [개인정보 상태 확인] 수동 캐시 무효화');
-    }
   }
 
   /// 📊 캐시 상태 정보 (디버깅용)
@@ -301,9 +223,6 @@ class ProfileStatusService {
       if (match != null) {
         final errorCode = int.tryParse(match.group(1) ?? '');
         if (errorCode == 401) {
-          if (AppConfig.debugMode) {
-            print('🎯 [ProfileStatusService] 백엔드 401 에러 코드 감지');
-          }
           return true;
         }
       }
@@ -316,9 +235,6 @@ class ProfileStatusService {
           lowerError.contains('만료') ||
           lowerError.contains('unauthorized') ||
           lowerError.contains('token')) {
-        if (AppConfig.debugMode) {
-          print('🔄 [ProfileStatusService] 인증 관련 키워드 감지');
-        }
         return true;
       }
 

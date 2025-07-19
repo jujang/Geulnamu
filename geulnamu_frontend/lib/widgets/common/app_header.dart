@@ -1,32 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   /// 화면 제목
   final String? title;
-  
+
   /// 로그인 버튼 핸들러
   final VoidCallback? onLoginPressed;
-  
+
   /// 사용자 프로필 위젯
   final Widget? profileWidget;
-  
+
   /// 로그인 버튼 표시 여부
   final bool showLoginButton;
-  
+
   /// 드로어 버튼 표시 여부 (🍔 햄버거 메뉴)
   final bool showDrawerButton;
-  
+
   /// 뒤로가기 버튼 표시 여부
   final bool showBackButton;
-  
+
   /// 로고 클릭 핸들러 (홈으로 이동)
   final VoidCallback? onLogoTap;
-  
+
   /// 뒤로가기 버튼 커스텀 핸들러
   final VoidCallback? onBackPressed;
-  
+
   /// 상단바 액션 버튼들
   final List<Widget>? actions;
 
@@ -50,15 +49,13 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: context.colors.primary,
       foregroundColor: context.colors.onPrimary,
       elevation: 0,
-      
+
       // 🧭 네비게이션 버튼 처리 (우선순위: 뒤로가기 > 드로어)
       leading: _buildLeadingWidget(context),
       automaticallyImplyLeading: false, // 수동 제어
-      
       // 🏷️ 제목 또는 로고
       title: _buildTitleWidget(context),
       centerTitle: true, // 항상 가운데 정렬 (제목과 로고 모두)
-      
       // ⚙️ 액션 버튼들 + 사용자 메뉴
       actions: _buildActions(context),
     );
@@ -125,12 +122,12 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   /// 액션 버튼들 빌드
   List<Widget> _buildActions(BuildContext context) {
     final actionsList = <Widget>[];
-    
+
     // ⚙️ 커스텀 액션 버튼들 추가
     if (actions != null) {
       actionsList.addAll(actions!);
     }
-    
+
     // 🔐 로그인 버튼 (비로그인 시)
     if (showLoginButton && onLoginPressed != null) {
       actionsList.add(
@@ -150,15 +147,15 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
       );
     }
-    
+
     // 👤 사용자 프로필 메뉴 (로그인 시)
     if (profileWidget != null) {
       actionsList.add(profileWidget!);
     }
-    
+
     // 우측 여백
     actionsList.add(const SizedBox(width: 8));
-    
+
     return actionsList;
   }
 

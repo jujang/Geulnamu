@@ -16,6 +16,10 @@ class _LoginScreenState extends State<LoginScreen>
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  
+  // 🎯 카카오 버튼 호버/클릭 상태 관리
+  bool _isHovering = false;
+  bool _isPressed = false;
 
   @override
   void initState() {
@@ -235,25 +239,7 @@ class _LoginScreenState extends State<LoginScreen>
             
             const SizedBox(height: 16),
             
-            // 로딩 상태일 때 추가 정보
-            if (authProvider.isLoading) ...[
-              const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7DD3C0)),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '카카오 로그인 중...',
-                style: GoogleFonts.notoSans(
-                  fontSize: 14,
-                  color: const Color(0xFF95A5A6),
-                ),
-              ),
-            ],
+            // 🎯 로딩 상태 중복 표시 제거 - 버튼 안의 로딩만 유지
           ],
         );
       },
@@ -264,48 +250,89 @@ class _LoginScreenState extends State<LoginScreen>
     return SizedBox(
       width: double.infinity,
       height: 56,
-      child: ElevatedButton.icon(
-        onPressed: authProvider.isLoading ? null : () => _handleKakaoLogin(),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFEE500), // 카카오 옐로우
-          foregroundColor: const Color(0xFF3C1E1E),
-          elevation: 2,
-          shadowColor: const Color(0xFFFEE500).withOpacity(0.3),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-          ),
-          disabledBackgroundColor: const Color(0xFFFEE500).withOpacity(0.6),
-        ),
-        icon: authProvider.isLoading 
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3C1E1E)),
-              ),
-            )
-          : Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: const Color(0xFF3C1E1E),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Icon(
-                Icons.chat_bubble_outline,
-                size: 16,
-                color: Color(0xFFFEE500),
+      child: authProvider.isLoading 
+        ? Container(
+            width: double.infinity,
+            height: 56,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEE500).withOpacity(0.6),
+              borderRadius: BorderRadius.circular(12), // 🎯 카카오 공식 가이드: 12px
+            ),
+            child: const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3C1E1E)),
+                ),
               ),
             ),
-        label: Text(
-          authProvider.isLoading ? '로그인 중...' : '카카오로 시작하기',
-          style: GoogleFonts.notoSans(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+          )
+        : GestureDetector(
+            onTapDown: (_) => setState(() => _isPressed = true),
+            onTapUp: (_) => setState(() => _isPressed = false),
+            onTapCancel: () => setState(() => _isPressed = false),
+            onTap: () => _handleKakaoLogin(),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click, // 👆 웹에서 마우스 커서를 포인터(손가락)로 변경
+              onEnter: (_) => setState(() => _isHovering = true),
+              onExit: (_) => setState(() => _isHovering = false),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150), // 🎯 부드러운 애니메이션
+                curve: Curves.easeInOut,
+                width: double.infinity,
+                height: 56,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12), // 🎯 카카오 공식 가이드: 12px
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFEE500).withOpacity(
+                        _isPressed ? 0.2 : (_isHovering ? 0.5 : 0.3), // 🎯 눠남에 따른 음영 강도
+                      ),
+                      blurRadius: _isPressed ? 2 : (_isHovering ? 8 : 4), // 🎯 눠남에 따른 블러 강도
+                      offset: Offset(0, _isPressed ? 1 : (_isHovering ? 4 : 2)), // 🎯 눠남에 따른 오프셋
+                    ),
+                  ],
+                ),
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(
+                      _isPressed ? 0.15 : (_isHovering ? 0.05 : 0.0), // 🎯 눠남에 따른 어두워지는 정도
+                    ),
+                    BlendMode.darken,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'assets/images/kakao_login_large_wide.png',
+                      width: double.infinity,
+                      height: 56,
+                      fit: BoxFit.contain, // 🎯 이미지 전체가 보이도록 변경 (잘리지 않음)
+                      errorBuilder: (context, error, stackTrace) {
+                        // 🎯 이미지 로드 실패 시 간단한 폴백
+                        debugPrint('❌ 카카오 로그인 이미지 로드 실패: $error');
+                        return Container(
+                          width: double.infinity,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEE500),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.error_outline,
+                              color: Color(0xFF3C1E1E),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -337,6 +364,9 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   void _handleKakaoLogin() async {
+    // 🎯 클릭 후 상태 초기화
+    setState(() => _isPressed = false);
+    
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
     final success = await authProvider.loginWithKakao(context: context);
@@ -345,6 +375,6 @@ class _LoginScreenState extends State<LoginScreen>
       // 로그인 성공 시 현재 화면을 닫고 홈 화면으로 돌아가기
       Navigator.of(context).pop();
     }
-    // 실패 시에는 AuthProvider의 errorMessage가 자동으로 표시됨
+    // 실패 시에는 AuthProvider의 errorMessage가 자동으로 표시됩니다
   }
 }

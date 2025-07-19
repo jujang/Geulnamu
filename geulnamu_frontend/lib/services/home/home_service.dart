@@ -11,10 +11,21 @@ import '../../providers/auth_provider.dart';
 /// - 프로필 메뉴 선택 처리
 /// - 다이얼로그 및 스낵바 표시
 /// - 네비게이션 처리
-class HomeService {
+/// - 로딩 상태 관리
+class HomeService extends ChangeNotifier {
   static final HomeService _instance = HomeService._internal();
   factory HomeService() => _instance;
   HomeService._internal();
+
+  // 🔄 로딩 상태 관리
+  bool _isProcessing = false;
+  String? _currentOperation;
+
+  /// 현재 처리 중인지 여부
+  bool get isProcessing => _isProcessing;
+  
+  /// 현재 진행 중인 작업명
+  String? get currentOperation => _currentOperation;
 
   // 🎯 메뉴 탭 처리 (권한 레벨 + 개인정보 이중 체크)
   void handleMenuTap(BuildContext context, String menuTitle) {
@@ -26,19 +37,45 @@ class HomeService {
       return;
     }
 
-    // 🔒 종합 접근 가능 체크
-    if (!canAccessFeature(menuTitle, authProvider)) {
-      if (!hasRolePermission(menuTitle, authProvider)) {
-        // 권한 부족
-        _showInsufficientPermissionDialog(context, menuTitle);
-      } else {
-        // 개인정보 입력 필요
-        _showProfileRequiredDialog(context, menuTitle);
-      }
+    // 🌿 글나무 소개도 누구나 접근 가능
+    if (menuTitle == '글나무 소개') {
+      _processMenuAction(context, menuTitle);
       return;
     }
 
-    // 정상 메뉴 처리
+    // 🔒 로그인이 필요한 기능들 체크
+    final loginRequiredFeatures = [
+      '모임 목록',
+      '오늘의 모임',
+      '모임 만들기',
+      '출석 체크',
+      '출석 이력',
+      '발제 작성',
+      '내 발제',
+      '모임원 목록',
+    ];
+
+    if (loginRequiredFeatures.contains(menuTitle)) {
+      // 🚫 로그인이 안 된 상태 → 로그인 요구 다이얼로그
+      if (!authProvider.isAuthenticated) {
+        _showLoginRequiredDialog(context, menuTitle);
+        return;
+      }
+      
+      // 🔍 로그인은 됐지만 개인정보 입력이 안 된 경우 (우선 체크!)
+      if (authProvider.profileCompleted == false) {
+        _showProfileRequiredDialog(context, menuTitle);
+        return;
+      }
+      
+      // 🔐 개인정보가 있지만 권한이 부족한 경우
+      if (!hasRolePermission(menuTitle, authProvider)) {
+        _showInsufficientPermissionDialog(context, menuTitle);
+        return;
+      }
+    }
+
+    // ✅ 정상 메뉴 처리
     _processMenuAction(context, menuTitle);
   }
 
@@ -61,32 +98,54 @@ class HomeService {
     }
   }
 
-  // 🎯 로그아웃 처리
+  // 🎯 로그아웃 처리 (로딩 상태 포함)
   Future<void> handleLogout(
     BuildContext context,
     AuthProvider authProvider,
   ) async {
+    // 이미 처리 중이면 중복 방지
+    if (_isProcessing) return;
+
     final confirmed = await _showLogoutDialog(context);
 
     if (confirmed == true) {
-      await authProvider.logout(context: context);
-      
-      // 🎯 로그아웃 후 자동으로 홈으로 이동 (모든 이전 라우트 제거)
-      if (context.mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (route) => false, // 모든 이전 라우트 제거
-        );
-      }
-      
-      // 🎯 홈 이동 후 스낵바 표시 (약간의 딜레이)
-      if (context.mounted) {
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (context.mounted) {
-            _showSnackBar(context, '로그아웃되었습니다.');
-          }
-        });
+      try {
+        // 🔄 로딩 시작
+        _setProcessing(true, '로그아웃 중...');
+        
+        await authProvider.logout(context: context);
+
+        // 🎯 로그아웃 후 자동으로 홈으로 이동 (모든 이전 라우트 제거)
+        if (context.mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/home',
+            (route) => false, // 모든 이전 라우트 제거
+          );
+        }
+
+        // 🎯 홈 이동 후 스낵바 표시 (약간의 딜레이)
+        if (context.mounted) {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (context.mounted) {
+              // 🎯 로그아웃 스낵바도 동일하게 수정
+              ScaffoldMessenger.of(context).clearSnackBars();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('로그아웃되었습니다.'),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  duration: const Duration(milliseconds: 2500),
+                ),
+              );
+            }
+          });
+        }
+      } catch (e) {
+        print('❌ [HomeService] 로그아웃 오류: $e');
+        // 에러 발생 시에도 로그아웃 상태로 처리 (보안상 이유)
+      } finally {
+        // 🔄 로딩 완료
+        _setProcessing(false);
       }
     }
   }
@@ -95,17 +154,25 @@ class HomeService {
   void showCreateMeetingDialog(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    // 🔒 종합 접근 가능 체크
-    if (!canAccessFeature('모임 만들기', authProvider)) {
-      if (!hasRolePermission('모임 만들기', authProvider)) {
-        _showInsufficientPermissionDialog(context, '모임 만들기');
-      } else {
-        _showProfileRequiredDialog(context, '모임 만들기');
-      }
+    // 🚫 로그인이 안 된 상태 → 로그인 요구 다이얼로그
+    if (!authProvider.isAuthenticated) {
+      _showLoginRequiredDialog(context, '모임 만들기');
+      return;
+    }
+    
+    // 🔍 로그인은 됐지만 개인정보 입력이 안 된 경우 (우선 체크!)
+    if (authProvider.profileCompleted == false) {
+      _showProfileRequiredDialog(context, '모임 만들기');
+      return;
+    }
+    
+    // 🔐 개인정보가 있지만 권한이 부족한 경우
+    if (!hasRolePermission('모임 만들기', authProvider)) {
+      _showInsufficientPermissionDialog(context, '모임 만들기');
       return;
     }
 
-    // 정상 처리 (현재는 개발 중)
+    // ✅ 정상 처리 (현재는 개발 중)
     _showSnackBar(context, '모임 만들기 기능은 개발 중입니다.');
   }
 
@@ -227,39 +294,7 @@ class HomeService {
     }
   }
 
-  // 🔒 권한 체크 메서드들 (임시 구현)
-
-  /// 기능 접근 가능 여부 체크
-  bool canAccessFeature(String featureName, AuthProvider authProvider) {
-    // 홈 화면은 항상 접근 가능
-    if (featureName == '홈 화면') {
-      return true;
-    }
-
-    // 글나무 소개도 누구나 접근 가능
-    if (featureName == '글나무 소개') {
-      return true;
-    }
-
-    // 로그인이 필요한 기능들
-    final loginRequiredFeatures = [
-      '모임 목록',
-      '오늘의 모임',
-      '모임 만들기',
-      '출석 체크',
-      '출석 이력',
-      '발제 작성',
-      '내 발제',
-      '모임원 목록', // 임원진 이상 기능
-    ];
-
-    if (loginRequiredFeatures.contains(featureName)) {
-      return authProvider.isAuthenticated;
-    }
-
-    // 기본적으로 접근 가능
-    return true;
-  }
+  // 🔒 권한 체크 메서드
 
   /// 역할 권한 체크
   bool hasRolePermission(String featureName, AuthProvider authProvider) {
@@ -267,18 +302,29 @@ class HomeService {
     if (featureName == '모임원 목록') {
       return authProvider.isStaffLevel;
     }
-    
+
     // 다른 기능들은 임시로 모두 접근 가능
     return true;
+  }
+
+  // 🔄 로딩 상태 설정 메서드
+  void _setProcessing(bool processing, [String? operation]) {
+    _isProcessing = processing;
+    _currentOperation = processing ? operation : null;
+    notifyListeners();
   }
 
   // 🎯 Private 메서드들
 
   void _showSnackBar(BuildContext context, String message) {
+    // 🎯 기존 SnackBar가 있으면 즉시 제거 (걹치기 허용)
+    ScaffoldMessenger.of(context).clearSnackBars();
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.primary, // 🎨 글나무 민트색
+        duration: const Duration(milliseconds: 2500), // 🎯 4초 → 2.5초로 단축
       ),
     );
   }
@@ -308,6 +354,81 @@ class HomeService {
               '로그아웃',
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 🚫 로그인 요구 다이얼로그
+  void _showLoginRequiredDialog(BuildContext context, String featureName) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.login_outlined,
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            const Text('로그인 필요'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$featureName 기능을 사용하려면\n로그인이 필요합니다.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '카카오 계정으로 간편하게 로그인하세요!',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              '다음에',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              navigateToLogin(context);
+            },
+            child: const Text('로그인하기'),
           ),
         ],
       ),
@@ -433,7 +554,7 @@ class HomeService {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '로그인이 필요하거나 상위 권한이 요구됩니다.',
+                      '해당 기능은 특정 권한이 있는 사용자만 사용할 수 있습니다.',
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(context).colorScheme.onErrorContainer,

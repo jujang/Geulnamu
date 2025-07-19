@@ -54,13 +54,13 @@ class HomeWidgets {
               ],
 
               // 개인정보 입력 버튼 (필요한 경우에만 표시)
-              if (authProvider.needsProfile) ...[
+              if (authProvider.profileCompleted == false) ...[
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: onProfileInputTap,
                   child: _buildProfileInputButton(context),
                 ),
-              ] else if (authProvider.profileStatusUnknown) ...[
+              ] else if (authProvider.profileCompleted == null) ...[
                 const SizedBox(height: 16),
                 _buildProfileStatusLoading(context),
               ],

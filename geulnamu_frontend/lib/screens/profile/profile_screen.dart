@@ -5,7 +5,7 @@ import '../../widgets/common/main_layout.dart';
 import '../../widgets/common/responsive_container.dart';
 import '../../services/home/home_route_service.dart'; // 🎯 RouteObserver import
 import '../../services/home/home_service.dart';
-import 'mixins/profile_logic_mixin_debug.dart';
+import 'mixins/profile_admin_logic_mixin.dart';
 import 'widgets/profile_widgets.dart';
 
 /// 프로필 화면 - 단일 페이지 + 토글 모드
@@ -45,7 +45,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> 
-    with ProfileLogicMixinDebug, RouteAware { // 🎯 RouteAware 추가
+    with ProfileAdminLogicMixin, RouteAware { // 🎯 RouteAware 추가
   
   @override
   void didChangeDependencies() {
@@ -122,7 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       actions: _buildAppBarActions(),
       // 🎯 하단 액션 버튼 (편집 모드에서만)
       bottomNavigationBar: isEditMode && profile != null
-          ? ProfileWidgets.buildActionButtons(
+          ? ProfileWidgets.buildProfileActionButtons(
               context,
               onSave: saveProfile,
               onCancel: cancelEdit,
@@ -152,32 +152,15 @@ class _ProfileScreenState extends State<ProfileScreen>
       );
     }
     
-    // ✏️ 편집/저장/취소 버튼
-    if (!isLoading && profile != null && isSelfMode) {
-      if (isEditMode) {
-        // 편집 모드: 취소 + 저장 버튼
-        actions.addAll([
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: cancelEdit,
-            tooltip: '취소',
-          ),
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: isSaving ? null : saveProfile,
-            tooltip: '저장',
-          ),
-        ]);
-      } else {
-        // 조회 모드: 편집 버튼
-        actions.add(
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: toggleEditMode,
-            tooltip: '편집',
-          ),
-        );
-      }
+    // ✏️ 편집 버튼 (조회 모드에서만)
+    if (!isLoading && profile != null && isSelfMode && !isEditMode) {
+      actions.add(
+        IconButton(
+          icon: const Icon(Icons.edit),
+          onPressed: toggleEditMode,
+          tooltip: '편집',
+        ),
+      );
     }
     
     return actions;
@@ -224,12 +207,12 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget _buildBody() {
     // 🎯 로딩 상태
     if (isLoading) {
-      return ProfileWidgets.buildLoadingWidget(context);
+      return ProfileWidgets.buildProfileLoadingWidget(context);
     }
 
     // 🎯 에러 상태 (프로필이 null)
     if (profile == null) {
-      return ProfileWidgets.buildErrorWidget(
+      return ProfileWidgets.buildProfileErrorWidget(
         context,
         '프로필 정보를 불러올 수 없습니다.',
         refreshProfileData,

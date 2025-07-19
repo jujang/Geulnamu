@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/profile/profile_model.dart';
 import '../../../core/utils/date_utils.dart' as app_date_utils;
+import '../../../widgets/common/loading_widgets.dart';
 
 /// 프로필 화면 UI 위젯들 (Static Methods)
 /// 
@@ -632,8 +633,8 @@ class ProfileWidgets {
     }
   }
 
-  /// 액션 버튼들 (저장, 취소)
-  static Widget buildActionButtons(
+  /// 편집 폼 액션 버튼들 (저장, 취소)
+  static Widget buildEditFormActionButtons(
     BuildContext context, {
     required VoidCallback onSave,
     required VoidCallback onCancel,
@@ -1033,6 +1034,100 @@ class ProfileWidgets {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 🔄 프로필 로딩 위젯
+  static Widget buildProfileLoadingWidget(BuildContext context) {
+    return LoadingWidgets.buildFullScreenLoading(
+      context,
+      message: '프로필 정보를 불러오는 중...',
+      showLogo: true,
+    );
+  }
+
+  /// ❌ 프로필 에러 위젯
+  static Widget buildProfileErrorWidget(
+    BuildContext context,
+    String message,
+    VoidCallback onRetry,
+  ) {
+    return LoadingWidgets.buildRefreshableLoading(
+      context,
+      message: message,
+      onRefresh: onRetry,
+      refreshButtonText: '다시 시도',
+    );
+  }
+
+  /// 🔄 프로필 액션 버튼들 (화면 하단 고정용)
+  static Widget buildProfileActionButtons(
+    BuildContext context, {
+    required VoidCallback onSave,
+    required VoidCallback onCancel,
+    bool isLoading = false,
+  }) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+        top: 16,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            // 취소 버튼
+            Expanded(
+              child: OutlinedButton(
+                onPressed: isLoading ? null : onCancel,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: Text(
+                  '취소',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+              ),
+            ),
+            
+            const SizedBox(width: 16),
+            
+            // 저장 버튼
+            Expanded(
+              flex: 2,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : onSave,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: isLoading
+                    ? LoadingWidgets.buildButtonLoading(
+                        context,
+                        text: '저장 중...',
+                        size: 18,
+                      )
+                    : Text(
+                        '저장',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

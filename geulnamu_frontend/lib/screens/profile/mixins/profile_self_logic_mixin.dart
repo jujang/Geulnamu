@@ -6,14 +6,14 @@ import '../../../models/profile/profile_model.dart';
 import '../../../core/utils/date_utils.dart' as app_date_utils;
 import '../../../core/config/app_config.dart';
 
-/// 프로필 화면 비즈니스 로직 Mixin
+/// 프로필 화면 비즈니스 로직 Mixin (본인 프로필용)
 ///
 /// 제공 기능:
-/// - 프로필 데이터 로드/저장
+/// - 본인 프로필 데이터 로드/저장
 /// - 편집 모드 토글
 /// - 폼 데이터 관리 및 유효성 검증
 /// - 에러 처리
-mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
+mixin ProfileSelfLogicMixin<T extends StatefulWidget> on State<T> {
   // 🎯 Service 클래스 사용
   final ProfileService _profileService = ProfileService();
 
@@ -58,15 +58,15 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
   /// ProfileScreen에서 RouteAware로 호출하거나,
   /// 수동으로 호출할 수 있음
   Future<void> refreshProfileData() async {
-    print('🔄 [ProfileLogicMixin] refreshProfileData() 호출 - 데이터 새로고침 시작');
+    print('🔄 [ProfileSelfLogicMixin] refreshProfileData() 호출 - 데이터 새로고침 시작');
 
     if (AppConfig.debugMode) {
-      print('🔄 [ProfileLogicMixin] 화면 재진입 - 프로필 데이터 새로고침');
+      print('🔄 [ProfileSelfLogicMixin] 화면 재진입 - 프로필 데이터 새로고침');
     }
 
     await _loadProfile();
 
-    print('✅ [ProfileLogicMixin] refreshProfileData() 완료');
+    print('✅ [ProfileSelfLogicMixin] refreshProfileData() 완료');
   }
 
   @override
@@ -97,7 +97,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
       }
 
       if (AppConfig.debugMode) {
-        print('🔍 [ProfileLogicMixin] 프로필 로드 시작...');
+        print('🔍 [ProfileSelfLogicMixin] 프로필 로드 시작...');
       }
 
       final profile = await _profileService.getMyProfile(accessToken);
@@ -110,7 +110,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
         });
 
         if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixin] 프로필 로드 성공: ${profile.name}');
+          print('✅ [ProfileSelfLogicMixin] 프로필 로드 성공: ${profile.name}');
         }
       }
     } catch (e) {
@@ -120,7 +120,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
         });
 
         if (AppConfig.debugMode) {
-          print('❌ [ProfileLogicMixin] 프로필 로드 실패: $e');
+          print('❌ [ProfileSelfLogicMixin] 프로필 로드 실패: $e');
         }
 
         // 에러 다이얼로그 표시
@@ -167,7 +167,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
     });
 
     if (AppConfig.debugMode) {
-      print('🎯 [ProfileLogicMixin] 편집 모드: ${_isEditMode ? '활성' : '비활성'}');
+      print('🎯 [ProfileSelfLogicMixin] 편집 모드: ${_isEditMode ? '활성' : '비활성'}');
     }
   }
 
@@ -235,7 +235,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
     // 유효성 검증
     if (!_validateForm()) {
       if (AppConfig.debugMode) {
-        print('❌ [ProfileLogicMixin] 유효성 검증 실패: $_errors');
+        print('❌ [ProfileSelfLogicMixin] 유효성 검증 실패: $_errors');
       }
       return;
     }
@@ -264,7 +264,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
       );
 
       if (AppConfig.debugMode) {
-        print('💾 [ProfileLogicMixin] 프로필 저장 시작...');
+        print('💾 [ProfileSelfLogicMixin] 프로필 저장 시작...');
       }
 
       // API 호출
@@ -275,7 +275,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
 
       if (success && mounted) {
         if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixin] 프로필 저장 성공 - 데이터 새로고침 시작');
+          print('✅ [ProfileSelfLogicMixin] 프로필 저장 성공 - 데이터 새로고침 시작');
         }
 
         // 성공 - 프로필 다시 로드하여 최신 데이터 반영
@@ -290,8 +290,8 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
         });
 
         if (AppConfig.debugMode) {
-          print('✅ [ProfileLogicMixin] 프로필 새로고침 완료: ${_profile?.name}');
-          print('✅ [ProfileLogicMixin] AuthProvider 업데이트 완료');
+          print('✅ [ProfileSelfLogicMixin] 프로필 새로고침 완료: ${_profile?.name}');
+          print('✅ [ProfileSelfLogicMixin] AuthProvider 업데이트 완료');
         }
 
         // 성공 메시지 표시
@@ -304,7 +304,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
         });
 
         if (AppConfig.debugMode) {
-          print('❌ [ProfileLogicMixin] 프로필 저장 실패: $e');
+          print('❌ [ProfileSelfLogicMixin] 프로필 저장 실패: $e');
         }
 
         // 에러 다이얼로그 표시
@@ -328,7 +328,7 @@ mixin ProfileLogicMixin<T extends StatefulWidget> on State<T> {
     });
 
     if (AppConfig.debugMode) {
-      print('🔄 [ProfileLogicMixin] 편집 취소');
+      print('🔄 [ProfileSelfLogicMixin] 편집 취소');
     }
   }
 
