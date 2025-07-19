@@ -152,32 +152,15 @@ class _ProfileScreenState extends State<ProfileScreen>
       );
     }
     
-    // ✏️ 편집/저장/취소 버튼
-    if (!isLoading && profile != null && isSelfMode) {
-      if (isEditMode) {
-        // 편집 모드: 취소 + 저장 버튼
-        actions.addAll([
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: cancelEdit,
-            tooltip: '취소',
-          ),
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: isSaving ? null : saveProfile,
-            tooltip: '저장',
-          ),
-        ]);
-      } else {
-        // 조회 모드: 편집 버튼
-        actions.add(
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: toggleEditMode,
-            tooltip: '편집',
-          ),
-        );
-      }
+    // ✏️ 편집 버튼 (조회 모드에서만)
+    if (!isLoading && profile != null && isSelfMode && !isEditMode) {
+      actions.add(
+        IconButton(
+          icon: const Icon(Icons.edit),
+          onPressed: toggleEditMode,
+          tooltip: '편집',
+        ),
+      );
     }
     
     return actions;
