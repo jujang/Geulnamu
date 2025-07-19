@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../core/config/app_config.dart';
+import '../../services/home/home_service.dart';
 import '../../widgets/common/app_header.dart';
 import '../../widgets/common/app_drawer.dart';
 import '../../widgets/common/responsive_container.dart';
+import '../../widgets/common/loading_widgets.dart';
 import '../../widgets/home/pwa_install_card.dart';
 import 'mixins/home_logic_mixin.dart';
 import 'mixins/route_aware_mixin.dart';
@@ -70,8 +71,6 @@ class _HomeScreenState extends State<HomeScreen>
   /// 🔍 인증 상태 확인 및 자동 리다이렉트
   void _checkAuthStatus() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-
 
     // 비로그인 상태에서는 리다이렉트 하지 않음
   }
@@ -187,6 +186,10 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         PopupMenuItem(
           value: 'logout',
+          enabled: !Provider.of<HomeService>(
+            context,
+            listen: false,
+          ).isProcessing, // 로딩 중 비활성화
           child: Row(
             children: [
               Container(
@@ -275,83 +278,90 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _fadeAnimation,
-      child: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
-          return Scaffold(
-            // 🎯 backgroundColor 제거! 테마에서 자동 처리
-            appBar: AppHeader(
-              onLoginPressed: authProvider.isAuthenticated
-                  ? null
-                  : navigateToLogin,
-              showLoginButton: !authProvider.isAuthenticated,
-              showDrawerButton: true, // Drawer 버튼 표시
-              onLogoTap: navigateToHome, // 로고 클릭으로 홈 이동
-              profileWidget: authProvider.isAuthenticated
-                  ? _buildProfileMenu(context, authProvider) // 직접 프로필 메뉴 생성
-                  : null,
-            ),
-            // Drawer 추가!
-            drawer: AppDrawer(
-              onMenuTap: handleMenuTap, // mixin 메서드 재사용
-              onLoginTap: navigateToLogin,
-              onLogoutTap: handleLogout,
-            ),
-            body: SafeArea(
-              child: ResponsiveContainer(
-                // 🎯 패딩 제거 - 스크롤바가 화면 끝에 위치하도록
-                child: SingleChildScrollView(
-                child: Padding(
-                // 콘텐츠에만 패딩 적용
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 동적 환영 카드 (Static Method 사용)
-                        HomeWidgets.buildDynamicWelcomeCard(
-                          context,
-                          authProvider,
-                          onProfileInputTap:
-                              navigateToProfileInput, // 개인정보 입력 버튼 핸들러
-                        ),
-                        const SizedBox(height: 24),
-
-                        // 통일된 빠른 메뉴 (Static Method 사용)
-                        HomeWidgets.buildQuickMenuGrid(
-                          context,
-                          authProvider,
-                          handleMenuTap, // mixin 메서드 사용
-                        ),
-                        const SizedBox(height: 24),
-
-                        // 로그인 상태에 따른 추가 콘텐츠
-                        if (authProvider.isAuthenticated) ...[
-                          HomeWidgets.buildRecentMeetingsSection(context),
-                          const SizedBox(height: 24),
-                        ] else ...[
-                          // PWA 설치 안내 (로그인 전에만 표시)
-                          PWAInstallCard(
-                            onInstallPressed:
-                                showInstallInstructions, // mixin 메서드 사용
+      child: Consumer2<AuthProvider, HomeService>(
+        builder: (context, authProvider, homeService, child) {
+          return LoadingWidgets.buildOverlayLoading(
+            context,
+            isLoading: homeService.isProcessing,
+            loadingMessage: homeService.currentOperation,
+            child: Scaffold(
+              // 🎯 backgroundColor 제거! 테마에서 자동 처리
+              appBar: AppHeader(
+                onLoginPressed: authProvider.isAuthenticated
+                    ? null
+                    : navigateToLogin,
+                showLoginButton: !authProvider.isAuthenticated,
+                showDrawerButton: true, // Drawer 버튼 표시
+                onLogoTap: navigateToHome, // 로고 클릭으로 홈 이동
+                profileWidget: authProvider.isAuthenticated
+                    ? _buildProfileMenu(context, authProvider) // 직접 프로필 메뉴 생성
+                    : null,
+              ),
+              // Drawer 추가!
+              drawer: AppDrawer(
+                onMenuTap: handleMenuTap, // mixin 메서드 재사용
+                onLoginTap: navigateToLogin,
+                onLogoutTap: handleLogout,
+              ),
+              body: SafeArea(
+                child: ResponsiveContainer(
+                  // 🎯 패딩 제거 - 스크롤바가 화면 끝에 위치하도록
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      // 콘텐츠에만 패딩 적용
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 동적 환영 카드 (Static Method 사용)
+                          HomeWidgets.buildDynamicWelcomeCard(
+                            context,
+                            authProvider,
+                            onProfileInputTap:
+                                navigateToProfileInput, // 개인정보 입력 버튼 핸들러
                           ),
                           const SizedBox(height: 24),
-                        ],
 
-                        // 추가 여백
-                        const SizedBox(height: 32),
-                      ],
+                          // 통일된 빠른 메뉴 (Static Method 사용)
+                          HomeWidgets.buildQuickMenuGrid(
+                            context,
+                            authProvider,
+                            handleMenuTap, // mixin 메서드 사용
+                          ),
+                          const SizedBox(height: 24),
+
+                          // 로그인 상태에 따른 추가 콘텐츠
+                          if (authProvider.isAuthenticated) ...[
+                            HomeWidgets.buildRecentMeetingsSection(context),
+                            const SizedBox(height: 24),
+                          ] else ...[
+                            // PWA 설치 안내 (로그인 전에만 표시)
+                            PWAInstallCard(
+                              onInstallPressed:
+                                  showInstallInstructions, // mixin 메서드 사용
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+
+                          // 추가 여백
+                          const SizedBox(height: 32),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
+              // 권한 체크를 통해 FAB 표시 여부 결정
+              floatingActionButton: _shouldShowCreateMeetingFAB(authProvider)
+                  ? FloatingActionButton.extended(
+                      onPressed: homeService.isProcessing
+                          ? null // 로딩 중에는 비활성화
+                          : showCreateMeetingDialog, // mixin 메서드 사용
+                      label: const Text('모임 만들기'),
+                      icon: const Icon(Icons.add),
+                    )
+                  : null,
             ),
-            // 권한 체크를 통해 FAB 표시 여부 결정
-            floatingActionButton: _shouldShowCreateMeetingFAB(authProvider)
-                ? FloatingActionButton.extended(
-                    onPressed: showCreateMeetingDialog, // mixin 메서드 사용
-                    label: const Text('모임 만들기'),
-                    icon: const Icon(Icons.add),
-                  )
-                : null,
           );
         },
       ),

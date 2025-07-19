@@ -10,6 +10,7 @@ import 'core/theme.dart';  // 🎯 모든 테마 설정이 여기에!
 // Provider imports
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
+import 'services/home/home_service.dart';
 
 // Screen imports
 import 'screens/splash/splash_screen.dart';
@@ -66,6 +67,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
           Future.microtask(() => themeProvider.initialize());
           return themeProvider;
         }),
+        ChangeNotifierProvider(create: (_) => HomeService()), // 🔄 HomeService 추가
         // 추후 다른 Provider들 추가 가능
       ],
       child: Consumer<ThemeProvider>(

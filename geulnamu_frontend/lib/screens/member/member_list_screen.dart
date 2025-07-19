@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
+import '../../widgets/common/loading_widgets.dart';
 import '../../core/theme.dart';
 import '../../core/config/app_config.dart'; // 🎯 AppConfig import 추가
 import '../../models/member/member_list_model.dart';
@@ -61,28 +62,37 @@ class _MemberListScreenState extends State<MemberListScreen>
 
   @override
   Widget build(BuildContext context) {
-    return MainLayout(
-      title: '모임원 목록',
-      isHomePage: true, // 🎯 메인 기능이므로 사이드바 버튼 표시
-      // 🎯 HomeService를 통한 메뉴 및 로그아웃 처리
-      onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
-      onLogoutTap: () => _handleLogout(),
-      body: Stack(
-        children: [
-          // 메인 콘텐츠
-          _buildMainContent(),
-          
-          // 플로팅 필터 버튼
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: MemberWidgets.buildFilterFab(
-              context,
-              _showFilterBottomSheet,
+    return Consumer<HomeService>(
+      builder: (context, homeService, child) {
+        return LoadingWidgets.buildOverlayLoading(
+          context,
+          isLoading: homeService.isProcessing,
+          loadingMessage: homeService.currentOperation,
+          child: MainLayout(
+            title: '모임원 목록',
+            isHomePage: true, // 🎯 메인 기능이므로 사이드바 버튼 표시
+            // 🎯 HomeService를 통한 메뉴 및 로그아웃 처리
+            onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
+            onLogoutTap: () => _handleLogout(),
+            body: Stack(
+              children: [
+                // 메인 콘텐츠
+                _buildMainContent(),
+                
+                // 플로팅 필터 버튼
+                Positioned(
+                  bottom: 16,
+                  right: 16,
+                  child: MemberWidgets.buildFilterFab(
+                    context,
+                    _showFilterBottomSheet,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

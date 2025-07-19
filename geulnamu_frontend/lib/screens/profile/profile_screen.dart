@@ -122,7 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       actions: _buildAppBarActions(),
       // 🎯 하단 액션 버튼 (편집 모드에서만)
       bottomNavigationBar: isEditMode && profile != null
-          ? ProfileWidgets.buildActionButtons(
+          ? ProfileWidgets.buildProfileActionButtons(
               context,
               onSave: saveProfile,
               onCancel: cancelEdit,
@@ -207,12 +207,12 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget _buildBody() {
     // 🎯 로딩 상태
     if (isLoading) {
-      return ProfileWidgets.buildLoadingWidget(context);
+      return ProfileWidgets.buildProfileLoadingWidget(context);
     }
 
     // 🎯 에러 상태 (프로필이 null)
     if (profile == null) {
-      return ProfileWidgets.buildErrorWidget(
+      return ProfileWidgets.buildProfileErrorWidget(
         context,
         '프로필 정보를 불러올 수 없습니다.',
         refreshProfileData,

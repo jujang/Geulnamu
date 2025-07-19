@@ -11,10 +11,21 @@ import '../../providers/auth_provider.dart';
 /// - 프로필 메뉴 선택 처리
 /// - 다이얼로그 및 스낵바 표시
 /// - 네비게이션 처리
-class HomeService {
+/// - 로딩 상태 관리
+class HomeService extends ChangeNotifier {
   static final HomeService _instance = HomeService._internal();
   factory HomeService() => _instance;
   HomeService._internal();
+
+  // 🔄 로딩 상태 관리
+  bool _isProcessing = false;
+  String? _currentOperation;
+
+  /// 현재 처리 중인지 여부
+  bool get isProcessing => _isProcessing;
+  
+  /// 현재 진행 중인 작업명
+  String? get currentOperation => _currentOperation;
 
   // 🎯 메뉴 탭 처리 (권한 레벨 + 개인정보 이중 체크)
   void handleMenuTap(BuildContext context, String menuTitle) {
@@ -87,40 +98,54 @@ class HomeService {
     }
   }
 
-  // 🎯 로그아웃 처리
+  // 🎯 로그아웃 처리 (로딩 상태 포함)
   Future<void> handleLogout(
     BuildContext context,
     AuthProvider authProvider,
   ) async {
+    // 이미 처리 중이면 중복 방지
+    if (_isProcessing) return;
+
     final confirmed = await _showLogoutDialog(context);
 
     if (confirmed == true) {
-      await authProvider.logout(context: context);
+      try {
+        // 🔄 로딩 시작
+        _setProcessing(true, '로그아웃 중...');
+        
+        await authProvider.logout(context: context);
 
-      // 🎯 로그아웃 후 자동으로 홈으로 이동 (모든 이전 라우트 제거)
-      if (context.mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (route) => false, // 모든 이전 라우트 제거
-        );
-      }
+        // 🎯 로그아웃 후 자동으로 홈으로 이동 (모든 이전 라우트 제거)
+        if (context.mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/home',
+            (route) => false, // 모든 이전 라우트 제거
+          );
+        }
 
-      // 🎯 홈 이동 후 스낵바 표시 (약간의 딜레이)
-      if (context.mounted) {
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (context.mounted) {
-            // 🎯 로그아웃 스낵바도 동일하게 수정
-            ScaffoldMessenger.of(context).clearSnackBars();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('로그아웃되었습니다.'),
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                duration: const Duration(milliseconds: 2500),
-              ),
-            );
-          }
-        });
+        // 🎯 홈 이동 후 스낵바 표시 (약간의 딜레이)
+        if (context.mounted) {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (context.mounted) {
+              // 🎯 로그아웃 스낵바도 동일하게 수정
+              ScaffoldMessenger.of(context).clearSnackBars();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('로그아웃되었습니다.'),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  duration: const Duration(milliseconds: 2500),
+                ),
+              );
+            }
+          });
+        }
+      } catch (e) {
+        print('❌ [HomeService] 로그아웃 오류: $e');
+        // 에러 발생 시에도 로그아웃 상태로 처리 (보안상 이유)
+      } finally {
+        // 🔄 로딩 완료
+        _setProcessing(false);
       }
     }
   }
@@ -280,6 +305,13 @@ class HomeService {
 
     // 다른 기능들은 임시로 모두 접근 가능
     return true;
+  }
+
+  // 🔄 로딩 상태 설정 메서드
+  void _setProcessing(bool processing, [String? operation]) {
+    _isProcessing = processing;
+    _currentOperation = processing ? operation : null;
+    notifyListeners();
   }
 
   // 🎯 Private 메서드들

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/home/home_service.dart';
 import 'app_header.dart';
 import 'app_drawer.dart';
 
@@ -71,8 +72,8 @@ class MainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
+    return Consumer2<AuthProvider, HomeService>(
+      builder: (context, authProvider, homeService, child) {
         return Scaffold(
           // 🎯 테마 시스템 사용 - backgroundColor 없음
           appBar: AppHeader(
@@ -87,7 +88,7 @@ class MainLayout extends StatelessWidget {
             // 👤 사용자 메뉴 (로그인 시에만 + showProfileMenu가 true일 때만)
             profileWidget: authProvider.isAuthenticated && showProfileMenu
                 ? (customProfileWidget ??
-                      _buildDefaultProfileMenu(context, authProvider))
+                      _buildDefaultProfileMenu(context, authProvider, homeService.isProcessing))
                 : null,
             // 🏠 로고 클릭으로 홈 이동
             onLogoTap: onLogoTap,
@@ -113,10 +114,11 @@ class MainLayout extends StatelessWidget {
     );
   }
 
-  /// 기본 프로필 메뉴 생성 (더 시각적으로 개선)
+  /// 기본 프로필 메뉴 생성 (더 시각적으로 개선 + 로딩 상태 지원)
   Widget _buildDefaultProfileMenu(
     BuildContext context,
     AuthProvider authProvider,
+    bool isProcessing,
   ) {
     return PopupMenuButton<String>(
       // 더 시각적으로 구분되는 아바타 스타일
@@ -210,6 +212,7 @@ class MainLayout extends StatelessWidget {
         ),
         PopupMenuItem(
           value: 'logout',
+          enabled: !isProcessing, // 로딩 중 비활성화
           child: Row(
             children: [
               Container(
