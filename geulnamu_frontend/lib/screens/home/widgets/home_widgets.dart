@@ -80,7 +80,7 @@ class HomeWidgets {
     AuthProvider authProvider,
     Function(String) onMenuTap,
   ) {
-    // 🎯 카드 콘텐츠: '글나무 소개', '오늘의 모임', '출석 체크', '발제 작성'
+    // 🎯 카드 콘텐츠: '글나무 소개', '오늘의 모임', '출석 체크', '발제문 목록'
     final menuItems = [
       {
         'icon': Icons.menu_book_rounded,
@@ -97,7 +97,11 @@ class HomeWidgets {
         'title': '출석 체크',
         'subtitle': 'QR 코드로 간편 출석',
       },
-      {'icon': Icons.edit_outlined, 'title': '발제 작성', 'subtitle': '독서 발제문 작성'},
+      {
+        'icon': Icons.library_books_outlined,
+        'title': '발제문 목록',
+        'subtitle': '모임별 작성된 발제문 확인',
+      },
     ];
 
     return Column(

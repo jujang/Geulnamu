@@ -23,7 +23,7 @@ class HomeService extends ChangeNotifier {
 
   /// 현재 처리 중인지 여부
   bool get isProcessing => _isProcessing;
-  
+
   /// 현재 진행 중인 작업명
   String? get currentOperation => _currentOperation;
 
@@ -46,13 +46,13 @@ class HomeService extends ChangeNotifier {
     // 🔒 로그인이 필요한 기능들 체크
     final loginRequiredFeatures = [
       '모임 목록',
+      '모임 목록 (운영진용)',
       '오늘의 모임',
       '모임 만들기',
       '출석 체크',
-      '출석 이력',
       '발제 작성',
-      '내 발제',
       '모임원 목록',
+      '발제문 목록',
     ];
 
     if (loginRequiredFeatures.contains(menuTitle)) {
@@ -61,13 +61,13 @@ class HomeService extends ChangeNotifier {
         _showLoginRequiredDialog(context, menuTitle);
         return;
       }
-      
+
       // 🔍 로그인은 됐지만 개인정보 입력이 안 된 경우 (우선 체크!)
       if (authProvider.profileCompleted == false) {
         _showProfileRequiredDialog(context, menuTitle);
         return;
       }
-      
+
       // 🔐 개인정보가 있지만 권한이 부족한 경우
       if (!hasRolePermission(menuTitle, authProvider)) {
         _showInsufficientPermissionDialog(context, menuTitle);
@@ -112,7 +112,7 @@ class HomeService extends ChangeNotifier {
       try {
         // 🔄 로딩 시작
         _setProcessing(true, '로그아웃 중...');
-        
+
         await authProvider.logout(context: context);
 
         // 🎯 로그아웃 후 자동으로 홈으로 이동 (모든 이전 라우트 제거)
@@ -159,13 +159,13 @@ class HomeService extends ChangeNotifier {
       _showLoginRequiredDialog(context, '모임 만들기');
       return;
     }
-    
+
     // 🔍 로그인은 됐지만 개인정보 입력이 안 된 경우 (우선 체크!)
     if (authProvider.profileCompleted == false) {
       _showProfileRequiredDialog(context, '모임 만들기');
       return;
     }
-    
+
     // 🔐 개인정보가 있지만 권한이 부족한 경우
     if (!hasRolePermission('모임 만들기', authProvider)) {
       _showInsufficientPermissionDialog(context, '모임 만들기');
@@ -261,26 +261,17 @@ class HomeService extends ChangeNotifier {
       case '모임원 목록':
         Navigator.pushNamed(context, '/member-list');
         break;
-      case '모임 목록':
-        _showSnackBar(context, '모임 목록 기능은 개발 중입니다.');
-        break;
       case '오늘의 모임':
         _showSnackBar(context, '오늘의 모임 기능은 개발 중입니다.');
         break;
-      case '모임 만들기':
-        _showSnackBar(context, '모임 만들기 기능은 개발 중입니다.');
+      case '모임 목록':
+        _showSnackBar(context, '모임 목록 기능은 개발 중입니다.');
         break;
-      case '출석 체크':
-        _showSnackBar(context, '출석 체크 기능은 개발 중입니다.');
+      case '모임 목록 (운영진용)':
+        _showSnackBar(context, '모임 목록 (운영진용) 기능은 개발 중입니다.');
         break;
-      case '출석 이력':
-        _showSnackBar(context, '출석 이력 기능은 개발 중입니다.');
-        break;
-      case '발제 작성':
-        _showSnackBar(context, '발제 작성 기능은 개발 중입니다.');
-        break;
-      case '내 발제':
-        _showSnackBar(context, '내 발제 기능은 개발 중입니다.');
+      case '발제문 목록':
+        _showSnackBar(context, '발제문 목록 기능은 개발 중입니다.');
         break;
       case '도움말':
         _showSnackBar(context, '도움말 기능은 개발 중입니다.');
@@ -319,7 +310,7 @@ class HomeService extends ChangeNotifier {
   void _showSnackBar(BuildContext context, String message) {
     // 🎯 기존 SnackBar가 있으면 즉시 제거 (걹치기 허용)
     ScaffoldMessenger.of(context).clearSnackBars();
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
