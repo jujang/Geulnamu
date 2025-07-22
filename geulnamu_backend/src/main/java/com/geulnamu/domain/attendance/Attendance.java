@@ -35,8 +35,8 @@ public class Attendance extends DateColumn {
     @Column(name = "note", length = 1)
     private String note; // 비고 (출석 관련 특이사항이 적는 곳)
 
-    @Column(name = "not_want_discussion", columnDefinition = "TINYINT(1)", nullable = false)
-    private boolean notWantDiscussion; // 토론 미참여 희망
+    @Column(name = "want_discussion", columnDefinition = "TINYINT(1)", nullable = false)
+    private boolean wantDiscussion; // 토론 참여 희망
 
     @Convert(converter = DiscussionGroupConverter.class)
     @Column(name = "discussion_group", length = 1)
@@ -50,7 +50,7 @@ public class Attendance extends DateColumn {
         return Attendance.builder()
             .meeting(meeting)
             .member(member)
-            .notWantDiscussion(false)
+            .wantDiscussion(true)
             .build();
     }
 
@@ -78,11 +78,11 @@ public class Attendance extends DateColumn {
     }
 
     public void updateNotWantDiscussion() {
-        this.notWantDiscussion = true;
+        this.wantDiscussion = false;
     }
 
     public void updateWantDiscussion() {
-        this.notWantDiscussion = false;
+        this.wantDiscussion = true;
     }
 
     public void updateDiscussionGroup(DiscussionGroup discussionGroup) {

@@ -1,10 +1,6 @@
 package com.geulnamu.controller.meeting;
 
-import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
-import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequest;
-import com.geulnamu.controller.meeting.dto.request.MeetingGroupUpdateRequest;
-import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
-import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
+import com.geulnamu.controller.meeting.dto.request.*;
 import com.geulnamu.controller.meeting.dto.response.*;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
@@ -47,14 +43,6 @@ public class MeetingController {
         return BaseResponse.ofSuccess(responseList);
     }
 
-    @ErrorLogAction(value = ActionType.MEETING_TODAY_LIST_VIEW, actionDomain = DomainType.MEETING)
-    @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/list/today", name = "오늘의 모임 (목록) 조회")
-    public BaseResponse<List<AttendanceInfoResponse>> getTodayMeetingList(@AuthMemberId Long memberId) {
-        List<AttendanceInfoResponse> responseList = meetingService.getTodayMeetingList(memberId);
-        return BaseResponse.ofSuccess(responseList);
-    }
-
     @ErrorLogAction(value = ActionType.MEETING_LIST_VIEW, actionDomain = DomainType.MEETING)
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/list", name = "모임 목록 조회")
@@ -64,19 +52,19 @@ public class MeetingController {
         return BaseResponse.ofSuccess(response);
     }
 
-    @ErrorLogAction(value = ActionType.MEETING_LIST_VIEW_FOR_STAFF, actionDomain = DomainType.MEETING)
-    @AccessLevel(Level.STAFF)
-    @GetMapping(value = "/list/staff", name = "모임 목록 조회(운영진용)")
-    public BaseResponse<MeetingListForStaffResponse> getMeetingListForStaff(@Valid MeetingListRequest request) {
-        MeetingListForStaffResponse response = meetingService.getMeetingListForStaff(request);
+    @ErrorLogAction(value = ActionType.MEETING_VIEW, actionDomain = DomainType.MEETING)
+    @AccessLevel(Level.MEMBER)
+    @GetMapping(value = "/{meetingId}", name = "모임 단일 상세 조회")
+    public BaseResponse<MeetingDetailResponse> findMeeting(@PathVariable @Min(value = 1) Long meetingId, @AuthMemberId Long memberId) {
+        MeetingDetailResponse response = meetingService.getMeeting(meetingId, memberId);
         return BaseResponse.ofSuccess(response);
     }
 
     @ErrorLogAction(value = ActionType.MEETING_VIEW_FOR_STAFF, actionDomain = DomainType.MEETING)
     @AccessLevel(Level.STAFF)
-    @GetMapping(value = "/{meetingId}", name = "모임 단일 조회(운영진용)")
-    public BaseResponse<MeetingInfoForStaffResponse> findMeetingForStaff(@PathVariable @Min(value = 1) Long meetingId) {
-        MeetingInfoForStaffResponse response = meetingService.getMeetingForStaff(meetingId);
+    @GetMapping(value = "/{meetingId}/staff", name = "모임 단일 상세 조회(운영진용)")
+    public BaseResponse<MeetingDetailResponseForStaff> findMeetingForStaff(@PathVariable @Min(value = 1) Long meetingId) {
+        MeetingDetailResponseForStaff response = meetingService.getMeetingForStaff(meetingId);
         return BaseResponse.ofSuccess(response);
     }
 
@@ -116,9 +104,9 @@ public class MeetingController {
         return BaseResponse.ofSuccess();
     }
 
-    @LogAction(value = ActionType.MEETING_DELETE, actionDomain = DomainType.MEETING)
+    @LogAction(value = ActionType.MEETING_REMOVE, actionDomain = DomainType.MEETING)
     @AccessLevel(Level.STAFF)
-    @DeleteMapping(value = "/{meetingId}", name = "개설한 모임 삭제 - 모임 시작 6시간 전까지만 가능")
+    @DeleteMapping(value = "/{meetingId}/remove", name = "개설한 모임 삭제 - 모임 시작 6시간 전까지만 가능")
     public BaseResponse<Void> removeMeeting(@PathVariable @Min(value = 1) Long meetingId,
                                             @AuthMemberId Long memberId, @AuthRole Role role) {
         meetingService.removeMeeting(meetingId, memberId, role);

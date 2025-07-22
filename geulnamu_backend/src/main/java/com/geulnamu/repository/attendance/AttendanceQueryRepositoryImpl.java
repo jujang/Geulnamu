@@ -46,7 +46,8 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
                 attendance.member.id, attendance.member.name)
             )
             .from(attendance)
-            .where(attendance.meeting.id.eq(meetingId))
+            .where(attendance.meeting.id.eq(meetingId),
+                attendance.wantDiscussion.eq(true))
             .orderBy(attendance.member.id.asc())
             .fetch();
     }
