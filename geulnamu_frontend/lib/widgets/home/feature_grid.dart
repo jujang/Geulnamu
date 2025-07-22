@@ -29,9 +29,9 @@ class FeatureGrid extends SimpleResponsiveWidget {
       // 🎯 색상 제거! FeatureCard에서 테마 색상 사용
     },
     {
-      'icon': Icons.edit_outlined,
-      'title': '발제 작성',
-      'subtitle': '독서 발제문 작성',
+      'icon': Icons.library_books_outlined,
+      'title': '발제문 목록',
+      'subtitle': '모임별 작성된 발제문 확인',
       // 🎯 색상 제거! FeatureCard에서 테마 색상 사용
     },
   ];

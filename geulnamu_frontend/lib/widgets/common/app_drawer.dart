@@ -63,7 +63,7 @@ class AppDrawer extends StatelessWidget {
                           icon: Icons.people_outlined,
                           title: '모임원 목록',
                           subtitle: '전체 모임원 보기',
-                          onTap: homeService.isProcessing 
+                          onTap: homeService.isProcessing
                               ? null // 로딩 중 비활성화
                               : () => _handleMenuTap(context, '모임원 목록'),
                           isDisabled: homeService.isProcessing,
@@ -74,57 +74,37 @@ class AppDrawer extends StatelessWidget {
                     if (authProvider.isAuthenticated) ...[
                       _buildMenuSection(context, '모임', [
                         _DrawerMenuItem(
-                          icon: Icons.group_outlined,
-                          title: '모임 목록',
-                          subtitle: '참여 중인 모임 보기',
-                          onTap: homeService.isProcessing 
-                              ? null 
-                              : () => _handleMenuTap(context, '모임 목록'),
-                          isDisabled: homeService.isProcessing,
-                        ),
-                        _DrawerMenuItem(
                           icon: Icons.event_outlined,
                           title: '오늘의 모임',
-                          subtitle: '예정된 모임 확인',
+                          subtitle: '오늘의 모임 보기',
                           onTap: () => _handleMenuTap(context, '오늘의 모임'),
                         ),
                         _DrawerMenuItem(
-                          icon: Icons.add_circle_outline,
-                          title: '모임 만들기',
-                          subtitle: '새로운 모임 생성',
-                          onTap: () => _handleMenuTap(context, '모임 만들기'),
+                          icon: Icons.group_outlined,
+                          title: '모임 목록',
+                          subtitle: '전체 모임 목록 보기',
+                          onTap: homeService.isProcessing
+                              ? null
+                              : () => _handleMenuTap(context, '모임 목록'),
+                          isDisabled: homeService.isProcessing,
                         ),
-                      ]),
-
-                      // ✅ 출석 섹션
-                      _buildMenuSection(context, '출석', [
-                        _DrawerMenuItem(
-                          icon: Icons.qr_code_scanner_outlined,
-                          title: '출석 체크',
-                          subtitle: 'QR 코드로 간편 출석',
-                          onTap: () => _handleMenuTap(context, '출석 체크'),
-                        ),
-                        _DrawerMenuItem(
-                          icon: Icons.history_outlined,
-                          title: '출석 이력',
-                          subtitle: '나의 출석 기록',
-                          onTap: () => _handleMenuTap(context, '출석 이력'),
-                        ),
+                        // 🔒 준운영진 이상만 접근 가능
+                        if (authProvider.isStaffLevel)
+                          _DrawerMenuItem(
+                            icon: Icons.group_outlined,
+                            title: '모임 목록 (운영진용)',
+                            subtitle: '전체 모임 목록 보기 (관리용)',
+                            onTap: () => _handleMenuTap(context, '모임 목록 (운영진용)'),
+                          ),
                       ]),
 
                       // ✍️ 발제 섹션
                       _buildMenuSection(context, '발제', [
                         _DrawerMenuItem(
-                          icon: Icons.edit_outlined,
-                          title: '발제 작성',
-                          subtitle: '독서 발제문 작성',
-                          onTap: () => _handleMenuTap(context, '발제 작성'),
-                        ),
-                        _DrawerMenuItem(
                           icon: Icons.library_books_outlined,
-                          title: '내 발제',
-                          subtitle: '작성한 발제문 보기',
-                          onTap: () => _handleMenuTap(context, '내 발제'),
+                          title: '발제문 목록',
+                          subtitle: '모임별 발제문 보기',
+                          onTap: () => _handleMenuTap(context, '발제문 목록'),
                         ),
                       ]),
                     ],
@@ -311,7 +291,7 @@ class AppDrawer extends StatelessWidget {
   /// 🎯 개별 메뉴 아이템 (로딩 상태 지원)
   Widget _buildMenuItem(BuildContext context, _DrawerMenuItem item) {
     final isDisabled = item.isDisabled ?? false;
-    
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       enabled: !isDisabled,
@@ -319,15 +299,15 @@ class AppDrawer extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: isDisabled 
+          color: isDisabled
               ? context.colors.onSurface.withOpacity(0.1)
               : context.colors.primary.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(
-          item.icon, 
-          size: 22, 
-          color: isDisabled 
+          item.icon,
+          size: 22,
+          color: isDisabled
               ? context.colors.onSurface.withOpacity(0.4)
               : context.colors.primary,
         ),
@@ -336,16 +316,14 @@ class AppDrawer extends StatelessWidget {
         item.title,
         style: context.textStyles.bodyMedium?.copyWith(
           fontWeight: FontWeight.w600,
-          color: isDisabled 
-              ? context.colors.onSurface.withOpacity(0.4)
-              : null,
+          color: isDisabled ? context.colors.onSurface.withOpacity(0.4) : null,
         ),
       ),
       subtitle: item.subtitle != null
           ? Text(
               item.subtitle!,
               style: context.textStyles.bodySmall?.copyWith(
-                color: isDisabled 
+                color: isDisabled
                     ? context.colors.onSurface.withOpacity(0.3)
                     : context.colors.onSurfaceVariant,
               ),
@@ -354,7 +332,7 @@ class AppDrawer extends StatelessWidget {
       trailing: Icon(
         Icons.arrow_forward_ios,
         size: 16,
-        color: isDisabled 
+        color: isDisabled
             ? context.colors.onSurface.withOpacity(0.3)
             : context.colors.onSurfaceVariant,
       ),
