@@ -24,15 +24,14 @@ public enum ActionType {
     // 모임 관련
     MEETING_CREATE("모임 생성"),
     MEETING_STAFF_LIST_VIEW("운영진 명단 조회"),
-    MEETING_TODAY_LIST_VIEW("오늘의 모임 목록 조회"),
     MEETING_LIST_VIEW("모임 목록 조회"),
-    MEETING_LIST_VIEW_FOR_STAFF("모임 목록 조회 - 운영진용"),
-    MEETING_VIEW_FOR_STAFF("모임 단일 조회 - 운영진용"),
+    MEETING_VIEW("모임 단일 상세 조회"),
+    MEETING_VIEW_FOR_STAFF("모임 단일 상세 조회 - 운영진용"),
     MEETING_UPDATE_BASIC("모임 수정"),
     MEETING_UPDATE_DISCUSSION("모임 토론 정보 수정"),
     MEETING_MAKE_PRIVATE("모임 비공개"),
     MEETING_MAKE_PUBLIC("비공개 모임 공개"),
-    MEETING_DELETE("모임 삭제"),
+    MEETING_REMOVE("모임 삭제"),
 
     // 출석 관련
     ATTENDANCE_CREATE("출석"),

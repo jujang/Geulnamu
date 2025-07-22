@@ -1,8 +1,7 @@
 package com.geulnamu.repository.meeting;
 
-import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
 import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
-import com.geulnamu.controller.meeting.dto.response.MeetingInfoForStaffResponse;
+import com.geulnamu.controller.meeting.dto.response.MeetingDetailResponse;
 import com.geulnamu.controller.meeting.dto.response.MeetingInfoResponse;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.attendance.AttendanceStatus;
@@ -22,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -47,7 +47,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
     }
 
     @Override
-    public Page<MeetingInfoResponse> findMeetingsWithPaging(MeetingListRequest request, Long myMemberId) {
+    public Page<MeetingInfoResponse> findMeetingsWithPagingNew(MeetingListRequest request, Long myMemberId) {
         Pageable pageable = request.toPageable();
 
         final Long totalCount = queryFactory
@@ -55,26 +55,28 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
             .from(meeting)
             .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id)
                 .and(attendance.member.id.eq(myMemberId)))
-            .where(meeting.privateAt.isNull(), // 비공개된 모임은 조회해오지 않음
+            .where(
                 filterByMeetingType(request.getMeetingType()),
-                filterByMemberId(request.getMeetingCreatorId()),
-                filterByAttendanceStatus(request.getAttendanceStatus())
+                filterByAttendanceStatus(request.getAttendanceStatus()),
+                filterByIsPrivateOrNot(request.getIsPrivate()),
+                filterByIsTodayMeeting(request.getIsTodayMeeting())
             )
             .fetchOne();
 
         List<MeetingInfoResponse> content = queryFactory
             .select(Projections.constructor(MeetingInfoResponse.class,
-                meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingName, meeting.meetingDate,
-                meeting.lateThresholdTime, meeting.meetingPlace, meeting.description, attendanceStatusExpression(),
-                attendance.discussionGroup, meeting.discussionTime, meeting.alarmMessage, meeting.createdAt)
+                meeting.id, meeting.member.name, meeting.member.id, meeting.meetingType, meeting.meetingName,
+                meeting.meetingDate, meeting.meetingPlace, attendanceStatusExpression(),
+                meeting.discussionTime, meeting.privateAt.isNotNull())
             )
             .from(meeting)
             .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id)
                 .and(attendance.member.id.eq(myMemberId)))
-            .where(meeting.privateAt.isNull(), // 비공개된 모임은 조회해오지 않음
+            .where(
                 filterByMeetingType(request.getMeetingType()),
-                filterByMemberId(request.getMeetingCreatorId()),
-                filterByAttendanceStatus(request.getAttendanceStatus())
+                filterByAttendanceStatus(request.getAttendanceStatus()),
+                filterByIsPrivateOrNot(request.getIsPrivate()),
+                filterByIsTodayMeeting(request.getIsTodayMeeting())
             )
             .orderBy(customSorting(request.getSortBy(), request.getIsAsc()),
                 meeting.id.desc())
@@ -86,60 +88,21 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
     }
 
     @Override
-    public List<AttendanceInfoResponse> findTodayMeetingList(Long memberId) {
+    public MeetingDetailResponse findMeeting(Long meetingId, Long memberId) {
         return queryFactory
-            .select(Projections.constructor(AttendanceInfoResponse.class,
-                attendance.id, meeting.id, meeting.meetingType, meeting.meetingDate,
-                meeting.lateThresholdTime, meeting.meetingName, meeting.meetingPlace,
-                meeting.description, attendance.createdAt, attendance.note,
-                meeting.discussionTime, attendance.discussionGroup, Expressions.nullExpression(List.class))
+            .select(Projections.constructor(MeetingDetailResponse.class,
+                meeting.id, meeting.member.name, meeting.member.id, meeting.meetingType, meeting.meetingName,
+                meeting.meetingDate, meeting.lateThresholdTime, meeting.meetingPlace, meeting.description,
+                meeting.createdAt,
+                attendance.id, attendanceStatusExpression(), attendance.note,
+                meeting.discussionTime, meeting.alarmMessage, attendance.wantDiscussion)
             )
             .from(meeting)
             .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id)
                 .and(attendance.member.id.eq(memberId)))
-            .where(
-                meeting.privateAt.isNull(), // 비공개된 모임은 조회해오지 않음
-                meeting.meetingDate.year().eq(DateTimeExpression.currentTimestamp().year()),
-                meeting.meetingDate.dayOfYear().eq(DateTimeExpression.currentTimestamp().dayOfYear())
-            )
-            .orderBy(meeting.meetingDate.asc())
-            .fetch();
-    }
-
-    @Override
-    public Page<MeetingInfoForStaffResponse> findMeetingsForAdminWithPaging(MeetingListRequest request) {
-        Pageable pageable = request.toPageable();
-
-        final Long totalCount = queryFactory
-            .select(meeting.count())
-            .from(meeting)
-            .where(
-                filterByMeetingType(request.getMeetingType()),
-                filterByMemberId(request.getMeetingCreatorId()),
-                filterByIsPrivateOrNot(request.getIsPrivate())
-            )
+            .where(meeting.id.eq(meetingId),
+                meeting.privateAt.isNull())
             .fetchOne();
-
-        List<MeetingInfoForStaffResponse> content = queryFactory
-            .select(Projections.constructor(MeetingInfoForStaffResponse.class,
-                meeting.id, meeting.member.name, meeting.meetingType, meeting.meetingName, meeting.meetingDate,
-                meeting.lateThresholdTime, meeting.meetingPlace, meeting.description, meeting.discussionTime,
-                meeting.alarmMessage, meeting.createdAt, meeting.privateAt.isNotNull())
-            )
-            .from(meeting)
-            .where(
-                filterByMeetingType(request.getMeetingType()),
-                filterByMemberId(request.getMeetingCreatorId()),
-                filterByIsPrivateOrNot(request.getIsPrivate())
-            )
-            .orderBy(customSorting(request.getSortBy(), request.getIsAsc()),
-                meeting.id.desc()
-            )
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .fetch();
-
-        return PageableExecutionUtils.getPage(content, pageable, () -> totalCount != null ? totalCount : 0L);
     }
 
 
@@ -163,6 +126,12 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
         else return meeting.member.id.eq(memberId);
     }
 
+    BooleanExpression filterByIsTodayMeeting(Boolean isTodayMeeting) {
+        if(isTodayMeeting == null || !isTodayMeeting) return null;
+        return meeting.meetingDate.year().eq(LocalDateTime.now().getYear())
+            .and(meeting.meetingDate.dayOfYear().eq(LocalDateTime.now().getDayOfYear()));
+    }
+
     BooleanExpression filterByIsPrivateOrNot(Boolean isPrivate) {
         if(isPrivate == null) return null;
         else if(isPrivate.equals(false)) return meeting.privateAt.isNull();
@@ -176,7 +145,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
         else return attendance.id.isNull();
     }
 
-    // 기본 정렬 기준은 이름 오름차순, 다른 정렬 기준을 사용하더라도 2차 정렬 기준은 다시 이름 오름차순
+    // 기본 정렬 기준은 모임 고유번호 내림차순, 다른 정렬 기준을 사용하더라도 2차 정렬 기준은 다신 모임 고유번호 내림차순
     OrderSpecifier<?> customSorting(String sortBy, Boolean isAsc) {
         if(sortBy == null) return QueryDslUtil.getSortedColumn(Order.DESC, meeting, "id");
         if(isAsc == null) isAsc = false;

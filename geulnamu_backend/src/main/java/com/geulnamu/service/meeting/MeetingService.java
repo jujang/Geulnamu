@@ -1,10 +1,6 @@
 package com.geulnamu.service.meeting;
 
-import com.geulnamu.controller.attendance.dto.response.AttendanceInfoResponse;
-import com.geulnamu.controller.meeting.dto.request.MeetingCreateRequest;
-import com.geulnamu.controller.meeting.dto.request.MeetingGroupUpdateRequest;
-import com.geulnamu.controller.meeting.dto.request.MeetingListRequest;
-import com.geulnamu.controller.meeting.dto.request.MeetingUpdateRequest;
+import com.geulnamu.controller.meeting.dto.request.*;
 import com.geulnamu.controller.meeting.dto.response.*;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.meeting.Meeting;
@@ -15,7 +11,6 @@ import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.response.paging.PagingResponse;
-import com.geulnamu.repository.attendance.AttendanceQueryRepository;
 import com.geulnamu.repository.meeting.MeetingQueryRepository;
 import com.geulnamu.repository.meeting.MeetingCommandRepository;
 import com.geulnamu.repository.member.MemberQueryRepository;
@@ -33,7 +28,6 @@ public class MeetingService {
     private final MemberQueryRepository memberQueryRepository;
     private final MeetingQueryRepository meetingQueryRepository;
     private final MeetingCommandRepository meetingCommandRepository;
-    private final AttendanceQueryRepository attendanceQueryRepository;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -54,7 +48,7 @@ public class MeetingService {
 
     @Transactional(readOnly = true)
     public MeetingListResponse getMeetingList(Long myMemberId, MeetingListRequest request) {
-        Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(request, myMemberId);
+        Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsWithPagingNew(request, myMemberId);
 
         PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
         List<MeetingInfoResponse> meetingList = meetingDslList.getContent();
@@ -62,34 +56,15 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public List<AttendanceInfoResponse> getTodayMeetingList(Long memberId) {
-        List<AttendanceInfoResponse> responseList = meetingQueryRepository.findTodayMeetingList(memberId);
-
-        // TODO: 향후 하루에 모임이 매우 많아질 경우, 해당 로직은 N+1개의 쿼리를 사용하기에 '배치 조회'로 변경하는 것을 고려할 필요가 있음.
-        responseList.forEach(response -> {
-            if(response.getDiscussionGroup() != null) {
-                List<MemberIdAndNameResponse> groupMembers = attendanceQueryRepository
-                    .findMyDiscussionMemberList(response.getMeetingId(), response.getDiscussionGroup());
-                response.updateGroupMemberList(groupMembers);
-            }
-        });
-
-        return  responseList;
-    }
-
-    @Transactional(readOnly = true)
-    public MeetingListForStaffResponse getMeetingListForStaff(MeetingListRequest request) {
-        Page<MeetingInfoForStaffResponse> meetingDslList = meetingQueryRepository.findMeetingsForAdminWithPaging(request);
-
-        PagingResponse pagingResponse = PagingResponse.from(meetingDslList);
-        List<MeetingInfoForStaffResponse> meetingList = meetingDslList.getContent();
-        return new MeetingListForStaffResponse(pagingResponse, meetingList);
-    }
-
-    @Transactional(readOnly = true)
-    public MeetingInfoForStaffResponse getMeetingForStaff(Long meetingId) {
+    public MeetingDetailResponse getMeeting(Long meetingId, Long memberId) {
         Meeting meeting = findMeetingOrThrow(meetingId);
-        return MeetingInfoForStaffResponse.of(meeting);
+        return meetingQueryRepository.findMeeting(meeting.getId(), memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public MeetingDetailResponseForStaff getMeetingForStaff(Long meetingId) {
+        Meeting meeting = findMeetingOrThrow(meetingId);
+        return MeetingDetailResponseForStaff.of(meeting);
     }
 
     @Transactional(rollbackFor = Exception.class)

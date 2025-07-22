@@ -63,35 +63,9 @@ include::{snippets}/meetings/staff-list/view/response-fields.adoc[]
 
 ---
 
-=== 오늘의 모임 목록 조회
-* 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
-* 오늘의 모임 목록을 조회하는 용도의 API
-** 비공개 처리된 모임의 경우, 해당 요청에서 조회되지 않음
-
-==== request
-include::{snippets}/meetings/list/today/view/http-request.adoc[]
-
-==== request-headers
-include::{snippets}/meetings/list/today/view/request-headers.adoc[]
-
-==== query-parameters
-include::{snippets}/meetings/list/today/view/query-parameters.adoc[]
-
-==== response
-include::{snippets}/meetings/list/today/view/http-response.adoc[]
-
-==== response-fields
-include::{snippets}/meetings/list/today/view/response-fields.adoc[]
-
-==== Error case
-
----
-
-
 === 모임 목록 조회
 * 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
 * 모임 목록을 조회하는 용도의 API
-** 비공개 처리된 모임의 경우, 해당 요청에서 조회되지 않음
 * 페이지네이션이 적용됨
 
 ==== request
@@ -113,48 +87,49 @@ include::{snippets}/meetings/list/view/response-fields.adoc[]
 
 ---
 
-=== 모임 목록 조회 (운영진용)
-* 접근 가능 권한 레벨: STAFF / 에러 로그만 생성
-* 운영진 모임원이 운영진 페이지에서 모임 목록을 조회하는 용도의 API (운영진 제공 정보에는 모임 비활성화여부가 함께 보여짐)
-* 페이지네이션이 적용됨
+
+=== 모임 단일 상세 조회
+* 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
+* 모임을 단일 상세 조회하는 데에 사용하는 API
 
 ==== request
-include::{snippets}/meetings/list/staff/view/http-request.adoc[]
+include::{snippets}/meetings/detail/view/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/meetings/list/staff/view/request-headers.adoc[]
+include::{snippets}/meetings/detail/view/request-headers.adoc[]
 
-==== query-parameters
-include::{snippets}/meetings/list/staff/view/query-parameters.adoc[]
+==== path-parameters
+include::{snippets}/meetings/detail/view/path-parameters.adoc[]
 
 ==== response
-include::{snippets}/meetings/list/staff/view/http-response.adoc[]
+include::{snippets}/meetings/detail/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/meetings/list/staff/view/response-fields.adoc[]
+include::{snippets}/meetings/detail/view/response-fields.adoc[]
 
 ==== Error case
 
 ---
 
-=== 모임 단일 조회 (운영진용)
+
+=== 모임 단일 상세 조회 (운영진용)
 * 접근 가능 권한 레벨: STAFF / 에러 로그만 생성
-* 운영진 모임원이 운영진 페이지에서 모임을 단일 조회하는 데에 사용하는 API
+* 운영진 모임원이 운영진 전용 페이지에서 모임을 단일 상세 조회하는 데에 사용하는 API
 
 ==== request
-include::{snippets}/meetings/view/http-request.adoc[]
+include::{snippets}/meetings/detail/staff/view/http-request.adoc[]
 
 ==== request-headers
-include::{snippets}/meetings/view/request-headers.adoc[]
+include::{snippets}/meetings/detail/staff/view/request-headers.adoc[]
 
 ==== path-parameters
-include::{snippets}/meetings/view/path-parameters.adoc[]
+include::{snippets}/meetings/detail/staff/view/path-parameters.adoc[]
 
 ==== response
-include::{snippets}/meetings/view/http-response.adoc[]
+include::{snippets}/meetings/detail/staff/view/http-response.adoc[]
 
 ==== response-fields
-include::{snippets}/meetings/view/response-fields.adoc[]
+include::{snippets}/meetings/detail/staff/view/response-fields.adoc[]
 
 ==== Error case
 
