@@ -74,12 +74,6 @@ class AppDrawer extends StatelessWidget {
                     if (authProvider.isAuthenticated) ...[
                       _buildMenuSection(context, '모임', [
                         _DrawerMenuItem(
-                          icon: Icons.event_outlined,
-                          title: '오늘의 모임',
-                          subtitle: '오늘의 모임 보기',
-                          onTap: () => _handleMenuTap(context, '오늘의 모임'),
-                        ),
-                        _DrawerMenuItem(
                           icon: Icons.group_outlined,
                           title: '모임 목록',
                           subtitle: '전체 모임 목록 보기',
@@ -94,7 +88,8 @@ class AppDrawer extends StatelessWidget {
                             icon: Icons.group_outlined,
                             title: '모임 목록 (운영진용)',
                             subtitle: '전체 모임 목록 보기 (관리용)',
-                            onTap: () => _handleMenuTap(context, '모임 목록 (운영진용)'),
+                            onTap: () =>
+                                _handleMenuTap(context, '모임 목록 (운영진용)'),
                           ),
                       ]),
 
