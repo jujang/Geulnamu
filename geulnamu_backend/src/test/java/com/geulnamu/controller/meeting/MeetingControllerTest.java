@@ -200,7 +200,7 @@ public class MeetingControllerTest extends ControllerTest {
                 queryParameters(
                     parameterWithName("meetingType").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'REGULAR', 'FLASH', 'SPECIAL' 중 하나의 값")).description("모임 종류").optional(),
                     parameterWithName("isTodayMeeting").attributes(key("type").value(JsonFieldType.BOOLEAN)).attributes(setAttributes("'true', 'false' 중 하나의 값")).description("오늘자 모임만 조회 여부").optional(),
-                    parameterWithName("attendanceStatus").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'ATTEND', 'ATTEND_LATE', 'NOT_ATTEND' 중 하나의 값")).description("출석 상태").optional(),
+                    parameterWithName("attendanceStatus").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'NOT_STARTED', 'ATTEND', 'ATTEND_LATE', 'NOT_ATTEND' 중 하나의 값")).description("출석 상태").optional(),
                     parameterWithName("isPrivate").attributes(key("type").value(JsonFieldType.BOOLEAN)).attributes(setAttributes("'true', 'false' 중 하나의 값")).description("모임 비공개 여부").optional(),
                     parameterWithName("sortBy").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'meetingDate', 'id' 중 하나의 값")).description("페이지네이션 정렬 기준 (id는 meetingId를 뜻함)").optional(),
                     parameterWithName("isAsc").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("'true', 'false' 중 하나의 값")).description("오름차순 여부").optional(),
@@ -214,7 +214,7 @@ public class MeetingControllerTest extends ControllerTest {
                     fieldWithPath("data.pagingResponse.pageNumber").type(JsonFieldType.NUMBER).description("현재 페이지"),
                     fieldWithPath("data.pagingResponse.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
                     fieldWithPath("data.pagingResponse.totalElements").type(JsonFieldType.NUMBER).description("전체 데이터 수"),
-                    fieldWithPath("data.meetingList[]").type(JsonFieldType.ARRAY).description("데이터 정보"),
+                    fieldWithPath("data.meetingList[]").type(JsonFieldType.ARRAY).description("데이터 정보").optional(),
                     fieldWithPath("data.meetingList[].meetingId").type(JsonFieldType.NUMBER).description("모임 고유번호"),
                     fieldWithPath("data.meetingList[].meetingCreatorName").type(JsonFieldType.STRING).description("모임 개설자 이름"),
                     fieldWithPath("data.meetingList[].meetingCreatorId").type(JsonFieldType.NUMBER).description("모임 개설자 고유번호"),

@@ -108,6 +108,8 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
 
     private StringExpression attendanceStatusExpression() {
         return new CaseBuilder()
+            .when(meeting.meetingDate.after(LocalDateTime.now()))
+            .then(AttendanceStatus.NOT_STARTED.getValue())
             .when(attendance.id.isNull())
             .then(AttendanceStatus.NOT_ATTENDED.getValue())
             .when(attendance.createdAt.before(meeting.lateThresholdTime))
@@ -140,6 +142,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
 
     BooleanExpression filterByAttendanceStatus(String attendanceStatus) {
         if(attendanceStatus == null) return null;
+        else if(attendanceStatus.equals(AttendanceStatus.NOT_STARTED.getValue())) return meeting.meetingDate.after(LocalDateTime.now());
         else if(attendanceStatus.equals(AttendanceStatus.ATTENDED.getValue())) return attendance.id.isNotNull();
         else if(attendanceStatus.equals(AttendanceStatus.ATTENDED_LATE.getValue())) return attendance.createdAt.after(meeting.lateThresholdTime);
         else return attendance.id.isNull();

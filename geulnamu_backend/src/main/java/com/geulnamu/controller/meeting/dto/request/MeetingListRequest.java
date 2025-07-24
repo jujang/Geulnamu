@@ -14,7 +14,7 @@ public class MeetingListRequest extends PagingRequest {
     private final String isTodayMeeting; // 오늘의 모임 조회 여부
 
     @Getter
-    @Pattern(regexp = "ATTEND|ATTEND_LATE|NOT_ATTEND", message = "참석 상태 값은 'ATTEND', 'ATTEND_LATE', 'NOT_ATTEND' 중 하나만 가능합니다.")
+    @Pattern(regexp = "NOT_STARTED|ATTEND|ATTEND_LATE|NOT_ATTEND", message = "참석 상태 값은 'NOT_STARTED', 'ATTEND', 'ATTEND_LATE', 'NOT_ATTEND' 중 하나만 가능합니다.")
     private final String attendanceStatus; // 참석 상태 (일반 목록 조회에서만 사용되는 값)
 
     @Pattern(regexp = "true|false", message = "모임 비공개 여부 값은 'true' 또는 'false' 만 가능합니다.")
