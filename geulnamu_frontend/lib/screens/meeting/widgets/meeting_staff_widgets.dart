@@ -19,8 +19,6 @@ class MeetingStaffWidgets {
     MeetingInfo meeting, {
     VoidCallback? onTap,
   }) {
-    // 🔍 디버그 로깅 추가
-    print('🛡️ [운영진 카드] buildStaffMeetingCard 호출됨 - 모임: ${meeting.meetingName}');
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       elevation: 4,

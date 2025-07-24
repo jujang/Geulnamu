@@ -30,7 +30,9 @@ class AuthProvider with ChangeNotifier {
     try {
       return await _authService.getAccessToken();
     } catch (e) {
-      print('❌ AccessToken 가져오기 실패: $e');
+      if (AppConfig.debugMode) {
+        print('❌ AccessToken 가져오기 실패: $e');
+      }
       return null;
     }
   }
@@ -100,7 +102,6 @@ class AuthProvider with ChangeNotifier {
   /// 앱 시작 시 로그인 상태 확인
   Future<void> checkAuthStatus() async {
     try {
-      print('🔍 로그인 상태 확인 중...');
       _setStatus(AuthStatus.loading);
 
       final isLoggedIn = await _authService.isLoggedIn();
@@ -110,20 +111,19 @@ class AuthProvider with ChangeNotifier {
         if (userInfo != null) {
           _userInfo = userInfo;
           _setStatus(AuthStatus.authenticated);
-          print('✅ 이미 로그인된 상태입니다.');
 
           // 개인정보 상태 확인
           await _checkProfileStatusSilent();
         } else {
           _setStatus(AuthStatus.unauthenticated);
-          print('⚠️ 토큰은 있지만 사용자 정보를 가져올 수 없습니다.');
         }
       } else {
         _setStatus(AuthStatus.unauthenticated);
-        print('📝 로그인이 필요합니다.');
       }
     } catch (e) {
-      print('❌ 로그인 상태 확인 중 오류: $e');
+      if (AppConfig.debugMode) {
+        print('❌ 로그인 상태 확인 중 오류: $e');
+      }
       _setError('로그인 상태 확인 중 오류가 발생했습니다.');
       _setStatus(AuthStatus.unauthenticated);
     }
@@ -132,7 +132,6 @@ class AuthProvider with ChangeNotifier {
   /// 카카오 로그인
   Future<bool> loginWithKakao({BuildContext? context}) async {
     try {
-      print('🥕 카카오 로그인 시작...');
       _setStatus(AuthStatus.loading);
       _clearError();
 
@@ -142,15 +141,19 @@ class AuthProvider with ChangeNotifier {
       _userInfo = authResponse['userInfo'];
       _setStatus(AuthStatus.authenticated);
 
-      print('✅ 카카오 로그인 성공!');
-      print('👤 사용자: ${_userInfo?['memberName'] ?? '이름 미등록'}'); // null 처리
+      if (AppConfig.debugMode) {
+        print('✅ 카카오 로그인 성공!');
+        print('👤 사용자: ${_userInfo?['memberName'] ?? '이름 미등록'}');
+      }
 
       // 개인정보 상태 확인
       await _checkProfileStatusSilent();
 
       return true;
     } catch (e) {
-      print('❌ 카카오 로그인 실패: $e');
+      if (AppConfig.debugMode) {
+        print('❌ 카카오 로그인 실패: $e');
+      }
       _setError(_getErrorMessage(e));
       _setStatus(AuthStatus.unauthenticated);
       return false;
@@ -160,7 +163,6 @@ class AuthProvider with ChangeNotifier {
   /// 로그아웃
   Future<void> logout({BuildContext? context}) async {
     try {
-      print('👋 로그아웃 중...');
       _setStatus(AuthStatus.loading);
 
       await _authService.logout(context: context);
@@ -168,9 +170,13 @@ class AuthProvider with ChangeNotifier {
       _userInfo = null;
       _setStatus(AuthStatus.unauthenticated);
 
-      print('✅ 로그아웃 완료');
+      if (AppConfig.debugMode) {
+        print('✅ 로그아웃 완료');
+      }
     } catch (e) {
-      print('❌ 로그아웃 중 오류: $e');
+      if (AppConfig.debugMode) {
+        print('❌ 로그아웃 중 오류: $e');
+      }
       _setError('로그아웃 중 오류가 발생했습니다.');
       // 로그아웃은 실패하더라도 상태를 unauthenticated로 설정
       _userInfo = null;
@@ -182,17 +188,22 @@ class AuthProvider with ChangeNotifier {
   /// 토큰 갱신
   Future<bool> refreshToken() async {
     try {
-      print('🔄 토큰 갱신 중...');
       final result = await _authService.refreshToken();
       if (result != null) {
         _userInfo = result['userInfo'];
-        print('✅ 토큰 갱신 성공');
+        if (AppConfig.debugMode) {
+          print('✅ 토큰 갱신 성공');
+        }
         return true;
       }
-      print('⚠️ 토큰 갱신 실패');
+      if (AppConfig.debugMode) {
+        print('⚠️ 토큰 갱신 실패');
+      }
       return false;
     } catch (e) {
-      print('❌ 토큰 갱신 중 오류: $e');
+      if (AppConfig.debugMode) {
+        print('❌ 토큰 갱신 중 오류: $e');
+      }
       return false;
     }
   }

@@ -61,9 +61,6 @@ class _MeetingListScreenState extends State<MeetingListScreen>
 
   @override
   Widget build(BuildContext context) {
-    // 🔍 디버그: 일반 화면 빌드 확인
-    print('📅 [일반 화면] MeetingListScreen build() 호출');
-    
     return Consumer<HomeService>(
       builder: (context, homeService, child) {
         return LoadingWidgets.buildOverlayLoading(
@@ -71,7 +68,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
           isLoading: homeService.isProcessing,
           loadingMessage: homeService.currentOperation,
           child: MainLayout(
-            title: '📅 모임 목록',
+            title: '모임 목록',
             isHomePage: true, // 메인 기능이므로 사이드바 버튼 표시
             // HomeService를 통한 메뉴 및 로그아웃 처리
             onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),

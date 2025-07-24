@@ -24,8 +24,6 @@ class MeetingWidgets {
     VoidCallback? onTap,
     VoidCallback? onAttendanceCheck,
   }) {
-    // 🔍 디버그 로깅 추가
-    print('📅 [일반 카드] buildMeetingCard 호출됨 - 모임: ${meeting.meetingName}');
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       elevation: 4,
