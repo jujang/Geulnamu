@@ -99,6 +99,28 @@ mixin MeetingCreateLogicMixin<T extends StatefulWidget> on State<T> {
         // 지각 기준 날짜도 같은 날로 설정
         selectedLateDate = picked;
         lateDateController.text = _formatDate(picked);
+        
+        // 🎯 오늘 날짜를 선택한 경우 기존 시간이 현재 시간보다 이전이면 시간 초기화
+        if (selectedMeetingTime != null) {
+          final now = DateTime.now();
+          final selectedDateTime = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            selectedMeetingTime!.hour,
+            selectedMeetingTime!.minute,
+          );
+          
+          if (selectedDateTime.isBefore(now)) {
+            // 과거 시간이면 시간 초기화
+            selectedMeetingTime = null;
+            meetingTimeController.clear();
+            selectedLateTime = null;
+            lateTimeController.clear();
+            
+            _showSnackBar('오늘 날짜로 선택하셨습니다. 현재 시간 이후로 시간을 다시 선택해주세요.');
+          }
+        }
       });
       
       if (AppConfig.debugMode) {
@@ -119,6 +141,24 @@ mixin MeetingCreateLogicMixin<T extends StatefulWidget> on State<T> {
     );
     
     if (picked != null) {
+      // 🎯 현재 날짜일 경우 현재 시간 이후만 허용
+      if (selectedMeetingDate != null) {
+        final now = DateTime.now();
+        final selectedDateTime = DateTime(
+          selectedMeetingDate!.year,
+          selectedMeetingDate!.month,
+          selectedMeetingDate!.day,
+          picked.hour,
+          picked.minute,
+        );
+        
+        // 선택한 날짜+시간이 현재 시점보다 이전인지 체크
+        if (selectedDateTime.isBefore(now)) {
+          _showSnackBar('모임 시간은 현재 시간 이후로 설정해주세요.');
+          return;
+        }
+      }
+      
       setState(() {
         selectedMeetingTime = picked;
         meetingTimeController.text = _formatTime(picked);
@@ -174,6 +214,23 @@ mixin MeetingCreateLogicMixin<T extends StatefulWidget> on State<T> {
         }
       }
       
+      // 🎯 현재 날짜일 경우 현재 시간 이후만 허용
+      if (selectedLateDate != null) {
+        final now = DateTime.now();
+        final selectedDateTime = DateTime(
+          selectedLateDate!.year,
+          selectedLateDate!.month,
+          selectedLateDate!.day,
+          picked.hour,
+          picked.minute,
+        );
+        
+        if (selectedDateTime.isBefore(now)) {
+          _showSnackBar('지각 기준 시간은 현재 시간 이후로 설정해주세요.');
+          return;
+        }
+      }
+      
       setState(() {
         selectedLateTime = picked;
         lateTimeController.text = _formatTime(picked);
@@ -196,6 +253,21 @@ mixin MeetingCreateLogicMixin<T extends StatefulWidget> on State<T> {
     
     if (selectedMeetingDate == null || selectedMeetingTime == null) {
       _showSnackBar('모임 날짜와 시간을 모두 선택해주세요.');
+      return;
+    }
+    
+    // 🎯 최종 시간 검증: 현재 시간 이후인지 체크
+    final now = DateTime.now();
+    final meetingDateTime = DateTime(
+      selectedMeetingDate!.year,
+      selectedMeetingDate!.month,
+      selectedMeetingDate!.day,
+      selectedMeetingTime!.hour,
+      selectedMeetingTime!.minute,
+    );
+    
+    if (meetingDateTime.isBefore(now)) {
+      _showSnackBar('모임 시간은 현재 시간 이후로 설정해주세요.');
       return;
     }
     
