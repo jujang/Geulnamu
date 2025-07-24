@@ -21,6 +21,7 @@ import 'screens/profile/profile_screen.dart';
 import 'screens/introduction/introduction_screen.dart'; // 글나무 소개 화면
 import 'screens/member/member_list_screen.dart'; // 모임원 목록 화면
 import 'screens/meeting/meeting_list_screen.dart'; // 모임 목록 화면
+import 'screens/meeting/meeting_list_admin_screen.dart'; // 🆕 운영진용 모임 목록 화면
 import 'screens/settings_screen.dart'; // 설정 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 
@@ -123,6 +124,19 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
             
             return MaterialPageRoute(
               builder: (context) => MeetingListScreen(
+                initialFilterType: filterType,
+              ),
+              settings: settings,
+            );
+          }
+          
+          // 🆕 운영진용 모임 목록 화면 라우트 처리 (쿼리 파라미터 지원)
+          if (settings.name != null && settings.name!.startsWith('/meeting-list-admin')) {
+            final uri = Uri.parse(settings.name!);
+            final filterType = uri.queryParameters['filter'];
+            
+            return MaterialPageRoute(
+              builder: (context) => MeetingListAdminScreen(
                 initialFilterType: filterType,
               ),
               settings: settings,

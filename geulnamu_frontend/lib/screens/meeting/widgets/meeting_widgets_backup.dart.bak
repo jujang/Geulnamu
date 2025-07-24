@@ -382,16 +382,6 @@ class MeetingWidgets {
     }
   }
 
-  /// 🆕 비공개 여부 표시명 가져오기
-  static String _getPrivacyStatusDisplayName(bool isPrivate) {
-    return isPrivate ? '비공개' : '공개';
-  }
-
-  /// 🆕 비공개 여부별 색상 가져오기
-  static Color _getPrivacyStatusColor(BuildContext context, bool isPrivate) {
-    return isPrivate ? Colors.orange : Colors.green;
-  }
-
   /// 플로팅 필터 버튼
   static Widget buildFilterFab(BuildContext context, VoidCallback onPressed) {
     return FloatingActionButton(
@@ -402,7 +392,7 @@ class MeetingWidgets {
     );
   }
 
-  /// 필터 바텀시트 (일반 사용자용)
+  /// 필터 바텀시트
   static Widget buildFilterBottomSheet(
     BuildContext context, {
     required MeetingListFilter currentFilter,
@@ -411,20 +401,6 @@ class MeetingWidgets {
     return _FilterBottomSheetContent(
       currentFilter: currentFilter,
       onFilterChanged: onFilterChanged,
-      isAdminMode: false, // 🆕 일반 모드
-    );
-  }
-
-  /// 🆕 필터 바텀시트 (운영진용)
-  static Widget buildAdminFilterBottomSheet(
-    BuildContext context, {
-    required MeetingListFilter currentFilter,
-    required Function(MeetingListFilter) onFilterChanged,
-  }) {
-    return _FilterBottomSheetContent(
-      currentFilter: currentFilter,
-      onFilterChanged: onFilterChanged,
-      isAdminMode: true, // 🆕 운영진 모드
     );
   }
 
@@ -657,7 +633,7 @@ class MeetingWidgets {
     );
   }
 
-  /// 목록 정보 헤더 (일반 사용자용)
+  /// 목록 정보 헤더
   static Widget buildListHeader(
     BuildContext context, {
     required int totalElements,
@@ -684,6 +660,68 @@ class MeetingWidgets {
         ],
       ),
     );
+  }
+
+  /// 필터 요약 텍스트 생성
+  static String _getFilterSummary(MeetingListFilter filter) {
+    final List<String> filterParts = [];
+
+    // 모임 유형 필터
+    if (filter.meetingType != MeetingTypeOption.all) {
+      filterParts.add(filter.meetingType.displayName);
+    }
+
+    // 오늘 모임 필터
+    if (filter.isTodayMeeting == true) {
+      filterParts.add('오늘 모임만');
+    }
+
+    // 출석 상태 필터
+    if (filter.attendanceStatus != AttendanceStatusOption.all) {
+      filterParts.add(filter.attendanceStatus.displayName);
+    }
+
+    // 정렬 정보
+    final order = filter.isAsc ? '↑' : '↓';
+    filterParts.add('${filter.sortBy.displayName}$order');
+
+    return filterParts.join(' · ');
+  }
+
+  /// 🆕 비공개 여부 표시명 가져오기
+  static String _getPrivacyStatusDisplayName(bool isPrivate) {
+    return isPrivate ? '비공개' : '공개';
+  }
+
+  /// 🆕 비공개 여부별 색상 가져오기
+  static Color _getPrivacyStatusColor(BuildContext context, bool isPrivate) {
+    return isPrivate ? Colors.orange : Colors.green;
+  }
+
+  /// 🆕 필터 요약 텍스트 생성 (운영진용)
+  static String _getAdminFilterSummary(MeetingListFilter filter) {
+    final List<String> filterParts = [];
+
+    // 모임 유형 필터
+    if (filter.meetingType != MeetingTypeOption.all) {
+      filterParts.add(filter.meetingType.displayName);
+    }
+
+    // 오늘 모임 필터
+    if (filter.isTodayMeeting == true) {
+      filterParts.add('오늘 모임만');
+    }
+
+    // 비공개 여부 필터
+    if (filter.privacyStatus != PrivacyStatusOption.all) {
+      filterParts.add(filter.privacyStatus.displayName);
+    }
+
+    // 정렬 정보
+    final order = filter.isAsc ? '↑' : '↓';
+    filterParts.add('${filter.sortBy.displayName}$order');
+
+    return filterParts.join(' · ');
   }
 
   /// 🆕 목록 정보 헤더 (운영진용)
@@ -715,56 +753,17 @@ class MeetingWidgets {
     );
   }
 
-  /// 필터 요약 텍스트 생성 (일반 사용자용)
-  static String _getFilterSummary(MeetingListFilter filter) {
-    final List<String> filterParts = [];
-
-    // 모임 유형 필터
-    if (filter.meetingType != MeetingTypeOption.all) {
-      filterParts.add(filter.meetingType.displayName);
-    }
-
-    // 오늘 모임 필터
-    if (filter.isTodayMeeting == true) {
-      filterParts.add('오늘 모임만');
-    }
-
-    // 출석 상태 필터
-    if (filter.attendanceStatus != AttendanceStatusOption.all) {
-      filterParts.add(filter.attendanceStatus.displayName);
-    }
-
-    // 정렬 정보
-    final order = filter.isAsc ? '↑' : '↓';
-    filterParts.add('${filter.sortBy.displayName}$order');
-
-    return filterParts.join(' · ');
-  }
-
-  /// 🆕 필터 요약 텍스트 생성 (운영진용)
-  static String _getAdminFilterSummary(MeetingListFilter filter) {
-    final List<String> filterParts = [];
-
-    // 모임 유형 필터
-    if (filter.meetingType != MeetingTypeOption.all) {
-      filterParts.add(filter.meetingType.displayName);
-    }
-
-    // 오늘 모임 필터
-    if (filter.isTodayMeeting == true) {
-      filterParts.add('오늘 모임만');
-    }
-
-    // 비공개 여부 필터
-    if (filter.privacyStatus != PrivacyStatusOption.all) {
-      filterParts.add(filter.privacyStatus.displayName);
-    }
-
-    // 정렬 정보
-    final order = filter.isAsc ? '↑' : '↓';
-    filterParts.add('${filter.sortBy.displayName}$order');
-
-    return filterParts.join(' · ');
+  /// 🆕 필터 바타시트 (운영진용)
+  static Widget buildAdminFilterBottomSheet(
+    BuildContext context, {
+    required MeetingListFilter currentFilter,
+    required Function(MeetingListFilter) onFilterChanged,
+  }) {
+    return _FilterBottomSheetContent(
+      currentFilter: currentFilter,
+      onFilterChanged: onFilterChanged,
+      isAdminMode: true,
+    );
   }
 }
 
@@ -772,12 +771,10 @@ class MeetingWidgets {
 class _FilterBottomSheetContent extends StatefulWidget {
   final MeetingListFilter currentFilter;
   final Function(MeetingListFilter) onFilterChanged;
-  final bool isAdminMode; // 🆕 운영진 모드 여부
 
   const _FilterBottomSheetContent({
     required this.currentFilter,
     required this.onFilterChanged,
-    this.isAdminMode = false, // 🆕 기본값: 일반 모드
   });
 
   @override
@@ -788,7 +785,6 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
   late MeetingTypeOption selectedMeetingType;
   late bool selectedTodayMeeting; // 🎯 null 제거
   late AttendanceStatusOption selectedAttendanceStatus;
-  late PrivacyStatusOption selectedPrivacyStatus; // 🆕 운영진용
   late SortByOption selectedSort;
   late bool isAscending;
 
@@ -798,7 +794,6 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
     selectedMeetingType = widget.currentFilter.meetingType;
     selectedTodayMeeting = widget.currentFilter.isTodayMeeting;
     selectedAttendanceStatus = widget.currentFilter.attendanceStatus;
-    selectedPrivacyStatus = widget.currentFilter.privacyStatus; // 🆕
     selectedSort = widget.currentFilter.sortBy;
     isAscending = widget.currentFilter.isAsc;
   }
@@ -822,16 +817,15 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                 ),
               ),
               TextButton(
-                onPressed: () {
-                  setState(() {
-                    selectedMeetingType = MeetingTypeOption.all;
-                    selectedTodayMeeting = false; // 🎯 초기화 시 false
-                    selectedAttendanceStatus = AttendanceStatusOption.all;
-                    selectedPrivacyStatus = PrivacyStatusOption.all; // 🆕
-                    selectedSort = SortByOption.meetingDate;
-                    isAscending = false;
-                  });
-                },
+              onPressed: () {
+              setState(() {
+              selectedMeetingType = MeetingTypeOption.all;
+              selectedTodayMeeting = false; // 🎯 초기화 시 false
+              selectedAttendanceStatus = AttendanceStatusOption.all;
+              selectedSort = SortByOption.meetingDate;
+              isAscending = false;
+              });
+              },
                 child: Text(
                   '초기화',
                   style: TextStyle(color: context.colors.primary),
@@ -905,64 +899,34 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
           
           const SizedBox(height: 16),
           
-          // 🆕 운영진 모드에서만 비공개 여부 필터 표시
-          if (widget.isAdminMode) ...[
-            // 비공개 여부 필터
-            MeetingWidgets._buildFilterSection(
-              context,
-              title: '공개 상태',
-              child: Wrap(
-                spacing: 8,
-                children: PrivacyStatusOption.values.map((option) {
-                  final isSelected = selectedPrivacyStatus == option;
-                  return FilterChip(
-                    label: Text(option.displayName),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        selectedPrivacyStatus = selected ? option : PrivacyStatusOption.all;
-                      });
-                    },
-                    selectedColor: context.colors.primary.withOpacity(0.2),
-                    checkmarkColor: context.colors.primary,
-                    backgroundColor: context.colors.surfaceVariant,
-                  );
-                }).toList(),
-              ),
+          // 참석 상태 필터
+          MeetingWidgets._buildFilterSection(
+            context,
+            title: '참석 상태',
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: AttendanceStatusOption.values.map((option) {
+                final isSelected = selectedAttendanceStatus == option;
+                return FilterChip(
+                  label: Text(option.displayName),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      selectedAttendanceStatus = selected ? option : AttendanceStatusOption.all;
+                    });
+                  },
+                  selectedColor: context.colors.primary.withOpacity(0.2),
+                  checkmarkColor: context.colors.primary,
+                  backgroundColor: context.colors.surfaceVariant,
+                );
+              }).toList(),
             ),
-            const SizedBox(height: 16),
-          ],
+          ),
           
-          // 🆕 일반 모드에서만 참석 상태 필터 표시
-          if (!widget.isAdminMode) ...[
-            // 참석 상태 필터
-            MeetingWidgets._buildFilterSection(
-              context,
-              title: '참석 상태',
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: AttendanceStatusOption.values.map((option) {
-                  final isSelected = selectedAttendanceStatus == option;
-                  return FilterChip(
-                    label: Text(option.displayName),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        selectedAttendanceStatus = selected ? option : AttendanceStatusOption.all;
-                      });
-                    },
-                    selectedColor: context.colors.primary.withOpacity(0.2),
-                    checkmarkColor: context.colors.primary,
-                    backgroundColor: context.colors.surfaceVariant,
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
+          const SizedBox(height: 16),
           
-          // 정렬 (모든 모드에서 공통)
+          // 정렬
           MeetingWidgets._buildFilterSection(
             context,
             title: '정렬',
@@ -1039,7 +1003,6 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                   meetingType: selectedMeetingType,
                   isTodayMeeting: selectedTodayMeeting,
                   attendanceStatus: selectedAttendanceStatus,
-                  privacyStatus: selectedPrivacyStatus, // 🆕
                   sortBy: selectedSort,
                   isAsc: isAscending,
                 );

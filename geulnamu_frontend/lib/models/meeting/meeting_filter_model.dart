@@ -5,6 +5,7 @@ class MeetingListFilter {
   final MeetingTypeOption meetingType;
   final bool isTodayMeeting; // 🎯 null 제거
   final AttendanceStatusOption attendanceStatus;
+  final PrivacyStatusOption privacyStatus; // 🆕 운영진용: 비공개 여부 필터
   final SortByOption sortBy;
   final bool isAsc;
   final int page;
@@ -14,6 +15,7 @@ class MeetingListFilter {
     this.meetingType = MeetingTypeOption.all,
     this.isTodayMeeting = false, // 🎯 기본값: false (전체 모임 조회)
     this.attendanceStatus = AttendanceStatusOption.all,
+    this.privacyStatus = PrivacyStatusOption.all, // 🆕 기본값: 전체
     this.sortBy = SortByOption.meetingDate,
     this.isAsc = false, // 기본값: 내림차순
     this.page = 1,
@@ -25,6 +27,7 @@ class MeetingListFilter {
     MeetingTypeOption? meetingType,
     bool? isTodayMeeting, // 🎯 널 체크는 유지 (선택적 매개변수)
     AttendanceStatusOption? attendanceStatus,
+    PrivacyStatusOption? privacyStatus, // 🆕 비공개 여부 필터
     SortByOption? sortBy,
     bool? isAsc,
     int? page,
@@ -34,6 +37,7 @@ class MeetingListFilter {
       meetingType: meetingType ?? this.meetingType,
       isTodayMeeting: isTodayMeeting ?? this.isTodayMeeting, // 🎯 널 체크 사용
       attendanceStatus: attendanceStatus ?? this.attendanceStatus,
+      privacyStatus: privacyStatus ?? this.privacyStatus, // 🆕
       sortBy: sortBy ?? this.sortBy,
       isAsc: isAsc ?? this.isAsc,
       page: page ?? this.page,
@@ -47,6 +51,7 @@ class MeetingListFilter {
       meetingType: MeetingTypeOption.all,
       isTodayMeeting: false, // 🎯 초기화 시도 false
       attendanceStatus: AttendanceStatusOption.all,
+      privacyStatus: PrivacyStatusOption.all, // 🆕
       sortBy: SortByOption.meetingDate,
       isAsc: false,
       page: 1,
@@ -76,12 +81,17 @@ class MeetingListFilter {
       params['attendanceStatus'] = attendanceStatus.value;
     }
 
+    // 🆕 비공개 여부 필터 (운영진용)
+    if (privacyStatus != PrivacyStatusOption.all) {
+      params['privacyStatus'] = privacyStatus.value;
+    }
+
     return params;
   }
 
   @override
   String toString() {
-    return 'MeetingListFilter{meetingType: $meetingType, isTodayMeeting: $isTodayMeeting, attendanceStatus: $attendanceStatus, sortBy: $sortBy, isAsc: $isAsc, page: $page}';
+    return 'MeetingListFilter{meetingType: $meetingType, isTodayMeeting: $isTodayMeeting, attendanceStatus: $attendanceStatus, privacyStatus: $privacyStatus, sortBy: $sortBy, isAsc: $isAsc, page: $page}';
   }
 }
 
@@ -143,6 +153,26 @@ enum SortByOption {
     return SortByOption.values.firstWhere(
       (option) => option.value == value,
       orElse: () => SortByOption.meetingDate,
+    );
+  }
+}
+
+/// 🆕 비공개 여부 옵션 (운영진용)
+enum PrivacyStatusOption {
+  all('', '전체'),
+  public('PUBLIC', '공개'),
+  private('PRIVATE', '비공개');
+
+  const PrivacyStatusOption(this.value, this.displayName);
+
+  final String value;
+  final String displayName;
+
+  static PrivacyStatusOption fromValue(String? value) {
+    if (value == null || value.isEmpty) return PrivacyStatusOption.all;
+    return PrivacyStatusOption.values.firstWhere(
+      (option) => option.value == value,
+      orElse: () => PrivacyStatusOption.all,
     );
   }
 }
