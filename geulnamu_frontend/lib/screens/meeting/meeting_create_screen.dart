@@ -111,7 +111,7 @@ class _MeetingCreateScreenState extends State<MeetingCreateScreen>
             context: context,
             controller: meetingNameController,
             validator: validateMeetingName,
-            onChanged: _revalidateForm, // 실시간 유효성 검사
+            onChanged: revalidateForm, // 실시간 유효성 검사
           ),
           const SizedBox(height: 28), // 더 많은 간격
 
@@ -151,7 +151,7 @@ class _MeetingCreateScreenState extends State<MeetingCreateScreen>
             context: context,
             controller: meetingPlaceController,
             validator: validateMeetingPlace,
-            onChanged: _revalidateForm, // 실시간 유효성 검사
+            onChanged: revalidateForm, // 실시간 유효성 검사
           ),
           const SizedBox(height: 28), // 더 많은 간격
 

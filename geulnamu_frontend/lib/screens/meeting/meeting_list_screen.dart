@@ -51,7 +51,10 @@ class _MeetingListScreenState extends State<MeetingListScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     // RouteObserver 등록
-    HomeRouteService.routeObserver.subscribe(this, ModalRoute.of(context)!);
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      HomeRouteService.routeObserver.subscribe(this, route);
+    }
   }
   
   @override

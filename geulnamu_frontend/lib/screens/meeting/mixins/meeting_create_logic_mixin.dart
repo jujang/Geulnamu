@@ -296,7 +296,7 @@ mixin MeetingCreateLogicMixin<T extends StatefulWidget> on State<T> {
   }
   
   /// 실시간 폼 유효성 검사 트리거
-  void _revalidateForm() {
+  void revalidateForm() {
     if (formKey.currentState != null) {
       formKey.currentState!.validate();
     }
