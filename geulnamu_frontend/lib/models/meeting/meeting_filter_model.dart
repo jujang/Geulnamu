@@ -1,7 +1,5 @@
-import 'meeting_model.dart';
-
 /// 모임 목록 필터 모델
-/// 
+///
 /// 백엔드 MeetingListRequest와 매핑
 class MeetingListFilter {
   final MeetingTypeOption meetingType;

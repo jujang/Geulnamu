@@ -21,10 +21,6 @@ class MeetingService {
     _dio.options.baseUrl = AppConfig.apiBaseUrl;
     _dio.options.connectTimeout = const Duration(seconds: 5);
     _dio.options.receiveTimeout = const Duration(seconds: 3);
-    
-    if (AppConfig.debugMode) {
-      print('🔧 [MeetingService] 서비스 초기화 완료');
-    }
   }
 
   /// 모임 목록 조회
@@ -36,11 +32,6 @@ class MeetingService {
     required String accessToken,
   }) async {
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [모임 목록 조회] API 요청 시작... 필터: $filter');
-        print('🔍 [모임 목록 조회] 쿼리 파라미터: ${filter.toQueryParameters()}');
-      }
-
       final response = await _dio.get(
         '/meetings/list',
         queryParameters: filter.toQueryParameters(),
@@ -53,31 +44,16 @@ class MeetingService {
       );
 
       if (response.statusCode == 200) {
-        if (AppConfig.debugMode) {
-          print('📝 [모임 목록 조회] HTTP 응늵 성공 (${response.statusCode})');
-          print('📝 [모임 목록 조회] Raw 응늵: ${response.data}');
-        }
-
         final processedResponse = ApiUtils.processBackendResponse(
           response,
           '모임 목록 조회',
         );
-
-        if (AppConfig.debugMode) {
-          print('📝 [모임 목록 조회] 처리된 응늵: ${processedResponse['data']}');
-        }
 
         return MeetingListResponse.fromJson(processedResponse['data']);
       } else {
         throw Exception('[모임 목록 조회] HTTP 오류: ${response.statusCode}');
       }
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [모임 목록 조회] 에러 상세: $e');
-        if (e is TypeError) {
-          print('🔍 [모임 목록 조회] TypeError 발생 - 데이터 타입 문제 의심');
-        }
-      }
       if (e is DioException) {
         throw ApiUtils.processDioException(e, '모임 목록 조회');
       }
@@ -89,11 +65,6 @@ class MeetingService {
   /// 
   /// [meetingId] 모임 ID
   void handleAttendanceCheck(int meetingId) {
-    if (AppConfig.debugMode) {
-      print('🎯 [MeetingService] 출석현황 확인 버튼 클릭 - 모임 ID: $meetingId');
-      print('📝 [MeetingService] 향후 출석현황 페이지로 이동 예정');
-    }
-
     // TODO: 향후 출석현황 페이지 구현 시 아래 코드 활성화
     // Navigator.pushNamed(context, '/meeting/$meetingId/attendance');
   }

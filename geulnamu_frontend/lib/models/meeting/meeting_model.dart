@@ -32,10 +32,6 @@ class MeetingInfo {
   /// JSON에서 객체 생성
   factory MeetingInfo.fromJson(Map<String, dynamic> json) {
     try {
-      if (AppConfig.debugMode) {
-        print('📝 [모임정보 파싱] JSON 데이터: $json');
-      }
-
       return MeetingInfo(
         meetingId: _parseIntSafely(json['meetingId'], '모임ID'),
         meetingCreatorName: _parseStringSafely(json['meetingCreatorName'], '개설자명'),
@@ -51,7 +47,6 @@ class MeetingInfo {
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ [모임정보 파싱] 오류: $e');
-        print('❌ [모임정보 파싱] 문제 JSON: $json');
       }
       rethrow;
     }
@@ -122,9 +117,6 @@ class MeetingInfo {
   // 🔧 Helper 메서드들
   static int _parseIntSafely(dynamic value, String fieldName) {
     if (value == null) {
-      if (AppConfig.debugMode) {
-        print('⚠️ [모임정보 파싱] $fieldName이 null입니다. 기본값 0 사용');
-      }
       return 0;
     }
     if (value is int) return value;
@@ -133,17 +125,11 @@ class MeetingInfo {
       if (parsed != null) return parsed;
     }
     
-    if (AppConfig.debugMode) {
-      print('❌ [모임정보 파싱] $fieldName 파싱 실패: $value (타입: ${value.runtimeType})');
-    }
     throw TypeError();
   }
 
   static String _parseStringSafely(dynamic value, String fieldName) {
     if (value == null) {
-      if (AppConfig.debugMode) {
-        print('⚠️ [모임정보 파싱] $fieldName이 null입니다. 기본값 빈 문자열 사용');
-      }
       return '';
     }
     return value.toString();
@@ -151,9 +137,6 @@ class MeetingInfo {
 
   static DateTime _parseDateTimeSafely(dynamic value, String fieldName) {
     if (value == null) {
-      if (AppConfig.debugMode) {
-        print('⚠️ [모임정보 파싱] $fieldName이 null입니다. 현재 시간 사용');
-      }
       return DateTime.now();
     }
     
@@ -166,10 +149,6 @@ class MeetingInfo {
               .replaceAll('.', '-')
               .trim() + ':00';
           
-          if (AppConfig.debugMode) {
-            print('📝 [모임정보 파싱] $fieldName 날짜 변환: "$value" -> "$formatted"');
-          }
-          
           return DateTime.parse(formatted);
         }
         
@@ -177,42 +156,19 @@ class MeetingInfo {
         return DateTime.parse(value);
       }
       
-      if (AppConfig.debugMode) {
-        print('❌ [모임정보 파싱] $fieldName 파싱 실패: $value (타입: ${value.runtimeType})');
-      }
       throw TypeError();
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [모임정보 파싱] $fieldName 날짜 파싱 오류: $e');
-      }
       return DateTime.now();
     }
   }
 
   static AttendanceStatus _parseAttendanceStatusSafely(dynamic value, String fieldName) {
     if (value == null) {
-      if (AppConfig.debugMode) {
-        print('⚠️ [모임정보 파싱] $fieldName이 null입니다. 기본값 NOT_ATTEND 사용');
-      }
       return AttendanceStatus.notAttend;
     }
     
     if (value is String) {
-      if (AppConfig.debugMode) {
-        print('📝 [모임정보 파싱] $fieldName 값: "$value"');
-      }
-      
-      final result = AttendanceStatus.fromString(value);
-      
-      if (AppConfig.debugMode) {
-        print('✅ [모임정보 파싱] $fieldName 파싱 결과: ${result.value} (${result.displayName})');
-      }
-      
-      return result;
-    }
-    
-    if (AppConfig.debugMode) {
-      print('❌ [모임정보 파싱] $fieldName 파싱 실패: $value (타입: ${value.runtimeType})');
+      return AttendanceStatus.fromString(value);
     }
     
     return AttendanceStatus.notAttend;
@@ -220,9 +176,6 @@ class MeetingInfo {
 
   static DateTime? _parseDiscussionTimeNullable(dynamic timeValue, dynamic dateValue, String fieldName) {
     if (timeValue == null) {
-      if (AppConfig.debugMode) {
-        print('⚠️ [모임정보 파싱] $fieldName이 null입니다. null 반환');
-      }
       return null;
     }
     
@@ -235,10 +188,6 @@ class MeetingInfo {
           final dateStr = DateFormat('yyyy-MM-dd').format(meetingDateTime);
           final fullTimeStr = '$dateStr $timeValue:00'; // 초 추가
           
-          if (AppConfig.debugMode) {
-            print('📝 [모임정보 파싱] $fieldName 시간 변환: "$timeValue" -> "$fullTimeStr"');
-          }
-          
           return DateTime.parse(fullTimeStr);
         }
         
@@ -246,14 +195,8 @@ class MeetingInfo {
         return DateTime.parse(timeValue);
       }
       
-      if (AppConfig.debugMode) {
-        print('❌ [모임정보 파싱] $fieldName 파싱 실패: $timeValue (타입: ${timeValue.runtimeType})');
-      }
       throw TypeError();
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [모임정보 파싱] $fieldName 시간 파싱 오류: $e');
-      }
       // 에러 시 null 반환
       return null;
     }
@@ -273,37 +216,18 @@ class MeetingListResponse {
   /// JSON에서 객체 생성
   factory MeetingListResponse.fromJson(Map<String, dynamic> json) {
     try {
-      if (AppConfig.debugMode) {
-        print('📝 [모임목록응늵 파싱] 시작...');
-        print('📝 [모임목록응늵 파싱] 전체 JSON: $json');
-      }
-
       final pagingResponse = PagingResponse.fromJson(json['pagingResponse'] as Map<String, dynamic>);
       
-      if (AppConfig.debugMode) {
-        final meetingListJson = json['meetingList'] as List;
-        print('📝 [모임목록응늵 파싱] 모임 개수: ${meetingListJson.length}');
-      }
-
       final meetingList = <MeetingInfo>[];
       final meetingListJson = json['meetingList'] as List;
       
       for (int i = 0; i < meetingListJson.length; i++) {
         try {
-          if (AppConfig.debugMode) {
-            print('📝 [모임목록응늵 파싱] 모임 $i 번 파싱 시작: ${meetingListJson[i]}');
-          }
-          
           final meeting = MeetingInfo.fromJson(meetingListJson[i] as Map<String, dynamic>);
           meetingList.add(meeting);
-          
-          if (AppConfig.debugMode) {
-            print('✅ [모임목록응늵 파싱] 모임 $i 번 파싱 성공: ${meeting.meetingName}');
-          }
         } catch (e) {
           if (AppConfig.debugMode) {
-            print('❌ [모임목록응늵 파싱] 모임 $i 번 파싱 실패: $e');
-            print('❌ [모임목록응늵 파싱] 문제 모임 데이터: ${meetingListJson[i]}');
+            print('❌ [모임목록응답 파싱] 모임 $i 번 파싱 실패: $e');
           }
           rethrow;
         }
@@ -315,7 +239,7 @@ class MeetingListResponse {
       );
     } catch (e) {
       if (AppConfig.debugMode) {
-        print('❌ [모임목록응늵 파싱] 전체 오류: $e');
+        print('❌ [모임목록응답 파싱] 전체 오류: $e');
       }
       rethrow;
     }
@@ -338,10 +262,6 @@ class PagingResponse {
 
   factory PagingResponse.fromJson(Map<String, dynamic> json) {
     try {
-      if (AppConfig.debugMode) {
-        print('📝 [페이징응답 파싱] JSON 데이터: $json');
-      }
-      
       return PagingResponse(
         pageNumber: _parseIntSafely(json['pageNumber'], '페이지번호'),
         totalElements: _parseIntSafely(json['totalElements'], '전체요소수'),
@@ -350,7 +270,6 @@ class PagingResponse {
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ [페이징응답 파싱] 오류: $e');
-        print('❌ [페이징응답 파싱] 문제 JSON: $json');
       }
       rethrow;
     }
@@ -381,9 +300,6 @@ class PagingResponse {
   // Helper 메서드
   static int _parseIntSafely(dynamic value, String fieldName) {
     if (value == null) {
-      if (AppConfig.debugMode) {
-        print('⚠️ [페이징응답 파싱] $fieldName이 null입니다. 기본값 0 사용');
-      }
       return 0;
     }
     if (value is int) return value;
@@ -392,9 +308,6 @@ class PagingResponse {
       if (parsed != null) return parsed;
     }
     
-    if (AppConfig.debugMode) {
-      print('❌ [페이징응답 파싱] $fieldName 파싱 실패: $value (타입: ${value.runtimeType})');
-    }
     throw TypeError();
   }
 }

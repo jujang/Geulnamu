@@ -4,14 +4,13 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../widgets/common/loading_widgets.dart';
 import '../../core/theme.dart';
-import '../../core/config/app_config.dart';
 import '../../models/meeting/meeting_model.dart';
 import '../../services/home/home_service.dart';
 import 'mixins/meeting_logic_mixin.dart';
 import 'widgets/meeting_widgets.dart';
 
 /// 모임 목록 화면
-/// 
+///
 /// 모든 사용자가 모임 목록을 조회할 수 있는 화면
 /// - 카드 리스트 방식으로 모임 정보 표시
 /// - 플로팅 필터 버튼으로 필터링 및 정렬
@@ -24,9 +23,8 @@ class MeetingListScreen extends StatefulWidget {
   State<MeetingListScreen> createState() => _MeetingListScreenState();
 }
 
-class _MeetingListScreenState extends State<MeetingListScreen> 
+class _MeetingListScreenState extends State<MeetingListScreen>
     with MeetingLogicMixin {
-
   final HomeService _homeService = HomeService();
 
   @override
@@ -62,7 +60,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
               children: [
                 // 메인 콘텐츠
                 _buildMainContent(),
-                
+
                 // 플로팅 필터 버튼
                 Positioned(
                   bottom: 16,
@@ -110,13 +108,10 @@ class _MeetingListScreenState extends State<MeetingListScreen>
           totalElements: totalElements,
           currentFilter: currentFilter,
         ),
-        
+
         // 구분선
-        Divider(
-          height: 1,
-          color: context.colors.outline.withOpacity(0.2),
-        ),
-        
+        Divider(height: 1, color: context.colors.outline.withOpacity(0.2)),
+
         // 모임 목록
         Expanded(
           child: RefreshIndicator(
@@ -133,13 +128,14 @@ class _MeetingListScreenState extends State<MeetingListScreen>
                   context,
                   meeting,
                   onTap: () => _handleMeetingTap(meeting),
-                  onAttendanceCheck: () => _handleAttendanceCheck(meeting.meetingId),
+                  onAttendanceCheck: () =>
+                      _handleAttendanceCheck(meeting.meetingId),
                 );
               },
             ),
           ),
         ),
-        
+
         // 페이지네이션
         if (totalPages > 1)
           MeetingWidgets.buildPagination(
@@ -176,11 +172,6 @@ class _MeetingListScreenState extends State<MeetingListScreen>
 
   /// 모임 카드 탭 처리 (향후 상세보기 기능)
   void _handleMeetingTap(MeetingInfo meeting) {
-    if (AppConfig.debugMode) {
-      print('🎯 [MeetingListScreen] 모임 카드 클릭 (ID: ${meeting.meetingId})');
-      print('📝 [MeetingListScreen] 향후 모임 상세 페이지로 이동 예정');
-    }
-    
     // TODO: 향후 모임 상세 페이지 구현 시 아래 코드 활성화
     // Navigator.pushNamed(context, '/meeting/${meeting.meetingId}');
   }
