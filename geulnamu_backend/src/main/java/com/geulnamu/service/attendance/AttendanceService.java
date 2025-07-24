@@ -8,6 +8,7 @@ import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.meeting.Meeting;
+import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
@@ -15,6 +16,7 @@ import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.repository.attendance.AttendanceCommandRepository;
 import com.geulnamu.repository.attendance.AttendanceQueryRepository;
 import com.geulnamu.repository.meeting.MeetingQueryRepository;
+import com.geulnamu.repository.member.MemberQueryRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class AttendanceService {
 
+    private final MemberQueryRepository memberQueryRepository;
     private final MeetingQueryRepository meetingQueryRepository;
     private final AttendanceQueryRepository attendanceQueryRepository;
     private final AttendanceCommandRepository attendanceCommandRepository;
@@ -36,9 +39,10 @@ public class AttendanceService {
     // TODO: 추후 lock을 걸지 고민해 볼 것
     @Transactional(rollbackFor = Exception.class)
     public Long createAttendance(Long memberId, Long meetingId) {
+        Member member =  memberQueryRepository.findById(memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         Meeting meeting = meetingQueryRepository.findById(meetingId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
-        meeting.checkRequestedMember(memberId);
         meeting.checkMemberIsDeActivated(memberId); // 비활성화 계정은 출석하지 못하게 제한
 
         meeting.checkTimeCanAttendMeeting();
@@ -47,7 +51,7 @@ public class AttendanceService {
             throw new BadRequestException(ResponseMessage.ATTENDANCE_DUPLICATE_ISSUE);
         }
 
-        Attendance attendance = Attendance.createAttendance(meeting, meeting.getMember());
+        Attendance attendance = Attendance.createAttendance(meeting, member);
         attendanceCommandRepository.save(attendance);
         return attendance.getId();
     }

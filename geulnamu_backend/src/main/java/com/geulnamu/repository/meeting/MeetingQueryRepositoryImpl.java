@@ -111,10 +111,10 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
             .when(meeting.meetingDate.after(LocalDateTime.now()))
             .then(AttendanceStatus.NOT_STARTED.getValue())
             .when(attendance.id.isNull())
-            .then(AttendanceStatus.NOT_ATTENDED.getValue())
+            .then(AttendanceStatus.NOT_ATTEND.getValue())
             .when(attendance.createdAt.before(meeting.lateThresholdTime))
-            .then(AttendanceStatus.ATTENDED.getValue())
-            .otherwise(AttendanceStatus.ATTENDED_LATE.getValue())
+            .then(AttendanceStatus.ATTEND.getValue())
+            .otherwise(AttendanceStatus.ATTEND_LATE.getValue())
             .as("attendanceStatus");
     }
 
@@ -143,8 +143,8 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
     BooleanExpression filterByAttendanceStatus(String attendanceStatus) {
         if(attendanceStatus == null) return null;
         else if(attendanceStatus.equals(AttendanceStatus.NOT_STARTED.getValue())) return meeting.meetingDate.after(LocalDateTime.now());
-        else if(attendanceStatus.equals(AttendanceStatus.ATTENDED.getValue())) return attendance.id.isNotNull();
-        else if(attendanceStatus.equals(AttendanceStatus.ATTENDED_LATE.getValue())) return attendance.createdAt.after(meeting.lateThresholdTime);
+        else if(attendanceStatus.equals(AttendanceStatus.ATTEND.getValue())) return attendance.id.isNotNull();
+        else if(attendanceStatus.equals(AttendanceStatus.ATTEND_LATE.getValue())) return attendance.createdAt.after(meeting.lateThresholdTime);
         else return attendance.id.isNull();
     }
 

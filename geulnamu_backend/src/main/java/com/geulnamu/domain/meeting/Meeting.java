@@ -112,12 +112,6 @@ public class Meeting extends DateColumn {
         }
     }
 
-    public void checkRequestedMember(Long memberId) {
-        if(!this.getMember().getId().equals(memberId)) {
-            throw new BadRequestException(ResponseMessage.NOT_SUITABLE_MEMBER);
-        }
-    }
-
     public void checkMemberIsDeActivated(Long memberId) {
         if(this.getMember().getDeletedAt() != null) {
             throw new BadRequestException(460, ResponseMessage.DEACTIVATE_MEMBER_ACCESS_DENIED);
