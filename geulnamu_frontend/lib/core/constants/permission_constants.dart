@@ -65,11 +65,13 @@ class PermissionConstants {
   ///
   /// 백엔드에서 받은 role 문자열을 PermissionLevel로 변환
   static const Map<String, PermissionLevel> roleToPermissionLevel = {
-    'GUEST': PermissionLevel.PUBLIC, // 비회원
-    'MEMBER': PermissionLevel.MEMBER, // 일반 회원
-    'STAFF': PermissionLevel.STAFF, // 운영진
-    'OPERATOR': PermissionLevel.STAFF, // 준운영진 (STAFF와 동일)
-    'ADMIN': PermissionLevel.ADMIN, // 관리자
+    'GUEST': PermissionLevel.PUBLIC,    // 비회원
+    'MEMBER': PermissionLevel.MEMBER,   // 일반 회원
+    'VICE_STAFF': PermissionLevel.STAFF, // 준운영진 → STAFF
+    'STAFF': PermissionLevel.STAFF,     // 운영진 → STAFF
+    'VICE_LEADER': PermissionLevel.ADMIN, // 부모임장 → ADMIN ✅
+    'LEADER': PermissionLevel.ADMIN,    // 모임장 → ADMIN ✅
+    'ADMIN': PermissionLevel.ADMIN,     // 관리자 → ADMIN ✅
   };
 
   // 🎯 편의 메서드들

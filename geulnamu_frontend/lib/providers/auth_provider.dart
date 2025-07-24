@@ -49,7 +49,7 @@ class AuthProvider with ChangeNotifier {
   /// 사용자명
   String get userNickname {
     if (_userInfo == null) return '비회원';
-    return _userInfo!['nickname'] as String? ?? '사용자';
+    return _userInfo!['memberName'] as String? ?? '사용자';
   }
 
   /// 사용자 이메일
@@ -77,6 +77,11 @@ class AuthProvider with ChangeNotifier {
   /// 관리자 레벨인지 확인 (ADMIN)
   bool get isAdminLevel {
     return permissionLevel == PermissionLevel.ADMIN;
+  }
+
+  /// 최고 관리자인지 확인 (ADMIN 역할만 - 시스템 관리 등 특수 기능용)
+  bool get isSuperAdmin {
+    return userRole == 'ADMIN';
   }
 
   /// 특정 메뉴에 접근할 권한이 있는지 확인
