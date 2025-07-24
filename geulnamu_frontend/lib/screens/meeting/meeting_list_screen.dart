@@ -8,6 +8,7 @@ import '../../models/meeting/meeting_model.dart';
 import '../../services/home/home_service.dart';
 import 'mixins/meeting_logic_mixin.dart';
 import 'widgets/meeting_widgets.dart';
+import 'widgets/meeting_list_widgets.dart';
 
 /// 모임 목록 화면
 ///
@@ -60,6 +61,9 @@ class _MeetingListScreenState extends State<MeetingListScreen>
 
   @override
   Widget build(BuildContext context) {
+    // 🔍 디버그: 일반 화면 빌드 확인
+    print('📅 [일반 화면] MeetingListScreen build() 호출');
+    
     return Consumer<HomeService>(
       builder: (context, homeService, child) {
         return LoadingWidgets.buildOverlayLoading(
@@ -67,7 +71,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
           isLoading: homeService.isProcessing,
           loadingMessage: homeService.currentOperation,
           child: MainLayout(
-            title: '모임 목록',
+            title: '📅 모임 목록',
             isHomePage: true, // 메인 기능이므로 사이드바 버튼 표시
             // HomeService를 통한 메뉴 및 로그아웃 처리
             onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
@@ -81,7 +85,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
                 Positioned(
                   bottom: 16,
                   right: 16,
-                  child: MeetingWidgets.buildFilterFab(
+                  child: MeetingListWidgets.buildFilterFab(
                     context,
                     _showFilterBottomSheet,
                   ),
@@ -98,12 +102,12 @@ class _MeetingListScreenState extends State<MeetingListScreen>
   Widget _buildMainContent() {
     // 로딩 상태
     if (isLoading) {
-      return MeetingWidgets.buildLoading(context);
+      return MeetingListWidgets.buildLoading(context);
     }
 
     // 에러 상태
     if (errorMessage != null) {
-      return MeetingWidgets.buildError(
+      return MeetingListWidgets.buildError(
         context,
         message: errorMessage!,
         onRetry: refreshMeetingList,
@@ -112,14 +116,14 @@ class _MeetingListScreenState extends State<MeetingListScreen>
 
     // 빈 목록
     if (meetingList.isEmpty) {
-      return MeetingWidgets.buildEmptyList(context);
+      return MeetingListWidgets.buildEmptyList(context);
     }
 
     // 정상 목록
     return Column(
       children: [
         // 목록 정보 헤더
-        MeetingWidgets.buildListHeader(
+        MeetingListWidgets.buildListHeader(
           context,
           totalElements: totalElements,
           currentFilter: currentFilter,
@@ -154,7 +158,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
 
         // 페이지네이션
         if (totalPages > 1)
-          MeetingWidgets.buildPagination(
+          MeetingListWidgets.buildPagination(
             context,
             currentPage: currentPage,
             totalPages: totalPages,

@@ -2,30 +2,25 @@ import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
 import '../../../models/meeting/meeting_model.dart';
 import '../../../models/meeting/meeting_filter_model.dart';
-import 'meeting_list_widgets.dart';
 import 'meeting_filter_widgets.dart';
-import 'meeting_staff_widgets.dart';
 
-/// 모임 관련 핵심 UI 위젯들
+/// 🆕 운영진용 모임 관련 UI 위젯들
 ///
 /// Static Methods로 구현하여 재사용성 극대화
-/// 분할된 위젯들을 통합하여 제공하는 메인 클래스
-class MeetingWidgets {
-  // ==================== 모임 카드 위젯들 ====================
-
-  /// 모임 카드 위젯 (일반 사용자용)
+class MeetingStaffWidgets {
+  /// 🆕 운영진용 모임 카드 위젯
+  ///
+  /// 출석 상태 대신 비공개 여부를 표시하고, 출석현황 확인 버튼 제거
   ///
   /// [meeting] 모임 정보
   /// [onTap] 카드 탭 콜백 (향후 상세보기 기능)
-  /// [onAttendanceCheck] 출석현황 확인 버튼 콜백
-  static Widget buildMeetingCard(
+  static Widget buildStaffMeetingCard(
     BuildContext context,
     MeetingInfo meeting, {
     VoidCallback? onTap,
-    VoidCallback? onAttendanceCheck,
   }) {
     // 🔍 디버그 로깅 추가
-    print('📅 [일반 카드] buildMeetingCard 호출됨 - 모임: ${meeting.meetingName}');
+    print('🛡️ [운영진 카드] buildStaffMeetingCard 호출됨 - 모임: ${meeting.meetingName}');
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       elevation: 4,
@@ -46,7 +41,7 @@ class MeetingWidgets {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🎯 상단: 모임 제목 + 모임 유형 배지
+              // 상단: 모임 제목 + 모임 유형 배지
               Row(
                 children: [
                   Expanded(
@@ -65,7 +60,7 @@ class MeetingWidgets {
 
               const SizedBox(height: 12),
 
-              // 🎯 정보 행들
+              // 정보 행들
               Column(
                 children: [
                   // 모임 개최일시 + 모임 장소
@@ -94,15 +89,15 @@ class MeetingWidgets {
 
                   const SizedBox(height: 8),
 
-                  // 출석 상태 + 모임 번호
+                  // 🆕 비공개 여부 + 모임 번호
                   _buildInfoRow(
                     context,
-                    icon: Icons.check_circle_outline,
-                    label: '출석상태',
-                    value: meeting.attendanceStatusDisplayName,
-                    valueColor: _getAttendanceStatusColor(
+                    icon: Icons.visibility_outlined,
+                    label: '공개상태',
+                    value: _getPrivacyStatusDisplayName(meeting.isPrivate),
+                    valueColor: _getPrivacyStatusColor(
                       context,
-                      meeting.attendanceStatus,
+                      meeting.isPrivate,
                     ),
                     secondIcon: Icons.tag,
                     secondLabel: '모임번호',
@@ -111,34 +106,7 @@ class MeetingWidgets {
                 ],
               ),
 
-              const SizedBox(height: 16),
-
-              // 🎯 하단: 출석현황 확인 버튼
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: onAttendanceCheck,
-                  icon: Icon(
-                    Icons.people_outline,
-                    size: 18,
-                    color: context.colors.primary,
-                  ),
-                  label: Text(
-                    '출석현황 확인',
-                    style: TextStyle(
-                      color: context.colors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: context.colors.primary),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
+              // 🆕 출석현황 확인 버튼 제거 (운영진용에서는 불필요)
             ],
           ),
         ),
@@ -146,7 +114,83 @@ class MeetingWidgets {
     );
   }
 
-  // ==================== 공통 헬퍼 메서드들 ====================
+  /// 🆕 운영진용 목록 정보 헤더
+  static Widget buildStaffListHeader(
+    BuildContext context, {
+    required int totalElements,
+    required MeetingListFilter currentFilter,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.admin_panel_settings,
+                size: 20,
+                color: context.colors.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '운영진용 - 총 $totalElements개',
+                style: context.textStyles.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: context.colors.onSurface,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            _getStaffFilterSummary(currentFilter),
+            style: context.textStyles.bodySmall?.copyWith(
+              color: context.colors.onSurface.withOpacity(0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 🆕 운영진용 필터 바텀시트
+  static Widget buildStaffFilterBottomSheet(
+    BuildContext context, {
+    required MeetingListFilter currentFilter,
+    required Function(MeetingListFilter) onFilterChanged,
+  }) {
+    return MeetingFilterWidgets.buildAdminFilterBottomSheet(
+      context,
+      currentFilter: currentFilter,
+      onFilterChanged: onFilterChanged,
+    );
+  }
+
+  /// 🆕 운영진용 필터 요약 텍스트 생성
+  static String _getStaffFilterSummary(MeetingListFilter filter) {
+    final List<String> filterParts = [];
+
+    // 모임 유형 필터
+    if (filter.meetingType != MeetingTypeOption.all) {
+      filterParts.add(filter.meetingType.displayName);
+    }
+
+    // 오늘 모임 필터
+    if (filter.isTodayMeeting == true) {
+      filterParts.add('오늘 모임만');
+    }
+
+    // 비공개 여부 필터
+    if (filter.privacyStatus != PrivacyStatusOption.all) {
+      filterParts.add(filter.privacyStatus.displayName);
+    }
+
+    // 정렬 정보
+    final order = filter.isAsc ? '↑' : '↓';
+    filterParts.add('${filter.sortBy.displayName}$order');
+
+    return filterParts.join(' · ');
+  }
 
   /// 모임 유형 배지 위젯
   static Widget _buildMeetingTypeBadge(
@@ -282,133 +326,13 @@ class MeetingWidgets {
     );
   }
 
-  /// 출석 상태별 색상 가져오기
-  static Color _getAttendanceStatusColor(
-    BuildContext context,
-    AttendanceStatus status,
-  ) {
-    switch (status) {
-      case AttendanceStatus.attend:
-        return Colors.green;
-      case AttendanceStatus.attendLate:
-        return Colors.orange;
-      case AttendanceStatus.notAttend:
-        return Colors.grey;
-      case AttendanceStatus.notStarted:
-        return Colors.blue;
-    }
+  /// 🆕 비공개 여부 표시명 가져오기
+  static String _getPrivacyStatusDisplayName(bool isPrivate) {
+    return isPrivate ? '비공개' : '공개';
   }
 
-  // ==================== 분할된 위젯들에 대한 위임 메서드들 ====================
-
-  // 목록 관련 위젯들 (MeetingListWidgets에 위임)
-  static Widget buildPagination(
-    BuildContext context, {
-    required int currentPage,
-    required int totalPages,
-    required Function(int) onPageChanged,
-  }) => MeetingListWidgets.buildPagination(
-        context,
-        currentPage: currentPage,
-        totalPages: totalPages,
-        onPageChanged: onPageChanged,
-      );
-
-  static Widget buildLoading(BuildContext context) =>
-      MeetingListWidgets.buildLoading(context);
-
-  static Widget buildError(
-    BuildContext context, {
-    required String message,
-    VoidCallback? onRetry,
-  }) => MeetingListWidgets.buildError(
-        context,
-        message: message,
-        onRetry: onRetry,
-      );
-
-  static Widget buildEmptyList(BuildContext context) =>
-      MeetingListWidgets.buildEmptyList(context);
-
-  static Widget buildListHeader(
-    BuildContext context, {
-    required int totalElements,
-    required MeetingListFilter currentFilter,
-  }) => MeetingListWidgets.buildListHeader(
-        context,
-        totalElements: totalElements,
-        currentFilter: currentFilter,
-      );
-
-  static Widget buildFilterFab(BuildContext context, VoidCallback onPressed) =>
-      MeetingListWidgets.buildFilterFab(context, onPressed);
-
-  // 필터 관련 위젯들 (MeetingFilterWidgets에 위임)
-  static Widget buildFilterBottomSheet(
-    BuildContext context, {
-    required MeetingListFilter currentFilter,
-    required Function(MeetingListFilter) onFilterChanged,
-  }) => MeetingFilterWidgets.buildFilterBottomSheet(
-        context,
-        currentFilter: currentFilter,
-        onFilterChanged: onFilterChanged,
-      );
-
-  // 🆕 운영진용 위젯들 (MeetingStaffWidgets에 위임)
-  static Widget buildStaffMeetingCard(
-    BuildContext context,
-    MeetingInfo meeting, {
-    VoidCallback? onTap,
-  }) => MeetingStaffWidgets.buildStaffMeetingCard(
-        context,
-        meeting,
-        onTap: onTap,
-      );
-
-  static Widget buildStaffListHeader(
-    BuildContext context, {
-    required int totalElements,
-    required MeetingListFilter currentFilter,
-  }) => MeetingStaffWidgets.buildStaffListHeader(
-        context,
-        totalElements: totalElements,
-        currentFilter: currentFilter,
-      );
-
-  static Widget buildStaffFilterBottomSheet(
-    BuildContext context, {
-    required MeetingListFilter currentFilter,
-    required Function(MeetingListFilter) onFilterChanged,
-  }) => MeetingStaffWidgets.buildStaffFilterBottomSheet(
-        context,
-        currentFilter: currentFilter,
-        onFilterChanged: onFilterChanged,
-      );
-
-  // 🆕 추가: 기존 코드와의 호환성을 위한 별칭 메서드들
-  static Widget buildAdminMeetingCard(
-    BuildContext context,
-    MeetingInfo meeting, {
-    VoidCallback? onTap,
-  }) => buildStaffMeetingCard(context, meeting, onTap: onTap);
-
-  static Widget buildAdminListHeader(
-    BuildContext context, {
-    required int totalElements,
-    required MeetingListFilter currentFilter,
-  }) => buildStaffListHeader(
-        context,
-        totalElements: totalElements,
-        currentFilter: currentFilter,
-      );
-
-  static Widget buildAdminFilterBottomSheet(
-    BuildContext context, {
-    required MeetingListFilter currentFilter,
-    required Function(MeetingListFilter) onFilterChanged,
-  }) => buildStaffFilterBottomSheet(
-        context,
-        currentFilter: currentFilter,
-        onFilterChanged: onFilterChanged,
-      );
+  /// 🆕 비공개 여부별 색상 가져오기
+  static Color _getPrivacyStatusColor(BuildContext context, bool isPrivate) {
+    return isPrivate ? Colors.orange : Colors.green;
+  }
 }

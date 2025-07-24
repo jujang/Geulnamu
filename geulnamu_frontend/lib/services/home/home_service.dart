@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../core/config/app_config.dart'; // 🆕 디버그 모드 체크용
+import '../../core/constants/permission_constants.dart'; // 🆕 권한 상수 사용
 
 /// 홈화면 비즈니스 로직을 담당하는 Singleton Service
 ///
@@ -30,6 +32,16 @@ class HomeService extends ChangeNotifier {
   // 🎯 메뉴 탭 처리 (권한 레벨 + 개인정보 이중 체크)
   void handleMenuTap(BuildContext context, String menuTitle) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    // 🔍 디버그: 권한 체크 로깅
+    if (AppConfig.debugMode) {
+      print('🎯 [메뉴 탭] $menuTitle');
+      print('🔑 [권한 체크] 사용자 역할: ${authProvider.userRole}');
+      print('🔑 [권한 체크] 권한 레벨: ${authProvider.permissionLevel}');
+      print('🔑 [권한 체크] 운영진 레벨: ${authProvider.isStaffLevel}');
+      print('🔑 [권한 체크] 필요 레벨: ${PermissionConstants.getRequiredPermissionLevel(menuTitle)}');
+      print('🔑 [권한 체크] 메뉴 권한 있음: ${authProvider.hasMenuPermission(menuTitle)}');
+    }
 
     // 🏠 홈 화면은 권한 체크 없이 무조건 접근 가능
     if (menuTitle == '홈 화면') {
@@ -269,6 +281,8 @@ class HomeService extends ChangeNotifier {
         Navigator.pushNamed(context, '/meeting-list');
         break;
       case '모임 목록 (운영진용)':
+        // 🔍 디버그 로깅 추가
+        print('👥 [라우팅] 운영진용 화면으로 이동: /meeting-list-staff');
         Navigator.pushNamed(context, '/meeting-list-staff');
         break;
       case '발제문 목록':
@@ -290,13 +304,8 @@ class HomeService extends ChangeNotifier {
 
   /// 역할 권한 체크
   bool hasRolePermission(String featureName, AuthProvider authProvider) {
-    // 모임원 목록은 임원진 이상 권한 필요
-    if (featureName == '모임원 목록') {
-      return authProvider.isStaffLevel;
-    }
-
-    // 다른 기능들은 임시로 모두 접근 가능
-    return true;
+    // 🆕 권한 상수를 사용한 통합 권한 체크 시스템
+    return authProvider.hasMenuPermission(featureName);
   }
 
   // 🔄 로딩 상태 설정 메서드

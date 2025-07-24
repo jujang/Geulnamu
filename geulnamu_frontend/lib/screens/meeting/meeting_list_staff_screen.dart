@@ -8,6 +8,7 @@ import '../../models/meeting/meeting_model.dart';
 import '../../services/home/home_service.dart';
 import 'mixins/meeting_logic_mixin.dart';
 import 'widgets/meeting_widgets.dart';
+import 'widgets/meeting_list_widgets.dart';
 
 /// 🆕 모임 목록 조회 (운영진용) 화면
 ///
@@ -59,6 +60,9 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
 
   @override
   Widget build(BuildContext context) {
+    // 🔍 디버그: 운영진용 화면 빌드 확인
+    print('👥 [운영진 화면] MeetingListStaffScreen build() 호출');
+    
     return Consumer<HomeService>(
       builder: (context, homeService, child) {
         return LoadingWidgets.buildOverlayLoading(
@@ -66,7 +70,7 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
           isLoading: homeService.isProcessing,
           loadingMessage: homeService.currentOperation,
           child: MainLayout(
-            title: '모임 목록 조회 (운영진용)',
+            title: '👥 모임 목록 (운영진)',
             isHomePage: true, // 메인 기능이므로 사이드바 버튼 표시
             // HomeService를 통한 메뉴 및 로그아웃 처리
             onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
@@ -80,7 +84,7 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
                 Positioned(
                   bottom: 16,
                   right: 16,
-                  child: MeetingWidgets.buildFilterFab(
+                  child: MeetingListWidgets.buildFilterFab(
                     context,
                     _showStaffFilterBottomSheet,
                   ),
@@ -97,12 +101,12 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
   Widget _buildMainContent() {
     // 로딩 상태
     if (isLoading) {
-      return MeetingWidgets.buildLoading(context);
+      return MeetingListWidgets.buildLoading(context);
     }
 
     // 에러 상태
     if (errorMessage != null) {
-      return MeetingWidgets.buildError(
+      return MeetingListWidgets.buildError(
         context,
         message: errorMessage!,
         onRetry: refreshMeetingList,
@@ -111,17 +115,20 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
 
     // 빈 목록
     if (meetingList.isEmpty) {
-      return MeetingWidgets.buildEmptyList(context);
+      return MeetingListWidgets.buildEmptyList(context);
     }
 
     // 정상 목록
     return Column(
       children: [
         // 🆕 운영진용 목록 정보 헤더
-        MeetingWidgets.buildStaffListHeader(
-          context,
-          totalElements: totalElements,
-          currentFilter: currentFilter,
+        Container(
+          color: context.colors.primaryContainer.withOpacity(0.1), // 🆕 운영진용 배경색
+          child: MeetingWidgets.buildStaffListHeader(
+            context,
+            totalElements: totalElements,
+            currentFilter: currentFilter,
+          ),
         ),
 
         // 구분선
@@ -143,7 +150,7 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
                   context,
                   meeting,
                   onTap: () => _handleMeetingTap(meeting),
-                  // 🆕 출석현황 확인 버튼 제거
+                  // 🆕 운영진용 카드 사용 (비공개 여부 표시, 출석현황 버튼 없음)
                 );
               },
             ),
@@ -152,7 +159,7 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
 
         // 페이지네이션
         if (totalPages > 1)
-          MeetingWidgets.buildPagination(
+          MeetingListWidgets.buildPagination(
             context,
             currentPage: currentPage,
             totalPages: totalPages,
