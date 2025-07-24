@@ -4,12 +4,11 @@ import '../../../models/meeting/meeting_model.dart';
 import '../../../models/meeting/meeting_filter_model.dart';
 
 /// 모임 목록 화면 UI 위젯들
-/// 
+///
 /// Static Methods로 구현하여 재사용성 극대화
 class MeetingWidgets {
-  
   /// 모임 카드 위젯 (일반 사용자용)
-  /// 
+  ///
   /// [meeting] 모임 정보
   /// [onTap] 카드 탭 콜백 (향후 상세보기 기능)
   /// [onAttendanceCheck] 출석현황 확인 버튼 콜백
@@ -55,9 +54,9 @@ class MeetingWidgets {
                   _buildMeetingTypeBadge(context, meeting.meetingType),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // 🎯 정보 행들
               Column(
                 children: [
@@ -71,9 +70,9 @@ class MeetingWidgets {
                     secondLabel: '장소',
                     secondValue: meeting.meetingPlace,
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // 토론 시간 + 모임 개설자
                   _buildInfoRow(
                     context,
@@ -84,25 +83,28 @@ class MeetingWidgets {
                     secondLabel: '개설자',
                     secondValue: meeting.meetingCreatorName,
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // 출석 상태 + 모임 번호
                   _buildInfoRow(
                     context,
                     icon: Icons.check_circle_outline,
                     label: '출석상태',
                     value: meeting.attendanceStatusDisplayName,
-                    valueColor: _getAttendanceStatusColor(context, meeting.attendanceStatus),
+                    valueColor: _getAttendanceStatusColor(
+                      context,
+                      meeting.attendanceStatus,
+                    ),
                     secondIcon: Icons.tag,
                     secondLabel: '모임번호',
                     secondValue: '#${meeting.meetingId}',
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // 🎯 하단: 출석현황 확인 버튼
               SizedBox(
                 width: double.infinity,
@@ -137,9 +139,9 @@ class MeetingWidgets {
   }
 
   /// 🆕 모임 카드 위젯 (운영진용)
-  /// 
+  ///
   /// 출석 상태 대신 비공개 여부를 표시하고, 출석현황 확인 버튼 제거
-  /// 
+  ///
   /// [meeting] 모임 정보
   /// [onTap] 카드 탭 콜백 (향후 상세보기 기능)
   static Widget buildAdminMeetingCard(
@@ -183,9 +185,9 @@ class MeetingWidgets {
                   _buildMeetingTypeBadge(context, meeting.meetingType),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // 정보 행들
               Column(
                 children: [
@@ -199,9 +201,9 @@ class MeetingWidgets {
                     secondLabel: '장소',
                     secondValue: meeting.meetingPlace,
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // 토론 시간 + 모임 개설자
                   _buildInfoRow(
                     context,
@@ -212,23 +214,26 @@ class MeetingWidgets {
                     secondLabel: '개설자',
                     secondValue: meeting.meetingCreatorName,
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // 🆕 비공개 여부 + 모임 번호
                   _buildInfoRow(
                     context,
                     icon: Icons.visibility_outlined,
                     label: '공개상태',
                     value: _getPrivacyStatusDisplayName(meeting.isPrivate),
-                    valueColor: _getPrivacyStatusColor(context, meeting.isPrivate),
+                    valueColor: _getPrivacyStatusColor(
+                      context,
+                      meeting.isPrivate,
+                    ),
                     secondIcon: Icons.tag,
                     secondLabel: '모임번호',
                     secondValue: '#${meeting.meetingId}',
                   ),
                 ],
               ),
-              
+
               // 🆕 출석현황 확인 버튼 제거 (운영진용에서는 불필요)
             ],
           ),
@@ -238,9 +243,12 @@ class MeetingWidgets {
   }
 
   /// 모임 유형 배지 위젯
-  static Widget _buildMeetingTypeBadge(BuildContext context, MeetingType meetingType) {
+  static Widget _buildMeetingTypeBadge(
+    BuildContext context,
+    MeetingType meetingType,
+  ) {
     Color badgeColor;
-    
+
     switch (meetingType) {
       case MeetingType.regular:
         badgeColor = Colors.blue;
@@ -258,10 +266,7 @@ class MeetingWidgets {
       decoration: BoxDecoration(
         color: badgeColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: badgeColor.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: badgeColor.withOpacity(0.3), width: 1),
       ),
       child: Text(
         meetingType.displayName,
@@ -295,16 +300,21 @@ class MeetingWidgets {
               Icon(
                 icon,
                 size: 18, // 16 -> 18
-                color: context.colors.onSurface.withOpacity(0.65), // 0.85 -> 0.65 (더 연하게)
+                color: context.colors.onSurface.withOpacity(
+                  0.65,
+                ), // 0.85 -> 0.65 (더 연하게)
               ),
               const SizedBox(width: 6),
               Text(
                 '$label: ',
                 style: context.textStyles.bodySmall?.copyWith(
-                  color: context.colors.onSurface.withOpacity(0.55), // 0.75 -> 0.55 (더 연하게)
+                  color: context.colors.onSurface.withOpacity(
+                    0.55,
+                  ), // 0.75 -> 0.55 (더 연하게)
                   fontSize: 14, // 12 -> 14
                   fontWeight: Theme.of(context).brightness == Brightness.light
-                      ? FontWeight.w600 // 라이트 모드: 더 진하게
+                      ? FontWeight
+                            .w600 // 라이트 모드: 더 진하게
                       : FontWeight.w500, // 다크 모드: 자연스럽게
                 ),
               ),
@@ -314,7 +324,8 @@ class MeetingWidgets {
                   style: context.textStyles.bodySmall?.copyWith(
                     color: valueColor ?? context.colors.onSurface,
                     fontWeight: Theme.of(context).brightness == Brightness.light
-                        ? FontWeight.w600 // 라이트 모드: 더 진하게
+                        ? FontWeight
+                              .w600 // 라이트 모드: 더 진하게
                         : FontWeight.w500, // 다크 모드: 자연스럽게
                     fontSize: 14, // 12 -> 14
                   ),
@@ -324,9 +335,11 @@ class MeetingWidgets {
             ],
           ),
         ),
-        
+
         // 두 번째 정보 (있는 경우)
-        if (secondIcon != null && secondLabel != null && secondValue != null) ...[
+        if (secondIcon != null &&
+            secondLabel != null &&
+            secondValue != null) ...[
           const SizedBox(width: 16),
           Expanded(
             child: Row(
@@ -334,16 +347,21 @@ class MeetingWidgets {
                 Icon(
                   secondIcon,
                   size: 18, // 16 -> 18
-                  color: context.colors.onSurface.withOpacity(0.65), // 0.85 -> 0.65 (더 연하게)
+                  color: context.colors.onSurface.withOpacity(
+                    0.65,
+                  ), // 0.85 -> 0.65 (더 연하게)
                 ),
                 const SizedBox(width: 6),
                 Text(
                   '$secondLabel: ',
                   style: context.textStyles.bodySmall?.copyWith(
-                    color: context.colors.onSurface.withOpacity(0.55), // 0.75 -> 0.55 (더 연하게)
+                    color: context.colors.onSurface.withOpacity(
+                      0.55,
+                    ), // 0.75 -> 0.55 (더 연하게)
                     fontSize: 14, // 12 -> 14
                     fontWeight: Theme.of(context).brightness == Brightness.light
-                        ? FontWeight.w600 // 라이트 모드: 더 진하게
+                        ? FontWeight
+                              .w600 // 라이트 모드: 더 진하게
                         : FontWeight.w500, // 다크 모드: 자연스럽게
                   ),
                 ),
@@ -352,8 +370,10 @@ class MeetingWidgets {
                     secondValue,
                     style: context.textStyles.bodySmall?.copyWith(
                       color: secondValueColor ?? context.colors.onSurface,
-                      fontWeight: Theme.of(context).brightness == Brightness.light
-                          ? FontWeight.w600 // 라이트 모드: 더 진하게
+                      fontWeight:
+                          Theme.of(context).brightness == Brightness.light
+                          ? FontWeight
+                                .w600 // 라이트 모드: 더 진하게
                           : FontWeight.w500, // 다크 모드: 자연스럽게
                       fontSize: 14, // 12 -> 14
                     ),
@@ -369,7 +389,10 @@ class MeetingWidgets {
   }
 
   /// 출석 상태별 색상 가져오기
-  static Color _getAttendanceStatusColor(BuildContext context, AttendanceStatus status) {
+  static Color _getAttendanceStatusColor(
+    BuildContext context,
+    AttendanceStatus status,
+  ) {
     switch (status) {
       case AttendanceStatus.attend:
         return Colors.green;
@@ -468,12 +491,10 @@ class MeetingWidgets {
         children: [
           // 첫 페이지
           IconButton(
-            onPressed: currentPage > 1 
-                ? () => onPageChanged(1)
-                : null,
+            onPressed: currentPage > 1 ? () => onPageChanged(1) : null,
             icon: const Icon(Icons.first_page),
           ),
-          
+
           // 이전 페이지
           IconButton(
             onPressed: currentPage > 1
@@ -481,10 +502,10 @@ class MeetingWidgets {
                 : null,
             icon: const Icon(Icons.chevron_left),
           ),
-          
+
           // 페이지 번호들
           ...buildPageNumbers(context, currentPage, totalPages, onPageChanged),
-          
+
           // 다음 페이지
           IconButton(
             onPressed: currentPage < totalPages
@@ -492,7 +513,7 @@ class MeetingWidgets {
                 : null,
             icon: const Icon(Icons.chevron_right),
           ),
-          
+
           // 마지막 페이지
           IconButton(
             onPressed: currentPage < totalPages
@@ -513,11 +534,11 @@ class MeetingWidgets {
     Function(int) onPageChanged,
   ) {
     final List<Widget> pageButtons = [];
-    
+
     // 표시할 페이지 범위 계산 (최대 5개)
     int startPage = (currentPage - 2).clamp(1, totalPages);
     int endPage = (startPage + 4).clamp(1, totalPages);
-    
+
     // startPage 조정 (endPage가 마지막에 도달했을 때)
     if (endPage == totalPages) {
       startPage = (endPage - 4).clamp(1, totalPages);
@@ -529,14 +550,12 @@ class MeetingWidgets {
           margin: const EdgeInsets.symmetric(horizontal: 2),
           child: Material(
             borderRadius: BorderRadius.circular(8),
-            color: i == currentPage 
+            color: i == currentPage
                 ? context.colors.primary
                 : Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(8),
-              onTap: i != currentPage 
-                  ? () => onPageChanged(i)
-                  : null,
+              onTap: i != currentPage ? () => onPageChanged(i) : null,
               child: Container(
                 width: 40,
                 height: 40,
@@ -544,10 +563,10 @@ class MeetingWidgets {
                 child: Text(
                   '$i',
                   style: context.textStyles.bodyMedium?.copyWith(
-                    color: i == currentPage 
+                    color: i == currentPage
                         ? context.colors.onPrimary
                         : context.colors.onSurface,
-                    fontWeight: i == currentPage 
+                    fontWeight: i == currentPage
                         ? FontWeight.bold
                         : FontWeight.normal,
                   ),
@@ -568,9 +587,7 @@ class MeetingWidgets {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-            color: context.colors.primary,
-          ),
+          CircularProgressIndicator(color: context.colors.primary),
           const SizedBox(height: 16),
           Text(
             '모임 목록을 불러오는 중...',
@@ -595,11 +612,7 @@ class MeetingWidgets {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: context.colors.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: context.colors.error),
             const SizedBox(height: 16),
             Text(
               message,
@@ -669,16 +682,16 @@ class MeetingWidgets {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            '총 ${totalElements}개',
+            '총 $totalElements개',
             style: context.textStyles.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              color: context.colors.onBackground,
+              color: context.colors.onSurface,
             ),
           ),
           Text(
             _getFilterSummary(currentFilter),
             style: context.textStyles.bodySmall?.copyWith(
-              color: context.colors.onBackground.withOpacity(0.7),
+              color: context.colors.onSurface.withOpacity(0.7),
             ),
           ),
         ],
@@ -698,16 +711,16 @@ class MeetingWidgets {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            '총 ${totalElements}개',
+            '총 $totalElements개',
             style: context.textStyles.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              color: context.colors.onBackground,
+              color: context.colors.onSurface,
             ),
           ),
           Text(
             _getAdminFilterSummary(currentFilter),
             style: context.textStyles.bodySmall?.copyWith(
-              color: context.colors.onBackground.withOpacity(0.7),
+              color: context.colors.onSurface.withOpacity(0.7),
             ),
           ),
         ],
@@ -781,7 +794,8 @@ class _FilterBottomSheetContent extends StatefulWidget {
   });
 
   @override
-  State<_FilterBottomSheetContent> createState() => _FilterBottomSheetContentState();
+  State<_FilterBottomSheetContent> createState() =>
+      _FilterBottomSheetContentState();
 }
 
 class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
@@ -839,9 +853,9 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // 모임 유형 필터
           MeetingWidgets._buildFilterSection(
             context,
@@ -855,19 +869,21 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                   selected: isSelected,
                   onSelected: (selected) {
                     setState(() {
-                      selectedMeetingType = selected ? option : MeetingTypeOption.all;
+                      selectedMeetingType = selected
+                          ? option
+                          : MeetingTypeOption.all;
                     });
                   },
                   selectedColor: context.colors.primary.withOpacity(0.2),
                   checkmarkColor: context.colors.primary,
-                  backgroundColor: context.colors.surfaceVariant,
+                  backgroundColor: context.colors.surfaceContainerHighest,
                 );
               }).toList(),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // 오늘 모임 필터
           MeetingWidgets._buildFilterSection(
             context,
@@ -885,7 +901,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                   },
                   selectedColor: context.colors.primary.withOpacity(0.2),
                   checkmarkColor: context.colors.primary,
-                  backgroundColor: context.colors.surfaceVariant,
+                  backgroundColor: context.colors.surfaceContainerHighest,
                 ),
                 FilterChip(
                   label: const Text('오늘 모임만'),
@@ -897,14 +913,14 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                   },
                   selectedColor: context.colors.primary.withOpacity(0.2),
                   checkmarkColor: context.colors.primary,
-                  backgroundColor: context.colors.surfaceVariant,
+                  backgroundColor: context.colors.surfaceContainerHighest,
                 ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // 🆕 운영진 모드에서만 비공개 여부 필터 표시
           if (widget.isAdminMode) ...[
             // 비공개 여부 필터
@@ -920,19 +936,21 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() {
-                        selectedPrivacyStatus = selected ? option : PrivacyStatusOption.all;
+                        selectedPrivacyStatus = selected
+                            ? option
+                            : PrivacyStatusOption.all;
                       });
                     },
                     selectedColor: context.colors.primary.withOpacity(0.2),
                     checkmarkColor: context.colors.primary,
-                    backgroundColor: context.colors.surfaceVariant,
+                    backgroundColor: context.colors.surfaceContainerHighest,
                   );
                 }).toList(),
               ),
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // 🆕 일반 모드에서만 참석 상태 필터 표시
           if (!widget.isAdminMode) ...[
             // 참석 상태 필터
@@ -949,19 +967,21 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() {
-                        selectedAttendanceStatus = selected ? option : AttendanceStatusOption.all;
+                        selectedAttendanceStatus = selected
+                            ? option
+                            : AttendanceStatusOption.all;
                       });
                     },
                     selectedColor: context.colors.primary.withOpacity(0.2),
                     checkmarkColor: context.colors.primary,
-                    backgroundColor: context.colors.surfaceVariant,
+                    backgroundColor: context.colors.surfaceContainerHighest,
                   );
                 }).toList(),
               ),
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // 정렬 (모든 모드에서 공통)
           MeetingWidgets._buildFilterSection(
             context,
@@ -979,18 +999,20 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                       selected: isSelected,
                       onSelected: (selected) {
                         setState(() {
-                          selectedSort = selected ? option : SortByOption.meetingDate;
+                          selectedSort = selected
+                              ? option
+                              : SortByOption.meetingDate;
                         });
                       },
                       selectedColor: context.colors.primary.withOpacity(0.2),
                       checkmarkColor: context.colors.primary,
-                      backgroundColor: context.colors.surfaceVariant,
+                      backgroundColor: context.colors.surfaceContainerHighest,
                     );
                   }).toList(),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // 정렬 순서
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1006,7 +1028,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                         }
                       },
                       selectedColor: context.colors.primary.withOpacity(0.2),
-                      backgroundColor: context.colors.surfaceVariant,
+                      backgroundColor: context.colors.surfaceContainerHighest,
                     ),
                     const SizedBox(width: 8),
                     ChoiceChip(
@@ -1020,16 +1042,16 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                         }
                       },
                       selectedColor: context.colors.primary.withOpacity(0.2),
-                      backgroundColor: context.colors.surfaceVariant,
+                      backgroundColor: context.colors.surfaceContainerHighest,
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // 적용 버튼
           SizedBox(
             width: double.infinity,
@@ -1043,14 +1065,14 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                   sortBy: selectedSort,
                   isAsc: isAscending,
                 );
-                
+
                 Navigator.pop(context);
                 widget.onFilterChanged(newFilter);
               },
               child: const Text('적용'),
             ),
           ),
-          
+
           // 하단 여백 (키보드 대응)
           SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
         ],

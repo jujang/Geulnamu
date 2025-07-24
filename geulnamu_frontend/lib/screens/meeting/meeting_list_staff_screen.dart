@@ -16,22 +16,22 @@ import 'widgets/meeting_widgets.dart';
 /// - 출석 상태 대신 비공개 여부 표시
 /// - 필터에 비공개 여부 옵션 추가
 /// - 출석현황 확인 버튼 제거
-class MeetingListAdminScreen extends StatefulWidget {
+class MeetingListStaffScreen extends StatefulWidget {
   /// 초기 필터 타입
   /// - 'today': 오늘의 모임
   /// - null 또는 기타: 기본 필터
   final String? initialFilterType;
   
-  const MeetingListAdminScreen({
+  const MeetingListStaffScreen({
     super.key,
     this.initialFilterType,
   });
 
   @override
-  State<MeetingListAdminScreen> createState() => _MeetingListAdminScreenState();
+  State<MeetingListStaffScreen> createState() => _MeetingListStaffScreenState();
 }
 
-class _MeetingListAdminScreenState extends State<MeetingListAdminScreen>
+class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
     with MeetingLogicMixin {
   final HomeService _homeService = HomeService();
 
@@ -82,7 +82,7 @@ class _MeetingListAdminScreenState extends State<MeetingListAdminScreen>
                   right: 16,
                   child: MeetingWidgets.buildFilterFab(
                     context,
-                    _showAdminFilterBottomSheet,
+                    _showStaffFilterBottomSheet,
                   ),
                 ),
               ],
@@ -118,7 +118,7 @@ class _MeetingListAdminScreenState extends State<MeetingListAdminScreen>
     return Column(
       children: [
         // 🆕 운영진용 목록 정보 헤더
-        MeetingWidgets.buildAdminListHeader(
+        MeetingWidgets.buildStaffListHeader(
           context,
           totalElements: totalElements,
           currentFilter: currentFilter,
@@ -139,7 +139,7 @@ class _MeetingListAdminScreenState extends State<MeetingListAdminScreen>
               itemCount: meetingList.length,
               itemBuilder: (context, index) {
                 final meeting = meetingList[index];
-                return MeetingWidgets.buildAdminMeetingCard(
+                return MeetingWidgets.buildStaffMeetingCard(
                   context,
                   meeting,
                   onTap: () => _handleMeetingTap(meeting),
@@ -163,14 +163,14 @@ class _MeetingListAdminScreenState extends State<MeetingListAdminScreen>
   }
 
   /// 🆕 운영진용 필터 바텀시트 표시
-  void _showAdminFilterBottomSheet() {
+  void _showStaffFilterBottomSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => MeetingWidgets.buildAdminFilterBottomSheet(
+      builder: (context) => MeetingWidgets.buildStaffFilterBottomSheet(
         context,
         currentFilter: currentFilter,
         onFilterChanged: applyFilter,
