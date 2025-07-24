@@ -38,14 +38,18 @@ class PermissionConstants {
     '프로필': PermissionLevel.MEMBER,
     '설정': PermissionLevel.MEMBER,
     '로그아웃': PermissionLevel.MEMBER,
+    '모임 목록': PermissionLevel.MEMBER,  // 🆕 일반 모임 목록
     '오늘의 모임': PermissionLevel.MEMBER,
     '출석 체크': PermissionLevel.MEMBER,
     '발제 작성': PermissionLevel.MEMBER,
+    '발제문 목록': PermissionLevel.MEMBER,  // 🆕 발제문 목록
     '모임 만들기': PermissionLevel.MEMBER,
     '모임 참여': PermissionLevel.MEMBER,
     '개인 대시보드': PermissionLevel.MEMBER,
 
     // STAFF: 운영진 이상 (모임 관리 관련)
+    '모임원 목록': PermissionLevel.STAFF,  // 🆕 모임원 목록
+    '모임 목록 (운영진용)': PermissionLevel.STAFF,  // 🆕 운영진용 모임 목록
     '모임 관리': PermissionLevel.STAFF,
     '모임 수정': PermissionLevel.STAFF,
     '모임 삭제': PermissionLevel.STAFF,
@@ -65,11 +69,13 @@ class PermissionConstants {
   ///
   /// 백엔드에서 받은 role 문자열을 PermissionLevel로 변환
   static const Map<String, PermissionLevel> roleToPermissionLevel = {
-    'GUEST': PermissionLevel.PUBLIC, // 비회원
-    'MEMBER': PermissionLevel.MEMBER, // 일반 회원
-    'STAFF': PermissionLevel.STAFF, // 운영진
-    'OPERATOR': PermissionLevel.STAFF, // 준운영진 (STAFF와 동일)
-    'ADMIN': PermissionLevel.ADMIN, // 관리자
+    'GUEST': PermissionLevel.PUBLIC,    // 비회원
+    'MEMBER': PermissionLevel.MEMBER,   // 일반 회원
+    'VICE_STAFF': PermissionLevel.STAFF, // 준운영진 → STAFF
+    'STAFF': PermissionLevel.STAFF,     // 운영진 → STAFF
+    'VICE_LEADER': PermissionLevel.ADMIN, // 부모임장 → ADMIN ✅
+    'LEADER': PermissionLevel.ADMIN,    // 모임장 → ADMIN ✅
+    'ADMIN': PermissionLevel.ADMIN,     // 관리자 → ADMIN ✅
   };
 
   // 🎯 편의 메서드들

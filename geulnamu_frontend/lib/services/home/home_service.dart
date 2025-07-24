@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../core/config/app_config.dart'; // 🆕 디버그 모드 체크용
+import '../../core/constants/permission_constants.dart'; // 🆕 권한 상수 사용
 
 /// 홈화면 비즈니스 로직을 담당하는 Singleton Service
 ///
@@ -196,7 +198,6 @@ class HomeService extends ChangeNotifier {
 
   // 🔍 개인정보 입력 화면으로 이동
   void navigateToProfileInput(BuildContext context) {
-    print('🔍 [HomeService] 개인정보 입력 화면으로 이동 요청');
     Navigator.pushNamed(context, '/profile'); // 프로필 화면으로 이동
   }
 
@@ -262,13 +263,14 @@ class HomeService extends ChangeNotifier {
         Navigator.pushNamed(context, '/member-list');
         break;
       case '오늘의 모임':
-        _showSnackBar(context, '오늘의 모임 기능은 개발 중입니다.');
+        // 🎯 모임 목록 화면으로 이동 (오늘의 모임 필터 활성화)
+        Navigator.pushNamed(context, '/meeting-list?filter=today');
         break;
       case '모임 목록':
-        _showSnackBar(context, '모임 목록 기능은 개발 중입니다.');
+        Navigator.pushNamed(context, '/meeting-list');
         break;
       case '모임 목록 (운영진용)':
-        _showSnackBar(context, '모임 목록 (운영진용) 기능은 개발 중입니다.');
+        Navigator.pushNamed(context, '/meeting-list-staff');
         break;
       case '발제문 목록':
         _showSnackBar(context, '발제문 목록 기능은 개발 중입니다.');
@@ -289,13 +291,8 @@ class HomeService extends ChangeNotifier {
 
   /// 역할 권한 체크
   bool hasRolePermission(String featureName, AuthProvider authProvider) {
-    // 모임원 목록은 임원진 이상 권한 필요
-    if (featureName == '모임원 목록') {
-      return authProvider.isStaffLevel;
-    }
-
-    // 다른 기능들은 임시로 모두 접근 가능
-    return true;
+    // 🆕 권한 상수를 사용한 통합 권한 체크 시스템
+    return authProvider.hasMenuPermission(featureName);
   }
 
   // 🔄 로딩 상태 설정 메서드
