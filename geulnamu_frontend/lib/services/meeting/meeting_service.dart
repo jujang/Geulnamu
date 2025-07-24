@@ -30,6 +30,7 @@ class MeetingService {
   Future<MeetingListResponse> getMeetingList({
     required MeetingListFilter filter,
     required String accessToken,
+    bool isStaffMode = false, // 🆕 운영진용 모드 여부
   }) async {
     try {
       if (AppConfig.debugMode) {
@@ -38,7 +39,7 @@ class MeetingService {
 
       final response = await _dio.get(
         '/meetings/list',
-        queryParameters: filter.toQueryParameters(),
+        queryParameters: filter.toQueryParameters(isStaffMode: isStaffMode), // 🆕 isStaffMode 전달
         options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken',
@@ -66,9 +67,6 @@ class MeetingService {
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ [모임 목록 조회] 오류 발생: $e');
-        if (e is DioException) {
-          print('🔍 DioException: ${e.type} - ${e.message}');
-        }
       }
       
       if (e is DioException) {

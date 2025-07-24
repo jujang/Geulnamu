@@ -18,7 +18,7 @@ public class MeetingListRequest extends PagingRequest {
     private final String attendanceStatus; // 참석 상태 (일반 목록 조회에서만 사용되는 값)
 
     @Pattern(regexp = "true|false", message = "모임 비공개 여부 값은 'true' 또는 'false' 만 가능합니다.")
-    private final String isPrivate; // 관리자용 목록 조회에서만 사용되는 값
+    private final String isPrivate;
 
     @Getter
     @Pattern(regexp = "meetingDate|id", message = "정렬 기준 값은 'meetingDate', 'id' 중 하나만 가능합니다.")

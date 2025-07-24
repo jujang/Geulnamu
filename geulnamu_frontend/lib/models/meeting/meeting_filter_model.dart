@@ -60,7 +60,7 @@ class MeetingListFilter {
   }
 
   /// 백엔드 쿼리 파라미터로 변환
-  Map<String, dynamic> toQueryParameters() {
+  Map<String, dynamic> toQueryParameters({bool isStaffMode = false}) {
     final Map<String, dynamic> params = {
       'page': page,
       'size': size,
@@ -81,9 +81,16 @@ class MeetingListFilter {
       params['attendanceStatus'] = attendanceStatus.value;
     }
 
-    // 🆕 비공개 여부 필터 (운영진용)
-    if (privacyStatus != PrivacyStatusOption.all) {
-      params['privacyStatus'] = privacyStatus.value;
+    // 🎯 비공개 여부 필터 처리
+    if (isStaffMode) {
+      // 운영진용: 사용자가 필터를 설정한 경우에만 isPrivate 파라미터 추가
+      if (privacyStatus != PrivacyStatusOption.all) {
+        params['isPrivate'] = privacyStatus.value; // 'false' 또는 'true'
+      }
+      // privacyStatus가 all인 경우 isPrivate 파라미터를 추가하지 않음 (모든 모임 조회)
+    } else {
+      // 일반 사용자용: 항상 공개 모임만 조회
+      params['isPrivate'] = 'false';
     }
 
     return params;
@@ -160,8 +167,8 @@ enum SortByOption {
 /// 🆕 비공개 여부 옵션 (운영진용)
 enum PrivacyStatusOption {
   all('', '전체'),
-  public('PUBLIC', '공개'),
-  private('PRIVATE', '비공개');
+  public('false', '공개'), // 🎯 isPrivate=false와 매핑
+  private('true', '비공개'); // 🎯 isPrivate=true와 매핑
 
   const PrivacyStatusOption(this.value, this.displayName);
 

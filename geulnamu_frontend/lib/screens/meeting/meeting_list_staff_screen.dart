@@ -36,6 +36,10 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
     with MeetingLogicMixin {
   final HomeService _homeService = HomeService();
 
+  // 🆕 운영진 모드 활성화
+  @override
+  bool get isStaffMode => true;
+
   @override
   void initState() {
     super.initState();

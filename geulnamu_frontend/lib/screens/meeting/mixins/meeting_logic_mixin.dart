@@ -16,6 +16,9 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
   String? _errorMessage;
   MeetingListResponse? _meetingListResponse;
   MeetingListFilter _currentFilter = const MeetingListFilter();
+  
+  // 🆕 운영진 모드 여부 (subclass에서 오버라이드 가능)
+  bool get isStaffMode => false; // 기본값: 일반 사용자
 
   // Getters
   bool get isLoading => _isLoading;
@@ -83,6 +86,7 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
       final response = await _meetingService.getMeetingList(
         filter: filter,
         accessToken: accessToken,
+        isStaffMode: isStaffMode, // 🆕 운영진 모드 전달
       );
 
       _meetingListResponse = response;
