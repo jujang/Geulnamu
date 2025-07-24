@@ -265,7 +265,7 @@ class HomeService extends ChangeNotifier {
         _showSnackBar(context, '오늘의 모임 기능은 개발 중입니다.');
         break;
       case '모임 목록':
-        _showSnackBar(context, '모임 목록 기능은 개발 중입니다.');
+        Navigator.pushNamed(context, '/meeting-list');
         break;
       case '모임 목록 (운영진용)':
         _showSnackBar(context, '모임 목록 (운영진용) 기능은 개발 중입니다.');

@@ -20,6 +20,7 @@ import 'screens/home/home_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/introduction/introduction_screen.dart'; // 글나무 소개 화면
 import 'screens/member/member_list_screen.dart'; // 모임원 목록 화면
+import 'screens/meeting/meeting_list_screen.dart'; // 모임 목록 화면
 import 'screens/settings_screen.dart'; // 설정 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 
@@ -123,6 +124,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
             '/profile': (context) => const ProfileScreen(), // 기본 프로필 (본인)
             '/introduction': (context) => const IntroductionScreen(),
             '/member-list': (context) => const MemberListScreen(),
+            '/meeting-list': (context) => const MeetingListScreen(), // 모임 목록 화면
             '/settings': (context) => const SettingsScreen(),
           };
           
