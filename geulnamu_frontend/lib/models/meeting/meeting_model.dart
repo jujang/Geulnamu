@@ -44,7 +44,7 @@ class MeetingInfo {
         meetingName: _parseStringSafely(json['meetingName'], '모임제목'),
         meetingDateTime: _parseDateTimeSafely(json['meetingDateTime'], '모임일시'),
         meetingPlace: _parseStringSafely(json['meetingPlace'], '모임장소'),
-        attendanceStatus: AttendanceStatus.fromString(json['attendanceStatus'] as String? ?? 'NOT_ATTEND'),
+        attendanceStatus: _parseAttendanceStatusSafely(json['attendanceStatus'], '출석상태'),
         discussionTime: _parseDiscussionTimeNullable(json['discussionTime'], json['meetingDateTime'], '토론시간'),
         isPrivate: json['isPrivate'] as bool? ?? false,
       );
@@ -187,6 +187,35 @@ class MeetingInfo {
       }
       return DateTime.now();
     }
+  }
+
+  static AttendanceStatus _parseAttendanceStatusSafely(dynamic value, String fieldName) {
+    if (value == null) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [모임정보 파싱] $fieldName이 null입니다. 기본값 NOT_ATTEND 사용');
+      }
+      return AttendanceStatus.notAttend;
+    }
+    
+    if (value is String) {
+      if (AppConfig.debugMode) {
+        print('📝 [모임정보 파싱] $fieldName 값: "$value"');
+      }
+      
+      final result = AttendanceStatus.fromString(value);
+      
+      if (AppConfig.debugMode) {
+        print('✅ [모임정보 파싱] $fieldName 파싱 결과: ${result.value} (${result.displayName})');
+      }
+      
+      return result;
+    }
+    
+    if (AppConfig.debugMode) {
+      print('❌ [모임정보 파싱] $fieldName 파싱 실패: $value (타입: ${value.runtimeType})');
+    }
+    
+    return AttendanceStatus.notAttend;
   }
 
   static DateTime? _parseDiscussionTimeNullable(dynamic timeValue, dynamic dateValue, String fieldName) {
@@ -393,7 +422,8 @@ enum MeetingType {
 enum AttendanceStatus {
   attend('ATTEND', '참석', 'green'),
   attendLate('ATTEND_LATE', '지각', 'orange'),
-  notAttend('NOT_ATTEND', '불참', 'red');
+  notAttend('NOT_ATTEND', '불참', 'grey'), // red -> grey로 변경
+  notStarted('NOT_STARTED', '진행 전', 'blue'); // 새로운 상태 추가
 
   const AttendanceStatus(this.value, this.displayName, this.colorName);
 

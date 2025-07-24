@@ -275,7 +275,9 @@ class MeetingWidgets {
       case AttendanceStatus.attendLate:
         return Colors.orange;
       case AttendanceStatus.notAttend:
-        return Colors.red;
+        return Colors.grey; // red -> grey로 변경
+      case AttendanceStatus.notStarted: // 새로운 상태 추가
+        return Colors.blue;
     }
   }
 
