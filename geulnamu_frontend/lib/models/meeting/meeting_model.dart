@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 import '../../core/config/app_config.dart';
 
 /// 모임 정보 모델
-/// 
+///
 /// 백엔드 MeetingInfoResponse와 매핑
 class MeetingInfo {
   final int meetingId;
@@ -32,7 +32,7 @@ class MeetingInfo {
   /// JSON에서 객체 생성
   factory MeetingInfo.fromJson(Map<String, dynamic> json) {
     try {
-      return MeetingInfo(
+      final meetingInfo = MeetingInfo(
         meetingId: _parseIntSafely(json['meetingId'], '모임ID'),
         meetingCreatorName: _parseStringSafely(json['meetingCreatorName'], '개설자명'),
         meetingCreatorId: _parseIntSafely(json['meetingCreatorId'], '개설자ID'),
@@ -44,9 +44,12 @@ class MeetingInfo {
         discussionTime: _parseDiscussionTimeNullable(json['discussionTime'], json['meetingDateTime'], '토론시간'),
         isPrivate: json['isPrivate'] as bool? ?? false,
       );
+      
+      return meetingInfo;
     } catch (e) {
       if (AppConfig.debugMode) {
-        print('❌ [모임정보 파싱] 오류: $e');
+        print('❌ [MeetingInfo.fromJson] 파싱 오류: $e');
+        print('🔍 입력 JSON: $json');
       }
       rethrow;
     }
@@ -105,7 +108,11 @@ class MeetingInfo {
   bool get isToday {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final meetingDate = DateTime(meetingDateTime.year, meetingDateTime.month, meetingDateTime.day);
+    final meetingDate = DateTime(
+      meetingDateTime.year,
+      meetingDateTime.month,
+      meetingDateTime.day,
+    );
     return today == meetingDate;
   }
 
@@ -124,7 +131,7 @@ class MeetingInfo {
       final parsed = int.tryParse(value);
       if (parsed != null) return parsed;
     }
-    
+
     throw TypeError();
   }
 
@@ -139,46 +146,51 @@ class MeetingInfo {
     if (value == null) {
       return DateTime.now();
     }
-    
+
     try {
       if (value is String) {
         // 백엔드 날짜 형식: "2025.06.26 11:12"
         if (value.contains('.') && value.contains(' ')) {
           // "2025.06.26 11:12" -> "2025-06-26 11:12:00"
-          final formatted = value
-              .replaceAll('.', '-')
-              .trim() + ':00';
-          
+          final formatted = '${value.replaceAll('.', '-').trim()}:00';
+
           return DateTime.parse(formatted);
         }
-        
+
         // 표준 ISO 형식인 경우
         return DateTime.parse(value);
       }
-      
+
       throw TypeError();
     } catch (e) {
       return DateTime.now();
     }
   }
 
-  static AttendanceStatus _parseAttendanceStatusSafely(dynamic value, String fieldName) {
+  static AttendanceStatus _parseAttendanceStatusSafely(
+    dynamic value,
+    String fieldName,
+  ) {
     if (value == null) {
       return AttendanceStatus.notAttend;
     }
-    
+
     if (value is String) {
       return AttendanceStatus.fromString(value);
     }
-    
+
     return AttendanceStatus.notAttend;
   }
 
-  static DateTime? _parseDiscussionTimeNullable(dynamic timeValue, dynamic dateValue, String fieldName) {
+  static DateTime? _parseDiscussionTimeNullable(
+    dynamic timeValue,
+    dynamic dateValue,
+    String fieldName,
+  ) {
     if (timeValue == null) {
       return null;
     }
-    
+
     try {
       if (timeValue is String) {
         // 시간만 오는 경우 ("11:13", "12:34")
@@ -187,14 +199,14 @@ class MeetingInfo {
           final meetingDateTime = _parseDateTimeSafely(dateValue, '모임일시');
           final dateStr = DateFormat('yyyy-MM-dd').format(meetingDateTime);
           final fullTimeStr = '$dateStr $timeValue:00'; // 초 추가
-          
+
           return DateTime.parse(fullTimeStr);
         }
-        
+
         // 전체 날짜 시간 문자열인 경우
         return DateTime.parse(timeValue);
       }
-      
+
       throw TypeError();
     } catch (e) {
       // 에러 시 null 반환
@@ -216,18 +228,22 @@ class MeetingListResponse {
   /// JSON에서 객체 생성
   factory MeetingListResponse.fromJson(Map<String, dynamic> json) {
     try {
-      final pagingResponse = PagingResponse.fromJson(json['pagingResponse'] as Map<String, dynamic>);
-      
+      final pagingResponse = PagingResponse.fromJson(
+        json['pagingResponse'] as Map<String, dynamic>,
+      );
+
       final meetingList = <MeetingInfo>[];
       final meetingListJson = json['meetingList'] as List;
-      
+
       for (int i = 0; i < meetingListJson.length; i++) {
         try {
-          final meeting = MeetingInfo.fromJson(meetingListJson[i] as Map<String, dynamic>);
+          final meeting = MeetingInfo.fromJson(
+            meetingListJson[i] as Map<String, dynamic>,
+          );
           meetingList.add(meeting);
         } catch (e) {
           if (AppConfig.debugMode) {
-            print('❌ [모임목록응답 파싱] 모임 $i 번 파싱 실패: $e');
+            print('❌ [MeetingListResponse] 모임 $i 파싱 실패: $e');
           }
           rethrow;
         }
@@ -239,7 +255,7 @@ class MeetingListResponse {
       );
     } catch (e) {
       if (AppConfig.debugMode) {
-        print('❌ [모임목록응답 파싱] 전체 오류: $e');
+        print('❌ [MeetingListResponse] 파싱 오류: $e');
       }
       rethrow;
     }
@@ -247,7 +263,7 @@ class MeetingListResponse {
 }
 
 /// 페이징 응답 모델
-/// 
+///
 /// 백엔드 실제 응답 구조에 맞춤
 class PagingResponse {
   final int pageNumber;
@@ -274,29 +290,29 @@ class PagingResponse {
       rethrow;
     }
   }
-  
+
   // 계산 가능한 속성들
-  
+
   /// 첫 번째 페이지 여부
   bool get first => pageNumber == 1;
-  
+
   /// 마지막 페이지 여부
   bool get last => pageNumber == totalPages;
-  
+
   /// 페이지 크기 (기본값 10)
   int get pageSize => 10;
-  
+
   /// 다음 페이지 존재 여부
   bool get hasNext => pageNumber < totalPages;
-  
+
   /// 이전 페이지 존재 여부
   bool get hasPrevious => pageNumber > 1;
-  
+
   @override
   String toString() {
     return 'PagingResponse{pageNumber: $pageNumber, totalElements: $totalElements, totalPages: $totalPages}';
   }
-  
+
   // Helper 메서드
   static int _parseIntSafely(dynamic value, String fieldName) {
     if (value == null) {
@@ -307,7 +323,7 @@ class PagingResponse {
       final parsed = int.tryParse(value);
       if (parsed != null) return parsed;
     }
-    
+
     throw TypeError();
   }
 }
@@ -335,8 +351,8 @@ enum MeetingType {
 enum AttendanceStatus {
   attend('ATTEND', '참석', 'green'),
   attendLate('ATTEND_LATE', '지각', 'orange'),
-  notAttend('NOT_ATTEND', '불참', 'grey'), // red -> grey로 변경
-  notStarted('NOT_STARTED', '진행 전', 'blue'); // 새로운 상태 추가
+  notAttend('NOT_ATTEND', '불참', 'grey'),
+  notStarted('NOT_STARTED', '진행 전', 'blue');
 
   const AttendanceStatus(this.value, this.displayName, this.colorName);
 
@@ -345,9 +361,16 @@ enum AttendanceStatus {
   final String colorName;
 
   static AttendanceStatus fromString(String value) {
-    return AttendanceStatus.values.firstWhere(
+    final result = AttendanceStatus.values.firstWhere(
       (status) => status.value == value,
-      orElse: () => AttendanceStatus.notAttend,
+      orElse: () {
+        if (AppConfig.debugMode) {
+          print('⚠️ [AttendanceStatus] 알 수 없는 출석상태: "$value" -> notAttend 사용');
+        }
+        return AttendanceStatus.notAttend;
+      },
     );
+    
+    return result;
   }
 }

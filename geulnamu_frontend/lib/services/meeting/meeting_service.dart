@@ -32,6 +32,10 @@ class MeetingService {
     required String accessToken,
   }) async {
     try {
+      if (AppConfig.debugMode) {
+        print('🚀 [모임 목록 조회] API 요청 시작...');
+      }
+
       final response = await _dio.get(
         '/meetings/list',
         queryParameters: filter.toQueryParameters(),
@@ -49,11 +53,24 @@ class MeetingService {
           '모임 목록 조회',
         );
 
-        return MeetingListResponse.fromJson(processedResponse['data']);
+        final meetingListResponse = MeetingListResponse.fromJson(processedResponse['data']);
+        
+        if (AppConfig.debugMode) {
+          print('✅ [모임 목록 조회] 성공 - 총 ${meetingListResponse.meetingList.length}개 모임 로드');
+        }
+
+        return meetingListResponse;
       } else {
         throw Exception('[모임 목록 조회] HTTP 오류: ${response.statusCode}');
       }
     } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [모임 목록 조회] 오류 발생: $e');
+        if (e is DioException) {
+          print('🔍 DioException: ${e.type} - ${e.message}');
+        }
+      }
+      
       if (e is DioException) {
         throw ApiUtils.processDioException(e, '모임 목록 조회');
       }

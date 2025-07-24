@@ -112,7 +112,7 @@ enum AttendanceStatusOption {
   attend('ATTEND', '참석'),
   attendLate('ATTEND_LATE', '지각'),
   notAttend('NOT_ATTEND', '불참'),
-  notStarted('NOT_STARTED', '진행 전'); // 시작 전 -> 진행 전으로 변경
+  notStarted('NOT_STARTED', '진행 전');
 
   const AttendanceStatusOption(this.value, this.displayName);
 
