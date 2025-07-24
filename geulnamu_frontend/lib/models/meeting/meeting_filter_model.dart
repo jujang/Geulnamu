@@ -131,7 +131,7 @@ enum AttendanceStatusOption {
 
 /// 정렬 기준 옵션
 enum SortByOption {
-  meetingDate('meetingDate', '모임 개최일자'),
+  meetingDate('meetingDate', '개최일시'),
   id('id', '모임번호');
 
   const SortByOption(this.value, this.displayName);

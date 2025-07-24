@@ -21,7 +21,16 @@ class MeetingWidgets {
   }) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      elevation: 2,
+      elevation: 4, // 그림자 강화 (2 -> 4)
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).brightness == Brightness.light
+              ? context.colors.outline.withOpacity(0.2) // 라이트 모드: 미세한 테두리
+              : Colors.transparent, // 다크 모드: 테두리 없음
+          width: 0.5,
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -184,24 +193,29 @@ class MeetingWidgets {
             children: [
               Icon(
                 icon,
-                size: 16,
-                color: context.colors.onSurfaceVariant,
+                size: 18, // 16 -> 18
+                color: context.colors.onSurface.withOpacity(0.65), // 0.85 -> 0.65 (더 연하게)
               ),
               const SizedBox(width: 6),
               Text(
                 '$label: ',
                 style: context.textStyles.bodySmall?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                  fontSize: 12,
+                  color: context.colors.onSurface.withOpacity(0.55), // 0.75 -> 0.55 (더 연하게)
+                  fontSize: 14, // 12 -> 14
+                  fontWeight: Theme.of(context).brightness == Brightness.light
+                      ? FontWeight.w600 // 라이트 모드: 더 진하게
+                      : FontWeight.w500, // 다크 모드: 자연스럽게
                 ),
               ),
               Expanded(
                 child: Text(
                   value,
                   style: context.textStyles.bodySmall?.copyWith(
-                    color: context.colors.onSurface,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 12,
+                    color: valueColor ?? context.colors.onSurface,
+                    fontWeight: Theme.of(context).brightness == Brightness.light
+                        ? FontWeight.w600 // 라이트 모드: 더 진하게
+                        : FontWeight.w500, // 다크 모드: 자연스럽게
+                    fontSize: 14, // 12 -> 14
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -218,15 +232,18 @@ class MeetingWidgets {
               children: [
                 Icon(
                   secondIcon,
-                  size: 16,
-                  color: context.colors.onSurfaceVariant,
+                  size: 18, // 16 -> 18
+                  color: context.colors.onSurface.withOpacity(0.65), // 0.85 -> 0.65 (더 연하게)
                 ),
                 const SizedBox(width: 6),
                 Text(
                   '$secondLabel: ',
                   style: context.textStyles.bodySmall?.copyWith(
-                    color: context.colors.onSurfaceVariant,
-                    fontSize: 12,
+                    color: context.colors.onSurface.withOpacity(0.55), // 0.75 -> 0.55 (더 연하게)
+                    fontSize: 14, // 12 -> 14
+                    fontWeight: Theme.of(context).brightness == Brightness.light
+                        ? FontWeight.w600 // 라이트 모드: 더 진하게
+                        : FontWeight.w500, // 다크 모드: 자연스럽게
                   ),
                 ),
                 Expanded(
@@ -234,8 +251,10 @@ class MeetingWidgets {
                     secondValue,
                     style: context.textStyles.bodySmall?.copyWith(
                       color: secondValueColor ?? context.colors.onSurface,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12,
+                      fontWeight: Theme.of(context).brightness == Brightness.light
+                          ? FontWeight.w600 // 라이트 모드: 더 진하게
+                          : FontWeight.w500, // 다크 모드: 자연스럽게
+                      fontSize: 14, // 12 -> 14
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
