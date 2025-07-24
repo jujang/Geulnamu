@@ -116,6 +116,19 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
             );
           }
           
+          // 🎯 모임 목록 화면 라우트 처리 (쿼리 파라미터 지원)
+          if (settings.name != null && settings.name!.startsWith('/meeting-list')) {
+            final uri = Uri.parse(settings.name!);
+            final filterType = uri.queryParameters['filter'];
+            
+            return MaterialPageRoute(
+              builder: (context) => MeetingListScreen(
+                initialFilterType: filterType,
+              ),
+              settings: settings,
+            );
+          }
+          
           // 기본 라우트들
           final routeMap = {
             '/splash': (context) => const SplashScreen(),
@@ -124,7 +137,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
             '/profile': (context) => const ProfileScreen(), // 기본 프로필 (본인)
             '/introduction': (context) => const IntroductionScreen(),
             '/member-list': (context) => const MemberListScreen(),
-            '/meeting-list': (context) => const MeetingListScreen(), // 모임 목록 화면
+            // '/meeting-list': (context) => const MeetingListScreen(), // 🎯 쿼리 파라미터 처리로 이동
             '/settings': (context) => const SettingsScreen(),
           };
           

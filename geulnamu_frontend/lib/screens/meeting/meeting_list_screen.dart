@@ -16,8 +16,17 @@ import 'widgets/meeting_widgets.dart';
 /// - 플로팅 필터 버튼으로 필터링 및 정렬
 /// - 페이지네이션으로 목록 탐색
 /// - 출석현황 확인 버튼 (향후 페이지 연결 예정)
+/// - 🎯 초기 필터 타입 지원 (today, all 등)
 class MeetingListScreen extends StatefulWidget {
-  const MeetingListScreen({super.key});
+  /// 초기 필터 타입
+  /// - 'today': 오늘의 모임
+  /// - null 또는 기타: 기본 필터
+  final String? initialFilterType;
+  
+  const MeetingListScreen({
+    super.key,
+    this.initialFilterType,
+  });
 
   @override
   State<MeetingListScreen> createState() => _MeetingListScreenState();
@@ -38,8 +47,15 @@ class _MeetingListScreenState extends State<MeetingListScreen>
 
   /// 화면 초기화
   Future<void> _initializeScreen() async {
-    // 초기 데이터 로드
-    await initializeMeetingList();
+    // 🎯 초기 필터 설정 (라우트 매개변수 기반)
+    if (widget.initialFilterType == 'today') {
+      // 오늘의 모임 필터 활성화
+      final todayFilter = currentFilter.copyWith(isTodayMeeting: true);
+      await initializeMeetingList(initialFilter: todayFilter);
+    } else {
+      // 기본 필터로 초기 데이터 로드
+      await initializeMeetingList();
+    }
   }
 
   @override

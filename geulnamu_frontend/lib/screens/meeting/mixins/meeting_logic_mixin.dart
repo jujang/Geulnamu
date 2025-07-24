@@ -42,9 +42,16 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
   int get totalElements => pagingInfo?.totalElements ?? 0;
 
   /// 초기 데이터 로드
-  Future<void> initializeMeetingList() async {
+  /// 
+  /// [initialFilter] 초기 필터 설정 (옵션)
+  Future<void> initializeMeetingList({MeetingListFilter? initialFilter}) async {
     // MeetingService 초기화
     _meetingService.initialize();
+
+    // 🎯 초기 필터 설정 (제공된 경우)
+    if (initialFilter != null) {
+      _currentFilter = initialFilter;
+    }
 
     await loadMeetingList(isInitial: true);
   }

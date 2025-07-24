@@ -262,7 +262,8 @@ class HomeService extends ChangeNotifier {
         Navigator.pushNamed(context, '/member-list');
         break;
       case '오늘의 모임':
-        _showSnackBar(context, '오늘의 모임 기능은 개발 중입니다.');
+        // 🎯 모임 목록 화면으로 이동 (오늘의 모임 필터 활성화)
+        Navigator.pushNamed(context, '/meeting-list?filter=today');
         break;
       case '모임 목록':
         Navigator.pushNamed(context, '/meeting-list');
