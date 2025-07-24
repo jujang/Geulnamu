@@ -104,6 +104,9 @@ mixin MeetingCreateLogicMixin<T extends StatefulWidget> on State<T> {
       if (AppConfig.debugMode) {
         print('📅 [모임 만들기] 모임 날짜 선택: ${_formatDate(picked)}');
       }
+      
+      // 🔄 폼 유효성 재검사
+      revalidateForm();
     }
   }
   
@@ -128,6 +131,9 @@ mixin MeetingCreateLogicMixin<T extends StatefulWidget> on State<T> {
       if (AppConfig.debugMode) {
         print('⏰ [모임 만들기] 모임 시간 선택: ${_formatTime(picked)}');
       }
+      
+      // 🔄 폼 유효성 재검사
+      revalidateForm();
     }
   }
   
@@ -176,6 +182,9 @@ mixin MeetingCreateLogicMixin<T extends StatefulWidget> on State<T> {
       if (AppConfig.debugMode) {
         print('⏰ [모임 만들기] 지각 기준 시간 선택: ${_formatTime(picked)}');
       }
+      
+      // 🔄 폼 유효성 재검사
+      revalidateForm();
     }
   }
   

@@ -64,6 +64,8 @@ class MeetingCreateWidgets {
         border: const OutlineInputBorder(),
         helperText: '한글, 영문, 숫자, 일부 특수문자 사용 가능 (최대 70자)',
         counterText: '',
+        fillColor: context.inputFieldBackgroundColor, // 🎨 민트색 배경 적용
+        filled: true,
       ),
       validator: validator,
       maxLength: 70,
@@ -110,6 +112,8 @@ class MeetingCreateWidgets {
                   prefixIcon: const Icon(Icons.calendar_today),
                   border: const OutlineInputBorder(),
                   suffixIcon: label == '지각 기준 시간' ? null : const Icon(Icons.arrow_drop_down),
+                  fillColor: context.inputFieldBackgroundColor, // 🎨 민트색 배경 적용
+                  filled: true,
                 ),
                 onTap: label == '지각 기준 시간' ? null : onDateTap,
                 validator: isRequired ? (value) {
@@ -133,6 +137,8 @@ class MeetingCreateWidgets {
                   prefixIcon: const Icon(Icons.access_time),
                   border: const OutlineInputBorder(),
                   suffixIcon: const Icon(Icons.arrow_drop_down),
+                  fillColor: context.inputFieldBackgroundColor, // 🎨 민트색 배경 적용
+                  filled: true,
                 ),
                 onTap: onTimeTap,
                 validator: isRequired ? (value) {
@@ -165,6 +171,8 @@ class MeetingCreateWidgets {
         border: const OutlineInputBorder(),
         helperText: '구체적인 위치를 입력해주세요 (최대 255자)',
         counterText: '',
+        fillColor: context.inputFieldBackgroundColor, // 🎨 민트색 배경 적용
+        filled: true,
       ),
       validator: validator,
       maxLength: 255,
@@ -188,6 +196,9 @@ class MeetingCreateWidgets {
         prefixIcon: Icon(Icons.description),
         border: OutlineInputBorder(),
         alignLabelWithHint: true,
+      ).copyWith(
+        fillColor: context.inputFieldBackgroundColor, // 🎨 민트색 배경 적용
+        filled: true,
       ),
       maxLines: 4,
       textInputAction: TextInputAction.done,

@@ -75,23 +75,6 @@ class _HomeScreenState extends State<HomeScreen>
     // 비로그인 상태에서는 리다이렉트 하지 않음
   }
 
-  // 🔒 모임 만들기 FAB 표시 여부 결정
-  bool _shouldShowCreateMeetingFAB(AuthProvider authProvider) {
-    // 로그인이 안 되어 있으면 비표시
-    if (!authProvider.isAuthenticated) {
-      return false;
-    }
-
-    // 개인정보 입력이 안 되어 있으면 비표시
-    if (authProvider.profileCompleted == false) {
-      return false;
-    }
-
-    // 모임원 목록은 임원진 이상 권한 필요 (현재는 다른 기능들은 무제한)
-    // 현재 모임 만들기는 권한 제한 없음
-    return true;
-  }
-
   /// 홈화면용 프로필 메뉴 빌드
   Widget _buildProfileMenu(BuildContext context, AuthProvider authProvider) {
     return PopupMenuButton<String>(
@@ -351,16 +334,6 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
               ),
-              // 권한 체크를 통해 FAB 표시 여부 결정
-              floatingActionButton: _shouldShowCreateMeetingFAB(authProvider)
-                  ? FloatingActionButton.extended(
-                      onPressed: homeService.isProcessing
-                          ? null // 로딩 중에는 비활성화
-                          : showCreateMeetingDialog, // mixin 메서드 사용
-                      label: const Text('모임 만들기'),
-                      icon: const Icon(Icons.add),
-                    )
-                  : null,
             ),
           );
         },

@@ -482,6 +482,11 @@ extension GeulnamuThemeExtension on BuildContext {
   Color get errorColor => GeulnamuColors.error;
   Color get infoColor => GeulnamuColors.info;
   
+  /// 입력 필드 배경색 (테마 자동 선택)
+  Color get inputFieldBackgroundColor => isDarkMode 
+      ? GeulnamuColors.inputFieldBackgroundDark 
+      : GeulnamuColors.inputFieldBackgroundLight;
+  
   /// 어두운 베이지 색상 (테마 자동 선택)
   Color get darkBeigeColor => isDarkMode 
       ? GeulnamuColors.darkBeigeDark 
