@@ -37,7 +37,7 @@ class GeulnamuColors {
   /// 배경 및 표면 색상 (다크) - 🎯 더 명확한 대비 제공
   static const Color backgroundDark = Color(0xFF0F0F0F);       // 더 어두운 배경 (거의 검정)
   static const Color surfaceDark = Color(0xFF1E1E1E);         // 카드는 충분히 밝은 회색 (명확한 대비!)
-  static const Color surfaceVariantDark = Color(0xFF2A2A2A);  // 입력 필드는 더 밝게
+  static const Color surfaceVariantDark = Color(0xFF353535);  // 입력 필드는 더 밝게 (개선)
   
   /// 텍스트 색상 (다크)
   static const Color onPrimaryDark = Color(0xFFFFFFFF);

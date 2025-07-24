@@ -6,6 +6,7 @@ import '../../widgets/common/loading_widgets.dart';
 import '../../core/theme.dart';
 import '../../models/meeting/meeting_model.dart';
 import '../../services/home/home_service.dart';
+import '../../services/home/home_route_service.dart'; // RouteObserver
 import 'mixins/meeting_logic_mixin.dart';
 import 'widgets/meeting_widgets.dart';
 import 'widgets/meeting_list_widgets.dart';
@@ -34,7 +35,7 @@ class MeetingListScreen extends StatefulWidget {
 }
 
 class _MeetingListScreenState extends State<MeetingListScreen>
-    with MeetingLogicMixin {
+    with MeetingLogicMixin, RouteAware {
   final HomeService _homeService = HomeService();
 
   @override
@@ -44,6 +45,28 @@ class _MeetingListScreenState extends State<MeetingListScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeScreen();
     });
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // RouteObserver 등록
+    HomeRouteService.routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+  
+  @override
+  void dispose() {
+    // RouteObserver 등록 해제
+    HomeRouteService.routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+  
+  @override
+  void didPopNext() {
+    // 다른 화면에서 돌아왔을 때 새로고침
+    super.didPopNext();
+    print('🔄 [모임 목록] 다른 화면에서 돌아오면서 새로고침');
+    refreshMeetingList();
   }
 
   /// 화면 초기화
