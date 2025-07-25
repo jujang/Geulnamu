@@ -73,6 +73,14 @@ class AppDrawer extends StatelessWidget {
                     // 📚 모임 섹션 (로그인 후에만)
                     if (authProvider.isAuthenticated) ...[
                       _buildMenuSection(context, '모임', [
+                        // 🔒 준운영진 이상만 모임 만들기 가능
+                        if (authProvider.isStaffLevel)
+                          _DrawerMenuItem(
+                            icon: Icons.add_circle_outline,
+                            title: '모임 만들기',
+                            subtitle: '새로운 모임 생성',
+                            onTap: () => _handleMenuTap(context, '모임 만들기'),
+                          ),
                         _DrawerMenuItem(
                           icon: Icons.group_outlined,
                           title: '모임 목록',

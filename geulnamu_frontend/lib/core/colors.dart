@@ -13,6 +13,12 @@ class GeulnamuColors {
   /// 어두운 베이지 색상: 가독성 개선된 베이지 계열 (따뜻한 브라운 베이지)
   static const Color darkBeigeLight = Color(0xFF8B7355);
   
+  /// 입력 필드 배경색 (라이트) - 민트색 5% 투명도
+  static const Color inputFieldBackgroundLight = Color(0x0D7DD3C0); // 민트색 5% 투명도
+  
+  /// 입력 필드 배경색 (다크) - surface 색상과 동일 (모임 만들기 안내 카드와 동일)
+  static const Color inputFieldBackgroundDark = Color(0xFF1E1E1E); // surface 색상과 동일
+  
   /// 배경 및 표면 색상 (라이트) - 🎯 명확한 대비 보장
   static const Color backgroundLight = Color(0xFFFAFAFA);      // 오프화이트 배경 (유지)
   static const Color surfaceLight = Color(0xFFFFFFFF);        // 카드는 완전한 흰색 (명확한 대비!)
@@ -37,7 +43,7 @@ class GeulnamuColors {
   /// 배경 및 표면 색상 (다크) - 🎯 더 명확한 대비 제공
   static const Color backgroundDark = Color(0xFF0F0F0F);       // 더 어두운 배경 (거의 검정)
   static const Color surfaceDark = Color(0xFF1E1E1E);         // 카드는 충분히 밝은 회색 (명확한 대비!)
-  static const Color surfaceVariantDark = Color(0xFF2A2A2A);  // 입력 필드는 더 밝게
+  static const Color surfaceVariantDark = Color(0xFF353535);  // 입력 필드는 더 밝게 (개선)
   
   /// 텍스트 색상 (다크)
   static const Color onPrimaryDark = Color(0xFFFFFFFF);

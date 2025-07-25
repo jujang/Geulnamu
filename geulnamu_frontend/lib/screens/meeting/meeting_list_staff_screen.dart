@@ -77,21 +77,26 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
             onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
             onLogoutTap: () => _handleLogout(),
             body: Stack(
-              children: [
-                // 메인 콘텐츠
-                _buildMainContent(),
+            children: [
+            // 메인 콘텐츠
+            _buildMainContent(),
 
-                // 플로팅 필터 버튼
-                Positioned(
-                  bottom: 16,
-                  right: 16,
-                  child: MeetingListWidgets.buildFilterFab(
-                    context,
-                    _showStaffFilterBottomSheet,
-                  ),
-                ),
-              ],
+            // 플로팅 버튼들 (맨 아래)
+            Positioned(
+            bottom: 16,
+            left: 16,
+            child: _buildCreateMeetingFab(), // 모임 만들기 FAB
             ),
+            Positioned(
+            bottom: 16,
+              right: 16,
+                child: MeetingListWidgets.buildFilterFab(
+                    context,
+                      _showStaffFilterBottomSheet,
+                    ),
+                  ),
+                ],
+              ),
           ),
         );
       },
@@ -183,6 +188,38 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
         currentFilter: currentFilter,
         onFilterChanged: applyFilter,
       ),
+    );
+  }
+
+  /// 모임 만들기 플로팅 버튼 빌드
+  Widget _buildCreateMeetingFab() {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // 운영진 권한 체크
+        if (!authProvider.isStaffLevel) {
+          return const SizedBox.shrink();
+        }
+
+        return FloatingActionButton.extended(
+          onPressed: () {
+            // 모임 만들기 페이지로 이동
+            Navigator.pushNamed(
+              context,
+              '/meeting-create',  // 라우트 이름 수정
+            ).then((result) {
+              // 모임 생성 후 목록 새로고침
+              if (result == true && mounted) {
+                refreshMeetingList();
+              }
+            });
+          },
+          label: const Text('모임 만들기'),
+          icon: const Icon(Icons.add),
+          backgroundColor: context.colors.primary,
+          foregroundColor: context.colors.onPrimary,
+          elevation: 4,
+        );
+      },
     );
   }
 

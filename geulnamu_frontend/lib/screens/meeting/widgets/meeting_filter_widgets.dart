@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
-import '../../../models/meeting/meeting_model.dart';
 import '../../../models/meeting/meeting_filter_model.dart';
 
 /// 모임 필터 관련 UI 위젯들

@@ -3,12 +3,14 @@ import '../../core/config/app_config.dart';
 import '../../core/utils/api_utils.dart';
 import '../../models/meeting/meeting_model.dart';
 import '../../models/meeting/meeting_filter_model.dart';
+import '../../models/meeting/request/meeting_create_request.dart';
 
 /// 모임 관리 서비스 (Singleton)
 /// 
 /// 제공 기능:
 /// - 모임 목록 조회
-/// - 향후: 모임 생성, 수정, 삭제 등
+/// - 모임 생성
+/// - 향후: 모임 수정, 삭제 등
 class MeetingService {
   static final MeetingService _instance = MeetingService._internal();
   factory MeetingService() => _instance;
@@ -21,6 +23,60 @@ class MeetingService {
     _dio.options.baseUrl = AppConfig.apiBaseUrl;
     _dio.options.connectTimeout = const Duration(seconds: 5);
     _dio.options.receiveTimeout = const Duration(seconds: 3);
+  }
+
+  /// 모임 생성
+  /// 
+  /// API: POST /meetings/create
+  /// 권한: STAFF 이상
+  Future<int> createMeeting({
+    required MeetingCreateRequest request,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [모임 생성] API 요청 시작...');
+        print('🔗 [모임 생성] 요청 URL: ${_dio.options.baseUrl}/meetings/create');
+        print('📝 [모임 생성] 요청 데이터: ${request.toString()}');
+      }
+
+      final response = await _dio.post(
+        '/meetings/create',
+        data: request.toJson(),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '모임 생성',
+        );
+
+        final meetingId = processedResponse['data'] as int;
+        
+        if (AppConfig.debugMode) {
+          print('✅ [모임 생성] 성공 - 생성된 모임 ID: $meetingId');
+        }
+
+        return meetingId;
+      } else {
+        throw Exception('[모임 생성] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [모임 생성] 오류 발생: $e');
+      }
+      
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '모임 생성');
+      }
+      rethrow;
+    }
   }
 
   /// 모임 목록 조회

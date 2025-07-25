@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../core/config/app_config.dart'; // 🆕 디버그 모드 체크용
-import '../../core/constants/permission_constants.dart'; // 🆕 권한 상수 사용
+import '../../core/config/app_config.dart'; // AppConfig import 추가
+import '../../core/constants/permission_constants.dart'; // 권한 상수 import
 
 /// 홈화면 비즈니스 로직을 담당하는 Singleton Service
 ///
@@ -267,7 +267,15 @@ class HomeService extends ChangeNotifier {
         Navigator.pushNamed(context, '/meeting-list?filter=today');
         break;
       case '모임 목록':
-        Navigator.pushNamed(context, '/meeting-list');
+        Navigator.pushNamed(context, '/meeting-list').then((result) {
+          // 모임 생성 후 돌아왔을 때 새로고침
+          if (result == true) {
+            // 모임 목록 페이지가 이미 로드되어 있다면 새로고침
+            if (AppConfig.debugMode) {
+              print('🔄 [모임 목록] 모임 생성 후 새로고침 트리거');
+            }
+          }
+        });
         break;
       case '모임 목록 (운영진용)':
         Navigator.pushNamed(context, '/meeting-list-staff');
@@ -280,6 +288,9 @@ class HomeService extends ChangeNotifier {
         break;
       case '앱 정보':
         _showSnackBar(context, '앱 정보 기능은 개발 중입니다.');
+        break;
+      case '모임 만들기':
+        Navigator.pushNamed(context, '/meeting-create');
         break;
       default:
         _showSnackBar(context, '$menuTitle 기능은 개발 중입니다.');
