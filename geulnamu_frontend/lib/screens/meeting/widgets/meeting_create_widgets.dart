@@ -317,18 +317,6 @@ class MeetingCreateWidgets {
     }
   }
 
-  /// 모임 타입별 설명 반환
-  static String _getMeetingTypeDescription(MeetingType type) {
-    switch (type) {
-      case MeetingType.regular:
-        return '정기적으로 열리는 모임입니다';
-      case MeetingType.flash:
-        return '즉석에서 열리는 번개 모임입니다';
-      case MeetingType.special:
-        return '특별한 목적의 모임입니다';
-    }
-  }
-
   /// 🌙 다크 모드에서 부드러운 테두리 색상 적용
   static OutlineInputBorder _getSoftOutlineBorder(BuildContext context) {
     // 다크 모드일 때만 부드러운 색상 적용
