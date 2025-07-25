@@ -4,6 +4,7 @@ import '../../core/utils/api_utils.dart';
 import '../../models/meeting/meeting_model.dart';
 import '../../models/meeting/meeting_filter_model.dart';
 import '../../models/meeting/request/meeting_create_request.dart';
+import '../../models/meeting/meeting_detail_model.dart';
 
 /// 모임 관리 서비스 (Singleton)
 /// 
@@ -127,6 +128,58 @@ class MeetingService {
       
       if (e is DioException) {
         throw ApiUtils.processDioException(e, '모임 목록 조회');
+      }
+      rethrow;
+    }
+  }
+
+  /// 모임 상세 조회
+  /// 
+  /// API: GET /meetings/{meetingId}
+  /// 권한: MEMBER 이상
+  Future<MeetingDetailInfo> getMeetingDetail({
+    required int meetingId,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [모임 상세 조회] API 요청 시작...');
+        print('🔗 [모임 상세 조회] 요청 URL: ${_dio.options.baseUrl}/meetings/$meetingId');
+      }
+
+      final response = await _dio.get(
+        '/meetings/$meetingId',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '모임 상세 조회',
+        );
+
+        final meetingDetail = MeetingDetailInfo.fromJson(processedResponse['data']);
+        
+        if (AppConfig.debugMode) {
+          print('✅ [모임 상세 조회] 성공 - 모임: ${meetingDetail.meetingName}');
+        }
+
+        return meetingDetail;
+      } else {
+        throw Exception('[모임 상세 조회] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [모임 상세 조회] 오류 발생: $e');
+      }
+      
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '모임 상세 조회');
       }
       rethrow;
     }

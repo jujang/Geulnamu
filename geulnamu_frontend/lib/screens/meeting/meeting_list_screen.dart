@@ -213,10 +213,9 @@ class _MeetingListScreenState extends State<MeetingListScreen>
     await _homeService.handleLogout(context, authProvider);
   }
 
-  /// 모임 카드 탭 처리 (향후 상세보기 기능)
+  /// 모임 카드 탭 처리 - 상세 페이지로 이동
   void _handleMeetingTap(MeetingInfo meeting) {
-    // TODO: 향후 모임 상세 페이지 구현 시 아래 코드 활성화
-    // Navigator.pushNamed(context, '/meeting/${meeting.meetingId}');
+    Navigator.pushNamed(context, '/meeting/${meeting.meetingId}');
   }
 
   /// 출석현황 확인 버튼 처리 (MeetingLogicMixin에서 처리)

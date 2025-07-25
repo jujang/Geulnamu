@@ -23,6 +23,7 @@ import 'screens/member/member_list_screen.dart'; // 모임원 목록 화면
 import 'screens/meeting/meeting_list_screen.dart'; // 모임 목록 화면
 import 'screens/meeting/meeting_list_staff_screen.dart'; // 🆕 운영진용 모임 목록 화면
 import 'screens/meeting/meeting_create_screen.dart'; // 🆕 모임 만들기 화면
+import 'screens/meeting/meeting_detail_screen.dart'; // 🆕 모임 상세 화면
 import 'screens/settings_screen.dart'; // 설정 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 
@@ -106,6 +107,18 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
           final uri = Uri.parse(settings.name!);
           final path = uri.path; // 쿼리 파라미터 제외한 순수 경로
           final queryParams = uri.queryParameters;
+          
+          // 🎯 동적 경로 처리 (모임 상세)
+          if (path.startsWith('/meeting/') && path.split('/').length == 3) {
+            final meetingIdStr = path.split('/')[2];
+            final meetingId = int.tryParse(meetingIdStr);
+            if (meetingId != null) {
+              return MaterialPageRoute(
+                builder: (context) => MeetingDetailScreen(meetingId: meetingId),
+                settings: settings,
+              );
+            }
+          }
           
           // 🎯 정확한 라우트 매칭 시스템
           switch (path) {
