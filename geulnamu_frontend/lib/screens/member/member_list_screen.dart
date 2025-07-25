@@ -82,7 +82,7 @@ class _MemberListScreenState extends State<MemberListScreen>
                 // 플로팅 필터 버튼
                 Positioned(
                   bottom: 16,
-                  right: 16,
+                  left: 16,
                   child: MemberWidgets.buildFilterFab(
                     context,
                     _showFilterBottomSheet,
