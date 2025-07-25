@@ -69,7 +69,7 @@ public class MeetingService {
     public MeetingDetailResponse getMeeting(Long meetingId, Long memberId) {
         Meeting meeting = findMeetingOrThrow(meetingId);
         MeetingDetailResponse meetingDetailResponse = meetingQueryRepository.findMeeting(meeting.getId(), memberId);
-        if(meetingDetailResponse.getAttendanceId() != null) {
+        if(meetingDetailResponse.getDiscussionGroup() != null) {
             List<MemberIdAndNameResponse> groupMemberList = attendanceQueryRepository.findMyDiscussionMemberList(
                 meetingDetailResponse.getMeetingId(), meetingDetailResponse.getDiscussionGroup());
             meetingDetailResponse.updateGroupMemberList(groupMemberList);

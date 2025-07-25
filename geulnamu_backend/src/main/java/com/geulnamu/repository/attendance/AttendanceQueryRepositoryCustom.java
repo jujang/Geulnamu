@@ -1,7 +1,6 @@
 package com.geulnamu.repository.attendance;
 
 import com.geulnamu.controller.attendance.dto.MemberInfoWithGroup;
-import com.geulnamu.controller.attendance.dto.response.DiscussionGroupResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;

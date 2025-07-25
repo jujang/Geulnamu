@@ -80,8 +80,7 @@ public class AttendanceService {
     @Transactional(readOnly = true)
     public List<MemberIdAndNameResponse> getMyDiscussionMemberList(Long attendanceId, Long memberId) {
         Attendance attendance = getValidateAttendance(attendanceId, memberId);
-        return attendanceQueryRepository.findMyDiscussionMemberList(attendance.getMeeting().getId(),
-            attendance.getDiscussionGroup());
+        return getDiscussionGroupMembers(attendance);
     }
 
     @Transactional(readOnly = true)
