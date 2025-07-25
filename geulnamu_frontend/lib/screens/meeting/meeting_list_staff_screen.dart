@@ -85,16 +85,16 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
             Positioned(
             bottom: 16,
             left: 16,
-            child: _buildCreateMeetingFab(), // 모임 만들기 FAB
-            ),
-            Positioned(
-            bottom: 16,
-              right: 16,
                 child: MeetingListWidgets.buildFilterFab(
                     context,
                       _showStaffFilterBottomSheet,
                     ),
                   ),
+            Positioned(
+            bottom: 16,
+              right: 16,
+            child: _buildCreateMeetingFab(), // 모임 만들기 FAB
+            ),
                 ],
               ),
           ),

@@ -107,7 +107,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
                 // 플로팅 필터 버튼
                 Positioned(
                   bottom: 16,
-                  right: 16,
+                  left: 16,
                   child: MeetingListWidgets.buildFilterFab(
                     context,
                     _showFilterBottomSheet,
