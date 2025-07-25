@@ -141,9 +141,9 @@ class MeetingDetailInfo {
     return DateFormat('HH:mm').format(meetingDateTime);
   }
 
-  /// 지각 기준 시간 표시 (HH:mm)
+  /// 지각 기준 시간 표시 (yyyy.MM.dd HH:mm)
   String get displayLateThresholdTime {
-    return DateFormat('HH:mm').format(lateThresholdTime);
+    return DateFormat('yyyy.MM.dd HH:mm').format(lateThresholdTime);
   }
 
   /// 토론 시간 표시 (HH:mm) - 시간만 표시
@@ -152,9 +152,9 @@ class MeetingDetailInfo {
     return DateFormat('HH:mm').format(discussionTime!);
   }
 
-  /// 모임 개설일자 표시 (yyyy.MM.dd)
+  /// 모임 개설일자 표시 (yyyy.MM.dd HH:mm)
   String get displayCreatedAt {
-    return DateFormat('yyyy.MM.dd').format(createdAt);
+    return DateFormat('yyyy.MM.dd HH:mm').format(createdAt);
   }
 
   /// 출석 상태 표시명
