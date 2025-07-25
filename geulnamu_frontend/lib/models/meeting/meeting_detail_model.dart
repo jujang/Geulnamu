@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import '../../core/config/app_config.dart';
+import 'group_member_model.dart';
 
 /// 모임 상세 정보 모델
 ///
@@ -27,6 +28,7 @@ class MeetingDetailInfo {
   final DateTime? discussionTime;
   final String? alarmMessage;
   final bool? wantDiscussion;
+  final List<GroupMember>? groupMemberList;
 
   const MeetingDetailInfo({
     // 모임 관련
@@ -48,6 +50,7 @@ class MeetingDetailInfo {
     this.discussionTime,
     this.alarmMessage,
     this.wantDiscussion,
+    this.groupMemberList,
   });
 
   /// JSON에서 객체 생성
@@ -73,6 +76,7 @@ class MeetingDetailInfo {
         discussionTime: _parseDateTimeNullable(json['discussionTime']),
         alarmMessage: _parseStringNullable(json['alarmMessage']),
         wantDiscussion: _parseBoolNullable(json['wantDiscussion']),
+        groupMemberList: _parseGroupMemberList(json['groupMemberList']),
       );
       
       return meetingDetail;
@@ -107,6 +111,7 @@ class MeetingDetailInfo {
       'discussionTime': discussionTime?.toIso8601String(),
       'alarmMessage': alarmMessage,
       'wantDiscussion': wantDiscussion,
+      'groupMemberList': groupMemberList?.map((member) => member.toJson()).toList(),
     };
   }
 
@@ -298,6 +303,25 @@ class MeetingDetailInfo {
 
       throw TypeError();
     } catch (e) {
+      return null;
+    }
+  }
+
+  static List<GroupMember>? _parseGroupMemberList(dynamic value) {
+    if (value == null) return null;
+    
+    try {
+      if (value is List) {
+        return value
+            .map((item) => GroupMember.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+      
+      return null;
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [MeetingDetailInfo] groupMemberList 파싱 오류: $e');
+      }
       return null;
     }
   }

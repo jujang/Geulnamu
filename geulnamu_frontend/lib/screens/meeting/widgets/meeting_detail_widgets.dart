@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
 import '../../../models/meeting/meeting_detail_model.dart';
+import '../../../models/meeting/group_member_model.dart';
 import '../../../widgets/common/loading_widgets.dart';
 
 /// 모임 상세 화면 UI 위젯들 (Static Methods)
-/// 
+///
 /// 모임 상세 정보 표시를 위한 UI 컴포넌트들
 class MeetingDetailWidgets {
-  
   /// 로딩 위젯
   static Widget buildLoading(BuildContext context) {
     return LoadingWidgets.buildFullScreenLoading(
@@ -28,11 +28,7 @@ class MeetingDetailWidgets {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: context.colors.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: context.colors.error),
             const SizedBox(height: 16),
             Text(
               '모임 정보를 불러올 수 없습니다',
@@ -77,10 +73,10 @@ class MeetingDetailWidgets {
           // 모임 기본 정보
           _buildMeetingInfoCard(context, meeting),
           const SizedBox(height: 16),
-          
+
           // 출석 정보
           _buildAttendanceCard(
-            context, 
+            context,
             meeting,
             isEditing: isEditing,
             onEditToggle: onEditToggle,
@@ -88,7 +84,7 @@ class MeetingDetailWidgets {
             onEditCancel: onEditCancel,
           ),
           const SizedBox(height: 16),
-          
+
           // 토론 정보
           _buildDiscussionCard(context, meeting),
           const SizedBox(height: 80), // FAB 공간 확보
@@ -128,7 +124,7 @@ class MeetingDetailWidgets {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // 모임 정보들
             _buildInfoRow(context, '모임 제목', meeting.meetingName),
             _buildInfoRow(context, '모임 유형', meeting.meetingTypeDisplayName),
@@ -137,7 +133,7 @@ class MeetingDetailWidgets {
             _buildInfoRow(context, '지각 기준시간', meeting.displayLateThresholdTime),
             _buildInfoRow(context, '장소', meeting.meetingPlace),
             _buildInfoRow(context, '개설일', meeting.displayCreatedAt),
-            
+
             // 모임 설명
             if (meeting.description.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -154,7 +150,9 @@ class MeetingDetailWidgets {
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -204,7 +202,7 @@ class MeetingDetailWidgets {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // 출석 상태
             Row(
               children: [
@@ -222,7 +220,10 @@ class MeetingDetailWidgets {
                     vertical: 6, // 패딩 증가
                   ),
                   decoration: BoxDecoration(
-                    color: _getAttendanceStatusColor(context, meeting.attendanceStatusColorName),
+                    color: _getAttendanceStatusColor(
+                      context,
+                      meeting.attendanceStatusColorName,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -236,10 +237,10 @@ class MeetingDetailWidgets {
                 ),
               ],
             ),
-            
+
             // 비고 (편집 가능 - 출석 ID가 있을 때만)
             const SizedBox(height: 16),
-            if (meeting.attendanceId != null) 
+            if (meeting.attendanceId != null)
               _buildNoteSection(
                 context,
                 meeting.note ?? '',
@@ -287,13 +288,21 @@ class MeetingDetailWidgets {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // 토론 정보들
             _buildInfoRow(context, '토론 시간', meeting.displayDiscussionTime),
             _buildInfoRow(context, '참석 희망', meeting.displayWantDiscussion),
-            
+
+            // 토론 조 구성원
+            if (meeting.groupMemberList != null &&
+                meeting.groupMemberList!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _buildGroupMembersSection(context, meeting.groupMemberList!),
+            ],
+
             // 알림 메시지
-            if (meeting.alarmMessage != null && meeting.alarmMessage!.isNotEmpty) ...[
+            if (meeting.alarmMessage != null &&
+                meeting.alarmMessage!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
                 '토론 알림 메시지',
@@ -308,7 +317,9 @@ class MeetingDetailWidgets {
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -324,7 +335,11 @@ class MeetingDetailWidgets {
   }
 
   /// 정보 행 위젯
-  static Widget _buildInfoRow(BuildContext context, String label, String value) {
+  static Widget _buildInfoRow(
+    BuildContext context,
+    String label,
+    String value,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10), // 패딩 증가
       child: Row(
@@ -344,7 +359,9 @@ class MeetingDetailWidgets {
           Expanded(
             child: Text(
               value,
-              style: context.textStyles.bodyLarge?.copyWith(fontSize: 16), // 폰트 크기 증가
+              style: context.textStyles.bodyLarge?.copyWith(
+                fontSize: 16,
+              ), // 폰트 크기 증가
             ),
           ),
         ],
@@ -369,18 +386,19 @@ class MeetingDetailWidgets {
           width: double.infinity,
           padding: const EdgeInsets.all(14), // 패딩 증가
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             note.isEmpty ? '비고가 없습니다.' : note,
-            style: context.textStyles.bodyLarge?.copyWith( // bodyMedium에서 bodyLarge로 변경
-              color: note.isEmpty 
-                ? context.colors.onSurfaceVariant
-                : context.colors.onSurface,
-              fontStyle: note.isEmpty 
-                ? FontStyle.italic 
-                : null,
+            style: context.textStyles.bodyLarge?.copyWith(
+              // bodyMedium에서 bodyLarge로 변경
+              color: note.isEmpty
+                  ? context.colors.onSurfaceVariant
+                  : context.colors.onSurface,
+              fontStyle: note.isEmpty ? FontStyle.italic : null,
               fontSize: 16, // 폰트 크기 증가
             ),
           ),
@@ -398,7 +416,9 @@ class MeetingDetailWidgets {
     required Function(String) onNoteSave,
     required VoidCallback onEditCancel,
   }) {
-    final TextEditingController noteController = TextEditingController(text: currentNote);
+    final TextEditingController noteController = TextEditingController(
+      text: currentNote,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,7 +437,10 @@ class MeetingDetailWidgets {
               TextButton.icon(
                 onPressed: onEditToggle,
                 icon: const Icon(Icons.edit, size: 18), // 아이콘 크기 증가
-                label: const Text('편집', style: TextStyle(fontSize: 16)), // 폰트 크기 증가
+                label: const Text(
+                  '편집',
+                  style: TextStyle(fontSize: 16),
+                ), // 폰트 크기 증가
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                 ),
@@ -425,7 +448,7 @@ class MeetingDetailWidgets {
           ],
         ),
         const SizedBox(height: 8),
-        
+
         // 편집 모드
         if (isEditing) ...[
           TextField(
@@ -462,18 +485,18 @@ class MeetingDetailWidgets {
             width: double.infinity,
             padding: const EdgeInsets.all(14), // 패딩 증가
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               currentNote.isEmpty ? '비고가 없습니다.' : currentNote,
               style: context.textStyles.bodyLarge?.copyWith(
-                color: currentNote.isEmpty 
-                  ? context.colors.onSurfaceVariant
-                  : context.colors.onSurface,
-                fontStyle: currentNote.isEmpty 
-                  ? FontStyle.italic 
-                  : null,
+                color: currentNote.isEmpty
+                    ? context.colors.onSurfaceVariant
+                    : context.colors.onSurface,
+                fontStyle: currentNote.isEmpty ? FontStyle.italic : null,
                 fontSize: 16, // 폰트 크기 증가
               ),
             ),
@@ -501,8 +524,60 @@ class MeetingDetailWidgets {
     );
   }
 
+  /// 토론 조 구성원 섹션
+  static Widget _buildGroupMembersSection(
+    BuildContext context,
+    List<GroupMember> groupMembers,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '토론 조 구성원',
+          style: context.textStyles.labelLarge?.copyWith(
+            color: context.colors.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8.0, // Chip 간 가로 간격
+          runSpacing: 6.0, // Chip 간 세로 간격
+          children: groupMembers
+              .map((member) => _buildMemberChip(context, member))
+              .toList(),
+        ),
+      ],
+    );
+  }
+
+  /// 개별 조 구성원 Chip
+  static Widget _buildMemberChip(BuildContext context, GroupMember member) {
+    return Chip(
+      label: Text(
+        member.memberName,
+        style: context.textStyles.labelMedium?.copyWith(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: context.colors.primary, // 텍스트 색상을 직접 지정
+        ),
+      ),
+      backgroundColor: context.colors.primary.withOpacity(0.1),
+      side: BorderSide(
+        color: context.colors.primary.withOpacity(0.3),
+        width: 1,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    );
+  }
+
   /// 출석 상태 색상 가져오기
-  static Color _getAttendanceStatusColor(BuildContext context, String colorName) {
+  static Color _getAttendanceStatusColor(
+    BuildContext context,
+    String colorName,
+  ) {
     switch (colorName) {
       case 'green':
         return Colors.green;
