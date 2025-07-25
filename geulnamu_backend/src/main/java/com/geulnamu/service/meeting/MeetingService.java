@@ -3,6 +3,7 @@ package com.geulnamu.service.meeting;
 import com.geulnamu.controller.meeting.dto.request.*;
 import com.geulnamu.controller.meeting.dto.response.*;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
@@ -11,6 +12,7 @@ import com.geulnamu.infrastructure.exception.BadRequestException;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.infrastructure.response.paging.PagingResponse;
+import com.geulnamu.repository.attendance.AttendanceQueryRepository;
 import com.geulnamu.repository.meeting.MeetingQueryRepository;
 import com.geulnamu.repository.meeting.MeetingCommandRepository;
 import com.geulnamu.repository.member.MemberQueryRepository;
@@ -28,6 +30,7 @@ public class MeetingService {
     private final MemberQueryRepository memberQueryRepository;
     private final MeetingQueryRepository meetingQueryRepository;
     private final MeetingCommandRepository meetingCommandRepository;
+    private final AttendanceQueryRepository attendanceQueryRepository;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -56,9 +59,22 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingDetailResponse getMeeting(Long meetingId, Long memberId) {
+    public MeetingDetailResponse getMeeting_original(Long meetingId, Long memberId) {
         Meeting meeting = findMeetingOrThrow(meetingId);
         return meetingQueryRepository.findMeeting(meeting.getId(), memberId);
+    }
+
+    // TODO: 추후 쿼리 하나로 다 뽑아내도록 개선할 것!
+    @Transactional(readOnly = true)
+    public MeetingDetailResponse getMeeting(Long meetingId, Long memberId) {
+        Meeting meeting = findMeetingOrThrow(meetingId);
+        MeetingDetailResponse meetingDetailResponse = meetingQueryRepository.findMeeting(meeting.getId(), memberId);
+        if(meetingDetailResponse.getAttendanceId() != null) {
+            List<MemberIdAndNameResponse> groupMemberList = attendanceQueryRepository.findMyDiscussionMemberList(
+                meetingDetailResponse.getMeetingId(), meetingDetailResponse.getDiscussionGroup());
+            meetingDetailResponse.updateGroupMemberList(groupMemberList);
+        }
+        return meetingDetailResponse;
     }
 
     @Transactional(readOnly = true)

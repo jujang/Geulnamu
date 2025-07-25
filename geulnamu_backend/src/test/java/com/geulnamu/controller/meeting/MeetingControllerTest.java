@@ -241,7 +241,8 @@ public class MeetingControllerTest extends ControllerTest {
             LocalDateTime.of(2025, 5, 31, 10, 45), "추후 공지 예정 (합정역 주변 카페)",
             "~~", LocalDateTime.of(2025, 5, 1, 12, 0),
             5L, "~~", "저 안 늦었어요",
-            LocalDateTime.of(2025, 5, 12, 12, 0), null, true
+            LocalDateTime.of(2025, 5, 12, 12, 0), null, true,
+            null, null
         );
 
         given(meetingService.getMeeting(any(), any())).willReturn(meetingDetailResponse_01);
@@ -288,7 +289,11 @@ public class MeetingControllerTest extends ControllerTest {
                     fieldWithPath("data.note").type(JsonFieldType.STRING).description("출석 비고").optional(),
                     fieldWithPath("data.discussionTime").type(JsonFieldType.STRING).description("토론 시간").optional(),
                     fieldWithPath("data.alarmMessage").type(JsonFieldType.STRING).description("토론 시작 알림 메세지").optional(),
-                    fieldWithPath("data.wantDiscussion").type(JsonFieldType.BOOLEAN).description("비공개 여부").optional()
+                    fieldWithPath("data.wantDiscussion").type(JsonFieldType.BOOLEAN).description("비공개 여부").optional(),
+                    fieldWithPath("data.discussionGroup").type(JsonFieldType.STRING).description("토론 조").optional(),
+                    fieldWithPath("data.groupMemberList").type(JsonFieldType.ARRAY).description("같은 토론 조 리스트").optional(),
+                    fieldWithPath("data.groupMemberList[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호").optional(),
+                    fieldWithPath("data.groupMemberList[].memberName").type(JsonFieldType.STRING).description("모임원 이름").optional()
                 )
             ));
     }

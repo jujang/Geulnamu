@@ -1,11 +1,14 @@
 package com.geulnamu.controller.meeting.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.meeting.MeetingType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -36,5 +39,10 @@ public class MeetingDetailResponse {
     private LocalDateTime discussionTime;
     private String alarmMessage;
     private Boolean wantDiscussion;
+    private DiscussionGroup discussionGroup;
+    private List<MemberIdAndNameResponse> groupMemberList;
 
+    public void updateGroupMemberList(List<MemberIdAndNameResponse> groupMemberList) {
+        this.groupMemberList = groupMemberList;
+    }
 }

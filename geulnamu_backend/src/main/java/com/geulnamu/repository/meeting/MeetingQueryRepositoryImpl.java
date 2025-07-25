@@ -95,7 +95,8 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
                 meeting.meetingDate, meeting.lateThresholdTime, meeting.meetingPlace, meeting.description,
                 meeting.createdAt,
                 attendance.id, attendanceStatusExpression(), attendance.note,
-                meeting.discussionTime, meeting.alarmMessage, attendance.wantDiscussion)
+                meeting.discussionTime, meeting.alarmMessage, attendance.wantDiscussion,
+                attendance.discussionGroup, Expressions.nullExpression(List.class))
             )
             .from(meeting)
             .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id)
@@ -145,7 +146,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
         else if(attendanceStatus.equals(AttendanceStatus.NOT_STARTED.getValue())) return meeting.meetingDate.after(LocalDateTime.now());
         else if(attendanceStatus.equals(AttendanceStatus.ATTEND.getValue())) return attendance.id.isNotNull();
         else if(attendanceStatus.equals(AttendanceStatus.ATTEND_LATE.getValue())) return attendance.createdAt.after(meeting.lateThresholdTime);
-        else return attendance.id.isNull();
+        else return meeting.meetingDate.before(LocalDateTime.now()).and(attendance.id.isNull());
     }
 
     // 기본 정렬 기준은 모임 고유번호 내림차순, 다른 정렬 기준을 사용하더라도 2차 정렬 기준은 다신 모임 고유번호 내림차순
