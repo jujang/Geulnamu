@@ -2,34 +2,40 @@
 /// 
 /// API: PATCH /meetings/{meetingId}/basic
 class MeetingBasicUpdateRequest {
-  final String meetingCreatorName;
   final String meetingType;
   final String meetingName;
-  final DateTime meetingDateTime;
+  final DateTime meetingDate;      // 백엔드에서는 meetingDate
   final DateTime lateThresholdTime;
   final String meetingPlace;
-  final String description;
+  final String? description;
 
   const MeetingBasicUpdateRequest({
-    required this.meetingCreatorName,
     required this.meetingType,
     required this.meetingName,
-    required this.meetingDateTime,
+    required this.meetingDate,     // meetingDateTime → meetingDate
     required this.lateThresholdTime,
     required this.meetingPlace,
-    required this.description,
+    this.description,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'meetingCreatorName': meetingCreatorName,
       'meetingType': meetingType,
       'meetingName': meetingName,
-      'meetingDateTime': meetingDateTime.toIso8601String(),
-      'lateThresholdTime': lateThresholdTime.toIso8601String(),
+      'meetingDate': _formatDateTimeForBackend(meetingDate),      // 백엔드 형식으로 변환
+      'lateThresholdTime': _formatDateTimeForBackend(lateThresholdTime), // 백엔드 형식으로 변환
       'meetingPlace': meetingPlace,
       'description': description,
     };
+  }
+
+  /// 백엔드 요구 형식으로 날짜 변환: "yyyyMMdd HH:mm"
+  static String _formatDateTimeForBackend(DateTime dateTime) {
+    return '${dateTime.year.toString().padLeft(4, '0')}'
+           '${dateTime.month.toString().padLeft(2, '0')}'
+           '${dateTime.day.toString().padLeft(2, '0')} '
+           '${dateTime.hour.toString().padLeft(2, '0')}:'
+           '${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -43,18 +49,27 @@ class MeetingBasicUpdateRequest {
 /// API: PATCH /meetings/{meetingId}/discussion
 class MeetingDiscussionUpdateRequest {
   final DateTime discussionTime;
-  final String alarmMessage;
+  final String? alarmMessage;  // null 가능
 
   const MeetingDiscussionUpdateRequest({
     required this.discussionTime,
-    required this.alarmMessage,
+    this.alarmMessage,  // nullable로 변경
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'discussionTime': discussionTime.toIso8601String(),
+      'discussionTime': _formatDateTimeForBackend(discussionTime), // 백엔드 형식으로 변환
       'alarmMessage': alarmMessage,
     };
+  }
+
+  /// 백엔드 요구 형식으로 날짜 변환: "yyyyMMdd HH:mm"
+  static String _formatDateTimeForBackend(DateTime dateTime) {
+    return '${dateTime.year.toString().padLeft(4, '0')}'
+           '${dateTime.month.toString().padLeft(2, '0')}'
+           '${dateTime.day.toString().padLeft(2, '0')} '
+           '${dateTime.hour.toString().padLeft(2, '0')}:'
+           '${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   @override

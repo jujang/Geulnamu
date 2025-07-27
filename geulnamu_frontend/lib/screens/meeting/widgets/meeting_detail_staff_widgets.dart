@@ -461,11 +461,11 @@ class MeetingDetailStaffWidgets {
     return Column(
       children: [
         _buildInfoRow(context, '모임 이름', meetingDetail.meetingName),
-        _buildInfoRow(context, '모임 유형', meetingDetail.meetingType),
+        _buildInfoRow(context, '모임 유형', _getMeetingTypeDisplayName(meetingDetail.meetingType)),
         _buildInfoRow(context, '개최 일시', _formatDateTime(meetingDetail.meetingDateTime)),
         _buildInfoRow(context, '지각 기준', _formatDateTime(meetingDetail.lateThresholdTime)),
         _buildInfoRow(context, '장소', meetingDetail.meetingPlace),
-        _buildInfoRow(context, '설명', meetingDetail.description, isMultiline: true),
+        _buildInfoRow(context, '설명', meetingDetail.description ?? '설명 없음', isMultiline: true),
       ],
     );
   }
@@ -477,8 +477,10 @@ class MeetingDetailStaffWidgets {
   ) {
     return Column(
       children: [
-        _buildInfoRow(context, '토론 시간', _formatDateTime(meetingDetail.discussionTime)),
-        _buildInfoRow(context, '알림 메시지', meetingDetail.alarmMessage, isMultiline: true),
+        _buildInfoRow(context, '토론 시간', meetingDetail.discussionTime != null 
+          ? _formatDateTime(meetingDetail.discussionTime!) 
+          : '토론 시간 미설정'),
+        _buildInfoRow(context, '알림 메시지', meetingDetail.alarmMessage ?? '알림 메시지 없음', isMultiline: true),
       ],
     );
   }
@@ -516,9 +518,9 @@ class MeetingDetailStaffWidgets {
             border: OutlineInputBorder(),
           ),
           items: const [
-            DropdownMenuItem(value: 'REGULAR', child: Text('정기 모임')),
-            DropdownMenuItem(value: 'SPECIAL', child: Text('특별 모임')),
-            DropdownMenuItem(value: 'LIGHTNING', child: Text('번개 모임')),
+            DropdownMenuItem(value: 'REGULAR', child: Text('정기')),
+            DropdownMenuItem(value: 'SPECIAL', child: Text('특수')),
+            DropdownMenuItem(value: 'FLASH', child: Text('번개')),
           ],
           onChanged: onMeetingTypeChanged,
         ),
@@ -664,5 +666,20 @@ class MeetingDetailStaffWidgets {
   static String _formatDateTime(DateTime dateTime) {
     return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')} '
            '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  /// 모임 유형 한글 변환
+  static String _getMeetingTypeDisplayName(String meetingType) {
+    switch (meetingType) {
+      case 'REGULAR':
+        return '정기';
+      case 'SPECIAL':
+        return '특수';
+      case 'FLASH':
+      case 'LIGHTNING': // 기존 데이터 호환성
+        return '번개';
+      default:
+        return meetingType; // 알 수 없는 값은 그대로 표시
+    }
   }
 }

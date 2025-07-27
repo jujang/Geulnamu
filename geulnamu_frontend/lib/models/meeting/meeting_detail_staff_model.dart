@@ -11,15 +11,15 @@ class MeetingDetailStaffInfo {
   final DateTime meetingDateTime;
   final DateTime lateThresholdTime;
   final String meetingPlace;
-  final String description;
+  final String? description;  // null 가능
   final DateTime createdAt;
 
   // 모임 관련 - 특수
   final bool isPrivateMeeting;
 
   // 토론 관련
-  final DateTime discussionTime;
-  final String alarmMessage;
+  final DateTime? discussionTime;  // null 가능
+  final String? alarmMessage;      // null 가능
 
   const MeetingDetailStaffInfo({
     required this.meetingId,
@@ -30,11 +30,11 @@ class MeetingDetailStaffInfo {
     required this.meetingDateTime,
     required this.lateThresholdTime,
     required this.meetingPlace,
-    required this.description,
+    this.description,              // nullable로 변경
     required this.createdAt,
     required this.isPrivateMeeting,
-    required this.discussionTime,
-    required this.alarmMessage,
+    this.discussionTime,           // nullable로 변경
+    this.alarmMessage,             // nullable로 변경
   });
 
   factory MeetingDetailStaffInfo.fromJson(Map<String, dynamic> json) {
@@ -44,15 +44,35 @@ class MeetingDetailStaffInfo {
       meetingCreatorId: json['meetingCreatorId'] as int,
       meetingType: json['meetingType'] as String,
       meetingName: json['meetingName'] as String,
-      meetingDateTime: DateTime.parse(json['meetingDateTime'] as String),
-      lateThresholdTime: DateTime.parse(json['lateThresholdTime'] as String),
+      meetingDateTime: _parseDateTime(json['meetingDateTime'] as String),
+      lateThresholdTime: _parseDateTime(json['lateThresholdTime'] as String),
       meetingPlace: json['meetingPlace'] as String,
-      description: json['description'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      description: json['description'] as String?,  // null 가능
+      createdAt: _parseDateTime(json['createdAt'] as String),
       isPrivateMeeting: json['isPrivateMeeting'] as bool,
-      discussionTime: DateTime.parse(json['discussionTime'] as String),
-      alarmMessage: json['alarmMessage'] as String,
+      discussionTime: json['discussionTime'] != null 
+        ? _parseDateTime(json['discussionTime'] as String)
+        : null, // null 그대로 유지
+      alarmMessage: json['alarmMessage'] as String?, // null 가능
     );
+  }
+
+  /// 백엔드 날짜 형식 (2025.07.31 14:00)을 DateTime으로 변환
+  static DateTime _parseDateTime(String dateTimeStr) {
+    try {
+      // 백엔드 형식: "2025.07.31 14:00"
+      // Dart가 이해할 수 있는 형식으로 변환: "2025-07-31 14:00:00"
+      final cleanedStr = dateTimeStr
+          .replaceAll('.', '-') // . → -
+          .replaceAll(' ', 'T') // 공백 → T
+          + ':00'; // 초 추가
+      
+      return DateTime.parse(cleanedStr);
+    } catch (e) {
+      print('❌ 날짜 파싱 오류: $dateTimeStr -> $e');
+      // 파싱 실패 시 현재 시간 반환
+      return DateTime.now();
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -68,7 +88,7 @@ class MeetingDetailStaffInfo {
       'description': description,
       'createdAt': createdAt.toIso8601String(),
       'isPrivateMeeting': isPrivateMeeting,
-      'discussionTime': discussionTime.toIso8601String(),
+      'discussionTime': discussionTime?.toIso8601String(),  // null 안전 처리
       'alarmMessage': alarmMessage,
     };
   }

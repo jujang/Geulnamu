@@ -153,13 +153,13 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
     _meetingNameController.text = _meetingDetail!.meetingName;
     _meetingPlaceController.text = _meetingDetail!.meetingPlace;
-    _descriptionController.text = _meetingDetail!.description;
-    _alarmMessageController.text = _meetingDetail!.alarmMessage;
+    _descriptionController.text = _meetingDetail!.description ?? '';  // null 안전 처리
+    _alarmMessageController.text = _meetingDetail!.alarmMessage ?? '';  // null 안전 처리
     
     _selectedMeetingType = _meetingDetail!.meetingType;
     _selectedMeetingDateTime = _meetingDetail!.meetingDateTime;
     _selectedLateThresholdTime = _meetingDetail!.lateThresholdTime;
-    _selectedDiscussionTime = _meetingDetail!.discussionTime;
+    _selectedDiscussionTime = _meetingDetail!.discussionTime;  // null 가능
   }
 
   /// 모임 기본 정보 편집 토글
@@ -202,13 +202,14 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       }
 
       final request = MeetingBasicUpdateRequest(
-        meetingCreatorName: _meetingDetail!.meetingCreatorName, // 생성자명은 변경 불가
         meetingType: _selectedMeetingType!,
         meetingName: _meetingNameController.text.trim(),
-        meetingDateTime: _selectedMeetingDateTime!,
+        meetingDate: _selectedMeetingDateTime!,  // meetingDateTime → meetingDate
         lateThresholdTime: _selectedLateThresholdTime!,
         meetingPlace: _meetingPlaceController.text.trim(),
-        description: _descriptionController.text.trim(),
+        description: _descriptionController.text.trim().isEmpty 
+          ? null 
+          : _descriptionController.text.trim(),  // 빈 값이면 null
       );
 
       await _meetingService.updateMeetingBasicInfo(
@@ -256,8 +257,10 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       }
 
       final request = MeetingDiscussionUpdateRequest(
-        discussionTime: _selectedDiscussionTime!,
-        alarmMessage: _alarmMessageController.text.trim(),
+        discussionTime: _selectedDiscussionTime ?? _meetingDetail!.meetingDateTime,  // null이면 모임 시간으로 설정
+        alarmMessage: _alarmMessageController.text.trim().isEmpty 
+          ? null 
+          : _alarmMessageController.text.trim(),  // 빈 값이면 null
       );
 
       await _meetingService.updateMeetingDiscussionInfo(
@@ -464,19 +467,21 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 토론 정보 유효성 검사
   bool _validateDiscussionInfo() {
-    if (_selectedDiscussionTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('토론 시간을 선택해주세요.')),
-      );
-      return false;
-    }
+    // 토론 시간은 선택사항 (더 이상 필수 아님)
+    // if (_selectedDiscussionTime == null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(content: Text('토론 시간을 선택해주세요.')),
+    //   );
+    //   return false;
+    // }
 
-    if (_alarmMessageController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('알림 메시지를 입력해주세요.')),
-      );
-      return false;
-    }
+    // 알림 메시지도 선택사항 (빈 값 허용)
+    // if (_alarmMessageController.text.trim().isEmpty) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(content: Text('알림 메시지를 입력해주세요.')),
+    //   );
+    //   return false;
+    // }
 
     return true;
   }

@@ -9,7 +9,7 @@ import '../../models/meeting/meeting_detail_staff_model.dart';
 import '../../models/meeting/request/meeting_update_requests.dart';
 
 /// 모임 관리 서비스 (Singleton)
-/// 
+///
 /// 제공 기능:
 /// - 모임 목록 조회
 /// - 모임 생성
@@ -19,15 +19,13 @@ class MeetingService {
   factory MeetingService() => _instance;
   MeetingService._internal() {
     // 🔧 생성자에서 즉시 Dio 초기화
-    _dio = ApiUtils.createDioWithTimeout(
-      baseUrl: AppConfig.apiBaseUrl,
-    );
+    _dio = ApiUtils.createDioWithTimeout(baseUrl: AppConfig.apiBaseUrl);
   }
 
   late final Dio _dio;
 
   /// 모임 생성
-  /// 
+  ///
   /// API: POST /meetings/create
   /// 권한: STAFF 이상
   Future<int> createMeeting({
@@ -59,7 +57,7 @@ class MeetingService {
         );
 
         final meetingId = processedResponse['data'] as int;
-        
+
         if (AppConfig.debugMode) {
           print('✅ [모임 생성] 성공 - 생성된 모임 ID: $meetingId');
         }
@@ -72,7 +70,7 @@ class MeetingService {
       if (AppConfig.debugMode) {
         print('❌ [모임 생성] 오류 발생: $e');
       }
-      
+
       if (e is DioException) {
         throw ApiUtils.processDioException(e, '모임 생성');
       }
@@ -81,7 +79,7 @@ class MeetingService {
   }
 
   /// 모임 목록 조회
-  /// 
+  ///
   /// API: GET /meetings/list
   /// 권한: MEMBER 이상
   Future<MeetingListResponse> getMeetingList({
@@ -118,8 +116,10 @@ class MeetingService {
           '모임 목록 조회',
         );
 
-        final meetingListResponse = MeetingListResponse.fromJson(processedResponse['data']);
-        
+        final meetingListResponse = MeetingListResponse.fromJson(
+          processedResponse['data'],
+        );
+
         return meetingListResponse;
       } else {
         throw Exception('[모임 목록 조회] HTTP 오류: ${response.statusCode}');
@@ -133,7 +133,7 @@ class MeetingService {
   }
 
   /// 모임 상세 조회
-  /// 
+  ///
   /// API: GET /meetings/{meetingId}
   /// 권한: MEMBER 이상
   Future<MeetingDetailInfo> getMeetingDetail({
@@ -157,8 +157,10 @@ class MeetingService {
           '모임 상세 조회',
         );
 
-        final meetingDetail = MeetingDetailInfo.fromJson(processedResponse['data']);
-        
+        final meetingDetail = MeetingDetailInfo.fromJson(
+          processedResponse['data'],
+        );
+
         return meetingDetail;
       } else {
         throw Exception('[모임 상세 조회] HTTP 오류: ${response.statusCode}');
@@ -172,7 +174,7 @@ class MeetingService {
   }
 
   /// 운영진용 모임 상세 조회
-  /// 
+  ///
   /// API: GET /meetings/{meetingId}/staff
   /// 권한: STAFF 이상
   Future<MeetingDetailStaffInfo> getMeetingDetailForStaff({
@@ -200,8 +202,10 @@ class MeetingService {
           '운영진용 모임 상세 조회',
         );
 
-        final meetingDetail = MeetingDetailStaffInfo.fromJson(processedResponse['data']);
-        
+        final meetingDetail = MeetingDetailStaffInfo.fromJson(
+          processedResponse['data'],
+        );
+
         return meetingDetail;
       } else {
         throw Exception('[운영진용 모임 상세 조회] HTTP 오류: ${response.statusCode}');
@@ -215,7 +219,7 @@ class MeetingService {
   }
 
   /// 모임 기본 정보 수정
-  /// 
+  ///
   /// API: PATCH /meetings/{meetingId}/basic
   /// 권한: STAFF 이상
   Future<void> updateMeetingBasicInfo({
@@ -261,7 +265,7 @@ class MeetingService {
   }
 
   /// 토론 정보 수정
-  /// 
+  ///
   /// API: PATCH /meetings/{meetingId}/discussion
   /// 권한: STAFF 이상
   Future<void> updateMeetingDiscussionInfo({
@@ -307,7 +311,7 @@ class MeetingService {
   }
 
   /// 모임 삭제
-  /// 
+  ///
   /// API: DELETE /meetings/{meetingId}/remove
   /// 권한: STAFF 이상 (생성자) 또는 관리자
   Future<void> deleteMeeting({
@@ -350,7 +354,7 @@ class MeetingService {
   }
 
   /// 모임 비공개 처리
-  /// 
+  ///
   /// API: PATCH /meetings/{meetingId}/make-private
   /// 권한: 관리자 (ADMIN, LEADER, VICE_LEADER)
   Future<void> makeMeetingPrivate({
@@ -393,7 +397,7 @@ class MeetingService {
   }
 
   /// 모임 공개 처리
-  /// 
+  ///
   /// API: PATCH /meetings/{meetingId}/make-public
   /// 권한: 관리자 (ADMIN, LEADER, VICE_LEADER)
   Future<void> makeMeetingPublic({
@@ -436,7 +440,7 @@ class MeetingService {
   }
 
   /// 출석현황 확인 처리 (향후 구현 예정)
-  /// 
+  ///
   /// [meetingId] 모임 ID
   void handleAttendanceCheck(int meetingId) {
     // TODO: 향후 출석현황 페이지 구현 시 아래 코드 활성화
