@@ -59,12 +59,18 @@ class MeetingDetailInfo {
       final meetingDetail = MeetingDetailInfo(
         // 모임 관련
         meetingId: _parseIntSafely(json['meetingId'], '모임ID'),
-        meetingCreatorName: _parseStringSafely(json['meetingCreatorName'], '개설자명'),
+        meetingCreatorName: _parseStringSafely(
+          json['meetingCreatorName'],
+          '개설자명',
+        ),
         meetingCreatorId: _parseIntSafely(json['meetingCreatorId'], '개설자ID'),
         meetingType: _parseStringSafely(json['meetingType'], '모임유형'),
         meetingName: _parseStringSafely(json['meetingName'], '모임제목'),
         meetingDateTime: _parseDateTimeSafely(json['meetingDateTime'], '모임일시'),
-        lateThresholdTime: _parseDateTimeSafely(json['lateThresholdTime'], '지각기준시간'),
+        lateThresholdTime: _parseDateTimeSafely(
+          json['lateThresholdTime'],
+          '지각기준시간',
+        ),
         meetingPlace: _parseStringSafely(json['meetingPlace'], '모임장소'),
         description: _parseStringSafely(json['description'], '모임설명'),
         createdAt: _parseDateTimeSafely(json['createdAt'], '모임개설일자'),
@@ -78,7 +84,7 @@ class MeetingDetailInfo {
         wantDiscussion: _parseBoolNullable(json['wantDiscussion']),
         groupMemberList: _parseGroupMemberList(json['groupMemberList']),
       );
-      
+
       return meetingDetail;
     } catch (e) {
       if (AppConfig.debugMode) {
@@ -111,7 +117,9 @@ class MeetingDetailInfo {
       'discussionTime': discussionTime?.toIso8601String(),
       'alarmMessage': alarmMessage,
       'wantDiscussion': wantDiscussion,
-      'groupMemberList': groupMemberList?.map((member) => member.toJson()).toList(),
+      'groupMemberList': groupMemberList
+          ?.map((member) => member.toJson())
+          .toList(),
     };
   }
 
@@ -197,7 +205,7 @@ class MeetingDetailInfo {
   /// 토론 참석 희망 여부 표시
   String get displayWantDiscussion {
     if (wantDiscussion == null) return '-';
-    return wantDiscussion! ? '참석 희망' : '참석 안함';
+    return wantDiscussion! ? '토론할래요' : '독서만 할래요';
   }
 
   /// 오늘 모임 여부
@@ -309,14 +317,14 @@ class MeetingDetailInfo {
 
   static List<GroupMember>? _parseGroupMemberList(dynamic value) {
     if (value == null) return null;
-    
+
     try {
       if (value is List) {
         return value
             .map((item) => GroupMember.fromJson(item as Map<String, dynamic>))
             .toList();
       }
-      
+
       return null;
     } catch (e) {
       if (AppConfig.debugMode) {

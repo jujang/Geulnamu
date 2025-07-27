@@ -64,6 +64,9 @@ class MeetingDetailWidgets {
     required VoidCallback onEditToggle,
     required Function(String) onNoteSave,
     required VoidCallback onEditCancel,
+    VoidCallback? onToggleDiscussion, // 🆕 토론 상태 토글 콜백 추가
+    bool canToggleDiscussion = false, // 🆕 토론 상태 변경 가능 여부
+    String? discussionTimeRemaining, // 🆕 토론 변경 마감까지 남은 시간
   }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -86,7 +89,13 @@ class MeetingDetailWidgets {
           const SizedBox(height: 16),
 
           // 토론 정보
-          _buildDiscussionCard(context, meeting),
+          _buildDiscussionCard(
+            context,
+            meeting,
+            onToggleDiscussion: onToggleDiscussion, // 🆕 토글 콜백 전달
+            canToggle: canToggleDiscussion, // 🆕 토글 가능 여부 전달
+            timeRemaining: discussionTimeRemaining, // 🆕 남은 시간 정보 전달
+          ),
           const SizedBox(height: 80), // FAB 공간 확보
         ],
       ),
@@ -260,8 +269,11 @@ class MeetingDetailWidgets {
   /// 토론 정보 카드
   static Widget _buildDiscussionCard(
     BuildContext context,
-    MeetingDetailInfo meeting,
-  ) {
+    MeetingDetailInfo meeting, {
+    Function()? onToggleDiscussion,
+    bool canToggle = false,
+    String? timeRemaining, // 🆕 남은 시간 정보 추가
+  }) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -291,7 +303,15 @@ class MeetingDetailWidgets {
 
             // 토론 정보들
             _buildInfoRow(context, '토론 시간', meeting.displayDiscussionTime),
-            _buildInfoRow(context, '참석 희망', meeting.displayWantDiscussion),
+
+            // 토론 참여 희망 상태 (토글 버튼 포함)
+            _buildDiscussionParticipationRow(
+              context,
+              meeting,
+              onToggleDiscussion: onToggleDiscussion,
+              canToggle: canToggle,
+              timeRemaining: timeRemaining, // 🆕 남은 시간 정보 전달
+            ),
 
             // 토론 조 구성원
             if (meeting.groupMemberList != null &&
@@ -549,6 +569,98 @@ class MeetingDetailWidgets {
               .toList(),
         ),
       ],
+    );
+  }
+
+  /// 토론 참여 상태 행 (토글 버튼 포함)
+  static Widget _buildDiscussionParticipationRow(
+    BuildContext context,
+    MeetingDetailInfo meeting, {
+    Function()? onToggleDiscussion,
+    bool canToggle = false,
+    String? timeRemaining, // 🆕 남은 시간 정보 추가
+  }) {
+    // 토론 시간이 설정되지 않았으면 하이픈 표시
+    final hasDiscussionTime = meeting.discussionTime != null;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 100,
+                child: Text(
+                  '토론 참석 여부',
+                  style: context.textStyles.labelLarge?.copyWith(
+                    color: context.colors.onSurfaceVariant,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // 현재 상태 표시 (토론 시간이 없으면 하이픈)
+              Expanded(
+                child: Text(
+                  hasDiscussionTime ? meeting.displayWantDiscussion : '-',
+                  style: context.textStyles.bodyLarge?.copyWith(
+                    fontSize: 16,
+                    color: hasDiscussionTime
+                        ? context.colors.onSurface
+                        : context.colors.onSurfaceVariant, // 토론 시간 없을 때 회색
+                  ),
+                ),
+              ),
+
+              // 토글 스위치 (토론 시간이 있고 출석한 모임에서만 활성화)
+              if (hasDiscussionTime && canToggle && onToggleDiscussion != null)
+                Switch(
+                  value: meeting.wantDiscussion ?? false,
+                  onChanged: (_) => onToggleDiscussion(),
+                  activeColor: context.colors.primary,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                )
+              else if (hasDiscussionTime && meeting.attendanceId != null)
+                // 토론 시간은 있지만 토글 불가능한 경우 (로딩 중, 시간 만료 등)
+                Switch(
+                  value: meeting.wantDiscussion ?? false,
+                  onChanged: null, // 비활성화
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                )
+              else if (hasDiscussionTime)
+                // 토론 시간은 있지만 출석하지 않은 모임인 경우 비활성화 스위치
+                Switch(
+                  value: false,
+                  onChanged: null,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              // 토론 시간이 없으면 스위치 자체를 표시하지 않음
+            ],
+          ),
+
+          // 남은 시간 안내 텍스트 (🆕 추가)
+          if (timeRemaining != null &&
+              hasDiscussionTime &&
+              meeting.attendanceId != null) ...[
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 116), // 라벨 너비 + 간격만큼 들여쓰기
+              child: Text(
+                timeRemaining,
+                style: context.textStyles.bodySmall?.copyWith(
+                  color: context.colors.onSurfaceVariant,
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 

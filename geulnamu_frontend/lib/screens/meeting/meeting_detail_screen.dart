@@ -134,6 +134,9 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
       onEditToggle: toggleEditMode,
       onNoteSave: saveNote,
       onEditCancel: cancelEdit,
+      onToggleDiscussion: toggleDiscussionParticipation, // 🆕 토론 상태 토글 콜백 연결
+      canToggleDiscussion: canChangeDiscussionParticipation, // 🆕 토론 상태 변경 가능 여부
+      discussionTimeRemaining: discussionChangeTimeRemaining, // 🆕 남은 시간 정보 연결
     );
   }
 
