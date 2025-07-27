@@ -49,8 +49,7 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
       print('🚀 [MemberLogicMixin] 모임원 목록 초기화 시작');
     }
 
-    // 🎯 MemberService 초기화
-    _memberService.initialize();
+    // 🎯 MemberService는 Singleton이므로 이미 초기화됨
 
     // 🎯 사용자 권한에 따른 필터 표시 가능 여부 설정
     await _updateDeletedFilterPermission();

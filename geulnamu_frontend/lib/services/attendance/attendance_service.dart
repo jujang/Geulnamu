@@ -14,16 +14,18 @@ import '../../models/attendance/request/attendance_note_request.dart';
 class AttendanceService {
   static final AttendanceService _instance = AttendanceService._internal();
   factory AttendanceService() => _instance;
-  AttendanceService._internal();
-
-  final Dio _dio = Dio();
-
-  /// 서비스 초기화
-  void initialize() {
-    _dio.options.baseUrl = AppConfig.apiBaseUrl;
-    _dio.options.connectTimeout = const Duration(seconds: 5);
-    _dio.options.receiveTimeout = const Duration(seconds: 3);
+  AttendanceService._internal() {
+    // 🔧 생성자에서 즉시 Dio 초기화
+    _dio = ApiUtils.createDioWithTimeout(
+      baseUrl: AppConfig.apiBaseUrl,
+    );
+    
+    if (AppConfig.debugMode) {
+      print('✅ [AttendanceService] 캐시 무효화 인터셉터와 함께 초기화 완료');
+    }
   }
+
+  late final Dio _dio;
 
   /// 모임 출석 체크인
   /// 

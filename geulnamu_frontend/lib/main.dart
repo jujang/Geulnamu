@@ -28,6 +28,8 @@ import 'screens/settings_screen.dart'; // 설정 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 import 'services/meeting/meeting_service.dart'; // 🆕 모임 서비스
 import 'services/attendance/attendance_service.dart'; // 🆕 출석 서비스
+import 'services/member/member_service.dart'; // 🆕 모임원 서비스
+import 'services/profile/profile_service.dart'; // 🆕 프로필 서비스
 
 // 🎯 Global Navigator Key - 전역에서 접근 가능
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -43,9 +45,11 @@ void main() async {
     // 카카오 SDK 초기화
     KakaoConfig.initialize();
 
-    // 서비스 초기화
-    MeetingService().initialize();
-    AttendanceService().initialize();
+    // 🎯 서비스 초기화 - Singleton 인스턴스 생성 (생성자에서 자동 초기화)
+    MeetingService(); // Singleton 인스턴스 생성
+    AttendanceService(); // Singleton 인스턴스 생성
+    MemberService(); // Singleton 인스턴스 생성
+    ProfileService(); // Singleton 인스턴스 생성
 
     // 앱 설정 정보 출력 (디버그용)
     AppConfig.printConfig();

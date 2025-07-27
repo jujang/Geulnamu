@@ -15,21 +15,18 @@ import '../../models/member/member_list_model.dart';
 class MemberService {
   static final MemberService _instance = MemberService._internal();
   factory MemberService() => _instance;
-  MemberService._internal();
-
-  final Dio _dio = Dio(); // late 제거하고 즉시 초기화
-
-  /// 서비스 초기화
-  void initialize() {
-    // 기본 설정 적용
-    _dio.options.baseUrl = AppConfig.apiBaseUrl;
-    _dio.options.connectTimeout = const Duration(seconds: 5);
-    _dio.options.receiveTimeout = const Duration(seconds: 3);
+  MemberService._internal() {
+    // 🔧 생성자에서 즉시 Dio 초기화
+    _dio = ApiUtils.createDioWithTimeout(
+      baseUrl: AppConfig.apiBaseUrl,
+    );
     
     if (AppConfig.debugMode) {
-      print('🔧 [MemberService] 서비스 초기화 완료');
+      print('✅ [MemberService] 캐시 무효화 인터셉터와 함께 초기화 완료');
     }
   }
+
+  late final Dio _dio;
 
   /// 🎯 개별 모임원 상세 조회 (관리자용)
   /// 

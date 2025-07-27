@@ -276,8 +276,7 @@ mixin MeetingCreateLogicMixin<T extends StatefulWidget> on State<T> {
     });
     
     try {
-      // 🔧 MeetingService 초기화 확인
-      _meetingService.initialize();
+      // 🎯 MeetingService는 Singleton이므로 이미 초기화됨
       
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       

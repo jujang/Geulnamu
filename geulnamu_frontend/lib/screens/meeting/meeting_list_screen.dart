@@ -50,17 +50,27 @@ class _MeetingListScreenState extends State<MeetingListScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // RouteObserver 등록
-    final route = ModalRoute.of(context);
-    if (route is PageRoute) {
-      HomeRouteService.routeObserver.subscribe(this, route);
-    }
+    // 🎯 RouteObserver 등록 - 안전하게 처리
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final route = ModalRoute.of(context);
+      if (route is PageRoute && mounted) {
+        try {
+          HomeRouteService.routeObserver.subscribe(this, route);
+        } catch (e) {
+          print('⚠️ [MeetingListScreen] RouteObserver 등록 실패: $e');
+        }
+      }
+    });
   }
   
   @override
   void dispose() {
     // RouteObserver 등록 해제
-    HomeRouteService.routeObserver.unsubscribe(this);
+    try {
+      HomeRouteService.routeObserver.unsubscribe(this);
+    } catch (e) {
+      print('⚠️ [MeetingListScreen] RouteObserver 해제 실패: $e');
+    }
     super.dispose();
   }
   

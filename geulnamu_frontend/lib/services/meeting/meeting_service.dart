@@ -15,16 +15,18 @@ import '../../models/meeting/meeting_detail_model.dart';
 class MeetingService {
   static final MeetingService _instance = MeetingService._internal();
   factory MeetingService() => _instance;
-  MeetingService._internal();
-
-  final Dio _dio = Dio();
-
-  /// 서비스 초기화
-  void initialize() {
-    _dio.options.baseUrl = AppConfig.apiBaseUrl;
-    _dio.options.connectTimeout = const Duration(seconds: 5);
-    _dio.options.receiveTimeout = const Duration(seconds: 3);
+  MeetingService._internal() {
+    // 🔧 생성자에서 즉시 Dio 초기화
+    _dio = ApiUtils.createDioWithTimeout(
+      baseUrl: AppConfig.apiBaseUrl,
+    );
+    
+    if (AppConfig.debugMode) {
+      print('✅ [MeetingService] 캐시 무효화 인터셉터와 함께 초기화 완료');
+    }
   }
+
+  late final Dio _dio;
 
   /// 모임 생성
   /// 
@@ -93,14 +95,25 @@ class MeetingService {
       if (AppConfig.debugMode) {
         print('🚀 [모임 목록 조회] API 요청 시작...');
       }
+      
+      // 🔥 강제 캐시 버스트 추가
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final queryParams = filter.toQueryParameters(isStaffMode: isStaffMode);
+      queryParams['_cache_bust'] = timestamp.toString();
+      queryParams['_t'] = timestamp.toString();
 
       final response = await _dio.get(
         '/meetings/list',
-        queryParameters: filter.toQueryParameters(isStaffMode: isStaffMode), // 🆕 isStaffMode 전달
+        queryParameters: queryParams,
         options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken',
             'Content-Type': 'application/json',
+            // 🔥 강력한 캐시 무효화 헤더
+            'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'If-Modified-Since': 'Mon, 26 Jul 1997 05:00:00 GMT',
           },
         ),
       );

@@ -13,54 +13,38 @@ class ProfileService {
   // 🎯 Singleton 패턴
   static final ProfileService _instance = ProfileService._internal();
   factory ProfileService() => _instance;
-  ProfileService._internal();
-
-  final Dio _dio = Dio();
-  
-  /// 🚫 캐시 방지 전용 Dio 인스턴스 생성
-  Dio _createNoCacheDio() {
-    final dio = Dio();
+  ProfileService._internal() {
+    // 🔧 생성자에서 즉시 Dio 초기화
+    _dio = ApiUtils.createDioWithTimeout(
+      baseUrl: AppConfig.apiBaseUrl,
+    );
     
-    // 🚫 기본 옵션에서 캐시 비활성화
-    dio.options.headers.addAll({
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-    });
-    
-    return dio;
+    if (AppConfig.debugMode) {
+      print('✅ [ProfileService] 캐시 무효화 인터셉터와 함께 초기화 완료');
+    }
   }
 
-  /// 본인 프로필 정보 조회 (캐시 방지 강화 버전)
+  late final Dio _dio;
+
+  /// 본인 프로필 정보 조회
   /// 
   /// API: GET /members/me/profile
   /// 권한: MEMBER 이상
-  /// 🚫 강력한 캐시 방지 적용
+  /// 🆕 글로벌 캐시 무효화 인터셉터 적용
   Future<ProfileModel> getMyProfile(String accessToken) async {
     try {
       if (AppConfig.debugMode) {
         print('🚀 [ProfileService] 본인 프로필 조회 시작...');
       }
 
-      // 🚫 캐시 방지 전용 Dio 인스턴스 사용
-      final noCacheDio = _createNoCacheDio();
-      
-      final response = await noCacheDio.get(
-        AppConfig.getApiEndpoint('members/me/profile'),
+      final response = await _dio.get(
+        '/members/me/profile',
         options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken',
             'Content-Type': 'application/json',
-            // 🚫 강력한 캐시 방지 헤더 추가
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-            // 🔄 매번 다른 요청으로 인식하도록 타임스탬프 추가
-            'X-Request-Time': DateTime.now().millisecondsSinceEpoch.toString(),
           },
         ),
-        // 🚫 쿼리 파라미터로도 캐싱 방지
-        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch},
       );
 
       if (response.statusCode == 200) {
@@ -75,7 +59,7 @@ class ProfileService {
           final profile = ProfileModel.fromJson(profileData);
           
           if (AppConfig.debugMode) {
-            print('✅ [ProfileService] 프로필 조회 성공: ${profile.displayName}');  // null 안전 getter 사용
+            print('✅ [ProfileService] 프로필 조회 성공: ${profile.displayName}');
           }
           
           return profile;
@@ -110,7 +94,7 @@ class ProfileService {
       }
 
       final response = await _dio.patch(
-        AppConfig.getApiEndpoint('members/me/profile'),
+        '/members/me/profile',
         data: updatedProfile.toUpdateJson(),
         options: Options(
           headers: {
@@ -158,25 +142,14 @@ class ProfileService {
         print('🚀 [ProfileService] 모임원 정보 조회 시작... (ID: $memberId)');
       }
 
-      // 🚫 캐시 방지 전용 Dio 인스턴스 사용
-      final noCacheDio = _createNoCacheDio();
-      
-      final response = await noCacheDio.get(
-        AppConfig.getApiEndpoint('members/$memberId'),
+      final response = await _dio.get(
+        '/members/$memberId',
         options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken',
             'Content-Type': 'application/json',
-            // 🚫 강력한 캐시 방지 헤더 추가
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-            // 🔄 매번 다른 요청으로 인식하도록 타임스탬프 추가
-            'X-Request-Time': DateTime.now().millisecondsSinceEpoch.toString(),
           },
         ),
-        // 🚫 쿼리 파라미터로도 캐싱 방지
-        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch},
       );
 
       if (response.statusCode == 200) {
