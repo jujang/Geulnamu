@@ -78,7 +78,6 @@ class _MeetingListScreenState extends State<MeetingListScreen>
   void didPopNext() {
     // 다른 화면에서 돌아왔을 때 새로고침
     super.didPopNext();
-    print('🔄 [모임 목록] 다른 화면에서 돌아오면서 새로고침');
     refreshMeetingList();
   }
 

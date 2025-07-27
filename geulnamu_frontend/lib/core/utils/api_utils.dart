@@ -271,7 +271,7 @@ class _CacheControlInterceptor extends Interceptor {
       });
 
       if (AppConfig.debugMode) {
-        print('📋 [캐시 무효화] ${options.method} ${options.path} - 캐시 제어 헤더 추가');
+        print('📅 [캐시 무효화] ${options.method} ${options.path}');
       }
     }
 

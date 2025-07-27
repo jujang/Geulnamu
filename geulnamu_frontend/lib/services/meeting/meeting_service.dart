@@ -20,10 +20,6 @@ class MeetingService {
     _dio = ApiUtils.createDioWithTimeout(
       baseUrl: AppConfig.apiBaseUrl,
     );
-    
-    if (AppConfig.debugMode) {
-      print('✅ [MeetingService] 캐시 무효화 인터셉터와 함께 초기화 완료');
-    }
   }
 
   late final Dio _dio;
@@ -92,10 +88,6 @@ class MeetingService {
     bool isStaffMode = false, // 🆕 운영진용 모드 여부
   }) async {
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [모임 목록 조회] API 요청 시작...');
-      }
-      
       // 🔥 강제 캐시 버스트 추가
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final queryParams = filter.toQueryParameters(isStaffMode: isStaffMode);
@@ -126,19 +118,11 @@ class MeetingService {
 
         final meetingListResponse = MeetingListResponse.fromJson(processedResponse['data']);
         
-        if (AppConfig.debugMode) {
-          print('✅ [모임 목록 조회] 성공 - 총 ${meetingListResponse.meetingList.length}개 모임 로드');
-        }
-
         return meetingListResponse;
       } else {
         throw Exception('[모임 목록 조회] HTTP 오류: ${response.statusCode}');
       }
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [모임 목록 조회] 오류 발생: $e');
-      }
-      
       if (e is DioException) {
         throw ApiUtils.processDioException(e, '모임 목록 조회');
       }

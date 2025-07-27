@@ -19,10 +19,6 @@ class AttendanceService {
     _dio = ApiUtils.createDioWithTimeout(
       baseUrl: AppConfig.apiBaseUrl,
     );
-    
-    if (AppConfig.debugMode) {
-      print('✅ [AttendanceService] 캐시 무효화 인터셉터와 함께 초기화 완료');
-    }
   }
 
   late final Dio _dio;

@@ -45,10 +45,6 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 초기 데이터 로드
   Future<void> initializeMemberList() async {
-    if (AppConfig.debugMode) {
-      print('🚀 [MemberLogicMixin] 모임원 목록 초기화 시작');
-    }
-
     // 🎯 MemberService는 Singleton이므로 이미 초기화됨
 
     // 🎯 사용자 권한에 따른 필터 표시 가능 여부 설정
@@ -64,11 +60,6 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
   Future<void> _updateDeletedFilterPermission() async {
     final userRole = await _getUserRole();
     _canShowDeletedFilterSync = MemberService.canUseDeletedFilter(userRole);
-    
-    if (AppConfig.debugMode) {
-      print('🔍 [MemberLogicMixin] 사용자 권한: $userRole');
-      print('🔍 [MemberLogicMixin] 비활성 계정 필터 사용 가능: $_canShowDeletedFilterSync');
-    }
   }
 
   /// 🎯 초기 필터 설정 (비관리자급은 활성 계정만)
@@ -79,14 +70,6 @@ mixin MemberLogicMixin<T extends StatefulWidget> on State<T> {
     if (!isAdminLevel) {
       // 비관리자급은 초기 필터에 활성 계정만 조회로 설정
       _currentFilter = _currentFilter.copyWith(isDeleted: false);
-      
-      if (AppConfig.debugMode) {
-        print('🎨 [MemberLogicMixin] 초기 필터 설정: 비관리자급($userRole) - 활성 계정만 조회');
-      }
-    } else {
-      if (AppConfig.debugMode) {
-        print('🎨 [MemberLogicMixin] 초기 필터 설정: 관리자급($userRole) - 모든 계정 조회 가능');
-      }
     }
   }
 
