@@ -48,10 +48,6 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
         throw Exception('로그인이 필요합니다.');
       }
 
-      if (AppConfig.debugMode) {
-        print('🔄 [MeetingDetailLogicMixin] 모임 상세 로드 시작: meetingId=$meetingId');
-      }
-
       final accessToken = await authProvider.accessToken;
       if (accessToken == null) {
         throw Exception('인증 토큰을 가져올 수 없습니다.');
@@ -67,12 +63,6 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
           _meetingDetail = detail;
           _isLoading = false;
         });
-
-        if (AppConfig.debugMode) {
-          print(
-            '✅ [MeetingDetailLogicMixin] 모임 상세 로드 성공: ${detail.meetingName}',
-          );
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -80,10 +70,6 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
           _isLoading = false;
           _errorMessage = e.toString();
         });
-
-        if (AppConfig.debugMode) {
-          print('❌ [MeetingDetailLogicMixin] 모임 상세 로드 실패: $e');
-        }
       }
     }
   }
@@ -443,14 +429,6 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
 
     final now = DateTime.now();
     final changeDeadline = discussionTime.subtract(const Duration(minutes: 30));
-
-    if (AppConfig.debugMode) {
-      print('🕰️ [MeetingDetailLogicMixin] 토론 시간 체크:');
-      print('   현재 시간: ${now.toString()}');
-      print('   토론 시간: ${discussionTime.toString()}');
-      print('   변경 마감 시간: ${changeDeadline.toString()}');
-      print('   변경 가능 여부: ${now.isBefore(changeDeadline)}');
-    }
 
     return now.isBefore(changeDeadline);
   }

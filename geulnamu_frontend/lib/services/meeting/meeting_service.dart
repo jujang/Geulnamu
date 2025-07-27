@@ -139,11 +139,6 @@ class MeetingService {
     required String accessToken,
   }) async {
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [모임 상세 조회] API 요청 시작...');
-        print('🔗 [모임 상세 조회] 요청 URL: ${_dio.options.baseUrl}/meetings/$meetingId');
-      }
-
       final response = await _dio.get(
         '/meetings/$meetingId',
         options: Options(
@@ -162,19 +157,11 @@ class MeetingService {
 
         final meetingDetail = MeetingDetailInfo.fromJson(processedResponse['data']);
         
-        if (AppConfig.debugMode) {
-          print('✅ [모임 상세 조회] 성공 - 모임: ${meetingDetail.meetingName}');
-        }
-
         return meetingDetail;
       } else {
         throw Exception('[모임 상세 조회] HTTP 오류: ${response.statusCode}');
       }
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [모임 상세 조회] 오류 발생: $e');
-      }
-      
       if (e is DioException) {
         throw ApiUtils.processDioException(e, '모임 상세 조회');
       }

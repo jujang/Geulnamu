@@ -23,7 +23,8 @@ class ApiUtils {
         baseUrl: baseUrl ?? AppConfig.apiBaseUrl,
         connectTimeout: Duration(seconds: connectionTimeoutSeconds),
         receiveTimeout: Duration(seconds: receiveTimeoutSeconds),
-        sendTimeout: Duration(seconds: sendTimeoutSeconds),
+        // 🌐 Flutter Web에서 sendTimeout 경고 방지
+        sendTimeout: kIsWeb ? null : Duration(seconds: sendTimeoutSeconds),
         headers: headers,
       ),
     );
