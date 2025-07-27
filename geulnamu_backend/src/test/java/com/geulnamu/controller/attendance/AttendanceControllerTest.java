@@ -251,7 +251,7 @@ public class AttendanceControllerTest extends ControllerTest {
                     headerWithName("Authorization").description("액세스 토큰")
                 ),
                 requestFields(
-                    fieldWithPath("note").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ ! ? . , ; -)만으로 사용한 1자 이상, 255자 이하의 문자열")).description("비고(출석 관련 사유 작성)")
+                    fieldWithPath("note").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수문자(: / @ [ ] ( ) ~ _ ! ? . , ; -)만으로 사용한 1자 이상, 255자 이하의 문자열")).description("비고(출석 관련 사유 작성)")
                 ),
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),

@@ -48,9 +48,8 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
   /// 
   /// [initialFilter] 초기 필터 설정 (옵션)
   Future<void> initializeMeetingList({MeetingListFilter? initialFilter}) async {
-    // MeetingService 초기화
-    _meetingService.initialize();
-
+    // 🎯 MeetingService는 Singleton이므로 이미 초기화됨
+    
     // 🎯 초기 필터 설정 (제공된 경우)
     if (initialFilter != null) {
       _currentFilter = initialFilter;

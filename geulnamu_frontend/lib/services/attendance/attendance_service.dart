@@ -1,0 +1,258 @@
+import 'package:dio/dio.dart';
+import '../../core/config/app_config.dart';
+import '../../core/utils/api_utils.dart';
+import '../../models/attendance/request/attendance_note_request.dart';
+
+/// 출석 관리 서비스 (Singleton)
+/// 
+/// 제공 기능:
+/// - 모임 출석 체크인
+/// - 본인 출석 정보 조회
+/// - 모임별 출석 현황 조회
+/// - 비고 작성
+/// - 토론 참석 의사 변경
+class AttendanceService {
+  static final AttendanceService _instance = AttendanceService._internal();
+  factory AttendanceService() => _instance;
+  AttendanceService._internal() {
+    // 🔧 생성자에서 즉시 Dio 초기화
+    _dio = ApiUtils.createDioWithTimeout(
+      baseUrl: AppConfig.apiBaseUrl,
+    );
+  }
+
+  late final Dio _dio;
+
+  /// 모임 출석 체크인
+  /// 
+  /// API: POST /attendances/check-in?meetingId={meetingId}
+  /// 권한: MEMBER 이상
+  Future<int> checkIn({
+    required int meetingId,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [출석 체크인] API 요청 시작...');
+        print('🔗 [출석 체크인] 요청 URL: ${_dio.options.baseUrl}/attendances/check-in?meetingId=$meetingId');
+      }
+
+      final response = await _dio.post(
+        '/attendances/check-in',
+        queryParameters: {'meetingId': meetingId},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '출석 체크인',
+        );
+
+        final attendanceId = processedResponse['data'] as int;
+        
+        if (AppConfig.debugMode) {
+          print('✅ [출석 체크인] 성공 - 출석 ID: $attendanceId');
+        }
+
+        return attendanceId;
+      } else {
+        throw Exception('[출석 체크인] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [출석 체크인] 오류 발생: $e');
+      }
+      
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '출석 체크인');
+      }
+      rethrow;
+    }
+  }
+
+  /// 비고 작성
+  /// 
+  /// API: PATCH /attendances/{attendanceId}/note
+  /// 권한: MEMBER 이상 (본인 출석만 수정 가능)
+  Future<void> writeNote({
+    required int attendanceId,
+    required String note,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [비고 작성] API 요청 시작...');
+        print('🔗 [비고 작성] 요청 URL: ${_dio.options.baseUrl}/attendances/$attendanceId/note');
+        print('📝 [비고 작성] 비고 내용: $note');
+      }
+
+      final request = AttendanceNoteRequest(note: note);
+
+      final response = await _dio.patch(
+        '/attendances/$attendanceId/note',
+        data: request.toJson(),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '비고 작성',
+          expectData: false, // Void 응답이므로 data 없음
+        );
+        
+        if (AppConfig.debugMode) {
+          print('✅ [비고 작성] 성공');
+        }
+      } else {
+        throw Exception('[비고 작성] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [비고 작성] 오류 발생: $e');
+      }
+      
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '비고 작성');
+      }
+      rethrow;
+    }
+  }
+
+  /// 독서만 할래요 (토론 불참)
+  /// 
+  /// API: PATCH /attendances/{attendanceId}/just-read
+  /// 권한: MEMBER 이상
+  Future<void> setJustRead({
+    required int attendanceId,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [독서만 할래요] API 요청 시작...');
+      }
+
+      final response = await _dio.patch(
+        '/attendances/$attendanceId/just-read',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        ApiUtils.processBackendResponse(
+          response,
+          '독서만 할래요',
+          expectData: false,
+        );
+        
+        if (AppConfig.debugMode) {
+          print('✅ [독서만 할래요] 성공');
+        }
+      } else {
+        throw Exception('[독서만 할래요] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [독서만 할래요] 오류 발생: $e');
+      }
+      
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '독서만 할래요');
+      }
+      rethrow;
+    }
+  }
+
+  /// 토론할래요 (토론 참석)
+  /// 
+  /// API: PATCH /attendances/{attendanceId}/want-discussion
+  /// 권한: MEMBER 이상
+  Future<void> setWantDiscussion({
+    required int attendanceId,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [토론할래요] API 요청 시작...');
+      }
+
+      final response = await _dio.patch(
+        '/attendances/$attendanceId/want-discussion',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        ApiUtils.processBackendResponse(
+          response,
+          '토론할래요',
+          expectData: false,
+        );
+        
+        if (AppConfig.debugMode) {
+          print('✅ [토론할래요] 성공');
+        }
+      } else {
+        throw Exception('[토론할래요] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [토론할래요] 오류 발생: $e');
+      }
+      
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '토론할래요');
+      }
+      rethrow;
+    }
+  }
+
+  /// 본인 출석 정보 조회
+  /// 
+  /// API: GET /attendances/my-info?meetingId={meetingId}
+  /// 권한: MEMBER 이상
+  /// 
+  /// 향후 구현 예정 (현재는 모임 상세에서 함께 조회됨)
+  /*
+  Future<AttendanceInfo> getMyAttendanceInfo({
+    required int meetingId,
+    required String accessToken,
+  }) async {
+    // TODO: 향후 필요시 구현
+  }
+  */
+
+  /// 모임별 출석 현황 조회
+  /// 
+  /// API: GET /attendances/list?meetingId={meetingId}
+  /// 권한: MEMBER 이상
+  /// 
+  /// 향후 구현 예정 (출석 현황 페이지에서 사용)
+  /*
+  Future<MeetingAttendanceDetails> getMeetingAttendanceStatus({
+    required int meetingId,
+    required String accessToken,
+  }) async {
+    // TODO: 향후 구현
+  }
+  */
+}

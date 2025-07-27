@@ -4,6 +4,7 @@ import '../../core/utils/api_utils.dart';
 import '../../models/meeting/meeting_model.dart';
 import '../../models/meeting/meeting_filter_model.dart';
 import '../../models/meeting/request/meeting_create_request.dart';
+import '../../models/meeting/meeting_detail_model.dart';
 
 /// 모임 관리 서비스 (Singleton)
 /// 
@@ -14,16 +15,14 @@ import '../../models/meeting/request/meeting_create_request.dart';
 class MeetingService {
   static final MeetingService _instance = MeetingService._internal();
   factory MeetingService() => _instance;
-  MeetingService._internal();
-
-  final Dio _dio = Dio();
-
-  /// 서비스 초기화
-  void initialize() {
-    _dio.options.baseUrl = AppConfig.apiBaseUrl;
-    _dio.options.connectTimeout = const Duration(seconds: 5);
-    _dio.options.receiveTimeout = const Duration(seconds: 3);
+  MeetingService._internal() {
+    // 🔧 생성자에서 즉시 Dio 초기화
+    _dio = ApiUtils.createDioWithTimeout(
+      baseUrl: AppConfig.apiBaseUrl,
+    );
   }
+
+  late final Dio _dio;
 
   /// 모임 생성
   /// 
@@ -89,17 +88,24 @@ class MeetingService {
     bool isStaffMode = false, // 🆕 운영진용 모드 여부
   }) async {
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [모임 목록 조회] API 요청 시작...');
-      }
+      // 🔥 강제 캐시 버스트 추가
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final queryParams = filter.toQueryParameters(isStaffMode: isStaffMode);
+      queryParams['_cache_bust'] = timestamp.toString();
+      queryParams['_t'] = timestamp.toString();
 
       final response = await _dio.get(
         '/meetings/list',
-        queryParameters: filter.toQueryParameters(isStaffMode: isStaffMode), // 🆕 isStaffMode 전달
+        queryParameters: queryParams,
         options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken',
             'Content-Type': 'application/json',
+            // 🔥 강력한 캐시 무효화 헤더
+            'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'If-Modified-Since': 'Mon, 26 Jul 1997 05:00:00 GMT',
           },
         ),
       );
@@ -112,21 +118,52 @@ class MeetingService {
 
         final meetingListResponse = MeetingListResponse.fromJson(processedResponse['data']);
         
-        if (AppConfig.debugMode) {
-          print('✅ [모임 목록 조회] 성공 - 총 ${meetingListResponse.meetingList.length}개 모임 로드');
-        }
-
         return meetingListResponse;
       } else {
         throw Exception('[모임 목록 조회] HTTP 오류: ${response.statusCode}');
       }
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [모임 목록 조회] 오류 발생: $e');
-      }
-      
       if (e is DioException) {
         throw ApiUtils.processDioException(e, '모임 목록 조회');
+      }
+      rethrow;
+    }
+  }
+
+  /// 모임 상세 조회
+  /// 
+  /// API: GET /meetings/{meetingId}
+  /// 권한: MEMBER 이상
+  Future<MeetingDetailInfo> getMeetingDetail({
+    required int meetingId,
+    required String accessToken,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/meetings/$meetingId',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '모임 상세 조회',
+        );
+
+        final meetingDetail = MeetingDetailInfo.fromJson(processedResponse['data']);
+        
+        return meetingDetail;
+      } else {
+        throw Exception('[모임 상세 조회] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '모임 상세 조회');
       }
       rethrow;
     }

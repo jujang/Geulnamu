@@ -67,8 +67,7 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
     super.initState();
     _nameController = TextEditingController(); // 🎯 Controller 초기화
     
-    // 🎯 MemberService 초기화
-    _memberService.initialize();
+    // 🎯 MemberService는 Singleton이므로 이미 초기화됨
     
     // 🛡️ 관리자 모드 권한 검증
     if (isAdminMode) {

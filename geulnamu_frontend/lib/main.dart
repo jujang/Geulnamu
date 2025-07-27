@@ -23,8 +23,13 @@ import 'screens/member/member_list_screen.dart'; // 모임원 목록 화면
 import 'screens/meeting/meeting_list_screen.dart'; // 모임 목록 화면
 import 'screens/meeting/meeting_list_staff_screen.dart'; // 🆕 운영진용 모임 목록 화면
 import 'screens/meeting/meeting_create_screen.dart'; // 🆕 모임 만들기 화면
+import 'screens/meeting/meeting_detail_screen.dart'; // 🆕 모임 상세 화면
 import 'screens/settings_screen.dart'; // 설정 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
+import 'services/meeting/meeting_service.dart'; // 🆕 모임 서비스
+import 'services/attendance/attendance_service.dart'; // 🆕 출석 서비스
+import 'services/member/member_service.dart'; // 🆕 모임원 서비스
+import 'services/profile/profile_service.dart'; // 🆕 프로필 서비스
 
 // 🎯 Global Navigator Key - 전역에서 접근 가능
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -39,6 +44,12 @@ void main() async {
 
     // 카카오 SDK 초기화
     KakaoConfig.initialize();
+
+    // 🎯 서비스 초기화 - Singleton 인스턴스 생성 (생성자에서 자동 초기화)
+    MeetingService(); // Singleton 인스턴스 생성
+    AttendanceService(); // Singleton 인스턴스 생성
+    MemberService(); // Singleton 인스턴스 생성
+    ProfileService(); // Singleton 인스턴스 생성
 
     // 앱 설정 정보 출력 (디버그용)
     AppConfig.printConfig();
@@ -106,6 +117,18 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
           final uri = Uri.parse(settings.name!);
           final path = uri.path; // 쿼리 파라미터 제외한 순수 경로
           final queryParams = uri.queryParameters;
+          
+          // 🎯 동적 경로 처리 (모임 상세)
+          if (path.startsWith('/meeting/') && path.split('/').length == 3) {
+            final meetingIdStr = path.split('/')[2];
+            final meetingId = int.tryParse(meetingIdStr);
+            if (meetingId != null) {
+              return MaterialPageRoute(
+                builder: (context) => MeetingDetailScreen(meetingId: meetingId),
+                settings: settings,
+              );
+            }
+          }
           
           // 🎯 정확한 라우트 매칭 시스템
           switch (path) {

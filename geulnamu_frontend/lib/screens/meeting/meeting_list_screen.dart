@@ -50,17 +50,27 @@ class _MeetingListScreenState extends State<MeetingListScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // RouteObserver 등록
-    final route = ModalRoute.of(context);
-    if (route is PageRoute) {
-      HomeRouteService.routeObserver.subscribe(this, route);
-    }
+    // 🎯 RouteObserver 등록 - 안전하게 처리
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final route = ModalRoute.of(context);
+      if (route is PageRoute && mounted) {
+        try {
+          HomeRouteService.routeObserver.subscribe(this, route);
+        } catch (e) {
+          print('⚠️ [MeetingListScreen] RouteObserver 등록 실패: $e');
+        }
+      }
+    });
   }
   
   @override
   void dispose() {
     // RouteObserver 등록 해제
-    HomeRouteService.routeObserver.unsubscribe(this);
+    try {
+      HomeRouteService.routeObserver.unsubscribe(this);
+    } catch (e) {
+      print('⚠️ [MeetingListScreen] RouteObserver 해제 실패: $e');
+    }
     super.dispose();
   }
   
@@ -68,7 +78,6 @@ class _MeetingListScreenState extends State<MeetingListScreen>
   void didPopNext() {
     // 다른 화면에서 돌아왔을 때 새로고침
     super.didPopNext();
-    print('🔄 [모임 목록] 다른 화면에서 돌아오면서 새로고침');
     refreshMeetingList();
   }
 
@@ -213,10 +222,9 @@ class _MeetingListScreenState extends State<MeetingListScreen>
     await _homeService.handleLogout(context, authProvider);
   }
 
-  /// 모임 카드 탭 처리 (향후 상세보기 기능)
+  /// 모임 카드 탭 처리 - 상세 페이지로 이동
   void _handleMeetingTap(MeetingInfo meeting) {
-    // TODO: 향후 모임 상세 페이지 구현 시 아래 코드 활성화
-    // Navigator.pushNamed(context, '/meeting/${meeting.meetingId}');
+    Navigator.pushNamed(context, '/meeting/${meeting.meetingId}');
   }
 
   /// 출석현황 확인 버튼 처리 (MeetingLogicMixin에서 처리)

@@ -24,7 +24,6 @@ class HomeRouteService {
     if (route != null && route is PageRoute) {
       try {
         routeObserver.subscribe(routeAware, route as PageRoute<dynamic>);
-        debugPrint('✅ [HomeRouteService] RouteObserver 등록 성공');
       } catch (e) {
         debugPrint('⚠️ [HomeRouteService] RouteObserver 등록 실패: $e');
       }
@@ -34,29 +33,28 @@ class HomeRouteService {
   void unregisterRouteObserver(RouteAware routeAware) {
     try {
       routeObserver.unsubscribe(routeAware);
-      debugPrint('✅ [HomeRouteService] RouteObserver 구독 해제 완료');
     } catch (e) {
       debugPrint('⚠️ [HomeRouteService] RouteObserver 구독 해제 실패: $e');
     }
   }
 
-  // 🎯 RouteAware 이벤트 처리 메서드들
+  // 🎯 RouteAware 이벤트 처리 메서드들 (로그 없이 기능만 유지)
 
   void onPush() {
-    debugPrint('🏠 [HomeRouteService] 화면 진입 (didPush)');
+    // 로그 제거: 기능만 유지
   }
 
   void onPushNext() {
-    debugPrint('🚪 [HomeRouteService] 다른 화면으로 이동 (didPushNext)');
+    // 로그 제거: 기능만 유지
   }
 
   void onPopNext(BuildContext context) {
-    debugPrint('🔄 [HomeRouteService] 다른 화면에서 돌아옴 감지 (didPopNext)');
+    // 로그 제거: 기능만 유지
     // 🎯 제거: 캐시 체크 로직 - ProfileStatusService에서 자동 처리
   }
 
   void onPop() {
-    debugPrint('🚪 [HomeRouteService] 화면 종료 (didPop)');
+    // 로그 제거: 기능만 유지
     // 🎯 제거: 캐시 초기화 로직 - ProfileStatusService에서 자동 처리
   }
 }

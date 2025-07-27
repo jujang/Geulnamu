@@ -85,10 +85,10 @@ public class MeetingControllerTest extends ControllerTest {
                 ),
                 requestFields(
                     fieldWithPath("meetingType").type(JsonFieldType.STRING).attributes(key("format").value("'REGULAR', 'FLASH', 'SPECIAL' 중 하나의 값")).description("모임 종류"),
-                    fieldWithPath("meetingName").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ -)만으로 사용한 1자 이상, 70자 이하")).description("모임 제목"),
+                    fieldWithPath("meetingName").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수문자(: / @ [ ] ( ) ~ _ -)만으로 사용한 1자 이상, 70자 이하")).description("모임 제목"),
                     fieldWithPath("meetingDate").type(JsonFieldType.STRING).attributes(key("format").value("yyyyMMdd HH:mm 형식으로 이뤄진 미래 시간대의 문자열")).description("모임 개최일자"),
                     fieldWithPath("lateThresholdTime").type(JsonFieldType.STRING).attributes(key("format").value("yyyyMMdd HH:mm 형식으로 이뤄진 미래 시간대의 문자열")).description("지각 기준 시간(모임 개최일자보다 빠르면 안 됨. 입력 안 할 시 모임 개최시간과 동일값 처리)").optional(),
-                    fieldWithPath("meetingPlace").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ -)만으로 사용한 1자 이상, 255자 이하")).description("모임 장소"),
+                    fieldWithPath("meetingPlace").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수문자(: / @ [ ] ( ) ~ _ -)만으로 사용한 1자 이상, 255자 이하")).description("모임 장소"),
                     fieldWithPath("description").type(JsonFieldType.STRING).attributes(key("format").value("형식, 길이 제한 없는 문자열")).description("상세 내용").optional()
                 ),
                 responseFields(
@@ -241,7 +241,8 @@ public class MeetingControllerTest extends ControllerTest {
             LocalDateTime.of(2025, 5, 31, 10, 45), "추후 공지 예정 (합정역 주변 카페)",
             "~~", LocalDateTime.of(2025, 5, 1, 12, 0),
             5L, "~~", "저 안 늦었어요",
-            LocalDateTime.of(2025, 5, 12, 12, 0), null, true
+            LocalDateTime.of(2025, 5, 12, 12, 0), null, true,
+            null, null
         );
 
         given(meetingService.getMeeting(any(), any())).willReturn(meetingDetailResponse_01);
@@ -288,7 +289,11 @@ public class MeetingControllerTest extends ControllerTest {
                     fieldWithPath("data.note").type(JsonFieldType.STRING).description("출석 비고").optional(),
                     fieldWithPath("data.discussionTime").type(JsonFieldType.STRING).description("토론 시간").optional(),
                     fieldWithPath("data.alarmMessage").type(JsonFieldType.STRING).description("토론 시작 알림 메세지").optional(),
-                    fieldWithPath("data.wantDiscussion").type(JsonFieldType.BOOLEAN).description("비공개 여부").optional()
+                    fieldWithPath("data.wantDiscussion").type(JsonFieldType.BOOLEAN).description("비공개 여부").optional(),
+                    fieldWithPath("data.discussionGroup").type(JsonFieldType.STRING).description("토론 조").optional(),
+                    fieldWithPath("data.groupMemberList").type(JsonFieldType.ARRAY).description("같은 토론 조 리스트").optional(),
+                    fieldWithPath("data.groupMemberList[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호").optional(),
+                    fieldWithPath("data.groupMemberList[].memberName").type(JsonFieldType.STRING).description("모임원 이름").optional()
                 )
             ));
     }
@@ -392,10 +397,10 @@ public class MeetingControllerTest extends ControllerTest {
                 ),
                 requestFields(
                     fieldWithPath("meetingType").type(JsonFieldType.STRING).attributes(key("format").value("'REGULAR', 'FLASH', 'SPECIAL' 중 하나의 값")).description("모임 종류").optional(),
-                    fieldWithPath("meetingName").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ -)만으로 사용한 1자 이상, 70자 이하의 문자열")).description("모임 제목").optional(),
+                    fieldWithPath("meetingName").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수문자(: / @ [ ] ( ) ~ _ -)만으로 사용한 1자 이상, 70자 이하의 문자열")).description("모임 제목").optional(),
                     fieldWithPath("meetingDate").type(JsonFieldType.STRING).attributes(key("format").value("yyyyMMdd HH:mm 형식으로 이뤄진 미래 시간대의 문자열")).description("모임 개최일자").optional(),
                     fieldWithPath("lateThresholdTime").type(JsonFieldType.STRING).attributes(key("format").value("yyyyMMdd HH:mm 형식으로 이뤄진 미래 시간대의 문자열")).description("지각 기준 시간(모임 개최 시간보다 빠르면 안 됨)").optional(),
-                    fieldWithPath("meetingPlace").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수분자(: / [ ] ( ) ~ _ -)만으로 사용한 1자 이상, 255자 이하의 문자열")).description("모임 장소").optional(),
+                    fieldWithPath("meetingPlace").type(JsonFieldType.STRING).attributes(key("format").value("한글, 영문, 숫자, 공백 및 일부 특수문자(: / @ [ ] ( ) ~ _ -)만으로 사용한 1자 이상, 255자 이하의 문자열")).description("모임 장소").optional(),
                     fieldWithPath("description").type(JsonFieldType.STRING).attributes(key("format").value("형식, 길이 제한 없는 문자열")).description("상세 내용").optional()
                 ),
                 responseFields(
