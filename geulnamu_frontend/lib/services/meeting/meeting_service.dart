@@ -5,6 +5,8 @@ import '../../models/meeting/meeting_model.dart';
 import '../../models/meeting/meeting_filter_model.dart';
 import '../../models/meeting/request/meeting_create_request.dart';
 import '../../models/meeting/meeting_detail_model.dart';
+import '../../models/meeting/meeting_detail_staff_model.dart';
+import '../../models/meeting/request/meeting_update_requests.dart';
 
 /// 모임 관리 서비스 (Singleton)
 /// 
@@ -164,6 +166,270 @@ class MeetingService {
     } catch (e) {
       if (e is DioException) {
         throw ApiUtils.processDioException(e, '모임 상세 조회');
+      }
+      rethrow;
+    }
+  }
+
+  /// 운영진용 모임 상세 조회
+  /// 
+  /// API: GET /meetings/{meetingId}/staff
+  /// 권한: STAFF 이상
+  Future<MeetingDetailStaffInfo> getMeetingDetailForStaff({
+    required int meetingId,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [운영진용 모임 상세 조회] API 요청 시작...');
+      }
+
+      final response = await _dio.get(
+        '/meetings/$meetingId/staff',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '운영진용 모임 상세 조회',
+        );
+
+        final meetingDetail = MeetingDetailStaffInfo.fromJson(processedResponse['data']);
+        
+        return meetingDetail;
+      } else {
+        throw Exception('[운영진용 모임 상세 조회] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '운영진용 모임 상세 조회');
+      }
+      rethrow;
+    }
+  }
+
+  /// 모임 기본 정보 수정
+  /// 
+  /// API: PATCH /meetings/{meetingId}/basic
+  /// 권한: STAFF 이상
+  Future<void> updateMeetingBasicInfo({
+    required int meetingId,
+    required MeetingBasicUpdateRequest request,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [모임 기본 정보 수정] API 요청 시작...');
+        print('📝 [모임 기본 정보 수정] 요청 데이터: ${request.toString()}');
+      }
+
+      final response = await _dio.patch(
+        '/meetings/$meetingId/basic',
+        data: request.toJson(),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '모임 기본 정보 수정',
+        );
+
+        if (AppConfig.debugMode) {
+          print('✅ [모임 기본 정보 수정] 성공');
+        }
+      } else {
+        throw Exception('[모임 기본 정보 수정] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '모임 기본 정보 수정');
+      }
+      rethrow;
+    }
+  }
+
+  /// 토론 정보 수정
+  /// 
+  /// API: PATCH /meetings/{meetingId}/discussion
+  /// 권한: STAFF 이상
+  Future<void> updateMeetingDiscussionInfo({
+    required int meetingId,
+    required MeetingDiscussionUpdateRequest request,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [토론 정보 수정] API 요청 시작...');
+        print('📝 [토론 정보 수정] 요청 데이터: ${request.toString()}');
+      }
+
+      final response = await _dio.patch(
+        '/meetings/$meetingId/discussion',
+        data: request.toJson(),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '토론 정보 수정',
+        );
+
+        if (AppConfig.debugMode) {
+          print('✅ [토론 정보 수정] 성공');
+        }
+      } else {
+        throw Exception('[토론 정보 수정] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '토론 정보 수정');
+      }
+      rethrow;
+    }
+  }
+
+  /// 모임 삭제
+  /// 
+  /// API: DELETE /meetings/{meetingId}/remove
+  /// 권한: STAFF 이상 (생성자) 또는 관리자
+  Future<void> deleteMeeting({
+    required int meetingId,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [모임 삭제] API 요청 시작...');
+      }
+
+      final response = await _dio.delete(
+        '/meetings/$meetingId/remove',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '모임 삭제',
+        );
+
+        if (AppConfig.debugMode) {
+          print('✅ [모임 삭제] 성공');
+        }
+      } else {
+        throw Exception('[모임 삭제] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '모임 삭제');
+      }
+      rethrow;
+    }
+  }
+
+  /// 모임 비공개 처리
+  /// 
+  /// API: PATCH /meetings/{meetingId}/make-private
+  /// 권한: 관리자 (ADMIN, LEADER, VICE_LEADER)
+  Future<void> makeMeetingPrivate({
+    required int meetingId,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [모임 비공개 처리] API 요청 시작...');
+      }
+
+      final response = await _dio.patch(
+        '/meetings/$meetingId/make-private',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '모임 비공개 처리',
+        );
+
+        if (AppConfig.debugMode) {
+          print('✅ [모임 비공개 처리] 성공');
+        }
+      } else {
+        throw Exception('[모임 비공개 처리] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '모임 비공개 처리');
+      }
+      rethrow;
+    }
+  }
+
+  /// 모임 공개 처리
+  /// 
+  /// API: PATCH /meetings/{meetingId}/make-public
+  /// 권한: 관리자 (ADMIN, LEADER, VICE_LEADER)
+  Future<void> makeMeetingPublic({
+    required int meetingId,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [모임 공개 처리] API 요청 시작...');
+      }
+
+      final response = await _dio.patch(
+        '/meetings/$meetingId/make-public',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '모임 공개 처리',
+        );
+
+        if (AppConfig.debugMode) {
+          print('✅ [모임 공개 처리] 성공');
+        }
+      } else {
+        throw Exception('[모임 공개 처리] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '모임 공개 처리');
       }
       rethrow;
     }

@@ -229,9 +229,13 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
     await _homeService.handleLogout(context, authProvider);
   }
 
-  /// 모임 카드 탭 처리 (향후 운영진용 상세보기 기능)
+  /// 모임 카드 탭 처리 (운영진용 상세보기 기능)
   void _handleMeetingTap(MeetingInfo meeting) {
-    // TODO: 향후 운영진용 모임 상세 페이지 구현 시 아래 코드 활성화
-    // Navigator.pushNamed(context, '/meeting/${meeting.meetingId}/staff');
+    Navigator.pushNamed(context, '/meeting/${meeting.meetingId}/staff').then((result) {
+      // 모임 수정/삭제 후 목록 새로고침
+      if (result == true && mounted) {
+        refreshMeetingList();
+      }
+    });
   }
 }
