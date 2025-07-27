@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface MeetingQueryRepositoryCustom {
     List<MemberIdAndNameResponse> findStaffList();
-    Page<MeetingInfoResponse> findMeetingsWithPagingNew(MeetingListRequest request, Long myMemberId);
+    Page<MeetingInfoResponse> findMeetingsWithPaging(MeetingListRequest request, Long myMemberId);
     MeetingDetailResponse findMeeting(Long meetingId, Long memberId);
 }

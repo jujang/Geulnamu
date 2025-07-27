@@ -47,7 +47,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
     }
 
     @Override
-    public Page<MeetingInfoResponse> findMeetingsWithPagingNew(MeetingListRequest request, Long myMemberId) {
+    public Page<MeetingInfoResponse> findMeetingsWithPaging(MeetingListRequest request, Long myMemberId) {
         Pageable pageable = request.toPageable();
 
         final Long totalCount = queryFactory
@@ -109,7 +109,7 @@ public class MeetingQueryRepositoryImpl implements MeetingQueryRepositoryCustom 
 
     private StringExpression attendanceStatusExpression() {
         return new CaseBuilder()
-            .when(meeting.meetingDate.after(LocalDateTime.now()))
+            .when(meeting.meetingDate.after(LocalDateTime.now()).and(attendance.id.isNull()))
             .then(AttendanceStatus.NOT_STARTED.getValue())
             .when(attendance.id.isNull())
             .then(AttendanceStatus.NOT_ATTEND.getValue())
