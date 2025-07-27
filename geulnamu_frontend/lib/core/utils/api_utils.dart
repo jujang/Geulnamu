@@ -286,7 +286,6 @@ class _DebugLoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     print('[API 요청] ${options.method} ${options.uri}');
-    print('📝 [요청 헤더] ${options.headers}');
     if (options.data != null) {
       print('📊 [요청 데이터] ${options.data}');
     }
@@ -297,7 +296,6 @@ class _DebugLoggingInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     print('✅ [API 응답] ${response.statusCode} ${response.requestOptions.uri}');
-    print('📝 [응답 헤더] ${response.headers}');
     if (response.data != null) {
       final dataStr = response.data.toString();
       if (dataStr.length > 500) {
