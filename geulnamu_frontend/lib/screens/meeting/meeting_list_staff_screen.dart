@@ -6,6 +6,7 @@ import '../../widgets/common/loading_widgets.dart';
 import '../../core/theme.dart';
 import '../../models/meeting/meeting_model.dart';
 import '../../services/home/home_service.dart';
+import '../../services/home/home_route_service.dart'; // RouteObserver 추가
 import 'mixins/meeting_logic_mixin.dart';
 import 'widgets/meeting_widgets.dart';
 import 'widgets/meeting_list_widgets.dart';
@@ -33,7 +34,7 @@ class MeetingListStaffScreen extends StatefulWidget {
 }
 
 class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
-    with MeetingLogicMixin {
+    with MeetingLogicMixin, RouteAware {
   final HomeService _homeService = HomeService();
 
   // 🆕 운영진 모드 활성화
@@ -47,6 +48,41 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeScreen();
     });
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 🎯 RouteObserver 등록 - 안전하게 처리
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final route = ModalRoute.of(context);
+      if (route is PageRoute && mounted) {
+        try {
+          HomeRouteService.routeObserver.subscribe(this, route);
+        } catch (e) {
+          print('⚠️ [MeetingListStaffScreen] RouteObserver 등록 실패: $e');
+        }
+      }
+    });
+  }
+  
+  @override
+  void dispose() {
+    // RouteObserver 등록 해제
+    try {
+      HomeRouteService.routeObserver.unsubscribe(this);
+    } catch (e) {
+      print('⚠️ [MeetingListStaffScreen] RouteObserver 해제 실패: $e');
+    }
+    super.dispose();
+  }
+  
+  @override
+  void didPopNext() {
+    // 다른 화면에서 돌아왔을 때 새로고침
+    super.didPopNext();
+    print('🔄 [운영진용 모임 목록] 다른 화면에서 돌아오면서 새로고침');
+    refreshMeetingList();
   }
 
   /// 화면 초기화

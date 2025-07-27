@@ -88,11 +88,20 @@ class MeetingService {
     bool isStaffMode = false, // 🆕 운영진용 모드 여부
   }) async {
     try {
+      if (AppConfig.debugMode) {
+        print('🚀 [모임 목록 조회] API 요청 시작... (${isStaffMode ? "운영진용" : "일반용"})');
+      }
+      
       // 🔥 강제 캐시 버스트 추가
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final queryParams = filter.toQueryParameters(isStaffMode: isStaffMode);
       queryParams['_cache_bust'] = timestamp.toString();
       queryParams['_t'] = timestamp.toString();
+      queryParams['_refresh'] = 'true';
+
+      if (AppConfig.debugMode) {
+        print('📅 [캐시 무효화] GET /meetings/list?${queryParams.entries.map((e) => '${e.key}=${e.value}').join('&')}');
+      }
 
       final response = await _dio.get(
         '/meetings/list',
@@ -106,6 +115,7 @@ class MeetingService {
             'Pragma': 'no-cache',
             'Expires': '0',
             'If-Modified-Since': 'Mon, 26 Jul 1997 05:00:00 GMT',
+            'X-Requested-With': 'XMLHttpRequest',
           },
         ),
       );
@@ -119,6 +129,10 @@ class MeetingService {
         final meetingListResponse = MeetingListResponse.fromJson(
           processedResponse['data'],
         );
+
+        if (AppConfig.debugMode) {
+          print('✅ [모임 목록 조회] 성공 - 총 ${meetingListResponse.meetingList.length}개 모임, 페이지: ${meetingListResponse.pagingResponse.pageNumber}/${meetingListResponse.pagingResponse.totalPages}');
+        }
 
         return meetingListResponse;
       } else {
@@ -174,24 +188,46 @@ class MeetingService {
   }
 
   /// 운영진용 모임 상세 조회
-  ///
+  /// 
   /// API: GET /meetings/{meetingId}/staff
   /// 권한: STAFF 이상
   Future<MeetingDetailStaffInfo> getMeetingDetailForStaff({
-    required int meetingId,
-    required String accessToken,
+  required int meetingId,
+  required String accessToken,
+    bool forceRefresh = false, // 강제 새로고침 옵션
   }) async {
-    try {
-      if (AppConfig.debugMode) {
-        print('🚀 [운영진용 모임 상세 조회] API 요청 시작...');
+  try {
+  if (AppConfig.debugMode) {
+    print('🚀 [운영진용 모임 상세 조회] API 요청 시작...');
+        if (forceRefresh) {
+      print('📅 [캐시 무효화] GET /meetings/$meetingId/staff');
+  }
+  }
+
+  // 강제 새로고침 시 캐시 버스트 매개변수 추가
+  final Map<String, dynamic> queryParams = {};
+  if (forceRefresh) {
+  final timestamp = DateTime.now().millisecondsSinceEpoch;
+    queryParams['_cache_bust'] = timestamp.toString();
+        queryParams['_t'] = timestamp.toString();
+        queryParams['_refresh'] = 'true';
       }
 
       final response = await _dio.get(
         '/meetings/$meetingId/staff',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
         options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken',
             'Content-Type': 'application/json',
+            // 강제 새로고침 시 강력한 캐시 무효화 헤더
+            if (forceRefresh) ...{
+              'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+              'Pragma': 'no-cache',
+              'Expires': '0',
+              'If-Modified-Since': 'Mon, 26 Jul 1997 05:00:00 GMT',
+              'X-Requested-With': 'XMLHttpRequest',
+            },
           },
         ),
       );

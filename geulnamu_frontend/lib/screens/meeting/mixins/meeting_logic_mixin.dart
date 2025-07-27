@@ -4,6 +4,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../services/meeting/meeting_service.dart';
 import '../../../models/meeting/meeting_model.dart';
 import '../../../models/meeting/meeting_filter_model.dart';
+import '../../../core/config/app_config.dart'; // AppConfig import 추가
 
 /// 모임 목록 화면 로직 Mixin
 ///
@@ -150,9 +151,18 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  /// 새로고침
+  /// 새로고침 (강제 캐시 무효화)
   Future<void> refreshMeetingList() async {
-    await loadMeetingList();
+    if (AppConfig.debugMode) {
+      print('🔄 [모임 목록 새로고침] 다른 화면에서 돌아와서 새로고침 시작...');
+    }
+    
+    // 로딩 표시와 함께 강제 새로고침
+    await loadMeetingList(showLoading: true);
+    
+    if (AppConfig.debugMode) {
+      print('✅ [모임 목록 새로고침] 완료 - 총 ${totalElements}개 모임');
+    }
   }
 
   /// 필터 초기화

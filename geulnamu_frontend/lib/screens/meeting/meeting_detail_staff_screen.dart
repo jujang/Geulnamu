@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../services/home/home_service.dart';
 import '../../services/home/home_route_service.dart';
+import '../../core/config/app_config.dart'; // AppConfig import 추가
 import 'mixins/meeting_detail_staff_logic_mixin.dart';
 import 'widgets/meeting_detail_staff_widgets.dart';
 
@@ -69,8 +70,11 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
   Widget build(BuildContext context) {
     return Consumer<HomeService>(
       builder: (context, homeService, child) {
+        // 모임 정보가 업데이트되면 타이틀도 자동 업데이트
+        final currentTitle = meetingDetail?.meetingName ?? '모임 상세 (운영진용)';
+        
         return MainLayout(
-          title: meetingDetail?.meetingName ?? '모임 상세 (운영진용)',
+          title: currentTitle,
           isHomePage: false, // 서브 페이지이므로 뒤로가기 버튼 표시
           // HomeService를 통한 메뉴 및 로그아웃 처리
           onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
@@ -79,7 +83,12 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
           actions: [
             IconButton(
               icon: const Icon(Icons.refresh),
-              onPressed: () => refreshMeetingDetailStaff(widget.meetingId),
+              onPressed: () {
+                if (AppConfig.debugMode) {
+                  print('🔄 [수동 새로고침] 사용자가 새로고침 버튼 클릭');
+                }
+                refreshMeetingDetailStaff(widget.meetingId);
+              },
               tooltip: '새로고침',
             ),
           ],

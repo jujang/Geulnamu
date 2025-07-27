@@ -97,7 +97,7 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   }
 
   /// 초기 데이터 로딩
-  Future<void> initializeMeetingDetailStaff(int meetingId) async {
+  Future<void> initializeMeetingDetailStaff(int meetingId, {bool forceRefresh = false}) async {
     if (!mounted) return;
 
     setState(() {
@@ -115,6 +115,7 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       final meetingDetail = await _meetingService.getMeetingDetailForStaff(
         meetingId: meetingId,
         accessToken: accessToken,
+        forceRefresh: forceRefresh, // 강제 새로고침 옵션 전달
       );
 
       if (mounted) {
@@ -126,6 +127,9 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
         if (AppConfig.debugMode) {
           print('✅ [운영진용 모임 상세] 데이터 로딩 완료: ${meetingDetail.meetingName}');
+          if (forceRefresh) {
+            print('🔄 [캐시 무효화] 새로운 데이터로 업데이트 완료');
+          }
         }
       }
     } catch (e) {
@@ -142,9 +146,9 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  /// 새로고침
+  /// 새로고침 (강제 캐시 무효화)
   Future<void> refreshMeetingDetailStaff(int meetingId) async {
-    await initializeMeetingDetailStaff(meetingId);
+    await initializeMeetingDetailStaff(meetingId, forceRefresh: true); // 강제 새로고침 옵션
   }
 
   /// 폼 컨트롤러 초기화
@@ -192,6 +196,37 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   Future<void> saveBasicInfo(int meetingId) async {
     if (!_validateBasicInfo()) return;
 
+    // 변경사항 감지
+    final request = MeetingBasicUpdateRequest.onlyChanged(
+      originalMeetingType: _meetingDetail!.meetingType,
+      newMeetingType: _selectedMeetingType,
+      originalMeetingName: _meetingDetail!.meetingName,
+      newMeetingName: _meetingNameController.text.trim(),
+      originalMeetingDate: _meetingDetail!.meetingDateTime,
+      newMeetingDate: _selectedMeetingDateTime,
+      originalLateThresholdTime: _meetingDetail!.lateThresholdTime,
+      newLateThresholdTime: _selectedLateThresholdTime,
+      originalMeetingPlace: _meetingDetail!.meetingPlace,
+      newMeetingPlace: _meetingPlaceController.text.trim(),
+      originalDescription: _meetingDetail!.description,
+      newDescription: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+    );
+
+    // 변경사항이 없으면 요청 차단
+    if (!request.hasChanges) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('변경된 내용이 없습니다.')),
+        );
+        setState(() => _isEditingBasicInfo = false); // 편집 모드 종료
+      }
+      return;
+    }
+
+    if (AppConfig.debugMode) {
+      print('📝 [모임 기본 정보 수정] 변경된 필드 ${request.changeCount}개: $request');
+    }
+
     setState(() => _isSaving = true);
 
     try {
@@ -200,17 +235,6 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       if (accessToken == null) {
         throw Exception('인증 토큰이 없습니다.');
       }
-
-      final request = MeetingBasicUpdateRequest(
-        meetingType: _selectedMeetingType!,
-        meetingName: _meetingNameController.text.trim(),
-        meetingDate: _selectedMeetingDateTime!,  // meetingDateTime → meetingDate
-        lateThresholdTime: _selectedLateThresholdTime!,
-        meetingPlace: _meetingPlaceController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty 
-          ? null 
-          : _descriptionController.text.trim(),  // 빈 값이면 null
-      );
 
       await _meetingService.updateMeetingBasicInfo(
         meetingId: meetingId,
@@ -226,11 +250,17 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
         // 성공 메시지
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('모임 정보가 수정되었습니다.')),
+          SnackBar(content: Text('모임 정보가 수정되었습니다. (변경된 항목: ${request.changeCount}개)')),
         );
 
-        // 데이터 새로고침
-        await refreshMeetingDetailStaff(meetingId);
+        // 짧은 지연 후 데이터 새로고침 (서버 동기화 대기)
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          if (AppConfig.debugMode) {
+            print('🔄 [모임 기본 정보 수정] 데이터 새로고침 시작...');
+          }
+          await refreshMeetingDetailStaff(meetingId);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -247,6 +277,29 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   Future<void> saveDiscussionInfo(int meetingId) async {
     if (!_validateDiscussionInfo()) return;
 
+    // 변경사항 감지
+    final request = MeetingDiscussionUpdateRequest.onlyChanged(
+      originalDiscussionTime: _meetingDetail!.discussionTime,
+      newDiscussionTime: _selectedDiscussionTime,
+      originalAlarmMessage: _meetingDetail!.alarmMessage,
+      newAlarmMessage: _alarmMessageController.text.trim().isEmpty ? null : _alarmMessageController.text.trim(),
+    );
+
+    // 변경사항이 없으면 요청 차단
+    if (!request.hasChanges) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('변경된 내용이 없습니다.')),
+        );
+        setState(() => _isEditingDiscussion = false); // 편집 모드 종료
+      }
+      return;
+    }
+
+    if (AppConfig.debugMode) {
+      print('📝 [토론 정보 수정] 변경된 필드 ${request.changeCount}개: $request');
+    }
+
     setState(() => _isSaving = true);
 
     try {
@@ -255,13 +308,6 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       if (accessToken == null) {
         throw Exception('인증 토큰이 없습니다.');
       }
-
-      final request = MeetingDiscussionUpdateRequest(
-        discussionTime: _selectedDiscussionTime ?? _meetingDetail!.meetingDateTime,  // null이면 모임 시간으로 설정
-        alarmMessage: _alarmMessageController.text.trim().isEmpty 
-          ? null 
-          : _alarmMessageController.text.trim(),  // 빈 값이면 null
-      );
 
       await _meetingService.updateMeetingDiscussionInfo(
         meetingId: meetingId,
@@ -277,11 +323,17 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
         // 성공 메시지
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('토론 정보가 수정되었습니다.')),
+          SnackBar(content: Text('토론 정보가 수정되었습니다. (변경된 항목: ${request.changeCount}개)')),
         );
 
-        // 데이터 새로고침
-        await refreshMeetingDetailStaff(meetingId);
+        // 짧은 지연 후 데이터 새로고침 (서버 동기화 대기)
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          if (AppConfig.debugMode) {
+            print('🔄 [토론 정보 수정] 데이터 새로고침 시작...');
+          }
+          await refreshMeetingDetailStaff(meetingId);
+        }
       }
     } catch (e) {
       if (mounted) {
