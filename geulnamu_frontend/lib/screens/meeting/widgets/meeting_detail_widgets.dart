@@ -726,9 +726,7 @@ class MeetingDetailWidgets {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      isStaffOrAbove
-                          ? '운영진용 QR 코드를 생성하여 참석자들의 출석을 받으세요'
-                          : 'QR 코드를 스캔하여 간편하게 출석하세요',
+                      'QR 코드를 스캔하여 간편하게 출석하세요',
                       style: context.textStyles.bodyMedium?.copyWith(
                         color: context.colors.onPrimaryContainer,
                       ),
@@ -740,38 +738,21 @@ class MeetingDetailWidgets {
 
             const SizedBox(height: 16),
 
-            // 버튼들
-            if (isStaffOrAbove) ...[
-              // 운영진용 QR 표시 버튼
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: onQrDisplayTap,
-                  icon: const Icon(Icons.qr_code),
-                  label: const Text('QR 출석 관리'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: context.colors.primary,
-                    foregroundColor: context.colors.onPrimary,
-                  ),
+            // 버튼들 - 🆕 모든 사용자가 출석 가능하도록 수정
+            // 운영진도 일반 모임 상세에서는 출석만 가능 (QR 관리는 운영진용 페이지에서)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onQrScanTap,
+                icon: const Icon(Icons.qr_code_scanner),
+                label: const Text('QR로 출석하기'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: context.colors.primary,
+                  foregroundColor: context.colors.onPrimary,
                 ),
               ),
-            ] else ...[
-              // 일반 사용자용 QR 스캔 버튼
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: onQrScanTap,
-                  icon: const Icon(Icons.qr_code_scanner),
-                  label: const Text('QR로 출석하기'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: context.colors.primary,
-                    foregroundColor: context.colors.onPrimary,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ],
         ),
       ),
