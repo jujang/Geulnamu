@@ -29,7 +29,7 @@ public class AttendanceController {
     @AccessLevel(Level.MEMBER)
     @PostMapping(value = "/check-in", name = "모임 출석")
     public BaseResponse<Long> meetingAttend(@AuthMemberId Long memberId, @RequestParam @Min(value = 1) Long meetingId) {
-        Long attendanceId = attendanceService.createAttendance(memberId, meetingId);
+        Long attendanceId = attendanceService.createAttendanceByQR(memberId, meetingId);
         return BaseResponse.ofSuccess(attendanceId);
     }
 
