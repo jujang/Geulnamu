@@ -243,34 +243,6 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
     return result ?? false;
   }
 
-  /// 모임 정보 수정 페이지로 이동 (운영진용)
-  void navigateToMeetingEdit(int meetingId) {
-    if (AppConfig.debugMode) {
-      print(
-        '🔧 [MeetingDetailLogicMixin] 모임 정보 수정 페이지로 이동: meetingId=$meetingId',
-      );
-    }
-
-    // TODO: 향후 모임 수정 페이지 구현 시 활성화
-    // Navigator.pushNamed(context, '/meeting/$meetingId/edit');
-
-    // 임시 스낵바 표시
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Row(
-          children: [
-            Icon(Icons.construction, color: Colors.white),
-            SizedBox(width: 8),
-            Text('모임 수정 기능은 준비 중입니다.'),
-          ],
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   /// 권한 확인 - 운영진 이상인지
   bool get isStaffOrAbove {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -462,5 +434,13 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
     if (!authProvider.isAuthenticated) return false;
 
     return authProvider.isAdminLevel;
+  }
+
+  /// 운영진용 모임 수정 페이지로 이동
+  void navigateToMeetingEdit(int meetingId) {
+    if (AppConfig.debugMode) {
+      print('🗺️ [모임 상세] 운영진용 페이지로 이동 시도: /meeting/$meetingId/staff');
+    }
+    Navigator.pushNamed(context, '/meeting/$meetingId/staff');
   }
 }

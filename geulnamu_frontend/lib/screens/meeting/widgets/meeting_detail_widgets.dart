@@ -526,24 +526,6 @@ class MeetingDetailWidgets {
     );
   }
 
-  /// 운영진용 편집 FAB
-  static Widget buildEditFab(
-    BuildContext context, {
-    required VoidCallback onPressed,
-  }) {
-    return Positioned(
-      bottom: 16,
-      left: 16,
-      child: FloatingActionButton.extended(
-        onPressed: onPressed,
-        icon: const Icon(Icons.edit),
-        label: const Text('모임 정보 수정', style: TextStyle(fontSize: 16)),
-        backgroundColor: context.colors.secondary,
-        foregroundColor: context.colors.onSecondary,
-      ),
-    );
-  }
-
   /// 토론 조 구성원 섹션
   static Widget _buildGroupMembersSection(
     BuildContext context,
@@ -660,6 +642,25 @@ class MeetingDetailWidgets {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  /// 운영진용 모임 수정 FAB
+  static Widget buildEditFab(
+    BuildContext context, {
+    required VoidCallback onPressed,
+  }) {
+    return Positioned(
+      bottom: 16,
+      right: 16,
+      child: FloatingActionButton(
+        onPressed: onPressed,
+        backgroundColor: context.colors.primary,
+        foregroundColor: context.colors.onPrimary,
+        heroTag: "meeting_edit_fab",
+        tooltip: '모임 정보 수정',
+        child: const Icon(Icons.edit),
       ),
     );
   }

@@ -79,14 +79,15 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
   bool get canDeleteMeeting {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (authProvider.isAdminLevel) return true; // 관리자는 항상 삭제 가능
     
     if (_meetingDetail != null && authProvider.userId != null) {
-      // 생성자인 경우에만 삭제 가능
+      // 생성자 또는 관리자만 삭제 가능
       final isCreator = _meetingDetail!.meetingCreatorId == authProvider.userId!;
-      if (!isCreator) return false;
+      final isAdmin = authProvider.isAdminLevel;
       
-      // 🔥 시간 제한 검사: 모임 개최 6시간 전까지만 삭제 가능
+      if (!isCreator && !isAdmin) return false;
+      
+      // 🔥 시간 제한 검사: 모임 개최 6시간 전까지만 삭제 가능 (관리자도 동일)
       final now = DateTime.now();
       final meetingTime = _meetingDetail!.meetingDateTime;
       final timeDifference = meetingTime.difference(now);
@@ -373,8 +374,10 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       
       if (_meetingDetail != null && authProvider.userId != null) {
         final isCreator = _meetingDetail!.meetingCreatorId == authProvider.userId!;
-        if (isCreator) {
-          // 생성자이지만 시간 제한에 걸린 경우
+        final isAdmin = authProvider.isAdminLevel;
+        
+        if (isCreator || isAdmin) {
+          // 생성자 또는 관리자이지만 시간 제한에 걸린 경우
           final now = DateTime.now();
           final meetingTime = _meetingDetail!.meetingDateTime;
           final timeDifference = meetingTime.difference(now);
