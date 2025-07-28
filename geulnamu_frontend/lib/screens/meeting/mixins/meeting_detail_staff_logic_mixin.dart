@@ -517,6 +517,21 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       return false;
     }
 
+    // 🔥 지각 기준 시간 유효성 검사 추가
+    if (!_isValidLateThresholdTime(_selectedLateThresholdTime!, _selectedMeetingDateTime!)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '⚠️ 지각 기준 시간이 올바르지 않습니다.\n'
+            '조건: ${_formatDate(_selectedMeetingDateTime!)} (모임 당일) ${_formatTime(_selectedMeetingDateTime!)} 이상으로 설정해주세요.',
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return false;
+    }
+
     if (_meetingPlaceController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('모임 장소를 입력해주세요.')),
@@ -525,6 +540,44 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
     }
 
     return true;
+  }
+  
+  /// 지각 기준 시간 유효성 검사
+  bool _isValidLateThresholdTime(DateTime lateTime, DateTime meetingTime) {
+    // 같은 날짜인지 확인
+    final lateDate = DateTime(lateTime.year, lateTime.month, lateTime.day);
+    final meetingDate = DateTime(meetingTime.year, meetingTime.month, meetingTime.day);
+    
+    if (lateDate != meetingDate) {
+      return false; // 다른 날짜는 불허
+    }
+    
+    // 🔥 모임 시간과 같거나 이후인지 확인 (같은 시간도 허용)
+    return !lateTime.isBefore(meetingTime); // isBefore의 반대 = 같거나 이후
+  }
+  
+  /// 토론 시간 유효성 검사
+  bool _isValidDiscussionTime(DateTime discussionTime, DateTime meetingTime) {
+    // 같은 날짜인지 확인
+    final discussionDate = DateTime(discussionTime.year, discussionTime.month, discussionTime.day);
+    final meetingDate = DateTime(meetingTime.year, meetingTime.month, meetingTime.day);
+    
+    if (discussionDate != meetingDate) {
+      return false; // 다른 날짜는 불허
+    }
+    
+    // 모임 시간 이후인지 확인
+    return discussionTime.isAfter(meetingTime);
+  }
+  
+  /// 날짜 포맷터 (YYYY.MM.DD)
+  String _formatDate(DateTime dateTime) {
+    return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}';
+  }
+  
+  /// 시간 포맷터 (HH:MM)
+  String _formatTime(DateTime dateTime) {
+    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   /// 토론 정보 유효성 검사
@@ -536,6 +589,23 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
     //   );
     //   return false;
     // }
+
+    // 🔥 토론 시간이 설정된 경우에만 유효성 검사
+    if (_selectedDiscussionTime != null && _selectedMeetingDateTime != null) {
+      if (!_isValidDiscussionTime(_selectedDiscussionTime!, _selectedMeetingDateTime!)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '⚠️ 토론 시간이 올바르지 않습니다.\n'
+              '조건: ${_formatDate(_selectedMeetingDateTime!)} (모임 당일) ${_formatTime(_selectedMeetingDateTime!)} 이후로 설정해주세요.',
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        return false;
+      }
+    }
 
     // 알림 메시지도 선택사항 (빈 값 허용)
     // if (_alarmMessageController.text.trim().isEmpty) {
@@ -554,14 +624,103 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   }
 
   void onMeetingDateTimeChanged(DateTime? value) {
-    setState(() => _selectedMeetingDateTime = value);
+    if (value == null) {
+      setState(() => _selectedMeetingDateTime = value);
+      return;
+    }
+
+    // 🔥 검증: 토론 시간과의 충돌 확인
+    if (_selectedDiscussionTime != null) {
+      final previousDate = _selectedMeetingDateTime != null 
+        ? DateTime(_selectedMeetingDateTime!.year, _selectedMeetingDateTime!.month, _selectedMeetingDateTime!.day)
+        : null;
+      final newDate = DateTime(value.year, value.month, value.day);
+      
+      // 날짜가 변경되거나, 모임 시간이 토론 시간보다 늦어지는 경우
+      if ((previousDate != null && previousDate != newDate) || 
+          value.isAfter(_selectedDiscussionTime!) || 
+          value.isAtSameMomentAs(_selectedDiscussionTime!)) {
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                '⚠️ 토론 시간 설정 기준과 맞지 않습니다.\n'
+                '토론 시간을 먼저 초기화하고나서 모임 시간을 설정해주세요.',
+              ),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+        return; // 변경 차단
+      }
+    }
+
+    setState(() {
+      _selectedMeetingDateTime = value;
+      
+      // 🔥 지각 기준 시간 검증 및 안내 (자동 조정 제거)
+      if (_selectedLateThresholdTime != null) {
+        final lateDate = DateTime(_selectedLateThresholdTime!.year, _selectedLateThresholdTime!.month, _selectedLateThresholdTime!.day);
+        final newDate = DateTime(value.year, value.month, value.day);
+        
+        // 날짜가 다르거나 지각 기준 시간이 모임 시간보다 빠른 경우
+        if (lateDate != newDate || _selectedLateThresholdTime!.isBefore(value)) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '⚠️ 지각 기준 시간을 다시 설정해주세요.\n'
+                  '조건: ${_formatDate(value)} (모임 당일) ${_formatTime(value)} 이상으로 설정 가능',
+                ),
+                backgroundColor: Colors.orange,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+        }
+      }
+    });
   }
 
   void onLateThresholdTimeChanged(DateTime? value) {
+    if (value != null && _selectedMeetingDateTime != null) {
+      // 🔥 지각 기준 시간 검증
+      if (!_isValidLateThresholdTime(value, _selectedMeetingDateTime!)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('⚠️ 지각 기준 시간은 모임 당일에 개최 일시 이상으로 설정해야 합니다.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return; // 변경 차단
+      }
+    }
+    
     setState(() => _selectedLateThresholdTime = value);
   }
 
   void onDiscussionTimeChanged(DateTime? value) {
+    if (value != null && _selectedMeetingDateTime != null) {
+      // 🔥 토론 시간 검증
+      if (!_isValidDiscussionTime(value, _selectedMeetingDateTime!)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('⚠️ 토론 시간은 모임 당일에 모임 시간 이후로 설정해야 합니다.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return; // 변경 차단
+      }
+    }
+    
     setState(() {
       _selectedDiscussionTime = value;
       // 🆕 시간을 다시 선택한 경우 X 버튼 상태 해제
@@ -577,8 +736,18 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       _selectedDiscussionTime = null;
       _isDiscussionTimeCleared = true; // X 버튼으로 클리어한 것으로 표시
       
-      // 🆕 알림 메시지도 함께 초기화
-      _alarmMessageController.clear();
+      // 🔥 알림 메시지는 유지 (사용자가 열심히 작성한 내용 보호)
+      // _alarmMessageController.clear(); // 제거됨
     });
+    
+    // 사용자에게 안내 메시지
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('📝 토론 시간이 초기화되었습니다. 알림 메시지는 유지되지만 토론 시간 설정 전까지는 사용되지 않습니다.'),
+          duration: Duration(seconds: 4),
+        ),
+      );
+    }
   }
 }

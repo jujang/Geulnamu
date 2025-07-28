@@ -576,19 +576,32 @@ class MeetingDetailStaffWidgets {
         const SizedBox(height: 16),
 
         // 지각 기준 시간 (실제 시간 선택기)
-        TextFormField(
-          readOnly: true,
-          decoration: const InputDecoration(
-            labelText: '지각 기준 시간',
-            border: OutlineInputBorder(),
-            suffixIcon: Icon(Icons.access_time),
-          ),
-          controller: TextEditingController(
-            text: selectedLateThresholdTime != null 
-              ? _formatDateTime(selectedLateThresholdTime!) 
-              : '',
-          ),
-          onTap: () => _selectDateTime(context, selectedLateThresholdTime, onLateThresholdTimeChanged),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextFormField(
+              readOnly: true,
+              decoration: const InputDecoration(
+                labelText: '지각 기준 시간',
+                border: OutlineInputBorder(),
+                suffixIcon: Icon(Icons.access_time),
+              ),
+              controller: TextEditingController(
+                text: selectedLateThresholdTime != null 
+                  ? _formatDateTime(selectedLateThresholdTime!) 
+                  : '',
+              ),
+              onTap: () => _selectDateTime(context, selectedLateThresholdTime, onLateThresholdTimeChanged),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '📅 모임 당일에 개최 일시 이상으로 설정 가능합니다. (같은 시간 포함)',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
 
@@ -657,11 +670,13 @@ class MeetingDetailStaffWidgets {
           ],
         ),
         const SizedBox(height: 8),
-        // 토론 시간 안내 텍스트
+        // 토론 시간 안내 텍스트 (개선됨)
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            '토론 시간은 선택사항입니다. 설정하지 않으면 토론 없이 진행됩니다.\n⚠️ X 버튼 클릭 시 토론 시간과 알림 메시지가 모두 초기화됩니다.',
+            '토론 시간은 선택사항입니다. 설정하지 않으면 토론 없이 진행됩니다.\n'
+            '🕓 조건: 모임 당일 내에 모임 시간 이후로만 설정 가능\n'
+            '📝 X 버튼 클릭 시 토론 시간만 초기화 (알림 메시지는 유지)',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontStyle: FontStyle.italic,
@@ -673,11 +688,23 @@ class MeetingDetailStaffWidgets {
         // 알림 메시지
         TextFormField(
           controller: alarmMessageController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: '알림 메시지',
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
+            // 🆕 토론 시간이 설정되지 않은 경우 비활성화 안내
+            helperText: selectedDiscussionTime == null || isDiscussionTimeCleared
+              ? '⚠️ 토론 시간이 설정되지 않아 현재 알림 메시지는 사용되지 않습니다.'
+              : '토론 시작 전에 참여자들에게 전송될 메시지입니다.',
+            helperStyle: TextStyle(
+              color: selectedDiscussionTime == null || isDiscussionTimeCleared
+                ? Theme.of(context).colorScheme.error
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 12,
+            ),
           ),
           maxLines: 3,
+          // 🆕 토론 시간이 없어도 입력은 가능 (내용 보존을 위해)
+          enabled: true,
         ),
       ],
     );
