@@ -46,6 +46,12 @@ public class Meeting extends DateColumn {
     @Column(name = "meeting_place", nullable = false)
     private String meetingPlace;
 
+    @Column(name = "meeting_place_latitude")
+    private Double meetingPlace_latitude;
+
+    @Column(name = "meeting_place_longitude")
+    private Double meetingPlace_longitude;
+
     @Column(name = "description")
     private String description;
 

@@ -50,7 +50,7 @@ public class AttendanceControllerTest extends ControllerTest {
         Long attendanceId = 1L;
         String accessToken = "Bearer access_token";
 
-        given(attendanceService.createAttendance(any(), any())).willReturn(attendanceId);
+        given(attendanceService.createAttendanceByQR(any(), any())).willReturn(attendanceId);
 
         // when
         ResultActions actions =

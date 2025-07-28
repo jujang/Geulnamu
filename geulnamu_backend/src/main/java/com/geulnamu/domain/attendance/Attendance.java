@@ -32,6 +32,10 @@ public class Attendance extends DateColumn {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "attendance_type", nullable = false)
+    private AttendanceType attendanceType;
+
     @Column(name = "note", length = 1)
     private String note; // 비고 (출석 관련 특이사항이 적는 곳)
 
@@ -46,10 +50,11 @@ public class Attendance extends DateColumn {
     private List<BookQuestion> bookQuestions;
 
 
-    public static Attendance createAttendance(Meeting meeting, Member member) {
+    public static Attendance createAttendance(Meeting meeting, Member member, AttendanceType attendanceType) {
         return Attendance.builder()
             .meeting(meeting)
             .member(member)
+            .attendanceType(attendanceType)
             .wantDiscussion(true)
             .build();
     }
