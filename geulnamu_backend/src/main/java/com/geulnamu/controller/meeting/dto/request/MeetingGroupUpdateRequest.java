@@ -15,6 +15,8 @@ public class MeetingGroupUpdateRequest {
     @JsonFormat(pattern = "yyyyMMdd HH:mm")
     private LocalDateTime discussionTime;
 
+    private Boolean discussionTimeNull; // 토론 시간을 null로 초기화하고 싶을 경우에 사용하는 값
+
     private String alarmMessage; // 모임 알람용 메세지 내용
 
 }

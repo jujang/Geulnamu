@@ -118,10 +118,11 @@ public class MeetingService {
         }
 
         // 수정 필요 부분 적용
-        if(request.getDiscussionTime() == null && request.getAlarmMessage() == null) {
+        if(request.getDiscussionTime() == null && request.getDiscussionTimeNull() == null && request.getAlarmMessage() == null) {
             throw new BadRequestException(ResponseMessage.NO_CHANGE_DETECTED);
         }
         if(request.getDiscussionTime() != null) meeting.updateDiscussionTime(request.getDiscussionTime());
+        if(Boolean.TRUE.equals(request.getDiscussionTimeNull())) meeting.updateDiscussionTime(null);
         if(request.getAlarmMessage() != null) meeting.updateAlarmMessage(request.getAlarmMessage());
     }
 
