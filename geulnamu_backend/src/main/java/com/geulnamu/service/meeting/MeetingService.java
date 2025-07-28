@@ -95,7 +95,7 @@ public class MeetingService {
 
         // 수정 필요 부분 적용
         if(request.getMeetingName() == null && request.getMeetingType() == null && request.getMeetingDate() == null
-            && request.getMeetingPlace() == null && request.getDescription() == null) {
+            && request.getLateThresholdTime() == null && request.getMeetingPlace() == null && request.getDescription() == null) {
             throw new BadRequestException(ResponseMessage.NO_CHANGE_DETECTED);
         }
         if(request.getMeetingName() != null) meeting.updateMeetingName(request.getMeetingName());
