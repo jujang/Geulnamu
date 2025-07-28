@@ -6,6 +6,7 @@ import '../../widgets/common/loading_widgets.dart';
 import '../../core/theme.dart';
 import '../../models/meeting/meeting_model.dart';
 import '../../services/home/home_service.dart';
+import '../../services/home/home_route_service.dart'; // RouteObserver 추가
 import 'mixins/meeting_logic_mixin.dart';
 import 'widgets/meeting_widgets.dart';
 import 'widgets/meeting_list_widgets.dart';
@@ -33,7 +34,7 @@ class MeetingListStaffScreen extends StatefulWidget {
 }
 
 class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
-    with MeetingLogicMixin {
+    with MeetingLogicMixin, RouteAware {
   final HomeService _homeService = HomeService();
 
   // 🆕 운영진 모드 활성화
@@ -47,6 +48,41 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeScreen();
     });
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 🎯 RouteObserver 등록 - 안전하게 처리
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final route = ModalRoute.of(context);
+      if (route is PageRoute && mounted) {
+        try {
+          HomeRouteService.routeObserver.subscribe(this, route);
+        } catch (e) {
+          print('⚠️ [MeetingListStaffScreen] RouteObserver 등록 실패: $e');
+        }
+      }
+    });
+  }
+  
+  @override
+  void dispose() {
+    // RouteObserver 등록 해제
+    try {
+      HomeRouteService.routeObserver.unsubscribe(this);
+    } catch (e) {
+      print('⚠️ [MeetingListStaffScreen] RouteObserver 해제 실패: $e');
+    }
+    super.dispose();
+  }
+  
+  @override
+  void didPopNext() {
+    // 다른 화면에서 돌아왔을 때 새로고침
+    super.didPopNext();
+    print('🔄 [운영진용 모임 목록] 다른 화면에서 돌아오면서 새로고침');
+    refreshMeetingList();
   }
 
   /// 화면 초기화
@@ -76,6 +112,17 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
             // HomeService를 통한 메뉴 및 로그아웃 처리
             onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
             onLogoutTap: () => _handleLogout(),
+            // 🔥 새로고침 버튼 추가
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  print('🔄 [운영진용 모임 목록] 수동 새로고침 버튼 클릭');
+                  refreshMeetingList();
+                },
+                tooltip: '새로고침',
+              ),
+            ],
             body: Stack(
             children: [
             // 메인 콘텐츠
@@ -229,9 +276,13 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
     await _homeService.handleLogout(context, authProvider);
   }
 
-  /// 모임 카드 탭 처리 (향후 운영진용 상세보기 기능)
+  /// 모임 카드 탭 처리 (운영진용 상세보기 기능)
   void _handleMeetingTap(MeetingInfo meeting) {
-    // TODO: 향후 운영진용 모임 상세 페이지 구현 시 아래 코드 활성화
-    // Navigator.pushNamed(context, '/meeting/${meeting.meetingId}/staff');
+    Navigator.pushNamed(context, '/meeting/${meeting.meetingId}/staff').then((result) {
+      // 모임 수정/삭제 후 목록 새로고침
+      if (result == true && mounted) {
+        refreshMeetingList();
+      }
+    });
   }
 }

@@ -24,6 +24,7 @@ import 'screens/meeting/meeting_list_screen.dart'; // 모임 목록 화면
 import 'screens/meeting/meeting_list_staff_screen.dart'; // 🆕 운영진용 모임 목록 화면
 import 'screens/meeting/meeting_create_screen.dart'; // 🆕 모임 만들기 화면
 import 'screens/meeting/meeting_detail_screen.dart'; // 🆕 모임 상세 화면
+import 'screens/meeting/meeting_detail_staff_screen.dart'; // 🆕 운영진용 모임 상세 화면
 import 'screens/settings_screen.dart'; // 설정 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 import 'services/meeting/meeting_service.dart'; // 🆕 모임 서비스
@@ -119,6 +120,17 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
           final queryParams = uri.queryParameters;
           
           // 🎯 동적 경로 처리 (모임 상세)
+          if (path.startsWith('/meeting/') && path.endsWith('/staff') && path.split('/').length == 4) {
+            final meetingIdStr = path.split('/')[2];
+            final meetingId = int.tryParse(meetingIdStr);
+            if (meetingId != null) {
+              return MaterialPageRoute(
+                builder: (context) => MeetingDetailStaffScreen(meetingId: meetingId),
+                settings: settings,
+              );
+            }
+          }
+          
           if (path.startsWith('/meeting/') && path.split('/').length == 3) {
             final meetingIdStr = path.split('/')[2];
             final meetingId = int.tryParse(meetingIdStr);

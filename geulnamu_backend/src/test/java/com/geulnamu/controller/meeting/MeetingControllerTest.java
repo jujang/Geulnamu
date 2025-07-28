@@ -417,7 +417,7 @@ public class MeetingControllerTest extends ControllerTest {
         // given
         String accessToken = "Bearer access_token";
         MeetingGroupUpdateRequest request = new MeetingGroupUpdateRequest(
-            LocalDateTime.of(2026, 5, 1, 12, 30), "모두 올라와주세요~"
+            LocalDateTime.of(2026, 5, 1, 12, 30), null,"모두 올라와주세요~"
         );
 
         doNothing().when(meetingService).updateMeetingForDiscussion(any(), any(), any(), any());
@@ -450,6 +450,7 @@ public class MeetingControllerTest extends ControllerTest {
                 ),
                 requestFields(
                     fieldWithPath("discussionTime").type(JsonFieldType.STRING).attributes(key("format").value("yyyyMMdd HH:mm 형식으로 이뤄진 미래 시간대의 문자열")).description("토론 시간").optional(),
+                    fieldWithPath("discussionTimeNull").type(JsonFieldType.BOOLEAN).attributes(key("format").value("true 또는 false 중 하나의 값")).description("토론 시간 초기화 플래그").optional(),
                     fieldWithPath("alarmMessage").type(JsonFieldType.STRING).attributes(key("format").value("형식제한 없는 최대 255자 이하의 문자열")).description("토론 시작 알림용 메세지").optional()
                 ),
                 responseFields(

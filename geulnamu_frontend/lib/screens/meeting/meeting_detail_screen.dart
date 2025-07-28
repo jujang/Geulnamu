@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../services/home/home_service.dart';
 import '../../services/home/home_route_service.dart';
+import '../../core/config/app_config.dart';
 import 'mixins/meeting_detail_logic_mixin.dart';
 import 'widgets/meeting_detail_widgets.dart';
 
@@ -17,11 +18,8 @@ import 'widgets/meeting_detail_widgets.dart';
 class MeetingDetailScreen extends StatefulWidget {
   /// 모임 ID
   final int meetingId;
-  
-  const MeetingDetailScreen({
-    super.key,
-    required this.meetingId,
-  });
+
+  const MeetingDetailScreen({super.key, required this.meetingId});
 
   @override
   State<MeetingDetailScreen> createState() => _MeetingDetailScreenState();
@@ -39,7 +37,7 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
       initializeMeetingDetail(widget.meetingId);
     });
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -49,24 +47,31 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
       HomeRouteService.routeObserver.subscribe(this, route);
     }
   }
-  
+
   @override
   void dispose() {
     // RouteObserver 등록 해제
     HomeRouteService.routeObserver.unsubscribe(this);
     super.dispose();
   }
-  
+
   @override
   void didPopNext() {
     // 다른 화면에서 돌아왔을 때 새로고침
     super.didPopNext();
-    print('🔄 [모임 상세] 다른 화면에서 돌아오면서 새로고침');
+    if (AppConfig.debugMode) {
+      print('🔄 [모임 상세] 다른 화면에서 돌아오면서 새로고침');
+    }
     refreshMeetingDetail(widget.meetingId);
   }
 
   @override
   Widget build(BuildContext context) {
+    // 디버그 로그 출력 (빌드 메서드 시작에서)
+    if (AppConfig.debugMode && meetingDetail != null) {
+      print('🔍 [모임 상세] 빌드: meetingId=${widget.meetingId}, isStaffOrAbove=$isStaffOrAbove');
+    }
+
     return Consumer<HomeService>(
       builder: (context, homeService, child) {
         return MainLayout(
@@ -92,7 +97,12 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
               if (meetingDetail != null && isStaffOrAbove)
                 MeetingDetailWidgets.buildEditFab(
                   context,
-                  onPressed: () => navigateToMeetingEdit(widget.meetingId),
+                  onPressed: () {
+                    if (AppConfig.debugMode) {
+                      print('🔧 [모임 상세] 편집 버튼 클릭: meetingId=${widget.meetingId}');
+                    }
+                    navigateToMeetingEdit(widget.meetingId);
+                  },
                 ),
             ],
           ),
