@@ -112,6 +112,17 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
             // HomeService를 통한 메뉴 및 로그아웃 처리
             onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
             onLogoutTap: () => _handleLogout(),
+            // 🔥 새로고침 버튼 추가
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  print('🔄 [운영진용 모임 목록] 수동 새로고침 버튼 클릭');
+                  refreshMeetingList();
+                },
+                tooltip: '새로고침',
+              ),
+            ],
             body: Stack(
             children: [
             // 메인 콘텐츠

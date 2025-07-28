@@ -83,7 +83,15 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
     
     if (_meetingDetail != null && authProvider.userId != null) {
       // 생성자인 경우에만 삭제 가능
-      return _meetingDetail!.meetingCreatorId == authProvider.userId!;
+      final isCreator = _meetingDetail!.meetingCreatorId == authProvider.userId!;
+      if (!isCreator) return false;
+      
+      // 🔥 시간 제한 검사: 모임 개최 6시간 전까지만 삭제 가능
+      final now = DateTime.now();
+      final meetingTime = _meetingDetail!.meetingDateTime;
+      final timeDifference = meetingTime.difference(now);
+      
+      return timeDifference.inHours >= 6; // 6시간 이상 남은 경우만 삭제 가능
     }
     return false;
   }
@@ -358,14 +366,48 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 모임 삭제
   Future<void> deleteMeeting(int meetingId) async {
-    if (!canDeleteMeeting) return;
+    if (!canDeleteMeeting) {
+      // 🔥 삭제 불가능 사유 별 안내 메시지
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      String message = '모임을 삭제할 권한이 없습니다.';
+      
+      if (_meetingDetail != null && authProvider.userId != null) {
+        final isCreator = _meetingDetail!.meetingCreatorId == authProvider.userId!;
+        if (isCreator) {
+          // 생성자이지만 시간 제한에 걸린 경우
+          final now = DateTime.now();
+          final meetingTime = _meetingDetail!.meetingDateTime;
+          final timeDifference = meetingTime.difference(now);
+          final hoursLeft = timeDifference.inHours;
+          
+          if (hoursLeft < 6) {
+            message = '모임 개최 6시간 전까지만 삭제가 가능합니다.\n'
+                     '현재 남은 시간: 약 ${hoursLeft + 1}시간';
+          }
+        }
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+      return;
+    }
 
     // 확인 다이얼로그
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('모임 삭제'),
-        content: const Text('정말로 이 모임을 삭제하시겠습니까?\\n삭제된 모임은 복구할 수 없습니다.'),
+        content: const Text(
+          '정말로 이 모임을 삭제하시겠습니까?\n'
+          '삭제된 모임은 복구할 수 없습니다.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),

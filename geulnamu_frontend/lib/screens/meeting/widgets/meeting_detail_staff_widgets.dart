@@ -4,15 +4,67 @@ import '../../../models/meeting/meeting_detail_staff_model.dart';
 import '../../../widgets/common/loading_widgets.dart';
 
 /// 운영진용 모임 상세 화면 UI 위젯들
-/// 
+///
 /// Static Methods로 구현하여 상태 관리와 분리
 class MeetingDetailStaffWidgets {
-  
   /// 로딩 화면
   static Widget buildLoading(BuildContext context) {
     return LoadingWidgets.buildFullScreenLoading(
       context,
       message: '모임 정보를 불러오는 중...',
+    );
+  }
+
+  /// 🔥 권한 안내 섹션
+  static Widget _buildPermissionGuide(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '📝 권한 안내',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                ),
+              ),
+              child: Text(
+                '• 모임 삭제: 모임 생성자 또는 관리자급 권한(모임장, 부모임장, 관지라)만 가능\n'
+                '• 삭제 시간 제한: 모임 개최 6시간 전까지만 삭제 가능\n'
+                '• 비공개/공개 처리: 관리자급 권한(모임장, 부모임장, 관리자)만 가능',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -69,7 +121,7 @@ class MeetingDetailStaffWidgets {
         children: [
           // 🆕 운영진용 헤더 (비공개 여부 표시)
           _buildStaffHeader(context, meetingDetail),
-          
+
           const SizedBox(height: 16),
 
           // 📋 모임 기본 정보 섹션
@@ -107,6 +159,11 @@ class MeetingDetailStaffWidgets {
             onDiscussionTimeChanged: onDiscussionTimeChanged,
             onClearDiscussionTime: onClearDiscussionTime, // 🆕 X 버튼 콜백 전달
           ),
+
+          const SizedBox(height: 16),
+
+          // 🔥 권한 안내를 토론 정보 하단으로 이동
+          _buildPermissionGuide(context),
 
           const SizedBox(height: 16),
 
@@ -155,7 +212,10 @@ class MeetingDetailStaffWidgets {
                 // 비공개 여부 표시
                 if (meetingDetail.isPrivateMeeting)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.orange.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
@@ -179,7 +239,10 @@ class MeetingDetailStaffWidgets {
                   )
                 else
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.green.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
@@ -206,6 +269,12 @@ class MeetingDetailStaffWidgets {
             const SizedBox(height: 8),
             Text(
               '생성자: ${meetingDetail.meetingCreatorName}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+            Text(
+              '모임번호: ${meetingDetail.meetingId}', // 🔥 모임번호 추가
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: context.colors.onSurfaceVariant,
               ),
@@ -255,8 +324,6 @@ class MeetingDetailStaffWidgets {
               onToggleEdit: onToggleEdit,
               onSave: onSave,
             ),
-            
-            const SizedBox(height: 16),
 
             // 내용 (조회 모드 vs 편집 모드)
             if (isEditing)
@@ -309,7 +376,7 @@ class MeetingDetailStaffWidgets {
               onToggleEdit: onToggleEdit,
               onSave: onSave,
             ),
-            
+
             const SizedBox(height: 16),
 
             // 내용 (조회 모드 vs 편집 모드)
@@ -318,7 +385,8 @@ class MeetingDetailStaffWidgets {
                 context,
                 alarmMessageController: alarmMessageController,
                 selectedDiscussionTime: selectedDiscussionTime,
-                isDiscussionTimeCleared: isDiscussionTimeCleared, // 🆕 X 버튼 상태 전달
+                isDiscussionTimeCleared:
+                    isDiscussionTimeCleared, // 🆕 X 버튼 상태 전달
                 onDiscussionTimeChanged: onDiscussionTimeChanged,
                 onClearDiscussionTime: onClearDiscussionTime, // 🆕 X 버튼 콜백 전달
               )
@@ -353,11 +421,7 @@ class MeetingDetailStaffWidgets {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.settings,
-                  color: context.colors.primary,
-                  size: 20,
-                ),
+                Icon(Icons.settings, color: context.colors.primary, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   '🔧 관리 기능',
@@ -368,7 +432,7 @@ class MeetingDetailStaffWidgets {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
 
             // 버튼들
@@ -380,16 +444,22 @@ class MeetingDetailStaffWidgets {
                 if (canManagePrivacy)
                   ElevatedButton.icon(
                     onPressed: isSaving ? null : onTogglePrivacy,
-                    icon: Icon(meetingDetail.isPrivateMeeting ? Icons.public : Icons.lock),
-                    label: Text(meetingDetail.isPrivateMeeting ? '공개로 변경' : '비공개로 변경'),
+                    icon: Icon(
+                      meetingDetail.isPrivateMeeting
+                          ? Icons.public
+                          : Icons.lock,
+                    ),
+                    label: Text(
+                      meetingDetail.isPrivateMeeting ? '공개로 변경' : '비공개로 변경',
+                    ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: meetingDetail.isPrivateMeeting 
-                        ? Colors.green 
-                        : Colors.orange,
+                      backgroundColor: meetingDetail.isPrivateMeeting
+                          ? Colors.green
+                          : Colors.orange,
                       foregroundColor: Colors.white,
                     ),
                   ),
-                
+
                 // 삭제 버튼 (생성자 또는 관리자)
                 if (canDeleteMeeting)
                   ElevatedButton.icon(
@@ -441,13 +511,13 @@ class MeetingDetailStaffWidgets {
               // 저장 버튼
               ElevatedButton.icon(
                 onPressed: isSaving ? null : onSave,
-                icon: isSaving 
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.save),
+                icon: isSaving
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.save),
                 label: Text(isSaving ? '저장 중...' : '저장'),
               ),
             ],
@@ -471,11 +541,28 @@ class MeetingDetailStaffWidgets {
     return Column(
       children: [
         _buildInfoRow(context, '모임 이름', meetingDetail.meetingName),
-        _buildInfoRow(context, '모임 유형', _getMeetingTypeDisplayName(meetingDetail.meetingType)),
-        _buildInfoRow(context, '개최 일시', _formatDateTime(meetingDetail.meetingDateTime)),
-        _buildInfoRow(context, '지각 기준', _formatDateTime(meetingDetail.lateThresholdTime)),
+        _buildInfoRow(
+          context,
+          '모임 유형',
+          _getMeetingTypeDisplayName(meetingDetail.meetingType),
+        ),
+        _buildInfoRow(
+          context,
+          '개최 일시',
+          _formatDateTime(meetingDetail.meetingDateTime),
+        ),
+        _buildInfoRow(
+          context,
+          '지각 기준',
+          _formatDateTime(meetingDetail.lateThresholdTime),
+        ),
         _buildInfoRow(context, '장소', meetingDetail.meetingPlace),
-        _buildInfoRow(context, '설명', meetingDetail.description ?? '설명 없음', isMultiline: true),
+        _buildInfoRow(
+          context,
+          '설명',
+          meetingDetail.description ?? '설명 없음',
+          isMultiline: true,
+        ),
       ],
     );
   }
@@ -487,10 +574,19 @@ class MeetingDetailStaffWidgets {
   ) {
     return Column(
       children: [
-        _buildInfoRow(context, '토론 시간', meetingDetail.discussionTime != null 
-          ? _formatDateTime(meetingDetail.discussionTime!) 
-          : '토론 시간 미설정'),
-        _buildInfoRow(context, '알림 메시지', meetingDetail.alarmMessage ?? '알림 메시지 없음', isMultiline: true),
+        _buildInfoRow(
+          context,
+          '토론 시간',
+          meetingDetail.discussionTime != null
+              ? _formatDateTime(meetingDetail.discussionTime!)
+              : '토론 시간 미설정',
+        ),
+        _buildInfoRow(
+          context,
+          '알림 메시지',
+          meetingDetail.alarmMessage ?? '알림 메시지 없음',
+          isMultiline: true,
+        ),
       ],
     );
   }
@@ -536,21 +632,27 @@ class MeetingDetailStaffWidgets {
               value: 'REGULAR',
               child: Text(
                 '정기',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
             DropdownMenuItem(
               value: 'SPECIAL',
               child: Text(
                 '특수',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
             DropdownMenuItem(
               value: 'FLASH',
               child: Text(
                 '번개',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
           ],
@@ -567,11 +669,15 @@ class MeetingDetailStaffWidgets {
             suffixIcon: Icon(Icons.calendar_today),
           ),
           controller: TextEditingController(
-            text: selectedMeetingDateTime != null 
-              ? _formatDateTime(selectedMeetingDateTime!) 
-              : '',
+            text: selectedMeetingDateTime != null
+                ? _formatDateTime(selectedMeetingDateTime)
+                : '',
           ),
-          onTap: () => _selectDateTime(context, selectedMeetingDateTime, onMeetingDateTimeChanged),
+          onTap: () => _selectDateTime(
+            context,
+            selectedMeetingDateTime,
+            onMeetingDateTimeChanged,
+          ),
         ),
         const SizedBox(height: 16),
 
@@ -587,11 +693,15 @@ class MeetingDetailStaffWidgets {
                 suffixIcon: Icon(Icons.access_time),
               ),
               controller: TextEditingController(
-                text: selectedLateThresholdTime != null 
-                  ? _formatDateTime(selectedLateThresholdTime!) 
-                  : '',
+                text: selectedLateThresholdTime != null
+                    ? _formatDateTime(selectedLateThresholdTime)
+                    : '',
               ),
-              onTap: () => _selectDateTime(context, selectedLateThresholdTime, onLateThresholdTimeChanged),
+              onTap: () => _selectDateTime(
+                context,
+                selectedLateThresholdTime,
+                onLateThresholdTimeChanged,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -651,16 +761,21 @@ class MeetingDetailStaffWidgets {
                   suffixIcon: Icon(Icons.access_time),
                 ),
                 controller: TextEditingController(
-                  text: selectedDiscussionTime != null 
-                    ? _formatDateTime(selectedDiscussionTime!) 
-                    : '',
+                  text: selectedDiscussionTime != null
+                      ? _formatDateTime(selectedDiscussionTime)
+                      : '',
                 ),
-                onTap: () => _selectDateTime(context, selectedDiscussionTime, onDiscussionTimeChanged),
+                onTap: () => _selectDateTime(
+                  context,
+                  selectedDiscussionTime,
+                  onDiscussionTimeChanged,
+                ),
               ),
             ),
             const SizedBox(width: 8),
             // 토론 시간 제거 버튼
-            if (selectedDiscussionTime != null || isDiscussionTimeCleared) // 🆕 조건 수정
+            if (selectedDiscussionTime != null ||
+                isDiscussionTimeCleared) // 🆕 조건 수정
               IconButton(
                 onPressed: onClearDiscussionTime, // 🆕 X 버튼 콜백 사용
                 icon: const Icon(Icons.clear),
@@ -692,13 +807,14 @@ class MeetingDetailStaffWidgets {
             labelText: '알림 메시지',
             border: const OutlineInputBorder(),
             // 🆕 토론 시간이 설정되지 않은 경우 비활성화 안내
-            helperText: selectedDiscussionTime == null || isDiscussionTimeCleared
-              ? '⚠️ 토론 시간이 설정되지 않아 현재 알림 메시지는 사용되지 않습니다.'
-              : '토론 시작 전에 참여자들에게 전송될 메시지입니다.',
+            helperText:
+                selectedDiscussionTime == null || isDiscussionTimeCleared
+                ? '⚠️ 토론 시간이 설정되지 않아 현재 알림 메시지는 사용되지 않습니다.'
+                : '토론 시작 전에 참여자들에게 전송될 메시지입니다.',
             helperStyle: TextStyle(
               color: selectedDiscussionTime == null || isDiscussionTimeCleared
-                ? Theme.of(context).colorScheme.error
-                : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ? Theme.of(context).colorScheme.error
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 12,
             ),
           ),
@@ -720,7 +836,9 @@ class MeetingDetailStaffWidgets {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        crossAxisAlignment: isMultiline ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment: isMultiline
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 80,
@@ -734,10 +852,7 @@ class MeetingDetailStaffWidgets {
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
           ),
         ],
       ),
@@ -747,7 +862,7 @@ class MeetingDetailStaffWidgets {
   /// 날짜/시간 포맷터
   static String _formatDateTime(DateTime dateTime) {
     return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')} '
-           '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   /// 모임 유형 한글 변환
@@ -799,9 +914,9 @@ class MeetingDetailStaffWidgets {
       // 2단계: 시간 선택
       final selectedTime = await showTimePicker(
         context: context,
-        initialTime: currentDateTime != null 
-          ? TimeOfDay.fromDateTime(currentDateTime) 
-          : const TimeOfDay(hour: 9, minute: 0),
+        initialTime: currentDateTime != null
+            ? TimeOfDay.fromDateTime(currentDateTime)
+            : const TimeOfDay(hour: 9, minute: 0),
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
@@ -833,9 +948,9 @@ class MeetingDetailStaffWidgets {
     } catch (e) {
       // 에러가 발생하면 스낵바로 알림
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('날짜/시간 선택 중 오류가 발생했습니다: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('날짜/시간 선택 중 오류가 발생했습니다: $e')));
       }
     }
   }
