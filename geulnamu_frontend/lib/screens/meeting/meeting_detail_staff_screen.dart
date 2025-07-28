@@ -7,6 +7,8 @@ import '../../services/home/home_route_service.dart';
 import '../../core/config/app_config.dart'; // AppConfig import 추가
 import 'mixins/meeting_detail_staff_logic_mixin.dart';
 import 'widgets/meeting_detail_staff_widgets.dart';
+import 'meeting_qr_display_screen.dart'; // 🆕 QR 표시 화면
+import 'meeting_detail_screen.dart'; // 🆕 일반 사용자 화면
 
 /// 운영진용 모임 상세 조회 화면
 ///
@@ -138,6 +140,9 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       onSaveDiscussionInfo: () => saveDiscussionInfo(widget.meetingId),
       onDeleteMeeting: () => deleteMeeting(widget.meetingId),
       onTogglePrivacy: () => toggleMeetingPrivacy(widget.meetingId),
+      // 🆕 출석 관리 콜백들
+      onQrDisplayTap: () => _navigateToQrDisplay(),
+      onViewAsUserTap: () => _navigateToUserView(),
       // 폼 컨트롤러들
       meetingNameController: meetingNameController,
       meetingPlaceController: meetingPlaceController,
@@ -155,6 +160,39 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       onLateThresholdTimeChanged: onLateThresholdTimeChanged,
       onDiscussionTimeChanged: onDiscussionTimeChanged,
       onClearDiscussionTime: clearDiscussionTime, // 🆕 X 버튼 콜백 전달
+    );
+  }
+
+  /// QR 표시 화면으로 이동 (운영진용)
+  void _navigateToQrDisplay() {
+    if (meetingDetail == null) return;
+    
+    if (AppConfig.debugMode) {
+      print('📱 [QR 표시] 화면 이동: meetingId=${widget.meetingId}');
+    }
+    
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MeetingQrDisplayScreen(
+          meetingId: widget.meetingId,
+          meetingTitle: meetingDetail!.meetingName,
+        ),
+      ),
+    );
+  }
+
+  /// 일반 사용자 화면으로 이동
+  void _navigateToUserView() {
+    if (AppConfig.debugMode) {
+      print('👥 [사용자 화면] 이동: meetingId=${widget.meetingId}');
+    }
+    
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MeetingDetailScreen(
+          meetingId: widget.meetingId,
+        ),
+      ),
     );
   }
 

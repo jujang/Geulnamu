@@ -56,5 +56,8 @@
 			</array>
 		</dict>
 	</array>
+	<!-- QR 코드 스캔을 위한 카메라 권한 -->
+	<key>NSCameraUsageDescription</key>
+	<string>QR 코드를 스캔하여 출석 처리를 위해 카메라 접근이 필요합니다.</string>
 </dict>
 </plist>

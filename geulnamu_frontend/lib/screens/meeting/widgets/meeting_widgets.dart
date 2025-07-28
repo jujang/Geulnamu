@@ -17,11 +17,13 @@ class MeetingWidgets {
   ///
   /// [meeting] 모임 정보
   /// [onTap] 카드 탭 콜백 (향후 상세보기 기능)
+  /// [onAttendance] 🆕 QR 출석 버튼 콜백
   /// [onAttendanceCheck] 출석현황 확인 버튼 콜백
   static Widget buildMeetingCard(
     BuildContext context,
     MeetingInfo meeting, {
     VoidCallback? onTap,
+    VoidCallback? onAttendance,
     VoidCallback? onAttendanceCheck,
   }) {
     return Card(
@@ -111,31 +113,64 @@ class MeetingWidgets {
 
               const SizedBox(height: 16),
 
-              // 🎯 하단: 출석현황 확인 버튼
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: onAttendanceCheck,
-                  icon: Icon(
-                    Icons.people_outline,
-                    size: 18,
-                    color: context.colors.primary,
-                  ),
-                  label: Text(
-                    '출석현황 확인',
-                    style: TextStyle(
-                      color: context.colors.primary,
-                      fontWeight: FontWeight.w600,
+              // 🎯 하단: 출석 버튼들 (5:5 비율)
+              Row(
+                children: [
+                  // 왼쪽: 출석 버튼 (QR 출석)
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: onAttendance,
+                      icon: Icon(
+                        Icons.qr_code_scanner,
+                        size: 18,
+                        color: context.colors.onPrimary,
+                      ),
+                      label: Text(
+                        '출석',
+                        style: TextStyle(
+                          color: context.colors.onPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.colors.primary,
+                        foregroundColor: context.colors.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
                     ),
                   ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: context.colors.primary),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  
+                  const SizedBox(width: 8),
+                  
+                  // 오른쪽: 출석 현황 버튼
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onAttendanceCheck,
+                      icon: Icon(
+                        Icons.people_outline,
+                        size: 18,
+                        color: context.colors.primary,
+                      ),
+                      label: Text(
+                        '출석 현황',
+                        style: TextStyle(
+                          color: context.colors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: context.colors.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                ),
+                ],
               ),
             ],
           ),

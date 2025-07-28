@@ -188,8 +188,8 @@ class _MeetingListScreenState extends State<MeetingListScreen>
                   context,
                   meeting,
                   onTap: () => _handleMeetingTap(meeting),
-                  onAttendanceCheck: () =>
-                      _handleAttendanceCheck(meeting.meetingId),
+                  onAttendance: () => _handleAttendance(meeting.meetingId), // 🆕 QR 출석
+                  onAttendanceCheck: () => _handleAttendanceCheck(meeting.meetingId),
                 );
               },
             ),
@@ -233,6 +233,11 @@ class _MeetingListScreenState extends State<MeetingListScreen>
   /// 모임 카드 탭 처리 - 상세 페이지로 이동
   void _handleMeetingTap(MeetingInfo meeting) {
     Navigator.pushNamed(context, '/meeting/${meeting.meetingId}');
+  }
+
+  /// 🆕 QR 출석 버튼 처리 - 모임 상세로 이동
+  void _handleAttendance(int meetingId) {
+    Navigator.pushNamed(context, '/meeting/$meetingId');
   }
 
   /// 출석현황 확인 버튼 처리 (MeetingLogicMixin에서 처리)

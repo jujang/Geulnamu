@@ -166,6 +166,76 @@ class ManagementWidgets {
     );
   }
 
+  /// 📱 운영진용 출석 관리 섹션
+  static Widget buildAttendanceManagementSection(
+    BuildContext context,
+    MeetingDetailStaffInfo meetingDetail, {
+    required VoidCallback onQrDisplayTap,
+    required VoidCallback onViewAsUserTap,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.qr_code,
+                  color: context.colors.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '📱 출석 관리',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: context.colors.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '모임 출석을 위한 QR 코드를 생성하거나, 일반 사용자 화면에서 본인의 출석 상태를 확인할 수 있습니다.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: context.colors.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                // QR 코드 생성 버튼
+                ElevatedButton.icon(
+                  onPressed: onQrDisplayTap,
+                  icon: const Icon(Icons.qr_code),
+                  label: const Text('출석용 QR 생성'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.colors.primary,
+                    foregroundColor: context.colors.onPrimary,
+                  ),
+                ),
+                // 일반 사용자 화면으로 이동
+                OutlinedButton.icon(
+                  onPressed: onViewAsUserTap,
+                  icon: const Icon(Icons.visibility),
+                  label: const Text('사용자 화면에서 보기'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: context.colors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// 🔧 관리 기능 섹션
   static Widget buildManagementSection(
     BuildContext context,

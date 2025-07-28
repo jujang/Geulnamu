@@ -67,6 +67,9 @@ class MeetingDetailWidgets {
     VoidCallback? onToggleDiscussion, // 🆕 토론 상태 토글 콜백 추가
     bool canToggleDiscussion = false, // 🆕 토론 상태 변경 가능 여부
     String? discussionTimeRemaining, // 🆕 토론 변경 마감까지 남은 시간
+    VoidCallback? onQrDisplayTap, // 🆕 QR 표시 콜백 (운영진용)
+    VoidCallback? onQrScanTap, // 🆕 QR 스캔 콜백 (일반 사용자용)
+    bool isStaffOrAbove = false, // 🆕 운영진 이상 권한 여부
   }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -85,6 +88,16 @@ class MeetingDetailWidgets {
             onEditToggle: onEditToggle,
             onNoteSave: onNoteSave,
             onEditCancel: onEditCancel,
+          ),
+          const SizedBox(height: 16),
+
+          // QR 출석 기능 (조건부 표시)
+          _buildQrAttendanceCard(
+            context,
+            meeting,
+            onQrDisplayTap: onQrDisplayTap,
+            onQrScanTap: onQrScanTap,
+            isStaffOrAbove: isStaffOrAbove,
           ),
           const SizedBox(height: 16),
 
@@ -661,6 +674,106 @@ class MeetingDetailWidgets {
         heroTag: "meeting_edit_fab",
         tooltip: '모임 정보 수정',
         child: const Icon(Icons.edit),
+      ),
+    );
+  }
+
+  /// QR 출석 카드
+  static Widget _buildQrAttendanceCard(
+    BuildContext context,
+    MeetingDetailInfo meeting, {
+    VoidCallback? onQrDisplayTap,
+    VoidCallback? onQrScanTap,
+    bool isStaffOrAbove = false,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 제목
+            Row(
+              children: [
+                Icon(Icons.qr_code, color: context.colors.primary, size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  'QR 출석',
+                  style: context.textStyles.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: context.colors.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // 설명 텍스트
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: context.colors.primaryContainer.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: context.colors.onPrimaryContainer,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      isStaffOrAbove
+                          ? '운영진용 QR 코드를 생성하여 참석자들의 출석을 받으세요'
+                          : 'QR 코드를 스캔하여 간편하게 출석하세요',
+                      style: context.textStyles.bodyMedium?.copyWith(
+                        color: context.colors.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 버튼들
+            if (isStaffOrAbove) ...[
+              // 운영진용 QR 표시 버튼
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: onQrDisplayTap,
+                  icon: const Icon(Icons.qr_code),
+                  label: const Text('QR 출석 관리'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: context.colors.primary,
+                    foregroundColor: context.colors.onPrimary,
+                  ),
+                ),
+              ),
+            ] else ...[
+              // 일반 사용자용 QR 스캔 버튼
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: onQrScanTap,
+                  icon: const Icon(Icons.qr_code_scanner),
+                  label: const Text('QR로 출석하기'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: context.colors.primary,
+                    foregroundColor: context.colors.onPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
