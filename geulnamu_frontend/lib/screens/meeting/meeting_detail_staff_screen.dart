@@ -148,11 +148,13 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       selectedMeetingDateTime: selectedMeetingDateTime,
       selectedLateThresholdTime: selectedLateThresholdTime,
       selectedDiscussionTime: selectedDiscussionTime,
+      isDiscussionTimeCleared: isDiscussionTimeCleared, // 🆕 X 버튼 상태 전달
       // 변경 콜백들
       onMeetingTypeChanged: onMeetingTypeChanged,
       onMeetingDateTimeChanged: onMeetingDateTimeChanged,
       onLateThresholdTimeChanged: onLateThresholdTimeChanged,
       onDiscussionTimeChanged: onDiscussionTimeChanged,
+      onClearDiscussionTime: clearDiscussionTime, // 🆕 X 버튼 콜백 전달
     );
   }
 

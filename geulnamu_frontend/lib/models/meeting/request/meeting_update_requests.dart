@@ -87,9 +87,10 @@ class MeetingBasicUpdateRequest {
            '${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
-  /// 문자열 값 변경 여부 확인
+  /// 문자열 값 변경 여부 확인 (null과 빈 문자열을 구분)
   static bool _isChanged(String? original, String? current) {
-    return (original ?? '') != (current ?? '');
+    // null을 빈 문자열로 정규화하지 않고 정확히 비교
+    return original != current;
   }
 
   /// 날짜 값 변경 여부 확인
@@ -117,10 +118,12 @@ class MeetingBasicUpdateRequest {
 /// API: PATCH /meetings/{meetingId}/discussion
 class MeetingDiscussionUpdateRequest {
   final DateTime? discussionTime;
+  final bool? discussionTimeNull; // 🆕 토론 시간 null 초기화 플래그
   final String? alarmMessage;
 
   const MeetingDiscussionUpdateRequest({
     this.discussionTime,
+    this.discussionTimeNull,
     this.alarmMessage,
   });
 
@@ -128,24 +131,45 @@ class MeetingDiscussionUpdateRequest {
   factory MeetingDiscussionUpdateRequest.onlyChanged({
     DateTime? originalDiscussionTime,
     DateTime? newDiscussionTime,
+    bool isDiscussionTimeCleared = false, // 🆕 X 버튼으로 클리어했는지 여부
     String? originalAlarmMessage,
     String? newAlarmMessage,
   }) {
+    // 🎯 토론 시간 처리 로직
+    DateTime? discussionTimeToSend;
+    bool? discussionTimeNullToSend;
+    
+    if (isDiscussionTimeCleared) {
+      // X 버튼으로 클리어한 경우: discussionTime은 보내지 않고, discussionTimeNull만 true
+      discussionTimeToSend = null;
+      discussionTimeNullToSend = true;
+    } else if (_isDateChanged(originalDiscussionTime, newDiscussionTime)) {
+      // 시간이 변경된 경우: 새로운 시간 값 전송, discussionTimeNull은 보내지 않음
+      discussionTimeToSend = newDiscussionTime;
+      discussionTimeNullToSend = null; // 요청에 포함하지 않음
+    } else {
+      // 변경사항 없는 경우: 둘 다 보내지 않음
+      discussionTimeToSend = null;
+      discussionTimeNullToSend = null;
+    }
+    
     return MeetingDiscussionUpdateRequest(
-      discussionTime: _isDateChanged(originalDiscussionTime, newDiscussionTime) ? newDiscussionTime : null,
-      alarmMessage: _isChanged(originalAlarmMessage, newAlarmMessage) ? newAlarmMessage : null,
+      discussionTime: discussionTimeToSend,
+      discussionTimeNull: discussionTimeNullToSend,
+      alarmMessage: _isChanged(originalAlarmMessage, newAlarmMessage) ? newAlarmMessage : null, // 🆕 빈 문자열도 변경사항으로 인식
     );
   }
 
   /// 변경사항이 있는지 확인
   bool get hasChanges {
-    return discussionTime != null || alarmMessage != null;
+    return discussionTime != null || discussionTimeNull == true || alarmMessage != null;
   }
 
   /// 변경된 필드 개수
   int get changeCount {
     int count = 0;
     if (discussionTime != null) count++;
+    if (discussionTimeNull == true) count++; // X 버튼으로 클리어한 경우도 변경사항
     if (alarmMessage != null) count++;
     return count;
   }
@@ -153,8 +177,16 @@ class MeetingDiscussionUpdateRequest {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = {};
     
-    if (discussionTime != null) json['discussionTime'] = _formatDateTimeForBackend(discussionTime!);
-    if (alarmMessage != null) json['alarmMessage'] = alarmMessage;
+    // 🎯 조건부 필드 포함
+    if (discussionTime != null) {
+      json['discussionTime'] = _formatDateTimeForBackend(discussionTime!);
+    }
+    if (discussionTimeNull == true) {
+      json['discussionTimeNull'] = discussionTimeNull;
+    }
+    if (alarmMessage != null) {
+      json['alarmMessage'] = alarmMessage;
+    }
     
     return json;
   }
@@ -184,6 +216,7 @@ class MeetingDiscussionUpdateRequest {
   String toString() {
     final changes = <String>[];
     if (discussionTime != null) changes.add('discussionTime: $discussionTime');
+    if (discussionTimeNull == true) changes.add('discussionTimeNull: $discussionTimeNull');
     if (alarmMessage != null) changes.add('alarmMessage: $alarmMessage');
     return 'MeetingDiscussionUpdateRequest{${changes.join(', ')}}';
   }

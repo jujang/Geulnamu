@@ -54,11 +54,13 @@ class MeetingDetailStaffWidgets {
     required DateTime? selectedMeetingDateTime,
     required DateTime? selectedLateThresholdTime,
     required DateTime? selectedDiscussionTime,
+    required bool isDiscussionTimeCleared, // 🆕 X 버튼 상태 추가
     // 변경 콜백들
     required ValueChanged<String?> onMeetingTypeChanged,
     required ValueChanged<DateTime?> onMeetingDateTimeChanged,
     required ValueChanged<DateTime?> onLateThresholdTimeChanged,
     required ValueChanged<DateTime?> onDiscussionTimeChanged,
+    required VoidCallback onClearDiscussionTime, // 🆕 X 버튼 콜백 추가
   }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -101,7 +103,9 @@ class MeetingDetailStaffWidgets {
             onSave: onSaveDiscussionInfo,
             alarmMessageController: alarmMessageController,
             selectedDiscussionTime: selectedDiscussionTime,
+            isDiscussionTimeCleared: isDiscussionTimeCleared, // 🆕 X 버튼 상태 전달
             onDiscussionTimeChanged: onDiscussionTimeChanged,
+            onClearDiscussionTime: onClearDiscussionTime, // 🆕 X 버튼 콜백 전달
           ),
 
           const SizedBox(height: 16),
@@ -286,7 +290,9 @@ class MeetingDetailStaffWidgets {
     required VoidCallback onSave,
     required TextEditingController alarmMessageController,
     required DateTime? selectedDiscussionTime,
+    required bool isDiscussionTimeCleared, // 🆕 X 버튼 상태 추가
     required ValueChanged<DateTime?> onDiscussionTimeChanged,
+    required VoidCallback onClearDiscussionTime, // 🆕 X 버튼 콜백 추가
   }) {
     return Card(
       child: Padding(
@@ -312,7 +318,9 @@ class MeetingDetailStaffWidgets {
                 context,
                 alarmMessageController: alarmMessageController,
                 selectedDiscussionTime: selectedDiscussionTime,
+                isDiscussionTimeCleared: isDiscussionTimeCleared, // 🆕 X 버튼 상태 전달
                 onDiscussionTimeChanged: onDiscussionTimeChanged,
+                onClearDiscussionTime: onClearDiscussionTime, // 🆕 X 버튼 콜백 전달
               )
             else
               _buildDiscussionDisplay(context, meetingDetail),
@@ -355,6 +363,7 @@ class MeetingDetailStaffWidgets {
                   '🔧 관리 기능',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: context.colors.primary, // 다크 모드에서 명확한 색상
                   ),
                 ),
               ],
@@ -415,6 +424,7 @@ class MeetingDetailStaffWidgets {
           title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary, // 다크 모드에서 명확한 색상
           ),
         ),
         const Spacer(),
@@ -510,23 +520,45 @@ class MeetingDetailStaffWidgets {
         ),
         const SizedBox(height: 16),
 
-        // 모임 유형
+        // 모임 유형 (다크 모드 색상 개선)
         DropdownButtonFormField<String>(
           value: selectedMeetingType,
           decoration: const InputDecoration(
             labelText: '모임 유형',
             border: OutlineInputBorder(),
           ),
-          items: const [
-            DropdownMenuItem(value: 'REGULAR', child: Text('정기')),
-            DropdownMenuItem(value: 'SPECIAL', child: Text('특수')),
-            DropdownMenuItem(value: 'FLASH', child: Text('번개')),
+          dropdownColor: Theme.of(context).colorScheme.surface, // 다크 모드 배경색 적용
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface, // 다크 모드 텍스트 색상
+          ),
+          items: [
+            DropdownMenuItem(
+              value: 'REGULAR',
+              child: Text(
+                '정기',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'SPECIAL',
+              child: Text(
+                '특수',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'FLASH',
+              child: Text(
+                '번개',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              ),
+            ),
           ],
           onChanged: onMeetingTypeChanged,
         ),
         const SizedBox(height: 16),
 
-        // 모임 일시 (TODO: 실제 날짜 선택기 구현)
+        // 모임 일시 (실제 날짜/시간 선택기)
         TextFormField(
           readOnly: true,
           decoration: const InputDecoration(
@@ -539,13 +571,11 @@ class MeetingDetailStaffWidgets {
               ? _formatDateTime(selectedMeetingDateTime!) 
               : '',
           ),
-          onTap: () {
-            // TODO: 날짜/시간 선택 다이얼로그 구현
-          },
+          onTap: () => _selectDateTime(context, selectedMeetingDateTime, onMeetingDateTimeChanged),
         ),
         const SizedBox(height: 16),
 
-        // 지각 기준 시간 (TODO: 실제 시간 선택기 구현)
+        // 지각 기준 시간 (실제 시간 선택기)
         TextFormField(
           readOnly: true,
           decoration: const InputDecoration(
@@ -558,9 +588,7 @@ class MeetingDetailStaffWidgets {
               ? _formatDateTime(selectedLateThresholdTime!) 
               : '',
           ),
-          onTap: () {
-            // TODO: 시간 선택 다이얼로그 구현
-          },
+          onTap: () => _selectDateTime(context, selectedLateThresholdTime, onLateThresholdTimeChanged),
         ),
         const SizedBox(height: 16),
 
@@ -592,26 +620,53 @@ class MeetingDetailStaffWidgets {
     BuildContext context, {
     required TextEditingController alarmMessageController,
     required DateTime? selectedDiscussionTime,
+    required bool isDiscussionTimeCleared, // 🆕 X 버튼 상태 추가
     required ValueChanged<DateTime?> onDiscussionTimeChanged,
+    required VoidCallback onClearDiscussionTime, // 🆕 X 버튼 콜백 추가
   }) {
     return Column(
       children: [
-        // 토론 시간 (TODO: 실제 시간 선택기 구현)
-        TextFormField(
-          readOnly: true,
-          decoration: const InputDecoration(
-            labelText: '토론 시간',
-            border: OutlineInputBorder(),
-            suffixIcon: Icon(Icons.access_time),
+        // 토론 시간 (실제 시간 선택기)
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: '토론 시간',
+                  border: OutlineInputBorder(),
+                  suffixIcon: Icon(Icons.access_time),
+                ),
+                controller: TextEditingController(
+                  text: selectedDiscussionTime != null 
+                    ? _formatDateTime(selectedDiscussionTime!) 
+                    : '',
+                ),
+                onTap: () => _selectDateTime(context, selectedDiscussionTime, onDiscussionTimeChanged),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // 토론 시간 제거 버튼
+            if (selectedDiscussionTime != null || isDiscussionTimeCleared) // 🆕 조건 수정
+              IconButton(
+                onPressed: onClearDiscussionTime, // 🆕 X 버튼 콜백 사용
+                icon: const Icon(Icons.clear),
+                tooltip: '토론 시간 및 알림 메시지를 모두 초기화합니다', // 🆕 툴팁 메시지 변경
+                color: Theme.of(context).colorScheme.error,
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // 토론 시간 안내 텍스트
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            '토론 시간은 선택사항입니다. 설정하지 않으면 토론 없이 진행됩니다.\n⚠️ X 버튼 클릭 시 토론 시간과 알림 메시지가 모두 초기화됩니다.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontStyle: FontStyle.italic,
+            ),
           ),
-          controller: TextEditingController(
-            text: selectedDiscussionTime != null 
-              ? _formatDateTime(selectedDiscussionTime!) 
-              : '',
-          ),
-          onTap: () {
-            // TODO: 시간 선택 다이얼로그 구현
-          },
         ),
         const SizedBox(height: 16),
 
@@ -680,6 +735,81 @@ class MeetingDetailStaffWidgets {
         return '번개';
       default:
         return meetingType; // 알 수 없는 값은 그대로 표시
+    }
+  }
+
+  /// 날짜/시간 선택 다이얼로그
+  static Future<void> _selectDateTime(
+    BuildContext context,
+    DateTime? currentDateTime,
+    ValueChanged<DateTime?> onChanged,
+  ) async {
+    try {
+      // 1단계: 날짜 선택
+      final selectedDate = await showDatePicker(
+        context: context,
+        initialDate: currentDateTime ?? DateTime.now(),
+        firstDate: DateTime(2020),
+        lastDate: DateTime(2030),
+        locale: const Locale('ko', 'KR'),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: Theme.of(context).colorScheme.copyWith(
+                primary: Theme.of(context).colorScheme.primary,
+                onPrimary: Theme.of(context).colorScheme.onPrimary,
+                surface: Theme.of(context).colorScheme.surface,
+                onSurface: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            child: child!,
+          );
+        },
+      );
+
+      if (selectedDate == null) return;
+
+      // 2단계: 시간 선택
+      final selectedTime = await showTimePicker(
+        context: context,
+        initialTime: currentDateTime != null 
+          ? TimeOfDay.fromDateTime(currentDateTime) 
+          : const TimeOfDay(hour: 9, minute: 0),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: Theme.of(context).colorScheme.copyWith(
+                primary: Theme.of(context).colorScheme.primary,
+                onPrimary: Theme.of(context).colorScheme.onPrimary,
+                surface: Theme.of(context).colorScheme.surface,
+                onSurface: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            child: child!,
+          );
+        },
+      );
+
+      if (selectedTime == null) return;
+
+      // 3단계: 날짜와 시간 결합
+      final combinedDateTime = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        selectedTime.hour,
+        selectedTime.minute,
+      );
+
+      // 4단계: 콜백 호출
+      onChanged(combinedDateTime);
+    } catch (e) {
+      // 에러가 발생하면 스낵바로 알림
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('날짜/시간 선택 중 오류가 발생했습니다: $e')),
+        );
+      }
     }
   }
 }

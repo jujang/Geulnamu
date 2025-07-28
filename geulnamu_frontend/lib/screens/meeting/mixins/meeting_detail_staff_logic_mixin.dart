@@ -39,6 +39,9 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   DateTime? _selectedMeetingDateTime;
   DateTime? _selectedLateThresholdTime;
   DateTime? _selectedDiscussionTime;
+  
+  // 🆕 X 버튼 상태 추적
+  bool _isDiscussionTimeCleared = false; // X 버튼으로 토론 시간을 클리어했는지 여부
 
   // 🎯 Getter들
   bool get isLoading => _isLoading;
@@ -59,6 +62,9 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   DateTime? get selectedMeetingDateTime => _selectedMeetingDateTime;
   DateTime? get selectedLateThresholdTime => _selectedLateThresholdTime;
   DateTime? get selectedDiscussionTime => _selectedDiscussionTime;
+  
+  // 🆕 X 버튼 상태 Getter
+  bool get isDiscussionTimeCleared => _isDiscussionTimeCleared;
 
   // 🎯 권한 체크
   bool get isStaffOrAbove {
@@ -164,6 +170,9 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
     _selectedMeetingDateTime = _meetingDetail!.meetingDateTime;
     _selectedLateThresholdTime = _meetingDetail!.lateThresholdTime;
     _selectedDiscussionTime = _meetingDetail!.discussionTime;  // null 가능
+    
+    // 🆕 X 버튼 상태 초기화
+    _isDiscussionTimeCleared = false;
   }
 
   /// 모임 기본 정보 편집 토글
@@ -277,12 +286,13 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   Future<void> saveDiscussionInfo(int meetingId) async {
     if (!_validateDiscussionInfo()) return;
 
-    // 변경사항 감지
+    // 변경사항 감지 (🆕 X 버튼 상태 포함)
     final request = MeetingDiscussionUpdateRequest.onlyChanged(
       originalDiscussionTime: _meetingDetail!.discussionTime,
       newDiscussionTime: _selectedDiscussionTime,
+      isDiscussionTimeCleared: _isDiscussionTimeCleared, // 🆕 X 버튼 상태 전달
       originalAlarmMessage: _meetingDetail!.alarmMessage,
-      newAlarmMessage: _alarmMessageController.text.trim().isEmpty ? null : _alarmMessageController.text.trim(),
+      newAlarmMessage: _alarmMessageController.text.trim(), // 🆕 빈 문자열도 그대로 전송
     );
 
     // 변경사항이 없으면 요청 차단
@@ -552,6 +562,23 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   }
 
   void onDiscussionTimeChanged(DateTime? value) {
-    setState(() => _selectedDiscussionTime = value);
+    setState(() {
+      _selectedDiscussionTime = value;
+      // 🆕 시간을 다시 선택한 경우 X 버튼 상태 해제
+      if (value != null) {
+        _isDiscussionTimeCleared = false;
+      }
+    });
+  }
+  
+  /// 🆕 토론 시간 클리어 (X 버튼)
+  void clearDiscussionTime() {
+    setState(() {
+      _selectedDiscussionTime = null;
+      _isDiscussionTimeCleared = true; // X 버튼으로 클리어한 것으로 표시
+      
+      // 🆕 알림 메시지도 함께 초기화
+      _alarmMessageController.clear();
+    });
   }
 }
