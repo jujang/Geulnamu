@@ -21,8 +21,7 @@ import 'widgets/home_widgets.dart';
 /// 제공 기능:
 /// - 동적 환영 카드 (로그인 상태별)
 /// - 빠른 메뉴 그리드
-/// - 최근 모임 섹션
-/// - PWA 설치 안내
+/// - PWA 설치 안내 (비로그인 사용자에게만)
 /// - RouteAware 화면 전환 감지
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -315,8 +314,8 @@ class _HomeScreenState extends State<HomeScreen>
 
                           // 로그인 상태에 따른 추가 콘텐츠
                           if (authProvider.isAuthenticated) ...[
-                            HomeWidgets.buildRecentMeetingsSection(context),
-                            const SizedBox(height: 24),
+                            // HomeWidgets.buildRecentMeetingsSection(context),
+                            // const SizedBox(height: 24),
                           ] else ...[
                             // PWA 설치 안내 (로그인 전에만 표시)
                             PWAInstallCard(
