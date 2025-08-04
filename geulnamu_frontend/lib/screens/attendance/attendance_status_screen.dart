@@ -124,6 +124,8 @@ class _AttendanceStatusScreenState extends State<AttendanceStatusScreen>
             context,
             attendanceList,
             refreshAttendanceStatus,
+            onDeleteAttendance: deleteAttendance, // 삭제 콜백 연결
+            showAdminActions: _isAdminLevel(), // 관리자 권한 체크
           ),
         ),
       ],
@@ -134,5 +136,15 @@ class _AttendanceStatusScreenState extends State<AttendanceStatusScreen>
   Future<void> _handleLogout() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     await _homeService.handleLogout(context, authProvider);
+  }
+
+  /// 관리자 급 권한 체크
+  bool _isAdminLevel() {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      return authProvider.isAdminLevel; // 관리자급 체크
+    } catch (e) {
+      return false; // 오류 시 기본적으로 권한 없음
+    }
   }
 }

@@ -267,8 +267,10 @@ class AttendanceStatusWidgets {
   static Widget buildAttendanceList(
     BuildContext context,
     List<AttendanceStatus> attendanceList,
-    VoidCallback onRefresh,
-  ) {
+    VoidCallback onRefresh, {
+    Function(int, String)? onDeleteAttendance, // 삭제 콜백 추가
+    bool showAdminActions = false, // 관리자 액션 표시 여부
+  }) {
     if (attendanceList.isEmpty) {
       return buildEmptyList(context);
     }
@@ -280,7 +282,12 @@ class AttendanceStatusWidgets {
         itemCount: attendanceList.length,
         itemBuilder: (context, index) {
           final attendance = attendanceList[index];
-          return buildAttendanceItem(context, attendance);
+          return buildAttendanceItem(
+            context,
+            attendance,
+            onDeleteAttendance: onDeleteAttendance,
+            showAdminActions: showAdminActions,
+          );
         },
       ),
     );
@@ -288,64 +295,67 @@ class AttendanceStatusWidgets {
 
   /// 개별 출석 항목
   static Widget buildAttendanceItem(
-  BuildContext context,
-  AttendanceStatus attendance,
-  ) {
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-    child: Card(
-    elevation: 2,
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(8),
-    side: BorderSide(
-    color: Theme.of(context).brightness == Brightness.light
-        ? context.colors.outline.withValues(alpha: 0.1)
-      : Colors.transparent,
-  width: 0.5,
-  ),
-  ),
-  child: Padding(
-    padding: const EdgeInsets.all(16),
-    child: Row(
-    children: [
-      // 프로필 아이콘
-    CircleAvatar(
-    backgroundColor: context.colors.primary.withValues(alpha: 0.1),
-    child: Icon(
-    Icons.person,
-    color: context.colors.primary,
-  size: 20,
-  ),
-  ),
-  const SizedBox(width: 16),
+    BuildContext context,
+    AttendanceStatus attendance, {
+    Function(int, String)? onDeleteAttendance, // 삭제 콜백 추가
+    bool showAdminActions = false, // 관리자 액션 표시 여부
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: Theme.of(context).brightness == Brightness.light
+                ? context.colors.outline.withValues(alpha: 0.1)
+                : Colors.transparent,
+            width: 0.5,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // 프로필 아이콘
+              CircleAvatar(
+                backgroundColor: context.colors.primary.withValues(alpha: 0.1),
+                child: Icon(
+                  Icons.person,
+                  color: context.colors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
 
-  // 이름
+              // 이름
               Expanded(
-    child: Text(
-      attendance.name,
-    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-    fontWeight: FontWeight.w600,
-    color: context.colors.onSurface,
-  ),
-  ),
-  ),
+                child: Text(
+                  attendance.name,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: context.colors.onSurface,
+                  ),
+                ),
+              ),
 
-  // 출석 시간 (기본 색상)
+              // 출석 시간 (기본 색상)
               Text(
-    _formatDateTime(attendance.attendanceTime),
-    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-    color: context.colors.onSurface,
-    fontWeight: FontWeight.w500,
-  ),
-  ),
-  
-  const SizedBox(width: 12),
+                _formatDateTime(attendance.attendanceTime),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: context.colors.onSurface,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
 
-      // 출석/지각 상태 표시
-        Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                  color: (attendance.isLate ? Colors.orange : Colors.green).withValues(alpha: 0.1),
+              const SizedBox(width: 12),
+
+              // 출석/지각 상태 표시
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (attendance.isLate ? Colors.orange : Colors.green)
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -356,41 +366,51 @@ class AttendanceStatusWidgets {
                   ),
                 ),
               ),
-              
+
               const SizedBox(width: 8),
 
-              // 더보기 메뉴 버튼
-              PopupMenuButton<String>(
-                icon: Icon(
-                  Icons.more_vert,
-                  color: context.colors.onSurface.withValues(alpha: 0.6),
-                  size: 20,
-                ),
-                onSelected: (value) {
-                  _handleAttendanceMenuAction(context, attendance, value);
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem<String>(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.delete_outline,
-                          color: Colors.red,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '출석 삭제',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.red,
-                          ),
-                        ),
-                      ],
-                    ),
+              // 더보기 메뉴 버튼 (관리자급에게만 표시)
+              if (showAdminActions) ...[
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: context.colors.onSurface.withValues(alpha: 0.6),
+                    size: 20,
                   ),
-                ],
-              ),
+                  onSelected: (value) {
+                    _handleAttendanceMenuAction(
+                      context,
+                      attendance,
+                      value,
+                      onDeleteAttendance,
+                    );
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem<String>(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '출석 삭제',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                // 관리자가 아니면 빈 공간으로 레이아웃 유지
+                const SizedBox(width: 28),
+              ],
             ],
           ),
         ),
@@ -398,22 +418,98 @@ class AttendanceStatusWidgets {
     );
   }
 
-  /// 출석 메뉴 액션 처리 (현재는 UI만 구현)
+  /// 출석 메뉴 액션 처리 (삭제 기능 완전 구현)
   static void _handleAttendanceMenuAction(
     BuildContext context,
     AttendanceStatus attendance,
     String action,
+    Function(int, String)? onDeleteAttendance,
   ) {
     switch (action) {
       case 'delete':
-        // TODO: 향후 출석 삭제 기능 구현
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${attendance.name}님의 출석 삭제 기능은 향후 구현 예정입니다.'),
-            backgroundColor: Colors.orange,
-          ),
-        );
+        if (onDeleteAttendance != null) {
+          _confirmAndDeleteAttendance(context, attendance, onDeleteAttendance);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('삭제 기능이 사용할 수 없습니다.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
         break;
+    }
+  }
+
+  /// 확인 후 출석 삭제 실행
+  static void _confirmAndDeleteAttendance(
+    BuildContext context,
+    AttendanceStatus attendance,
+    Function(int, String) onDeleteAttendance,
+  ) async {
+    try {
+      // 1. 확인 다이얼로그 표시
+      final confirmed = await showDeleteConfirmDialog(context, attendance.name);
+
+      if (!confirmed) {
+        return; // 사용자가 취소
+      }
+
+      // 2. 로딩 스낵바 표시
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text('${attendance.name}님의 출석을 삭제하고 있습니다...'),
+            ],
+          ),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 10), // 길게 표시 (삭제 시간 고려)
+        ),
+      );
+
+      // 3. 실제 삭제 실행
+      await onDeleteAttendance(attendance.attendanceId, attendance.name);
+
+      // 4. 성공 메시지
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              Text('${attendance.name}님의 출석이 삭제되었습니다.'),
+            ],
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      // 5. 오류 처리
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              Expanded(child: Text('출석 삭제에 실패했습니다: ${e.toString()}')),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
     }
   }
 
@@ -451,6 +547,99 @@ class AttendanceStatusWidgets {
   }
 
   // ==================== Helper Methods ====================
+
+  /// 출석 삭제 확인 다이얼로그
+  static Future<bool> showDeleteConfirmDialog(
+    BuildContext context,
+    String attendeeName,
+  ) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false, // 바깥 클릭으로 닫기 방지
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(
+                  Icons.warning_amber_outlined,
+                  color: Colors.orange,
+                  size: 28,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '출석 삭제 확인',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$attendeeName님의 출석 기록을 삭제하시겠습니까?',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.red.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.red, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '이 작업은 되돌릴 수 없습니다.',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Colors.red,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  '어죰',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: context.colors.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(
+                  '삭제',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false; // null인 경우 false 반환
+  }
 
   /// DateTime을 "yyyy.MM.dd HH:mm" 형식으로 포맷
   static String _formatDateTime(DateTime dateTime) {

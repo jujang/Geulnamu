@@ -85,6 +85,41 @@ mixin AttendanceStatusLogicMixin<T extends StatefulWidget> on State<T> {
     await refreshAttendanceStatus();
   }
 
+  /// 출석 삭제
+  /// 
+  /// [attendanceId] 삭제할 출석 ID
+  /// [attendeeName] 출석자 이름 (로그용)
+  Future<void> deleteAttendance(int attendanceId, String attendeeName) async {
+    try {
+      final accessToken = await _getAccessToken();
+      if (accessToken == null) {
+        throw Exception('인증 토큰을 가져올 수 없습니다.');
+      }
+
+      if (AppConfig.debugMode) {
+        print('🗑️ [AttendanceStatusLogicMixin] 출석 삭제 시작: $attendeeName (ID: $attendanceId)');
+      }
+
+      await _attendanceService.deleteAttendance(
+        attendanceId: attendanceId,
+        accessToken: accessToken,
+      );
+
+      if (AppConfig.debugMode) {
+        print('✅ [AttendanceStatusLogicMixin] 출석 삭제 성공: $attendeeName');
+      }
+
+      // 삭제 성공 후 전체 새로고침
+      await refreshAttendanceStatus();
+
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [AttendanceStatusLogicMixin] 출석 삭제 실패: $e');
+      }
+      rethrow;
+    }
+  }
+
   // ==================== Private Methods ====================
 
   /// 로딩 상태 설정
