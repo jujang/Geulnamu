@@ -10,6 +10,7 @@ import '../../services/home/home_route_service.dart'; // RouteObserver
 import 'mixins/meeting_logic_mixin.dart';
 import 'widgets/meeting_widgets.dart';
 import 'widgets/meeting_list_widgets.dart';
+import 'meeting_qr_scanner_screen.dart'; // 🆕 QR 스캔 화면
 
 /// 모임 목록 화면
 ///
@@ -188,8 +189,8 @@ class _MeetingListScreenState extends State<MeetingListScreen>
                   context,
                   meeting,
                   onTap: () => _handleMeetingTap(meeting),
-                  onAttendanceCheck: () =>
-                      _handleAttendanceCheck(meeting.meetingId),
+                  onAttendance: () => _handleAttendance(meeting.meetingId), // 🆕 QR 출석
+                  onAttendanceCheck: () => _handleAttendanceCheck(meeting.meetingId),
                 );
               },
             ),
@@ -233,6 +234,15 @@ class _MeetingListScreenState extends State<MeetingListScreen>
   /// 모임 카드 탭 처리 - 상세 페이지로 이동
   void _handleMeetingTap(MeetingInfo meeting) {
     Navigator.pushNamed(context, '/meeting/${meeting.meetingId}');
+  }
+
+  /// 🆕 QR 출석 버튼 처리 - QR 스캔 화면으로 직접 이동
+  void _handleAttendance(int meetingId) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const MeetingQrScannerScreen(),
+      ),
+    );
   }
 
   /// 출석현황 확인 버튼 처리 (MeetingLogicMixin에서 처리)

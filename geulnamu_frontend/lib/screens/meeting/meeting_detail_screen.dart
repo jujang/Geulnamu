@@ -7,6 +7,8 @@ import '../../services/home/home_route_service.dart';
 import '../../core/config/app_config.dart';
 import 'mixins/meeting_detail_logic_mixin.dart';
 import 'widgets/meeting_detail_widgets.dart';
+import 'meeting_qr_display_screen.dart'; // 🆕 QR 표시 화면
+import 'meeting_qr_scanner_screen.dart'; // 🆕 QR 스캔 화면
 
 /// 모임 상세 조회 화면
 ///
@@ -147,7 +149,49 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
       onToggleDiscussion: toggleDiscussionParticipation, // 🆕 토론 상태 토글 콜백 연결
       canToggleDiscussion: canChangeDiscussionParticipation, // 🆕 토론 상태 변경 가능 여부
       discussionTimeRemaining: discussionChangeTimeRemaining, // 🆕 남은 시간 정보 연결
+      onQrDisplayTap: () => _navigateToQrDisplay(), // 🆕 QR 표시 화면 이동
+      onQrScanTap: () => _navigateToQrScanner(), // 🆕 QR 스캔 화면 이동
+      isStaffOrAbove: isStaffOrAbove, // 🆕 권한 정보 전달
     );
+  }
+
+  /// QR 표시 화면으로 이동 (운영진용)
+  void _navigateToQrDisplay() {
+    if (meetingDetail == null) return;
+    
+    if (AppConfig.debugMode) {
+      print('📱 [QR 표시] 화면 이동: meetingId=${widget.meetingId}');
+    }
+    
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MeetingQrDisplayScreen(
+          meetingId: widget.meetingId,
+          meetingTitle: meetingDetail!.meetingName,
+        ),
+      ),
+    );
+  }
+
+  /// QR 스캔 화면으로 이동 (일반 사용자용)
+  void _navigateToQrScanner() async {
+    if (AppConfig.debugMode) {
+      print('📷 [QR 스캔] 화면 이동');
+    }
+    
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => const MeetingQrScannerScreen(),
+      ),
+    );
+    
+    // 출석 성공 시 새로고침
+    if (result == true) {
+      if (AppConfig.debugMode) {
+        print('✅ [QR 스캔] 출석 성공, 데이터 새로고침');
+      }
+      refreshMeetingDetail(widget.meetingId);
+    }
   }
 
   /// 로그아웃 처리 (HomeService 활용)

@@ -67,6 +67,9 @@ class MeetingDetailWidgets {
     VoidCallback? onToggleDiscussion, // 🆕 토론 상태 토글 콜백 추가
     bool canToggleDiscussion = false, // 🆕 토론 상태 변경 가능 여부
     String? discussionTimeRemaining, // 🆕 토론 변경 마감까지 남은 시간
+    VoidCallback? onQrDisplayTap, // 🆕 QR 표시 콜백 (운영진용)
+    VoidCallback? onQrScanTap, // 🆕 QR 스캔 콜백 (일반 사용자용)
+    bool isStaffOrAbove = false, // 🆕 운영진 이상 권한 여부
   }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -87,6 +90,19 @@ class MeetingDetailWidgets {
             onEditCancel: onEditCancel,
           ),
           const SizedBox(height: 16),
+
+          // QR 출석 기능 (조건부 표시 - '진행 전' 상태일 때만)
+          // 참석, 지각, 불참 상태에서는 QR 출석 섹션 숨김
+          if (meeting.attendanceStatus == 'NOT_STARTED') ...[
+            _buildQrAttendanceCard(
+              context,
+              meeting,
+              onQrDisplayTap: onQrDisplayTap,
+              onQrScanTap: onQrScanTap,
+              isStaffOrAbove: isStaffOrAbove,
+            ),
+            const SizedBox(height: 16),
+          ],
 
           // 토론 정보
           _buildDiscussionCard(
@@ -661,6 +677,58 @@ class MeetingDetailWidgets {
         heroTag: "meeting_edit_fab",
         tooltip: '모임 정보 수정',
         child: const Icon(Icons.edit),
+      ),
+    );
+  }
+
+  /// QR 출석 카드
+  static Widget _buildQrAttendanceCard(
+    BuildContext context,
+    MeetingDetailInfo meeting, {
+    VoidCallback? onQrDisplayTap,
+    VoidCallback? onQrScanTap,
+    bool isStaffOrAbove = false,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 제목
+            Row(
+              children: [
+                Icon(Icons.qr_code, color: context.colors.primary, size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  'QR 출석',
+                  style: context.textStyles.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: context.colors.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // 버튼들 - 🆕 모든 사용자가 출석 가능하도록 수정
+            // 운영진도 일반 모임 상세에서는 출석만 가능 (QR 관리는 운영진용 페이지에서)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onQrScanTap,
+                icon: const Icon(Icons.qr_code_scanner),
+                label: const Text('QR로 출석하기'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: context.colors.primary,
+                  foregroundColor: context.colors.onPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

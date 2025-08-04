@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
+import '../../../core/colors.dart';
 import '../../../models/meeting/meeting_model.dart';
 import '../../../models/meeting/meeting_filter_model.dart';
 import 'meeting_list_widgets.dart';
@@ -17,11 +18,13 @@ class MeetingWidgets {
   ///
   /// [meeting] 모임 정보
   /// [onTap] 카드 탭 콜백 (향후 상세보기 기능)
+  /// [onAttendance] 🆕 QR 출석 버튼 콜백
   /// [onAttendanceCheck] 출석현황 확인 버튼 콜백
   static Widget buildMeetingCard(
     BuildContext context,
     MeetingInfo meeting, {
     VoidCallback? onTap,
+    VoidCallback? onAttendance,
     VoidCallback? onAttendanceCheck,
   }) {
     return Card(
@@ -111,31 +114,93 @@ class MeetingWidgets {
 
               const SizedBox(height: 16),
 
-              // 🎯 하단: 출석현황 확인 버튼
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: onAttendanceCheck,
-                  icon: Icon(
-                    Icons.people_outline,
-                    size: 18,
-                    color: context.colors.primary,
-                  ),
-                  label: Text(
-                    '출석현황 확인',
-                    style: TextStyle(
-                      color: context.colors.primary,
-                      fontWeight: FontWeight.w600,
+              // 🎯 하단: 출석 버튼들 (5:5 비율)
+              Row(
+                children: [
+                  // 왼쪽: 출석 버튼 (QR 출석) - 출석 상태에 따라 비활성화
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      // 출석, 지각, 불참 상태일 때 비활성화
+                      onPressed:
+                          _isAttendanceButtonDisabled(meeting.attendanceStatus?.value)
+                          ? null
+                          : onAttendance,
+                      icon: Icon(
+                        Icons.qr_code_scanner,
+                        size: 18,
+                        color:
+                            _isAttendanceButtonDisabled(
+                              meeting.attendanceStatus?.value,
+                            )
+                            ? context.colors.onSurface.withOpacity(0.38)
+                            : context.colors.onPrimary,
+                      ),
+                      label: Text(
+                        '출석',
+                        style: TextStyle(
+                          color:
+                              _isAttendanceButtonDisabled(
+                                meeting.attendanceStatus?.toString(),
+                              )
+                              ? context.colors.onSurface.withOpacity(0.38)
+                              : context.colors.onPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            _isAttendanceButtonDisabled(
+                              meeting.attendanceStatus?.value,
+                            )
+                            ? context.colors.onSurface.withOpacity(0.12)
+                            : context.colors.primary,
+                        foregroundColor:
+                            _isAttendanceButtonDisabled(
+                              meeting.attendanceStatus?.value,
+                            )
+                            ? context.colors.onSurface.withOpacity(0.38)
+                            : context.colors.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        // Material 3 스타일의 비활성화된 버튼 색상
+                        disabledBackgroundColor: context.colors.onSurface
+                            .withOpacity(0.12),
+                        disabledForegroundColor: context.colors.onSurface
+                            .withOpacity(0.38),
+                      ),
                     ),
                   ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: context.colors.primary),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+
+                  const SizedBox(width: 8),
+
+                  // 오른쪽: 출석 현황 버튼
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onAttendanceCheck,
+                      icon: Icon(
+                        Icons.people_outline,
+                        size: 18,
+                        color: context.colors.primary,
+                      ),
+                      label: Text(
+                        '출석 현황',
+                        style: TextStyle(
+                          color: context.colors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: context.colors.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -145,6 +210,40 @@ class MeetingWidgets {
   }
 
   // ==================== 공통 헬퍼 메서드들 ====================
+
+  /// 출석 버튼 비활성화 여부 확인
+  /// 출석, 지각, 불참 상태일 때 비활성화
+  static bool _isAttendanceButtonDisabled(String? attendanceStatus) {
+    if (attendanceStatus == null || attendanceStatus.isEmpty) return false;
+    
+    // 출석 상태가 '출석', '지각', '불참'일 때 비활성화
+    const disabledStatuses = ['ATTEND', 'ATTEND_LATE', 'NOT_ATTEND'];
+    return disabledStatuses.contains(attendanceStatus);
+  }
+
+  /// 출석 상태 색상 가져오기
+  /// AttendanceStatus enum의 colorName을 활용하여 colors.dart의 정의된 색상과 매핑
+  static Color _getAttendanceStatusColor(
+    BuildContext context,
+    AttendanceStatus? attendanceStatus,
+  ) {
+    if (attendanceStatus == null) {
+      return context.colors.onSurfaceVariant;
+    }
+
+    switch (attendanceStatus.colorName) {
+      case 'green':
+        return GeulnamuColors.success;  // 출석 - 초록색
+      case 'orange':
+        return GeulnamuColors.warning;  // 지각 - 주황색
+      case 'grey':
+        return context.colors.onSurfaceVariant;  // 불참 - 회색
+      case 'blue':
+        return GeulnamuColors.info;  // 진행 전 - 파란색
+      default:
+        return context.colors.onSurfaceVariant;
+    }
+  }
 
   /// 모임 유형 배지 위젯
   static Widget _buildMeetingTypeBadge(
@@ -280,23 +379,6 @@ class MeetingWidgets {
     );
   }
 
-  /// 출석 상태별 색상 가져오기
-  static Color _getAttendanceStatusColor(
-    BuildContext context,
-    AttendanceStatus status,
-  ) {
-    switch (status) {
-      case AttendanceStatus.attend:
-        return Colors.green;
-      case AttendanceStatus.attendLate:
-        return Colors.orange;
-      case AttendanceStatus.notAttend:
-        return Colors.grey;
-      case AttendanceStatus.notStarted:
-        return Colors.blue;
-    }
-  }
-
   // ==================== 분할된 위젯들에 대한 위임 메서드들 ====================
 
   // 목록 관련 위젯들 (MeetingListWidgets에 위임)
@@ -306,11 +388,11 @@ class MeetingWidgets {
     required int totalPages,
     required Function(int) onPageChanged,
   }) => MeetingListWidgets.buildPagination(
-        context,
-        currentPage: currentPage,
-        totalPages: totalPages,
-        onPageChanged: onPageChanged,
-      );
+    context,
+    currentPage: currentPage,
+    totalPages: totalPages,
+    onPageChanged: onPageChanged,
+  );
 
   static Widget buildLoading(BuildContext context) =>
       MeetingListWidgets.buildLoading(context);
@@ -320,10 +402,10 @@ class MeetingWidgets {
     required String message,
     VoidCallback? onRetry,
   }) => MeetingListWidgets.buildError(
-        context,
-        message: message,
-        onRetry: onRetry,
-      );
+    context,
+    message: message,
+    onRetry: onRetry,
+  );
 
   static Widget buildEmptyList(BuildContext context) =>
       MeetingListWidgets.buildEmptyList(context);
@@ -333,10 +415,10 @@ class MeetingWidgets {
     required int totalElements,
     required MeetingListFilter currentFilter,
   }) => MeetingListWidgets.buildListHeader(
-        context,
-        totalElements: totalElements,
-        currentFilter: currentFilter,
-      );
+    context,
+    totalElements: totalElements,
+    currentFilter: currentFilter,
+  );
 
   static Widget buildFilterFab(BuildContext context, VoidCallback onPressed) =>
       MeetingListWidgets.buildFilterFab(context, onPressed);
@@ -347,41 +429,38 @@ class MeetingWidgets {
     required MeetingListFilter currentFilter,
     required Function(MeetingListFilter) onFilterChanged,
   }) => MeetingFilterWidgets.buildFilterBottomSheet(
-        context,
-        currentFilter: currentFilter,
-        onFilterChanged: onFilterChanged,
-      );
+    context,
+    currentFilter: currentFilter,
+    onFilterChanged: onFilterChanged,
+  );
 
   // 🆕 운영진용 위젯들 (MeetingStaffWidgets에 위임)
   static Widget buildStaffMeetingCard(
     BuildContext context,
     MeetingInfo meeting, {
     VoidCallback? onTap,
-  }) => MeetingStaffWidgets.buildStaffMeetingCard(
-        context,
-        meeting,
-        onTap: onTap,
-      );
+  }) =>
+      MeetingStaffWidgets.buildStaffMeetingCard(context, meeting, onTap: onTap);
 
   static Widget buildStaffListHeader(
     BuildContext context, {
     required int totalElements,
     required MeetingListFilter currentFilter,
   }) => MeetingStaffWidgets.buildStaffListHeader(
-        context,
-        totalElements: totalElements,
-        currentFilter: currentFilter,
-      );
+    context,
+    totalElements: totalElements,
+    currentFilter: currentFilter,
+  );
 
   static Widget buildStaffFilterBottomSheet(
     BuildContext context, {
     required MeetingListFilter currentFilter,
     required Function(MeetingListFilter) onFilterChanged,
   }) => MeetingStaffWidgets.buildStaffFilterBottomSheet(
-        context,
-        currentFilter: currentFilter,
-        onFilterChanged: onFilterChanged,
-      );
+    context,
+    currentFilter: currentFilter,
+    onFilterChanged: onFilterChanged,
+  );
 
   // 🆕 추가: 기존 코드와의 호환성을 위한 별칭 메서드들
   static Widget buildAdminMeetingCard(
@@ -395,18 +474,18 @@ class MeetingWidgets {
     required int totalElements,
     required MeetingListFilter currentFilter,
   }) => buildStaffListHeader(
-        context,
-        totalElements: totalElements,
-        currentFilter: currentFilter,
-      );
+    context,
+    totalElements: totalElements,
+    currentFilter: currentFilter,
+  );
 
   static Widget buildAdminFilterBottomSheet(
     BuildContext context, {
     required MeetingListFilter currentFilter,
     required Function(MeetingListFilter) onFilterChanged,
   }) => buildStaffFilterBottomSheet(
-        context,
-        currentFilter: currentFilter,
-        onFilterChanged: onFilterChanged,
-      );
+    context,
+    currentFilter: currentFilter,
+    onFilterChanged: onFilterChanged,
+  );
 }

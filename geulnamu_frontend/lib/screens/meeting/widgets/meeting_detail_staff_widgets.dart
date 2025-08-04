@@ -45,6 +45,9 @@ class MeetingDetailStaffWidgets {
     required VoidCallback onSaveDiscussionInfo,
     required VoidCallback onDeleteMeeting,
     required VoidCallback onTogglePrivacy,
+    // 🆕 출석 관리 콜백들
+    required VoidCallback onQrDisplayTap,
+    required VoidCallback onViewAsUserTap,
     // 폼 컨트롤러들
     required TextEditingController meetingNameController,
     required TextEditingController meetingPlaceController,
@@ -107,6 +110,16 @@ class MeetingDetailStaffWidgets {
             isDiscussionTimeCleared: isDiscussionTimeCleared,
             onDiscussionTimeChanged: onDiscussionTimeChanged,
             onClearDiscussionTime: onClearDiscussionTime,
+          ),
+
+          const SizedBox(height: 16),
+
+          // 📱 출석 관리 섹션
+          ManagementWidgets.buildAttendanceManagementSection(
+            context,
+            meetingDetail,
+            onQrDisplayTap: onQrDisplayTap,
+            onViewAsUserTap: onViewAsUserTap,
           ),
 
           const SizedBox(height: 16),
