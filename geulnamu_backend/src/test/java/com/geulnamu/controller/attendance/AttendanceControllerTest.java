@@ -207,7 +207,7 @@ public class AttendanceControllerTest extends ControllerTest {
                     fieldWithPath("data.meetingAttendanceSummaryResponse.attendCount").type(JsonFieldType.NUMBER).description("정상 참석자 수"),
                     fieldWithPath("data.meetingAttendanceSummaryResponse.lateAttendCount").type(JsonFieldType.NUMBER).description("지각 참석자 수"),
                     fieldWithPath("data.meetingAttendanceStatusResponseList[]").type(JsonFieldType.ARRAY).description("모임원별 출석 정보"),
-                    fieldWithPath("data.meetingAttendanceStatusResponseList[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
+                    fieldWithPath("data.meetingAttendanceStatusResponseList[].attendanceId").type(JsonFieldType.NUMBER).description("출석 고유번호"),
                     fieldWithPath("data.meetingAttendanceStatusResponseList[].name").type(JsonFieldType.STRING).description("모임원 이름"),
                     fieldWithPath("data.meetingAttendanceStatusResponseList[].attendanceTime").type(JsonFieldType.STRING).description("출석 시간"),
                     fieldWithPath("data.meetingAttendanceStatusResponseList[].isLate").type(JsonFieldType.BOOLEAN).description("지각 여부")

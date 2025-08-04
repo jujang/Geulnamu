@@ -224,7 +224,7 @@ class MeetingListWidgets {
           Text(
             _getFilterSummary(currentFilter),
             style: context.textStyles.bodySmall?.copyWith(
-              color: context.colors.onSurface.withOpacity(0.7),
+              color: context.colors.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],

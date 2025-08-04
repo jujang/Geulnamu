@@ -26,6 +26,7 @@ import 'screens/meeting/meeting_create_screen.dart'; // 🆕 모임 만들기 �
 import 'screens/meeting/meeting_detail_screen.dart'; // 🆕 모임 상세 화면
 import 'screens/meeting/meeting_detail_staff_screen.dart'; // 🆕 운영진용 모임 상세 화면
 import 'screens/meeting/meeting_qr_scanner_screen.dart'; // 🆕 QR 스캐너 화면
+import 'screens/attendance/attendance_status_screen.dart'; // 🆕 출석 현황 화면
 import 'screens/settings_screen.dart'; // 설정 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 import 'services/meeting/meeting_service.dart'; // 🆕 모임 서비스
@@ -179,6 +180,26 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
                 ),
                 settings: settings,
               );
+              
+            // 🆕 출석 현황 화면 (정확한 매칭)
+            case '/attendance/status':
+              final arguments = settings.arguments as Map<String, dynamic>?;
+              if (arguments != null) {
+                final meetingId = arguments['meetingId'] as int?;
+                final meetingTitle = arguments['meetingTitle'] as String?;
+                
+                if (meetingId != null) {
+                  return MaterialPageRoute(
+                    builder: (context) => AttendanceStatusScreen(
+                      meetingId: meetingId,
+                      meetingTitle: meetingTitle,
+                    ),
+                    settings: settings,
+                  );
+                }
+              }
+              // meetingId가 없으면 404 처리
+              return null;
           }
           
           // 나머지 기본 라우트들 (쿼리 파라미터 불필요)

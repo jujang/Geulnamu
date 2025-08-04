@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../core/config/app_config.dart';
 import '../../core/utils/api_utils.dart';
 import '../../models/attendance/request/attendance_note_request.dart';
+import '../../models/attendance/attendance_status_model.dart';
 
 /// 출석 관리 서비스 (Singleton)
 /// 
@@ -11,17 +12,20 @@ import '../../models/attendance/request/attendance_note_request.dart';
 /// - 모임별 출석 현황 조회
 /// - 비고 작성
 /// - 토론 참석 의사 변경
+/// - 출석 삭제 (관리자급)
 class AttendanceService {
   static final AttendanceService _instance = AttendanceService._internal();
   factory AttendanceService() => _instance;
+  
+  // 🔧 Dio 인스턴스 선언 (상단으로 이동)
+  late final Dio _dio;
+  
   AttendanceService._internal() {
     // 🔧 생성자에서 즉시 Dio 초기화
     _dio = ApiUtils.createDioWithTimeout(
       baseUrl: AppConfig.apiBaseUrl,
     );
   }
-
-  late final Dio _dio;
 
   /// 모임 출석 체크인
   /// 
@@ -226,33 +230,107 @@ class AttendanceService {
     }
   }
 
-  /// 본인 출석 정보 조회
-  /// 
-  /// API: GET /attendances/my-info?meetingId={meetingId}
-  /// 권한: MEMBER 이상
-  /// 
-  /// 향후 구현 예정 (현재는 모임 상세에서 함께 조회됨)
-  /*
-  Future<AttendanceInfo> getMyAttendanceInfo({
-    required int meetingId,
-    required String accessToken,
-  }) async {
-    // TODO: 향후 필요시 구현
-  }
-  */
-
   /// 모임별 출석 현황 조회
   /// 
   /// API: GET /attendances/list?meetingId={meetingId}
   /// 권한: MEMBER 이상
-  /// 
-  /// 향후 구현 예정 (출석 현황 페이지에서 사용)
-  /*
   Future<MeetingAttendanceDetails> getMeetingAttendanceStatus({
     required int meetingId,
     required String accessToken,
   }) async {
-    // TODO: 향후 구현
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [출석 현황 조회] API 요청 시작...');
+        print('🔗 [출석 현황 조회] 요청 URL: ${_dio.options.baseUrl}/attendances/list?meetingId=$meetingId');
+      }
+
+      final response = await _dio.get(
+        '/attendances/list',
+        queryParameters: {'meetingId': meetingId},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '출석 현황 조회',
+        );
+
+        final attendanceDetails = MeetingAttendanceDetails.fromJson(
+          processedResponse['data'] as Map<String, dynamic>
+        );
+        
+        if (AppConfig.debugMode) {
+          print('✅ [출석 현황 조회] 성공 - 출석자 ${attendanceDetails.attendanceList.length}명');
+        }
+
+        return attendanceDetails;
+      } else {
+        throw Exception('[출석 현황 조회] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [출석 현황 조회] 오류 발생: $e');
+      }
+      
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '출석 현황 조회');
+      }
+      rethrow;
+    }
   }
-  */
+
+  /// 출석 삭제
+  /// 
+  /// API: DELETE /attendances/{attendanceId}
+  /// 권한: ADMIN 이상 (관리자급)
+  Future<void> deleteAttendance({
+    required int attendanceId,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [출석 삭제] API 요청 시작...');
+        print('🔗 [출석 삭제] 요청 URL: ${_dio.options.baseUrl}/attendances/$attendanceId');
+      }
+
+      final response = await _dio.delete(
+        '/attendances/$attendanceId',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '출석 삭제',
+          expectData: false, // Void 응답이므로 data 없음
+        );
+        
+        if (AppConfig.debugMode) {
+          print('✅ [출석 삭제] 성공 - attendanceId: $attendanceId');
+        }
+      } else {
+        throw Exception('[출석 삭제] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [출석 삭제] 오류 발생: $e');
+      }
+      
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '출석 삭제');
+      }
+      rethrow;
+    }
+  }
 }

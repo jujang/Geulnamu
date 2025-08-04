@@ -88,7 +88,11 @@ class MainLayout extends StatelessWidget {
             // 👤 사용자 메뉴 (로그인 시에만 + showProfileMenu가 true일 때만)
             profileWidget: authProvider.isAuthenticated && showProfileMenu
                 ? (customProfileWidget ??
-                      _buildDefaultProfileMenu(context, authProvider, homeService.isProcessing))
+                      _buildDefaultProfileMenu(
+                        context,
+                        authProvider,
+                        homeService.isProcessing,
+                      ))
                 : null,
             // 🏠 로고 클릭으로 홈 이동
             onLogoTap: onLogoTap,
@@ -136,7 +140,9 @@ class MainLayout extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -163,7 +169,9 @@ class MainLayout extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -191,7 +199,9 @@ class MainLayout extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -219,7 +229,9 @@ class MainLayout extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -256,7 +268,7 @@ class MainLayout extends StatelessWidget {
                 border: Border.all(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onPrimary.withOpacity(0.3),
+                  ).colorScheme.onPrimary.withValues(alpha: 0.3),
                   width: 2,
                 ),
               ),

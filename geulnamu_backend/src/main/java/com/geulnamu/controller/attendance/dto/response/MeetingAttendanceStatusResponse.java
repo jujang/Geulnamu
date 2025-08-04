@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class MeetingAttendanceStatusResponse {
-    private Long memberId;
+    private Long attendanceId;
     private String name;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     private LocalDateTime attendanceTime;

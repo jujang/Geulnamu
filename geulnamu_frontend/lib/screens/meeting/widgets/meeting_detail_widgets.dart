@@ -177,7 +177,7 @@ class MeetingDetailWidgets {
                 decoration: BoxDecoration(
                   color: Theme.of(
                     context,
-                  ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -355,7 +355,7 @@ class MeetingDetailWidgets {
                 decoration: BoxDecoration(
                   color: Theme.of(
                     context,
-                  ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -424,7 +424,7 @@ class MeetingDetailWidgets {
           decoration: BoxDecoration(
             color: Theme.of(
               context,
-            ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -523,7 +523,7 @@ class MeetingDetailWidgets {
             decoration: BoxDecoration(
               color: Theme.of(
                 context,
-              ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -744,9 +744,9 @@ class MeetingDetailWidgets {
           color: context.colors.primary, // 텍스트 색상을 직접 지정
         ),
       ),
-      backgroundColor: context.colors.primary.withOpacity(0.1),
+      backgroundColor: context.colors.primary.withValues(alpha: 0.1),
       side: BorderSide(
-        color: context.colors.primary.withOpacity(0.3),
+        color: context.colors.primary.withValues(alpha: 0.3),
         width: 1,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
