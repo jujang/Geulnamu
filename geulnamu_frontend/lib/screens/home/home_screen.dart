@@ -92,7 +92,9 @@ class _HomeScreenState extends State<HomeScreen>
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -119,7 +121,9 @@ class _HomeScreenState extends State<HomeScreen>
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -147,7 +151,9 @@ class _HomeScreenState extends State<HomeScreen>
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -178,7 +184,9 @@ class _HomeScreenState extends State<HomeScreen>
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -215,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen>
                 border: Border.all(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onPrimary.withOpacity(0.3),
+                  ).colorScheme.onPrimary.withValues(alpha: 0.3),
                   width: 2,
                 ),
               ),

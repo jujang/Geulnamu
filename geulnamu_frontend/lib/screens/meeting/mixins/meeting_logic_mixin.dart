@@ -17,7 +17,7 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
   String? _errorMessage;
   MeetingListResponse? _meetingListResponse;
   MeetingListFilter _currentFilter = const MeetingListFilter();
-  
+
   // 🆕 운영진 모드 여부 (subclass에서 오버라이드 가능)
   bool get isStaffMode => false; // 기본값: 일반 사용자
 
@@ -46,11 +46,11 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
   int get totalElements => pagingInfo?.totalElements ?? 0;
 
   /// 초기 데이터 로드
-  /// 
+  ///
   /// [initialFilter] 초기 필터 설정 (옵션)
   Future<void> initializeMeetingList({MeetingListFilter? initialFilter}) async {
     // 🎯 MeetingService는 Singleton이므로 이미 초기화됨
-    
+
     // 🎯 초기 필터 설정 (제공된 경우)
     if (initialFilter != null) {
       _currentFilter = initialFilter;
@@ -156,12 +156,12 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
     if (AppConfig.debugMode) {
       print('🔄 [모임 목록 새로고침] 다른 화면에서 돌아와서 새로고침 시작...');
     }
-    
+
     // 로딩 표시와 함께 강제 새로고침
     await loadMeetingList(showLoading: true);
-    
+
     if (AppConfig.debugMode) {
-      print('✅ [모임 목록 새로고침] 완료 - 총 ${totalElements}개 모임');
+      print('✅ [모임 목록 새로고침] 완료 - 총 $totalElements개 모임');
     }
   }
 
@@ -169,14 +169,6 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
   Future<void> resetFilter() async {
     final resetFilter = _currentFilter.reset();
     await applyFilter(resetFilter);
-  }
-
-  /// 출석현황 확인 버튼 처리
-  void handleAttendanceCheck(int meetingId) {
-    _meetingService.handleAttendanceCheck(meetingId);
-
-    // TODO: 향후 실제 페이지 이동 구현 시 아래 코드 활성화
-    // Navigator.pushNamed(context, '/meeting/$meetingId/attendance');
   }
 
   // Private methods
@@ -217,6 +209,20 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
         setState(() {});
       }
     }
+  }
+
+  /// 출석현황 확인 처리
+  void handleAttendanceCheck(int meetingId) {
+    if (AppConfig.debugMode) {
+      print('🎯 [MeetingLogicMixin] 출석현황 확인: meetingId=$meetingId');
+    }
+
+    // 출석 현황 페이지로 이동
+    Navigator.pushNamed(
+      context,
+      '/attendance/status',
+      arguments: {'meetingId': meetingId},
+    );
   }
 
   /// 에러 메시지 변환

@@ -254,8 +254,12 @@ class MeetingCreateWidgets {
         style: ElevatedButton.styleFrom(
           backgroundColor: context.colors.primary,
           foregroundColor: context.colors.onPrimary,
-          disabledBackgroundColor: context.colors.onSurface.withOpacity(0.12),
-          disabledForegroundColor: context.colors.onSurface.withOpacity(0.38),
+          disabledBackgroundColor: context.colors.onSurface.withValues(
+            alpha: 0.12,
+          ),
+          disabledForegroundColor: context.colors.onSurface.withValues(
+            alpha: 0.38,
+          ),
           elevation: isLoading ? 0 : 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -334,7 +338,7 @@ class MeetingCreateWidgets {
   static OutlineInputBorder _getSoftFocusedBorder(BuildContext context) {
     // 다크 모드일 때만 부드러운 포커스 색상 적용
     final Color focusedBorderColor = context.isDarkMode
-        ? context.colors.primary.withOpacity(0.8) // 민트색을 약간 부드럽게
+        ? context.colors.primary.withValues(alpha: 0.8) // 민트색을 약간 부드럽게
         : context.colors.primary; // 라이트 모드는 기본 primary 색상
 
     return OutlineInputBorder(

@@ -25,11 +25,8 @@ class MeetingListScreen extends StatefulWidget {
   /// - 'today': 오늘의 모임
   /// - null 또는 기타: 기본 필터
   final String? initialFilterType;
-  
-  const MeetingListScreen({
-    super.key,
-    this.initialFilterType,
-  });
+
+  const MeetingListScreen({super.key, this.initialFilterType});
 
   @override
   State<MeetingListScreen> createState() => _MeetingListScreenState();
@@ -47,7 +44,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
       _initializeScreen();
     });
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -63,7 +60,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
       }
     });
   }
-  
+
   @override
   void dispose() {
     // RouteObserver 등록 해제
@@ -74,7 +71,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
     }
     super.dispose();
   }
-  
+
   @override
   void didPopNext() {
     // 다른 화면에서 돌아왔을 때 새로고침
@@ -109,14 +106,14 @@ class _MeetingListScreenState extends State<MeetingListScreen>
             // HomeService를 통한 메뉴 및 로그아웃 처리
             onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
             onLogoutTap: () => _handleLogout(),
-          // 새로고침 액션 추가
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: refreshMeetingList,
-              tooltip: '새로고침',
-            ),
-          ],
+            // 새로고침 액션 추가
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: refreshMeetingList,
+                tooltip: '새로고침',
+              ),
+            ],
             body: Stack(
               children: [
                 // 메인 콘텐츠
@@ -171,7 +168,10 @@ class _MeetingListScreenState extends State<MeetingListScreen>
         ),
 
         // 구분선
-        Divider(height: 1, color: context.colors.outline.withOpacity(0.2)),
+        Divider(
+          height: 1,
+          color: context.colors.outline.withValues(alpha: 0.2),
+        ),
 
         // 모임 목록
         Expanded(
@@ -189,8 +189,10 @@ class _MeetingListScreenState extends State<MeetingListScreen>
                   context,
                   meeting,
                   onTap: () => _handleMeetingTap(meeting),
-                  onAttendance: () => _handleAttendance(meeting.meetingId), // 🆕 QR 출석
-                  onAttendanceCheck: () => _handleAttendanceCheck(meeting.meetingId),
+                  onAttendance: () =>
+                      _handleAttendance(meeting.meetingId), // 🆕 QR 출석
+                  onAttendanceCheck: () =>
+                      _handleAttendanceCheck(meeting.meetingId),
                 );
               },
             ),
@@ -239,9 +241,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
   /// 🆕 QR 출석 버튼 처리 - QR 스캔 화면으로 직접 이동
   void _handleAttendance(int meetingId) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const MeetingQrScannerScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const MeetingQrScannerScreen()),
     );
   }
 

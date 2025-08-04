@@ -25,7 +25,7 @@ class MeetingCreateScreen extends StatefulWidget {
 class _MeetingCreateScreenState extends State<MeetingCreateScreen>
     with MeetingCreateLogicMixin {
   final HomeService _homeService = HomeService(); // HomeService 인스턴스
-  
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
@@ -61,7 +61,7 @@ class _MeetingCreateScreenState extends State<MeetingCreateScreen>
               // 🔄 로딩 오버레이
               if (isLoading)
                 Container(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   child: const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -105,7 +105,6 @@ class _MeetingCreateScreenState extends State<MeetingCreateScreen>
             onChanged: onMeetingTypeChanged,
           ),
           const SizedBox(height: 32), // 더 많은 간격
-
           // 📝 모임 제목
           MeetingCreateWidgets.buildMeetingNameField(
             context: context,
@@ -114,7 +113,6 @@ class _MeetingCreateScreenState extends State<MeetingCreateScreen>
             onChanged: revalidateForm, // 실시간 유효성 검사
           ),
           const SizedBox(height: 28), // 더 많은 간격
-
           // 📅 모임 날짜/시간
           MeetingCreateWidgets.buildDateTimeSelector(
             context: context,
@@ -126,7 +124,6 @@ class _MeetingCreateScreenState extends State<MeetingCreateScreen>
             isRequired: true,
           ),
           const SizedBox(height: 28), // 더 많은 간격
-
           // ⏰ 지각 기준 시간
           MeetingCreateWidgets.buildDateTimeSelector(
             context: context,
@@ -154,14 +151,12 @@ class _MeetingCreateScreenState extends State<MeetingCreateScreen>
             onChanged: revalidateForm, // 실시간 유효성 검사
           ),
           const SizedBox(height: 28), // 더 많은 간격
-
           // 📄 상세 설명
           MeetingCreateWidgets.buildDescriptionField(
             context: context,
             controller: descriptionController,
           ),
           const SizedBox(height: 40), // 더 많은 간격
-
           // 🚀 생성 버튼
           MeetingCreateWidgets.buildCreateButton(
             context: context,
@@ -173,12 +168,12 @@ class _MeetingCreateScreenState extends State<MeetingCreateScreen>
       ),
     );
   }
-  
+
   /// 메뉴 탭 처리
   void _handleMenuTap(String menu) {
     _homeService.handleMenuTap(context, menu);
   }
-  
+
   /// 로그아웃 처리
   Future<void> _handleLogout() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
