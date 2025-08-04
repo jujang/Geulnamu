@@ -288,63 +288,133 @@ class AttendanceStatusWidgets {
 
   /// 개별 출석 항목
   static Widget buildAttendanceItem(
-    BuildContext context,
-    AttendanceStatus attendance,
+  BuildContext context,
+  AttendanceStatus attendance,
   ) {
-    final timeColor = attendance.isLate ? Colors.orange : Colors.green;
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    child: Card(
+    elevation: 2,
+    shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(8),
+    side: BorderSide(
+    color: Theme.of(context).brightness == Brightness.light
+        ? context.colors.outline.withValues(alpha: 0.1)
+      : Colors.transparent,
+  width: 0.5,
+  ),
+  ),
+  child: Padding(
+    padding: const EdgeInsets.all(16),
+    child: Row(
+    children: [
+      // 프로필 아이콘
+    CircleAvatar(
+    backgroundColor: context.colors.primary.withValues(alpha: 0.1),
+    child: Icon(
+    Icons.person,
+    color: context.colors.primary,
+  size: 20,
+  ),
+  ),
+  const SizedBox(width: 16),
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(
-            color: Theme.of(context).brightness == Brightness.light
-                ? context.colors.outline.withValues(alpha: 0.1)
-                : Colors.transparent,
-            width: 0.5,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // 프로필 아이콘
-              CircleAvatar(
-                backgroundColor: context.colors.primary.withValues(alpha: 0.1),
-                child: Icon(
-                  Icons.person,
-                  color: context.colors.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 16),
-
-              // 이름
+  // 이름
               Expanded(
+    child: Text(
+      attendance.name,
+    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+    fontWeight: FontWeight.w600,
+    color: context.colors.onSurface,
+  ),
+  ),
+  ),
+
+  // 출석 시간 (기본 색상)
+              Text(
+    _formatDateTime(attendance.attendanceTime),
+    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+    color: context.colors.onSurface,
+    fontWeight: FontWeight.w500,
+  ),
+  ),
+  
+  const SizedBox(width: 12),
+
+      // 출석/지각 상태 표시
+        Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                  color: (attendance.isLate ? Colors.orange : Colors.green).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Text(
-                  attendance.name,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  attendance.isLate ? '지각' : '출석',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: attendance.isLate ? Colors.orange : Colors.green,
                     fontWeight: FontWeight.w600,
-                    color: context.colors.onSurface,
                   ),
                 ),
               ),
+              
+              const SizedBox(width: 8),
 
-              // 출석 시간 (색상으로 지각 여부 표시)
-              Text(
-                _formatDateTime(attendance.attendanceTime),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: timeColor,
-                  fontWeight: FontWeight.w600,
+              // 더보기 메뉴 버튼
+              PopupMenuButton<String>(
+                icon: Icon(
+                  Icons.more_vert,
+                  color: context.colors.onSurface.withValues(alpha: 0.6),
+                  size: 20,
                 ),
+                onSelected: (value) {
+                  _handleAttendanceMenuAction(context, attendance, value);
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '출석 삭제',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  /// 출석 메뉴 액션 처리 (현재는 UI만 구현)
+  static void _handleAttendanceMenuAction(
+    BuildContext context,
+    AttendanceStatus attendance,
+    String action,
+  ) {
+    switch (action) {
+      case 'delete':
+        // TODO: 향후 출석 삭제 기능 구현
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${attendance.name}님의 출석 삭제 기능은 향후 구현 예정입니다.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        break;
+    }
   }
 
   /// 빈 목록 위젯
