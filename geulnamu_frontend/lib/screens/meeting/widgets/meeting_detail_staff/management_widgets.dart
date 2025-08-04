@@ -181,11 +181,7 @@ class ManagementWidgets {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.qr_code,
-                  color: context.colors.primary,
-                  size: 20,
-                ),
+                Icon(Icons.qr_code, color: context.colors.primary, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   '📱 출석 관리',
@@ -213,7 +209,7 @@ class ManagementWidgets {
                 ElevatedButton.icon(
                   onPressed: onQrDisplayTap,
                   icon: const Icon(Icons.qr_code),
-                  label: const Text('출석용 QR 생성'),
+                  label: const Text('출석용 QR 표시'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.colors.primary,
                     foregroundColor: context.colors.onPrimary,

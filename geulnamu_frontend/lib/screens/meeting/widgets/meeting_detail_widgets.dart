@@ -91,9 +91,9 @@ class MeetingDetailWidgets {
           ),
           const SizedBox(height: 16),
 
-          // QR 출석 기능 (조건부 표시 - 출석하지 않은 경우에만)
-          // 출석 ID가 없거나 출석 상태가 없는 경우에만 표시 (불참 포함)
-          if (meeting.attendanceId == null) ...[
+          // QR 출석 기능 (조건부 표시 - '진행 전' 상태일 때만)
+          // 참석, 지각, 불참 상태에서는 QR 출석 섹션 숨김
+          if (meeting.attendanceStatus == 'NOT_STARTED') ...[
             _buildQrAttendanceCard(
               context,
               meeting,
@@ -710,35 +710,6 @@ class MeetingDetailWidgets {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-
-            // 설명 텍스트
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.colors.primaryContainer.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: context.colors.onPrimaryContainer,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'QR 코드를 스캔하여 간편하게 출석하세요',
-                      style: context.textStyles.bodyMedium?.copyWith(
-                        color: context.colors.onPrimaryContainer,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
             const SizedBox(height: 16),
 
             // 버튼들 - 🆕 모든 사용자가 출석 가능하도록 수정

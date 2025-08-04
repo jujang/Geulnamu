@@ -4,6 +4,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/attendance/qr_service.dart';
 import '../../services/attendance/attendance_service.dart';
+import '../../services/home/home_service.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../core/config/app_config.dart';
 import '../../models/attendance/qr_data.dart';
@@ -24,6 +25,7 @@ class MeetingQrScannerScreen extends StatefulWidget {
 class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
   final QrService _qrService = QrService();
   final AttendanceService _attendanceService = AttendanceService();
+  final HomeService _homeService = HomeService();
   late MobileScannerController _scannerController;
 
   bool _isProcessing = false;
@@ -410,11 +412,19 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
     });
   }
 
+  /// 로그아웃 처리 (HomeService 활용)
+  Future<void> _handleLogout() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await _homeService.handleLogout(context, authProvider);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'QR 출석',
       isHomePage: false, // 뒤로가기 버튼 표시
+      onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
+      onLogoutTap: () => _handleLogout(),
       body: _isProcessing || _isSuccess || _statusMessage != null
           ? _buildResultScreen()
           : _buildScannerScreen(),

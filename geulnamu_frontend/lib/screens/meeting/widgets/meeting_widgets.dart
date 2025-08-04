@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
+import '../../../core/colors.dart';
 import '../../../models/meeting/meeting_model.dart';
 import '../../../models/meeting/meeting_filter_model.dart';
 import 'meeting_list_widgets.dart';
@@ -102,7 +103,7 @@ class MeetingWidgets {
                     value: meeting.attendanceStatusDisplayName,
                     valueColor: _getAttendanceStatusColor(
                       context,
-                      meeting.attendanceStatus?.toString() ?? '',
+                      meeting.attendanceStatus,
                     ),
                     secondIcon: Icons.tag,
                     secondLabel: '모임번호',
@@ -121,7 +122,7 @@ class MeetingWidgets {
                     child: ElevatedButton.icon(
                       // 출석, 지각, 불참 상태일 때 비활성화
                       onPressed:
-                          _isAttendanceButtonDisabled(meeting.attendanceStatus?.toString())
+                          _isAttendanceButtonDisabled(meeting.attendanceStatus?.value)
                           ? null
                           : onAttendance,
                       icon: Icon(
@@ -129,7 +130,7 @@ class MeetingWidgets {
                         size: 18,
                         color:
                             _isAttendanceButtonDisabled(
-                              meeting.attendanceStatus?.toString(),
+                              meeting.attendanceStatus?.value,
                             )
                             ? context.colors.onSurface.withOpacity(0.38)
                             : context.colors.onPrimary,
@@ -149,13 +150,13 @@ class MeetingWidgets {
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
                             _isAttendanceButtonDisabled(
-                              meeting.attendanceStatus?.toString(),
+                              meeting.attendanceStatus?.value,
                             )
                             ? context.colors.onSurface.withOpacity(0.12)
                             : context.colors.primary,
                         foregroundColor:
                             _isAttendanceButtonDisabled(
-                              meeting.attendanceStatus?.toString(),
+                              meeting.attendanceStatus?.value,
                             )
                             ? context.colors.onSurface.withOpacity(0.38)
                             : context.colors.onPrimary,
@@ -213,29 +214,32 @@ class MeetingWidgets {
   /// 출석 버튼 비활성화 여부 확인
   /// 출석, 지각, 불참 상태일 때 비활성화
   static bool _isAttendanceButtonDisabled(String? attendanceStatus) {
-  if (attendanceStatus == null || attendanceStatus.isEmpty) return false;
-  
-  // 출석 상태가 '출석', '지각', '불참'일 때 비활성화
-  const disabledStatuses = ['PRESENT', 'LATE', 'ABSENT'];
-  return disabledStatuses.contains(attendanceStatus);
+    if (attendanceStatus == null || attendanceStatus.isEmpty) return false;
+    
+    // 출석 상태가 '출석', '지각', '불참'일 때 비활성화
+    const disabledStatuses = ['ATTEND', 'ATTEND_LATE', 'NOT_ATTEND'];
+    return disabledStatuses.contains(attendanceStatus);
   }
 
   /// 출석 상태 색상 가져오기
+  /// AttendanceStatus enum의 colorName을 활용하여 colors.dart의 정의된 색상과 매핑
   static Color _getAttendanceStatusColor(
     BuildContext context,
-    String attendanceStatus, // nullable 제거
+    AttendanceStatus? attendanceStatus,
   ) {
-    if (attendanceStatus.isEmpty) {
+    if (attendanceStatus == null) {
       return context.colors.onSurfaceVariant;
     }
 
-    switch (attendanceStatus) {
-      case 'PRESENT':
-        return Colors.green;
-      case 'LATE':
-        return Colors.orange;
-      case 'ABSENT':
-        return Colors.red;
+    switch (attendanceStatus.colorName) {
+      case 'green':
+        return GeulnamuColors.success;  // 출석 - 초록색
+      case 'orange':
+        return GeulnamuColors.warning;  // 지각 - 주황색
+      case 'grey':
+        return context.colors.onSurfaceVariant;  // 불참 - 회색
+      case 'blue':
+        return GeulnamuColors.info;  // 진행 전 - 파란색
       default:
         return context.colors.onSurfaceVariant;
     }
