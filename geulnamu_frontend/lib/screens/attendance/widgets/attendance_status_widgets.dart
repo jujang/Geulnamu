@@ -569,7 +569,10 @@ class AttendanceStatusWidgets {
                   '출석 삭제 확인',
                   style: Theme.of(
                     context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: context.colors.onSurface, // 🎯 다크 모드 가독성 개선
+                  ),
                 ),
               ],
             ),
@@ -615,7 +618,7 @@ class AttendanceStatusWidgets {
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
                 child: Text(
-                  '어죰',
+                  '취소', // 🎯 오타 수정: '어죰' → '취소'
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: context.colors.onSurface.withValues(alpha: 0.7),
                   ),

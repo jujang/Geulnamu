@@ -107,10 +107,22 @@ mixin AttendanceStatusLogicMixin<T extends StatefulWidget> on State<T> {
 
       if (AppConfig.debugMode) {
         print('✅ [AttendanceStatusLogicMixin] 출석 삭제 성공: $attendeeName');
+        print('🔄 [AttendanceStatusLogicMixin] 새로고침 시작...');
       }
 
-      // 삭제 성공 후 전체 새로고침
-      await refreshAttendanceStatus();
+      // 삭제 성공 후 전체 새로고침 (강제 UI 업데이트)
+      await loadAttendanceStatus(showLoading: false);
+      
+      // 🎯 강제로 setState 호출하여 UI 업데이트 보장
+      if (mounted) {
+        setState(() {
+          // 상태 강제 업데이트를 위한 빈 setState
+        });
+      }
+      
+      if (AppConfig.debugMode) {
+        print('✅ [AttendanceStatusLogicMixin] 새로고침 완료 - 출석자: ${attendanceList.length}명');
+      }
 
     } catch (e) {
       if (AppConfig.debugMode) {
