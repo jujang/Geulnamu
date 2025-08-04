@@ -6,6 +6,7 @@ import '../../services/attendance/qr_service.dart';
 import '../../services/attendance/attendance_service.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../core/config/app_config.dart';
+import '../../models/attendance/qr_data.dart';
 
 /// 일반 사용자용 QR 코드 스캔 화면
 ///
@@ -45,6 +46,9 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
   void _simulateQrScan() async {
     if (!AppConfig.debugMode) return;
 
+    // 테스트용 모임 ID 선언
+    const int testMeetingId = 1;
+
     setState(() {
       _isProcessing = true;
       _statusMessage = '테스트 출석 처리 중...';
@@ -52,9 +56,6 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-      // 가짜 QR 데이터 생성 (모임 ID 1로 고정)
-      const testMeetingId = 1;
 
       if (AppConfig.debugMode) {
         print('🧪 [테스트 QR] 모의 출석 처리: 모임 ID $testMeetingId');
@@ -101,8 +102,10 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
       String errorMessage = '테스트 출석 처리 중 오류가 발생했습니다.';
 
       // 에러 메시지 구체화
-      if (e.toString().contains('이미 출석')) {
-        errorMessage = '이미 출석 처리되었습니다.';
+      if (e.toString().contains('이미 출석') || e.toString().contains('중복으로 출석')) {
+        // 중복 출석 시 상세 다이얼로그 표시
+        _showDuplicateAttendanceDialog(context, testMeetingId, e.toString());
+        return; // 다이얼로그를 표시하기 때문에 setState는 하지 않음
       } else if (e.toString().contains('권한')) {
         errorMessage = '출석 권한이 없습니다.';
       } else if (e.toString().contains('시간')) {
@@ -141,7 +144,8 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
         return;
       }
 
-      final qrData = scanResult.qrData!;
+      // QR 데이터 추출
+      final QrData qrData = scanResult.qrData!;
 
       if (AppConfig.debugMode) {
         print('✅ [QR 스캔] 성공: 모임 ID ${qrData.meetingId}');
@@ -186,10 +190,23 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
       }
 
       String errorMessage = '출석 처리 중 오류가 발생했습니다.';
+      QrData? qrData; // 변수 선언을 try 블록 바깥으로 이동
+
+      // QR 데이터 다시 추출 (에러 핸들링용)
+      final scanResult = _qrService.processScanResult(capture);
+      if (scanResult.success) {
+        qrData = scanResult.qrData;
+      }
 
       // 에러 메시지 구체화
-      if (e.toString().contains('이미 출석')) {
-        errorMessage = '이미 출석 처리되었습니다.';
+      if (e.toString().contains('이미 출석') || e.toString().contains('중복으로 출석')) {
+        // 중복 출석 시 상세 다이얼로그 표시
+        if (qrData != null) {
+          _showDuplicateAttendanceDialog(context, qrData.meetingId, e.toString());
+        } else {
+          _showDuplicateAttendanceDialog(context, 0, e.toString());
+        }
+        return; // 다이얼로그를 표시하기 때문에 setState는 하지 않음
       } else if (e.toString().contains('권한')) {
         errorMessage = '출석 권한이 없습니다.';
       } else if (e.toString().contains('시간')) {
@@ -204,6 +221,186 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
     }
   }
 
+  /// 중복 출석 시 상세 다이얼로그 표시
+  void _showDuplicateAttendanceDialog(
+    BuildContext context,
+    int meetingId,
+    String errorMessage,
+  ) {
+    // 로딩 상태 해제
+    setState(() {
+      _isProcessing = false;
+      _statusMessage = null;
+      _isSuccess = false;
+    });
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.warning_amber,
+                  color: Colors.orange,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '출석 중복 알림',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 메인 메시지
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.orange.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.orange.shade700,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '이미 출석 처리된 모임입니다',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.orange.shade800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.event,
+                          color: Colors.orange.shade600,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '모임번호: $meetingId',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.orange.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              // 상세 설명
+              Text(
+                '하나의 모임에는 한 번만 출석할 수 있습니다. '
+                '모임 상세 페이지에서 출석 상태를 확인해주세요.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // 서버 메시지 (디버그 모드에서만)
+              if (AppConfig.debugMode) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '디버그 정보:',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        errorMessage,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // QR 스캔 화면 닫기
+                Navigator.pop(context, false);
+              },
+              child: Text(
+                '닫기',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // 다시 스캔 가능하도록 상태 리셋
+                _resetScanner();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+              child: const Text('다시 시도'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   /// 다시 스캔하기
   void _resetScanner() {
     setState(() {
@@ -211,171 +408,16 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
       _statusMessage = null;
       _isSuccess = false;
     });
-    _scannerController.start();
-  }
-
-  /// 플래시 토글
-  void _toggleFlash() {
-    _scannerController.toggleTorch();
   }
 
   @override
   Widget build(BuildContext context) {
     return MainLayout(
       title: 'QR 출석',
-      body: Column(
-        children: [
-          // 안내 메시지
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.qr_code_scanner,
-                  size: 32,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-                const SizedBox(height: 8),
-
-                // 🧪 개발용 테스트 버튼 (디버그 모드에서만 표시)
-                if (AppConfig.debugMode) ...[
-                  ElevatedButton.icon(
-                    onPressed: _simulateQrScan,
-                    icon: const Icon(Icons.bug_report),
-                    label: const Text('🧪 테스트용 출석 처리'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '개발 테스트용: QR 스캔 없이 출석 처리',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.orange,
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-                Text(
-                  '📷 운영진의 QR 코드를 스캔해주세요',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '카메라를 QR 코드에 맞춰주시면 자동으로 출석 처리됩니다',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                // 웹 환경 추가 안내
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surface.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    '💻 PC에서 카메라 권한을 허용해주세요',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 11,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // 스캐너 또는 결과 화면
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: _isProcessing || _statusMessage != null
-                  ? _buildResultScreen()
-                  : _buildScannerScreen(),
-            ),
-          ),
-
-          // 하단 버튼들
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                if (!_isProcessing && _statusMessage == null) ...[
-                  // 플래시 버튼
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: _toggleFlash,
-                        icon: const Icon(Icons.flash_on),
-                        iconSize: 32,
-                        style: IconButton.styleFrom(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.surface,
-                          foregroundColor: Theme.of(
-                            context,
-                          ).colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text('플래시', style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
-                ] else if (_statusMessage != null && !_isSuccess) ...[
-                  // 다시 스캔 버튼
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _resetScanner,
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('다시 스캔하기'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: 8),
-
-                // 도움말
-                Text(
-                  '💡 QR 코드가 잘 보이지 않으면 플래시를 켜보세요',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withOpacity(0.6),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      isHomePage: false, // 뒤로가기 버튼 표시
+      body: _isProcessing || _isSuccess || _statusMessage != null
+          ? _buildResultScreen()
+          : _buildScannerScreen(),
     );
   }
 
@@ -383,56 +425,65 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
   Widget _buildScannerScreen() {
     return Stack(
       children: [
-        // 카메라 뷰
+        // 카메라 프리뷰
         MobileScanner(
           controller: _scannerController,
           onDetect: _handleScanResult,
         ),
 
-        // 스캔 가이드 오버레이
+        // 오버레이
         Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Theme.of(context).colorScheme.primary,
-              width: 2,
-            ),
-          ),
+          color: Colors.black.withOpacity(0.5),
           child: Center(
             child: Container(
               width: 250,
               height: 250,
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 3,
-                ),
+                border: Border.all(color: Colors.white, width: 2),
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
           ),
         ),
 
-        // 상단 안내 텍스트
+        // 하단 안내 텍스트 + 테스트 버튼
         Positioned(
-          top: 20,
+          bottom: 100,
           left: 0,
           right: 0,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              'QR 코드를 네모 안에 맞춰주세요',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 32),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'QR 코드를 네모 안에 맞춰주세요',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
+              
+              // 테스트 버튼 (개발 모드에서만)
+              if (AppConfig.debugMode) ...[
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _simulateQrScan,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('🧪 테스트 출석'),
+                ),
+              ],
+            ],
           ),
         ),
       ],

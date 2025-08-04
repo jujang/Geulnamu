@@ -91,15 +91,18 @@ class MeetingDetailWidgets {
           ),
           const SizedBox(height: 16),
 
-          // QR 출석 기능 (조건부 표시)
-          _buildQrAttendanceCard(
-            context,
-            meeting,
-            onQrDisplayTap: onQrDisplayTap,
-            onQrScanTap: onQrScanTap,
-            isStaffOrAbove: isStaffOrAbove,
-          ),
-          const SizedBox(height: 16),
+          // QR 출석 기능 (조건부 표시 - 출석하지 않은 경우에만)
+          // 출석 ID가 없거나 출석 상태가 없는 경우에만 표시 (불참 포함)
+          if (meeting.attendanceId == null) ...[
+            _buildQrAttendanceCard(
+              context,
+              meeting,
+              onQrDisplayTap: onQrDisplayTap,
+              onQrScanTap: onQrScanTap,
+              isStaffOrAbove: isStaffOrAbove,
+            ),
+            const SizedBox(height: 16),
+          ],
 
           // 토론 정보
           _buildDiscussionCard(
