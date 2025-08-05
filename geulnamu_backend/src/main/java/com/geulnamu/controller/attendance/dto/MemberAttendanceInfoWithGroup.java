@@ -6,8 +6,8 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class MemberInfoWithGroup {
-    private Long memberId;
+public class MemberAttendanceInfoWithGroup {
+    private Long attendanceId;
     private String memberName;
     private DiscussionGroup discussionGroup;
 }

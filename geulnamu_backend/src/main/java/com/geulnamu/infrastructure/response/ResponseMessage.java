@@ -40,6 +40,7 @@ public class ResponseMessage {
 
     public static final String OVER_DISCUSSION_GROUP_NUMBER = "토론 그룹은 현재 최대 7개 까지만 가능합니다.";
     public static final String MEMBER_DUPLICATE_DISCUSSION_GROUP_ASSIGNMENT = "특정 모임원이 2개 이상의 토론 그룹에 담겨 있습니다.";
+    public static final String INVALID_ATTENDANCE_IDS_FOR_MEETING = "해당 모임에 참석하지 않은 출석번호가 포함되어 있습니다.";
 
     public static final String BOOK_QUESTION_TIME_RESTRICTION = "발제문 수정 및 삭제는 토론 시간 2시간 이내까지만 가능합니다.";
     public static final String BOOK_QUESTION_VIEW_RESTRICTION = "그룹 발제문 조회는 토론 그룹을 지정받은 경우에만 조회 가능합니다.";

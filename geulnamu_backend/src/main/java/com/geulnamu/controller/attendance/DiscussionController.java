@@ -2,7 +2,7 @@ package com.geulnamu.controller.attendance;
 
 import com.geulnamu.controller.attendance.dto.request.AssignDiscussionGroupsRequest;
 import com.geulnamu.controller.attendance.dto.response.DiscussionGroupResponse;
-import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.controller.shared.dto.response.AttendanceIdAndNameResponse;
 import com.geulnamu.domain.shared.enums.ActionType;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.domain.shared.enums.Level;
@@ -30,17 +30,17 @@ public class DiscussionController {
     @ErrorLogAction(value = ActionType.DISCUSSION_WANT_LIST_VIEW, actionDomain = DomainType.ATTENDANCE)
     @AccessLevel(Level.STAFF)
     @GetMapping(value = "/list/want-discussion", name = "모임 토론 참여 희망 명단 조회")
-    public BaseResponse<List<MemberIdAndNameResponse>> getWantDiscussionMemberList(@RequestParam @Min(value = 1) Long meetingId) {
-        List<MemberIdAndNameResponse> responseList = attendanceService.getWantDiscussionMemberList(meetingId);
+    public BaseResponse<List<AttendanceIdAndNameResponse>> getWantDiscussionMemberList(@RequestParam @Min(value = 1) Long meetingId) {
+        List<AttendanceIdAndNameResponse> responseList = attendanceService.getWantDiscussionMemberList(meetingId);
         return BaseResponse.ofSuccess(responseList);
     }
 
     @ErrorLogAction(value = ActionType.DISCUSSION_MY_GROUP_LIST_VIEW, actionDomain = DomainType.ATTENDANCE)
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/{attendanceId}/my-group", name = "본인 토론 그룹 명단 조회")
-    public BaseResponse<List<MemberIdAndNameResponse>> getMyDiscussionGroupMemberList(@PathVariable @Min(value = 1) Long attendanceId,
-                                                                                      @AuthMemberId Long memberId) {
-        List<MemberIdAndNameResponse> responseList = attendanceService.getMyDiscussionMemberList(attendanceId, memberId);
+    public BaseResponse<List<AttendanceIdAndNameResponse>> getMyDiscussionGroupMemberList(@PathVariable @Min(value = 1) Long attendanceId,
+                                                                                          @AuthMemberId Long memberId) {
+        List<AttendanceIdAndNameResponse> responseList = attendanceService.getMyDiscussionMemberList(attendanceId, memberId);
         return BaseResponse.ofSuccess(responseList);
     }
 
@@ -65,9 +65,9 @@ public class DiscussionController {
     @AccessLevel(Level.ADMIN)
     @PatchMapping(value = "/groups/assign-member", name = "토론 그룹 할당 - 개인")
     public BaseResponse<Void> manuallyAssignDiscussionGroup(@RequestParam @Min(value = 1) Long meetingId,
-                                                            @RequestParam @Min(value = 1) Long memberId,
+                                                            @RequestParam @Min(value = 1) Long attendanceId,
                                                             @RequestParam @Min(value = 1) Integer groupNumber) {
-        attendanceService.assignMemberToDiscussionGroup(meetingId, memberId, groupNumber-1);
+        attendanceService.assignMemberToDiscussionGroup(meetingId, attendanceId, groupNumber-1);
         return BaseResponse.ofSuccess();
     }
 

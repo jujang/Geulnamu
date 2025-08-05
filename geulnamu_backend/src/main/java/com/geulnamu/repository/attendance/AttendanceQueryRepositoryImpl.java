@@ -1,9 +1,9 @@
 package com.geulnamu.repository.attendance;
 
-import com.geulnamu.controller.attendance.dto.MemberInfoWithGroup;
+import com.geulnamu.controller.attendance.dto.MemberAttendanceInfoWithGroup;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
-import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.controller.shared.dto.response.AttendanceIdAndNameResponse;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.attendance.QAttendance;
 import com.geulnamu.domain.meeting.QMeeting;
@@ -40,10 +40,10 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
     }
 
     @Override
-    public List<MemberIdAndNameResponse> findWantDiscussionMemberList(Long meetingId) {
+    public List<AttendanceIdAndNameResponse> findWantDiscussionMemberList(Long meetingId) {
         return queryFactory
-            .select(Projections.constructor(MemberIdAndNameResponse.class,
-                attendance.member.id, attendance.member.name)
+            .select(Projections.constructor(AttendanceIdAndNameResponse.class,
+                attendance.id, attendance.member.name)
             )
             .from(attendance)
             .where(attendance.meeting.id.eq(meetingId),
@@ -53,29 +53,29 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
     }
 
     @Override
-    public List<MemberIdAndNameResponse> findMyDiscussionMemberList(Long meetingId, DiscussionGroup discussionGroup) {
+    public List<AttendanceIdAndNameResponse> findMyDiscussionMemberList(Long meetingId, DiscussionGroup discussionGroup) {
         return queryFactory
-            .select(Projections.constructor(MemberIdAndNameResponse.class,
-                attendance.member.id, attendance.member.name)
+            .select(Projections.constructor(AttendanceIdAndNameResponse.class,
+                attendance.id, attendance.member.name)
             )
             .from(attendance)
             .where(attendance.meeting.id.eq(meetingId),
                 attendance.discussionGroup.eq(discussionGroup))
-            .orderBy(attendance.member.id.asc())
+            .orderBy(attendance.id.asc())
             .fetch();
     }
 
     @Override
-    public List<MemberInfoWithGroup> findAllDiscussionGroupMemberList(Long meetingId) {
+    public List<MemberAttendanceInfoWithGroup> findAllDiscussionGroupMemberList(Long meetingId) {
         // meetingId 값을 기준으로 모두 조회
         return queryFactory
-            .select(Projections.constructor(MemberInfoWithGroup.class,
-                    attendance.member.id, attendance.member.name, attendance.discussionGroup)
+            .select(Projections.constructor(MemberAttendanceInfoWithGroup.class,
+                    attendance.id, attendance.member.name, attendance.discussionGroup)
             )
             .from(attendance)
             .where(attendance.meeting.id.eq(meetingId)
                 .and(attendance.discussionGroup.isNotNull()))
-            .orderBy(attendance.discussionGroup.asc(), attendance.member.id.asc())
+            .orderBy(attendance.discussionGroup.asc(), attendance.id.asc())
             .fetch();
     }
 
@@ -89,6 +89,20 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
             .where(meeting.id.eq(meetingId))
             .orderBy(attendance.createdAt.desc())
             .fetch();
+    }
+
+    @Override
+    public long countValidAttendanceIds(List<Long> attendanceIds, Long meetingId) {
+        Long count = queryFactory
+            .select(attendance.count())
+            .from(attendance)
+            .where(
+                attendance.id.in(attendanceIds)
+                    .and(attendance.meeting.id.eq(meetingId))
+            )
+            .fetchOne();
+
+        return count != null ? count : 0L;
     }
 
 
