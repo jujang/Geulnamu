@@ -560,10 +560,10 @@ Content-Type: application/json;charset=UTF-8
   "code" : 200,
   "message" : "API 호출에 성공했습니다.",
   "data" : [ {
-    "memberId" : 1,
+    "attendanceId" : 1,
     "memberName" : "나뭉일"
   }, {
-    "memberId" : 2,
+    "attendanceId" : 2,
     "memberName" : "나뭉이"
   } ]
 }</code></pre>
@@ -612,11 +612,11 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">토론 참여 희망자 명단</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].attendanceId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">출석 고유번호</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberName</code></p></td>
@@ -716,10 +716,10 @@ Content-Type: application/json;charset=UTF-8
   "code" : 200,
   "message" : "API 호출에 성공했습니다.",
   "data" : [ {
-    "memberId" : 1,
+    "attendanceId" : 1,
     "memberName" : "나뭉일"
   }, {
-    "memberId" : 2,
+    "attendanceId" : 2,
     "memberName" : "나뭉이"
   } ]
 }</code></pre>
@@ -768,11 +768,11 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">토론 참여 희망자 명단</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].attendanceId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">출석 고유번호</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberName</code></p></td>
@@ -875,19 +875,19 @@ Content-Type: application/json;charset=UTF-8
   "code" : 200,
   "message" : "API 호출에 성공했습니다.",
   "data" : [ {
-    "memberIdAndNameResponseList" : [ {
-      "memberId" : 1,
+    "attendanceIdAndNameResponseList" : [ {
+      "attendanceId" : 1,
       "memberName" : "나뭉일"
     }, {
-      "memberId" : 2,
+      "attendanceId" : 2,
       "memberName" : "나뭉이"
     } ]
   }, {
-    "memberIdAndNameResponseList" : [ {
-      "memberId" : 3,
+    "attendanceIdAndNameResponseList" : [ {
+      "attendanceId" : 3,
       "memberName" : "나뭉삼"
     }, {
-      "memberId" : 4,
+      "attendanceId" : 4,
       "memberName" : "나뭉사"
     } ]
   } ]
@@ -944,21 +944,21 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">전체 토론 그룹</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberIdAndNameResponseList</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].attendanceIdAndNameResponseList</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">토론 그룹별 명단</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberIdAndNameResponseList[].memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].attendanceIdAndNameResponseList[].attendanceId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">출석 고유번호</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].memberIdAndNameResponseList[].memberName</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data[].attendanceIdAndNameResponseList[].memberName</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
@@ -1010,14 +1010,14 @@ Content-Type: application/json;charset=UTF-8
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
-Content-Length: 101
+Content-Length: 109
 Host: docs.api.com
 
 {
   "groups" : [ {
-    "memberIdList" : [ 1, 10 ]
+    "attendanceIdList" : [ 1, 10 ]
   }, {
-    "memberIdList" : [ 2, 20 ]
+    "attendanceIdList" : [ 2, 20 ]
   } ]
 }</code></pre>
 </div>
@@ -1102,11 +1102,11 @@ Host: docs.api.com
 <td class="tableblock halign-left valign-top"><p class="tableblock">전체 그룹(7개 이하)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>groups[].memberIdList[]</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>groups[].attendanceIdList[]</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수가 하나 이상 담긴 리스트</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호 리스트</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">출석 고유번호 리스트</p></td>
 </tr>
 </tbody>
 </table>
@@ -1198,7 +1198,7 @@ Content-Type: application/json;charset=UTF-8
 <h4 id="_request_5"><a class="link" href="#_request_5">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /discussions/groups/assign-member?meetingId=1&amp;memberId=2&amp;groupNumber=3 HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">PATCH /discussions/groups/assign-member?meetingId=1&amp;attendanceId=2&amp;groupNumber=3 HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -1255,11 +1255,11 @@ Host: docs.api.com</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임 고유번호</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>attendanceId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">출석 고유번호</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>groupNumber</code></p></td>

@@ -739,10 +739,10 @@ Content-Type: application/json;charset=UTF-8
     "discussionTime" : "12:00",
     "discussionGroup" : "A",
     "groupMemberList" : [ {
-      "memberId" : 1,
+      "attendanceId" : 1,
       "memberName" : "나뭉일"
     }, {
-      "memberId" : 2,
+      "attendanceId" : 2,
       "memberName" : "나뭉이"
     } ]
   }
@@ -876,11 +876,11 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">토론 조 명단</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.groupMemberList[].memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.groupMemberList[].attendanceId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">같은 토론 조 모임원 고유번호</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">같은 토론 조 모임원 출석 고유번호</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.groupMemberList[].memberName</code></p></td>
@@ -991,17 +991,17 @@ Content-Type: application/json;charset=UTF-8
       "lateAttendCount" : 1
     },
     "meetingAttendanceStatusResponseList" : [ {
-      "memberId" : 1,
+      "attendanceId" : 1,
       "name" : "나뭉일",
       "attendanceTime" : "2025.05.31 10:20",
       "isLate" : false
     }, {
-      "memberId" : 2,
+      "attendanceId" : 2,
       "name" : "나뭉이",
       "attendanceTime" : "2025.05.31 10:44",
       "isLate" : false
     }, {
-      "memberId" : 3,
+      "attendanceId" : 3,
       "name" : "나뭉삼",
       "attendanceTime" : "2025.05.31 10:50",
       "isLate" : true
@@ -1095,11 +1095,11 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임원별 출석 정보</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[].memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[].attendanceId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">출석 고유번호</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[].name</code></p></td>

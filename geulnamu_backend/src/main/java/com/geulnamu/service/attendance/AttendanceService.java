@@ -1,10 +1,10 @@
 package com.geulnamu.service.attendance;
 
-import com.geulnamu.controller.attendance.dto.MemberInfoWithGroup;
+import com.geulnamu.controller.attendance.dto.MemberAttendanceInfoWithGroup;
 import com.geulnamu.controller.attendance.dto.request.DiscussionGroupRequest;
 import com.geulnamu.controller.attendance.dto.request.AssignDiscussionGroupsRequest;
 import com.geulnamu.controller.attendance.dto.response.*;
-import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.controller.shared.dto.response.AttendanceIdAndNameResponse;
 import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.attendance.AttendanceType;
 import com.geulnamu.domain.attendance.DiscussionGroup;
@@ -61,8 +61,8 @@ public class AttendanceService {
     public AttendanceInfoResponse getMyAttendanceInfo(Long memberId, Long meetingId) {
         Attendance attendance = attendanceQueryRepository.findByMeetingIdAndMemberId(meetingId, memberId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
-        List<MemberIdAndNameResponse> memberIdAndNameResponseList = getDiscussionGroupMembers(attendance);
-        return new AttendanceInfoResponse(attendance, memberIdAndNameResponseList);
+        List<AttendanceIdAndNameResponse> attendanceIdAndNameResponseList = getDiscussionGroupMembers(attendance);
+        return new AttendanceInfoResponse(attendance, attendanceIdAndNameResponseList);
     }
 
     @Transactional(readOnly = true)
@@ -74,20 +74,20 @@ public class AttendanceService {
     }
 
     @Transactional(readOnly = true)
-    public List<MemberIdAndNameResponse> getWantDiscussionMemberList(Long meetingId) {
+    public List<AttendanceIdAndNameResponse> getWantDiscussionMemberList(Long meetingId) {
         return attendanceQueryRepository.findWantDiscussionMemberList(meetingId);
     }
 
     @Transactional(readOnly = true)
-    public List<MemberIdAndNameResponse> getMyDiscussionMemberList(Long attendanceId, Long memberId) {
+    public List<AttendanceIdAndNameResponse> getMyDiscussionMemberList(Long attendanceId, Long memberId) {
         Attendance attendance = getValidateAttendance(attendanceId, memberId);
         return getDiscussionGroupMembers(attendance);
     }
 
     @Transactional(readOnly = true)
     public List<DiscussionGroupResponse> getAllDiscussionGroupMemberList(Long meetingId) {
-        List<MemberInfoWithGroup> memberInfoWithGroupList = attendanceQueryRepository.findAllDiscussionGroupMemberList(meetingId);
-        return convertToDiscussionGroupResponse(memberInfoWithGroupList);
+        List<MemberAttendanceInfoWithGroup> memberAttendanceInfoWithGroupList = attendanceQueryRepository.findAllDiscussionGroupMemberList(meetingId);
+        return convertToDiscussionGroupResponse(memberAttendanceInfoWithGroupList);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -123,15 +123,16 @@ public class AttendanceService {
         meetingQueryRepository.findById(meetingId).orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
         validateGroupNumberOver(request.getGroups().size()); // 토론 그룹 수 (7개) 초과 체크
         validateDiscussionGroupAssignment(request); // 모임원 그룹 중복 할당 체크
+        validateAttendanceIdList(request, meetingId); // 요청된 출석 번호중 해당 모임에 출석하지 않은 출석 번호를 그룹화 하려고 하는지 확인 (그럴 경우, 에러 처리)
         attendanceCommandRepository.resetDiscussionGroups(meetingId); // 기존 그룹 생성 했었다면 초기화 (bulk update)
         assignGroupsToMembers(request, meetingId); // 토론 그룹 할당
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void assignMemberToDiscussionGroup(Long meetingId, Long memberId, Integer optimizedGroupNumber) {
+    public void assignMemberToDiscussionGroup(Long meetingId, Long attendanceId, Integer optimizedGroupNumber) {
         meetingQueryRepository.findById(meetingId).orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
         validateGroupNumberOver(optimizedGroupNumber); // 토론 그룹 수 (7개) 초과 체크
-        Attendance attendance = attendanceQueryRepository.findByMeetingIdAndMemberId(meetingId, memberId)
+        Attendance attendance = attendanceQueryRepository.findById(attendanceId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
         attendance.updateDiscussionGroup(DiscussionGroup.values()[optimizedGroupNumber]);
     }
@@ -150,18 +151,18 @@ public class AttendanceService {
         return attendance;
     }
 
-    private List<MemberIdAndNameResponse> getDiscussionGroupMembers(Attendance attendance) {
+    private List<AttendanceIdAndNameResponse> getDiscussionGroupMembers(Attendance attendance) {
         return attendance.getDiscussionGroup() != null
             ? attendanceQueryRepository.findMyDiscussionMemberList(
             attendance.getMeeting().getId(), attendance.getDiscussionGroup())
             : null;
     }
 
-    private List<DiscussionGroupResponse> convertToDiscussionGroupResponse(List<MemberInfoWithGroup> memberInfoWithGroupList) {
+    private List<DiscussionGroupResponse> convertToDiscussionGroupResponse(List<MemberAttendanceInfoWithGroup> memberAttendanceInfoWithGroupList) {
         // discussionGroup 값을 기준으로 같은 discussionGroup 끼리 List로 묶어서 map 으로 만들기
-        Map<DiscussionGroup, List<MemberIdAndNameResponse>> groupMap = memberInfoWithGroupList.stream()
+        Map<DiscussionGroup, List<AttendanceIdAndNameResponse>> groupMap = memberAttendanceInfoWithGroupList.stream()
             .collect(Collectors.groupingBy(
-                MemberInfoWithGroup::getDiscussionGroup,
+                MemberAttendanceInfoWithGroup::getDiscussionGroup,
                 Collectors.mapping(this::toMemberResponse, Collectors.toList())
             ));
 
@@ -172,10 +173,10 @@ public class AttendanceService {
             .collect(Collectors.toList());
     }
 
-    private MemberIdAndNameResponse toMemberResponse(MemberInfoWithGroup memberInfoWithGroup) {
-        return new MemberIdAndNameResponse(
-            memberInfoWithGroup.getMemberId(),
-            memberInfoWithGroup.getMemberName()
+    private AttendanceIdAndNameResponse toMemberResponse(MemberAttendanceInfoWithGroup memberAttendanceInfoWithGroup) {
+        return new AttendanceIdAndNameResponse(
+            memberAttendanceInfoWithGroup.getAttendanceId(),
+            memberAttendanceInfoWithGroup.getMemberName()
         );
     }
 
@@ -186,20 +187,31 @@ public class AttendanceService {
     }
 
     private static void validateDiscussionGroupAssignment(AssignDiscussionGroupsRequest request) {
-        List<Long> memberIdList = new ArrayList<>();
+        List<Long> attendanceIdList = new ArrayList<>();
         for(DiscussionGroupRequest requestList : request.getGroups()) {
-            memberIdList.addAll(requestList.getMemberIdList());
+            attendanceIdList.addAll(requestList.getAttendanceIdList());
         }
-        if(memberIdList.size() != memberIdList.stream().distinct().count()) {
+        if(attendanceIdList.size() != attendanceIdList.stream().distinct().count()) {
             throw new BadRequestException(ResponseMessage.MEMBER_DUPLICATE_DISCUSSION_GROUP_ASSIGNMENT);
+        }
+    }
+
+    private void validateAttendanceIdList(AssignDiscussionGroupsRequest request, Long meetingId) {
+        List<Long> attendanceIdList = new ArrayList<>();
+        for(DiscussionGroupRequest requestList : request.getGroups()) {
+            attendanceIdList.addAll(requestList.getAttendanceIdList());
+        }
+        long validCount = attendanceQueryRepository.countValidAttendanceIds(attendanceIdList, meetingId);
+        if(validCount != attendanceIdList.size()) {
+            throw new BadRequestException(ResponseMessage.INVALID_ATTENDANCE_IDS_FOR_MEETING);
         }
     }
 
     // 그룹 할당 - 그룹 별로 bulk update 진행 TODO: 현재는 그룹장을 따로 선별하지 않음, 추후 실 운영하면서 그룹장도 요청으로 받을지 고려해 볼 것
     private void assignGroupsToMembers(AssignDiscussionGroupsRequest request, Long meetingId) {
         for(int i = 0; i < request.getGroups().size(); i++) {
-            List<Long> memberIds = request.getGroups().get(i).getMemberIdList();
-            attendanceCommandRepository.assignDiscussionGroup(meetingId, memberIds, DiscussionGroup.values()[i]);
+            List<Long> attendanceIds = request.getGroups().get(i).getAttendanceIdList();
+            attendanceCommandRepository.assignDiscussionGroup(meetingId, attendanceIds, DiscussionGroup.values()[i]);
         }
     }
 

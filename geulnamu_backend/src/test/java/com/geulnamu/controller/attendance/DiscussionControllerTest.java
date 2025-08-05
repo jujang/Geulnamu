@@ -4,7 +4,7 @@ import com.geulnamu.controller.attendance.dto.request.AssignDiscussionGroupsRequ
 import com.geulnamu.controller.attendance.dto.request.DiscussionGroupRequest;
 import com.geulnamu.controller.attendance.dto.response.DiscussionGroupResponse;
 import com.geulnamu.controller.shared.ControllerTest;
-import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.controller.shared.dto.response.AttendanceIdAndNameResponse;
 import com.geulnamu.infrastructure.response.ResponseMessage;
 import com.geulnamu.service.attendance.AttendanceService;
 import org.junit.jupiter.api.Test;
@@ -47,13 +47,13 @@ public class DiscussionControllerTest extends ControllerTest {
     public void getWantDiscussionMemberListTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        List<MemberIdAndNameResponse> memberIdAndNameResponseList =
+        List<AttendanceIdAndNameResponse> attendanceIdAndNameResponseList =
             Arrays.asList(
-                new MemberIdAndNameResponse(1L, "나뭉일"),
-                new MemberIdAndNameResponse(2L, "나뭉이")
+                new AttendanceIdAndNameResponse(1L, "나뭉일"),
+                new AttendanceIdAndNameResponse(2L, "나뭉이")
             );
 
-        given(attendanceService.getWantDiscussionMemberList(any())).willReturn(memberIdAndNameResponseList);
+        given(attendanceService.getWantDiscussionMemberList(any())).willReturn(attendanceIdAndNameResponseList);
 
         // when
         ResultActions actions =
@@ -84,7 +84,7 @@ public class DiscussionControllerTest extends ControllerTest {
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
                     fieldWithPath("data").type(JsonFieldType.ARRAY).description("토론 참여 희망자 명단"),
-                    fieldWithPath("data[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
+                    fieldWithPath("data[].attendanceId").type(JsonFieldType.NUMBER).description("출석 고유번호"),
                     fieldWithPath("data[].memberName").type(JsonFieldType.STRING).description("모임원 이름")
                 )
             ));
@@ -95,13 +95,13 @@ public class DiscussionControllerTest extends ControllerTest {
     public void getMyDiscussionGroupMemberListTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";
-        List<MemberIdAndNameResponse> memberIdAndNameResponseList =
+        List<AttendanceIdAndNameResponse> attendanceIdAndNameResponseList =
             Arrays.asList(
-                new MemberIdAndNameResponse(1L, "나뭉일"),
-                new MemberIdAndNameResponse(2L, "나뭉이")
+                new AttendanceIdAndNameResponse(1L, "나뭉일"),
+                new AttendanceIdAndNameResponse(2L, "나뭉이")
             );
 
-        given(attendanceService.getMyDiscussionMemberList(any(), any())).willReturn(memberIdAndNameResponseList);
+        given(attendanceService.getMyDiscussionMemberList(any(), any())).willReturn(attendanceIdAndNameResponseList);
 
         // when
         ResultActions actions =
@@ -131,7 +131,7 @@ public class DiscussionControllerTest extends ControllerTest {
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
                     fieldWithPath("data").type(JsonFieldType.ARRAY).description("토론 참여 희망자 명단"),
-                    fieldWithPath("data[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
+                    fieldWithPath("data[].attendanceId").type(JsonFieldType.NUMBER).description("출석 고유번호"),
                     fieldWithPath("data[].memberName").type(JsonFieldType.STRING).description("모임원 이름")
                 )
             ));
@@ -146,12 +146,12 @@ public class DiscussionControllerTest extends ControllerTest {
         List<DiscussionGroupResponse> discussionGroupResponseList =
             Arrays.asList(
                 new DiscussionGroupResponse(Arrays.asList(
-                    new MemberIdAndNameResponse(1L, "나뭉일"),
-                    new MemberIdAndNameResponse(2L, "나뭉이")
+                    new AttendanceIdAndNameResponse(1L, "나뭉일"),
+                    new AttendanceIdAndNameResponse(2L, "나뭉이")
                 )),
                 new DiscussionGroupResponse(Arrays.asList(
-                    new MemberIdAndNameResponse(3L, "나뭉삼"),
-                    new MemberIdAndNameResponse(4L, "나뭉사")
+                    new AttendanceIdAndNameResponse(3L, "나뭉삼"),
+                    new AttendanceIdAndNameResponse(4L, "나뭉사")
                 ))
             );
 
@@ -187,9 +187,9 @@ public class DiscussionControllerTest extends ControllerTest {
                     fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
                     fieldWithPath("data").type(JsonFieldType.ARRAY).description("토론 참여 희망자 명단"),
                     fieldWithPath("data[]").type(JsonFieldType.ARRAY).description("전체 토론 그룹"),
-                    fieldWithPath("data[].memberIdAndNameResponseList").type(JsonFieldType.ARRAY).description("토론 그룹별 명단"),
-                    fieldWithPath("data[].memberIdAndNameResponseList[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
-                    fieldWithPath("data[].memberIdAndNameResponseList[].memberName").type(JsonFieldType.STRING).description("모임원 이름")
+                    fieldWithPath("data[].attendanceIdAndNameResponseList").type(JsonFieldType.ARRAY).description("토론 그룹별 명단"),
+                    fieldWithPath("data[].attendanceIdAndNameResponseList[].attendanceId").type(JsonFieldType.NUMBER).description("출석 고유번호"),
+                    fieldWithPath("data[].attendanceIdAndNameResponseList[].memberName").type(JsonFieldType.STRING).description("모임원 이름")
                 )
             ));
     }
@@ -236,7 +236,7 @@ public class DiscussionControllerTest extends ControllerTest {
                 ),
                 requestFields(
                     fieldWithPath("groups[]").type(JsonFieldType.ARRAY).attributes(key("format").value("7개 이하의 리스트를 담고 있는 리스트")).description("전체 그룹(7개 이하)"),
-                    fieldWithPath("groups[].memberIdList[]").type(JsonFieldType.ARRAY).attributes(key("format").value("1 이상의 정수가 하나 이상 담긴 리스트")).description("모임원 고유번호 리스트")
+                    fieldWithPath("groups[].attendanceIdList[]").type(JsonFieldType.ARRAY).attributes(key("format").value("1 이상의 정수가 하나 이상 담긴 리스트")).description("출석 고유번호 리스트")
                 ),
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
@@ -258,7 +258,7 @@ public class DiscussionControllerTest extends ControllerTest {
         ResultActions actions =
             mockMvc.perform(
                 patch("/discussions/groups/assign-member" +
-                        "?meetingId={meetingId}&memberId={memberId}&groupNumber={groupNumber}",
+                        "?meetingId={meetingId}&attendanceId={attendanceId}&groupNumber={groupNumber}",
                     1, 2, 3)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
@@ -279,7 +279,7 @@ public class DiscussionControllerTest extends ControllerTest {
                 ),
                 queryParameters(
                     parameterWithName("meetingId").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("모임 고유번호"),
-                    parameterWithName("memberId").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("모임원 고유번호"),
+                    parameterWithName("attendanceId").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("출석 고유번호"),
                     parameterWithName("groupNumber").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상, 7 이하의 정수")).description("그룹 번호")
                 ),
                 responseFields(

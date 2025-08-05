@@ -21,8 +21,8 @@ public interface AttendanceCommandRepository extends JpaRepository<Attendance, L
     @Query(value = "UPDATE attendances a " +
         "SET a.discussionGroup = :group " +
         "WHERE a.meeting.id = :meetingId " +
-        "AND a.member.id IN :memberIds ")
+        "AND a.id IN :attendanceIds ")
     void assignDiscussionGroup(@Param("meetingId") Long meetingId,
-                               @Param("memberIds") List<Long> memberIds,
+                               @Param("attendanceIds") List<Long> attendanceIds,
                                @Param("group") DiscussionGroup group);
 }

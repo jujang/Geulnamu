@@ -11,5 +11,5 @@ import java.util.List;
 @AllArgsConstructor
 public class DiscussionGroupRequest {
     @NotEmpty(message = "토론 그룹에는 1명 이상이 반드시 들어가야 합니다.")
-    private List<@Min(1) Long> memberIdList;
+    private List<@Min(1) Long> attendanceIdList;
 }

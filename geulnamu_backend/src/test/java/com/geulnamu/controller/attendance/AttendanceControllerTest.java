@@ -3,7 +3,7 @@ package com.geulnamu.controller.attendance;
 import com.geulnamu.controller.attendance.dto.request.AttendanceNoteRequest;
 import com.geulnamu.controller.attendance.dto.response.*;
 import com.geulnamu.controller.shared.ControllerTest;
-import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
+import com.geulnamu.controller.shared.dto.response.AttendanceIdAndNameResponse;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.meeting.MeetingType;
 import com.geulnamu.infrastructure.response.ResponseMessage;
@@ -96,8 +96,8 @@ public class AttendanceControllerTest extends ControllerTest {
             "합정 저스티나", "조심히 오세요~", LocalDateTime.of(2126, 6, 14, 10, 0),
             "1등으로 왔지롱~", LocalDateTime.of(2126, 6, 14, 12, 0), DiscussionGroup.A,
             Arrays.asList(
-                new MemberIdAndNameResponse(1L, "나뭉일"),
-                new MemberIdAndNameResponse(2L, "나뭉이")
+                new AttendanceIdAndNameResponse(1L, "나뭉일"),
+                new AttendanceIdAndNameResponse(2L, "나뭉이")
             )
         );
 
@@ -143,7 +143,7 @@ public class AttendanceControllerTest extends ControllerTest {
                     fieldWithPath("data.discussionTime").type(JsonFieldType.STRING).description("토론 시간").optional(),
                     fieldWithPath("data.discussionGroup").type(JsonFieldType.STRING).description("토론 조 그룹").optional(),
                     fieldWithPath("data.groupMemberList").type(JsonFieldType.ARRAY).description("토론 조 명단").optional(),
-                    fieldWithPath("data.groupMemberList[].memberId").type(JsonFieldType.NUMBER).description("같은 토론 조 모임원 고유번호").optional(),
+                    fieldWithPath("data.groupMemberList[].attendanceId").type(JsonFieldType.NUMBER).description("같은 토론 조 모임원 출석 고유번호").optional(),
                     fieldWithPath("data.groupMemberList[].memberName").type(JsonFieldType.STRING).description("같은 토론 조 모임원 이름").optional()
                 )
             ));

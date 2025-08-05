@@ -2,6 +2,7 @@ package com.geulnamu.service.meeting;
 
 import com.geulnamu.controller.meeting.dto.request.*;
 import com.geulnamu.controller.meeting.dto.response.*;
+import com.geulnamu.controller.shared.dto.response.AttendanceIdAndNameResponse;
 import com.geulnamu.controller.shared.dto.response.MemberIdAndNameResponse;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.member.Member;
@@ -69,7 +70,7 @@ public class MeetingService {
         Meeting meeting = findMeetingOrThrow(meetingId);
         MeetingDetailResponse meetingDetailResponse = meetingQueryRepository.findMeeting(meeting.getId(), memberId);
         if(meetingDetailResponse.getDiscussionGroup() != null) {
-            List<MemberIdAndNameResponse> groupMemberList = attendanceQueryRepository.findMyDiscussionMemberList(
+            List<AttendanceIdAndNameResponse> groupMemberList = attendanceQueryRepository.findMyDiscussionMemberList(
                 meetingDetailResponse.getMeetingId(), meetingDetailResponse.getDiscussionGroup());
             meetingDetailResponse.updateGroupMemberList(groupMemberList);
         }
