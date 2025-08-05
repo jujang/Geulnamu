@@ -160,6 +160,12 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       onLateThresholdTimeChanged: onLateThresholdTimeChanged,
       onDiscussionTimeChanged: onDiscussionTimeChanged,
       onClearDiscussionTime: clearDiscussionTime, // 🆕 X 버튼 콜백 전달
+      // 🆕 토론 조 관련 콜백들
+      onGetDiscussionGroupLoading: () => isDiscussionGroupLoading,
+      onGetWantDiscussionList: () => wantDiscussionList,
+      onGetDiscussionGroupList: () => discussionGroupList,
+      onGetDiscussionGroupErrorMessage: () => discussionGroupErrorMessage,
+      onRefreshDiscussionGroupData: () => refreshDiscussionGroupData(widget.meetingId),
     );
   }
 

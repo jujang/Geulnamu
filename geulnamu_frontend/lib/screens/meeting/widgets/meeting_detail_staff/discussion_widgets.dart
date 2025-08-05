@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme.dart';
 import '../../../../models/meeting/meeting_detail_staff_model.dart';
+import '../../../../models/discussion/attendance_id_and_name_model.dart';
+import '../../../../models/discussion/discussion_group_model.dart';
 
 /// 운영진용 모임 상세 - 토론 정보 섹션 위젯들
 class DiscussionWidgets {
@@ -48,6 +50,44 @@ class DiscussionWidgets {
               )
             else
               _buildDiscussionDisplay(context, meetingDetail),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 👥 토론 조 정보 섹션
+  static Widget buildDiscussionGroupSection(
+    BuildContext context,
+    MeetingDetailStaffInfo meetingDetail, {
+    required bool isLoading,
+    required List<AttendanceIdAndNameModel>? wantDiscussionList,
+    required DiscussionGroupListResponse? discussionGroupList,
+    required String? errorMessage,
+    required VoidCallback onRefresh,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 섹션 헤더
+            _buildDiscussionGroupHeader(context, onRefresh),
+
+            const SizedBox(height: 16),
+
+            // 내용 (로딩/에러/정상 데이터)
+            if (isLoading)
+              _buildDiscussionGroupLoading(context)
+            else if (errorMessage != null)
+              _buildDiscussionGroupError(context, errorMessage, onRefresh)
+            else
+              _buildDiscussionGroupContent(
+                context,
+                wantDiscussionList: wantDiscussionList,
+                discussionGroupList: discussionGroupList,
+              ),
           ],
         ),
       ),
@@ -199,7 +239,8 @@ class DiscussionWidgets {
           decoration: InputDecoration(
             labelText: '알림 메시지',
             border: const OutlineInputBorder(),
-            helperText: selectedDiscussionTime == null || isDiscussionTimeCleared
+            helperText:
+                selectedDiscussionTime == null || isDiscussionTimeCleared
                 ? '⚠️ 토론 시간이 설정되지 않아 현재 알림 메시지는 사용되지 않습니다.'
                 : '토론 시작 전에 참여자들에게 전송될 메시지입니다.',
             helperStyle: TextStyle(
@@ -253,6 +294,413 @@ class DiscussionWidgets {
   static String _formatDateTime(DateTime dateTime) {
     return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')} '
         '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  // ====================
+  // 토론 조 정보 섹션 헬퍼 메서드들
+  // ====================
+
+  /// 토론 조 정보 섹션 헤더
+  static Widget _buildDiscussionGroupHeader(
+    BuildContext context,
+    VoidCallback onRefresh,
+  ) {
+    return Row(
+      children: [
+        Text(
+          '👥 토론 조 정보',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        const Spacer(),
+        // 새로고침 버튼
+        IconButton(
+          onPressed: onRefresh,
+          icon: const Icon(Icons.refresh),
+          tooltip: '토론 조 데이터 새로고침',
+        ),
+      ],
+    );
+  }
+
+  /// 토론 조 정보 로딩 상태
+  static Widget _buildDiscussionGroupLoading(BuildContext context) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: Column(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('토론 조 정보를 불러오는 중...'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 토론 조 정보 에러 상태
+  static Widget _buildDiscussionGroupError(
+    BuildContext context,
+    String errorMessage,
+    VoidCallback onRetry,
+  ) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              errorMessage,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('다시 시도'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 토론 조 정보 메인 콘텐츠
+  static Widget _buildDiscussionGroupContent(
+    BuildContext context, {
+    required List<AttendanceIdAndNameModel>? wantDiscussionList,
+    required DiscussionGroupListResponse? discussionGroupList,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 1. 토론 참여 희망 명단
+        _buildWantDiscussionSection(context, wantDiscussionList),
+
+        const SizedBox(height: 24),
+
+        // 2. 모임별 전체 토론 그룹 명단
+        _buildAllDiscussionGroupsSection(context, discussionGroupList),
+      ],
+    );
+  }
+
+  /// 토론 참여 희망 명단 섹션
+  static Widget _buildWantDiscussionSection(
+    BuildContext context,
+    List<AttendanceIdAndNameModel>? wantList,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 소제목
+        Row(
+          children: [
+            Icon(
+              Icons.volunteer_activism,
+              size: 20,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '토론 참여 희망 명단',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
+
+        // 내용
+        if (wantList == null)
+          _buildNoDataMessage(context, '토론 참여 희망 명단 정보를 불러올 수 없습니다.')
+        else if (wantList.isEmpty)
+          _buildNoDataMessage(context, '토론 참여를 희망하는 모임원이 없습니다.')
+        else
+          _buildMemberList(context, wantList),
+      ],
+    );
+  }
+
+  /// 모임별 전체 토론 그룹 명단 섹션
+  static Widget _buildAllDiscussionGroupsSection(
+    BuildContext context,
+    DiscussionGroupListResponse? groupList,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 소제목
+        Row(
+          children: [
+            Icon(
+              Icons.groups,
+              size: 20,
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '토론 그룹 구성 현황',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
+
+        // 내용
+        if (groupList == null)
+          _buildNoDataMessage(context, '토론 그룹 정보를 불러올 수 없습니다.')
+        else if (groupList.groups.isEmpty)
+          _buildNoDataMessage(context, '구성된 토론 그룹이 없습니다.')
+        else
+          _buildDiscussionGroups(context, groupList),
+      ],
+    );
+  }
+
+  /// 데이터 없음 메시지
+  static Widget _buildNoDataMessage(BuildContext context, String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 멤버 목록 표시
+  static Widget _buildMemberList(
+    BuildContext context,
+    List<AttendanceIdAndNameModel> memberList,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 총 인원 표시
+          Text(
+            '총 ${memberList.length}명',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // 멤버 이름들
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: memberList.map((member) {
+              return Chip(
+                label: Text(
+                  member.memberName,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 토론 그룹들 표시
+  static Widget _buildDiscussionGroups(
+    BuildContext context,
+    DiscussionGroupListResponse groupList,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.secondaryContainer.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 총 그룹 수 및 참여자 수 표시
+          Text(
+            '총 ${groupList.groupCount}개 그룹, ${groupList.totalMemberCount}명 참여',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // 각 그룹별 표시
+          ...groupList.groups.asMap().entries.map((entry) {
+            final groupIndex = entry.key;
+            final group = entry.value;
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: groupIndex < groupList.groups.length - 1 ? 12 : 0,
+              ),
+              child: _buildSingleDiscussionGroup(
+                context,
+                groupIndex + 1, // 1부터 시작
+                group,
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  /// 개별 토론 그룹 표시
+  static Widget _buildSingleDiscussionGroup(
+    BuildContext context,
+    int groupNumber,
+    DiscussionGroupModel group,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 그룹 제목
+          Row(
+            children: [
+              Icon(
+                Icons.group,
+                size: 16,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '$groupNumber조',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '(${group.memberCount}명)',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+
+          if (group.members.isNotEmpty) ...[
+            const SizedBox(height: 8),
+
+            // 그룹 멤버들
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: group.members.map((member) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.secondaryContainer.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    member.memberName,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 11,
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ] else ...[
+            const SizedBox(height: 4),
+            Text(
+              '참여자 없음',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontStyle: FontStyle.italic,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   /// 날짜/시간 선택 다이얼로그
@@ -323,9 +771,9 @@ class DiscussionWidgets {
     } catch (e) {
       // 에러가 발생하면 스낵바로 알림
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('날짜/시간 선택 중 오류가 발생했습니다: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('날짜/시간 선택 중 오류가 발생했습니다: $e')));
       }
     }
   }

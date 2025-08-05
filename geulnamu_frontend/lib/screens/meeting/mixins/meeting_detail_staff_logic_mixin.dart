@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/meeting/meeting_service.dart';
+import '../../../services/discussion/discussion_service.dart';
 import '../../../models/meeting/meeting_detail_staff_model.dart';
 import '../../../models/meeting/request/meeting_update_requests.dart';
+import '../../../models/discussion/attendance_id_and_name_model.dart';
+import '../../../models/discussion/discussion_group_model.dart';
 import '../../../core/config/app_config.dart';
 
 /// 운영진용 모임 상세 화면 로직 처리 Mixin
@@ -15,6 +18,7 @@ import '../../../core/config/app_config.dart';
 /// - 권한별 기능 제어
 mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   final MeetingService _meetingService = MeetingService();
+  final DiscussionService _discussionService = DiscussionService();
 
   // 🎯 로딩 상태
   bool _isLoading = false;
@@ -43,11 +47,23 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   // 🆕 X 버튼 상태 추적
   bool _isDiscussionTimeCleared = false; // X 버튼으로 토론 시간을 클리어했는지 여부
 
+  // 🆕 토론 조 관련 상태
+  bool _isDiscussionGroupLoading = false;
+  String? _discussionGroupErrorMessage;
+  List<AttendanceIdAndNameModel>? _wantDiscussionList;
+  DiscussionGroupListResponse? _discussionGroupList;
+
   // 🎯 Getter들
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
   MeetingDetailStaffInfo? get meetingDetail => _meetingDetail;
+  
+  // 🆕 토론 조 관련 Getter들
+  bool get isDiscussionGroupLoading => _isDiscussionGroupLoading;
+  String? get discussionGroupErrorMessage => _discussionGroupErrorMessage;
+  List<AttendanceIdAndNameModel>? get wantDiscussionList => _wantDiscussionList;
+  DiscussionGroupListResponse? get discussionGroupList => _discussionGroupList;
   bool get isEditingBasicInfo => _isEditingBasicInfo;
   bool get isEditingDiscussion => _isEditingDiscussion;
 
@@ -145,6 +161,11 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
           if (forceRefresh) {
             print('🔄 [캐시 무효화] 새로운 데이터로 업데이트 완료');
           }
+        }
+        
+        // 🆕 토론 시간이 설정된 경우 토론 조 데이터 로드
+        if (meetingDetail.discussionTime != null) {
+          loadDiscussionGroupData(meetingId);
         }
       }
     } catch (e) {
@@ -352,6 +373,9 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
             print('🔄 [토론 정보 수정] 데이터 새로고침 시작...');
           }
           await refreshMeetingDetailStaff(meetingId);
+          
+          // 🆕 토론 시간 변경에 따른 토론 조 데이터 처리
+          handleDiscussionTimeUpdate(meetingId);
         }
       }
     } catch (e) {
@@ -793,6 +817,96 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
           duration: Duration(seconds: 4),
         ),
       );
+    }
+  }
+
+  // ====================
+  // 토론 조 관련 메서드들
+  // ====================
+
+  /// 토론 조 데이터 로드 
+  /// 조건: discussionTime != null인 경우에만 호출
+  Future<void> loadDiscussionGroupData(int meetingId) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final accessToken = await authProvider.accessToken; // 🔧 await 추가
+    
+    if (accessToken == null) {
+      if (AppConfig.debugMode) {
+        print('❌ [토론 조 데이터 로드] 액세스 토큰이 없습니다.');
+      }
+      return;
+    }
+
+    setState(() {
+      _isDiscussionGroupLoading = true;
+      _discussionGroupErrorMessage = null;
+    });
+
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [토론 조 데이터 로드] 시작... meetingId: $meetingId');
+      }
+
+      final results = await _discussionService.refreshDiscussionData(
+        meetingId: meetingId,
+        accessToken: accessToken,
+      );
+
+      setState(() {
+        _wantDiscussionList = results['wantDiscussionList'] as List<AttendanceIdAndNameModel>?;
+        _discussionGroupList = results['discussionGroupList'] as DiscussionGroupListResponse?;
+        _isDiscussionGroupLoading = false;
+        _discussionGroupErrorMessage = null;
+      });
+
+      if (AppConfig.debugMode) {
+        print('✅ [토론 조 데이터 로드] 성공');
+        print('   - 참여 희망자: ${_wantDiscussionList?.length ?? 0}명');
+        print('   - 토론 그룹: ${_discussionGroupList?.groupCount ?? 0}개');
+      }
+
+    } catch (e) {
+      setState(() {
+        _isDiscussionGroupLoading = false;
+        _discussionGroupErrorMessage = e.toString();
+      });
+
+      if (AppConfig.debugMode) {
+        print('❌ [토론 조 데이터 로드] 오류: $e');
+      }
+    }
+  }
+
+  /// 토론 조 데이터 새로고침
+  Future<void> refreshDiscussionGroupData(int meetingId) async {
+    if (_meetingDetail?.discussionTime == null) {
+      if (AppConfig.debugMode) {
+        print('ℹ️ [토론 조 새로고침] 토론 시간이 설정되지 않아 새로고침을 건너뛔니다.');
+      }
+      return;
+    }
+
+    await loadDiscussionGroupData(meetingId);
+  }
+
+  /// 토론 시간 변경에 따른 토론 조 데이터 처리
+  /// 토론 정보 저장 후 호출
+  void handleDiscussionTimeUpdate(int meetingId) {
+    if (_meetingDetail?.discussionTime != null) {
+      // 토론 시간이 설정된 경우 데이터 로드
+      loadDiscussionGroupData(meetingId);
+    } else {
+      // 토론 시간이 제거된 경우 데이터 초기화
+      setState(() {
+        _wantDiscussionList = null;
+        _discussionGroupList = null;
+        _discussionGroupErrorMessage = null;
+        _isDiscussionGroupLoading = false;
+      });
+      
+      if (AppConfig.debugMode) {
+        print('🆕 [토론 조 데이터] 토론 시간 제거로 인한 데이터 초기화');
+      }
     }
   }
 }

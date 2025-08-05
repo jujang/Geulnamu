@@ -4,6 +4,8 @@ import '../../../widgets/common/loading_widgets.dart';
 import 'meeting_detail_staff/basic_info_widgets.dart';
 import 'meeting_detail_staff/discussion_widgets.dart';
 import 'meeting_detail_staff/management_widgets.dart';
+import '../../../models/discussion/attendance_id_and_name_model.dart';
+import '../../../models/discussion/discussion_group_model.dart';
 
 /// 운영진용 모임 상세 화면 메인 위젯들
 ///
@@ -65,6 +67,12 @@ class MeetingDetailStaffWidgets {
     required ValueChanged<DateTime?> onLateThresholdTimeChanged,
     required ValueChanged<DateTime?> onDiscussionTimeChanged,
     required VoidCallback onClearDiscussionTime,
+    // 🆕 토론 조 관련 콜백들
+    required bool Function() onGetDiscussionGroupLoading,
+    required List<AttendanceIdAndNameModel>? Function() onGetWantDiscussionList,
+    required DiscussionGroupListResponse? Function() onGetDiscussionGroupList,
+    required String? Function() onGetDiscussionGroupErrorMessage,
+    required VoidCallback onRefreshDiscussionGroupData,
   }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -111,6 +119,20 @@ class MeetingDetailStaffWidgets {
             onDiscussionTimeChanged: onDiscussionTimeChanged,
             onClearDiscussionTime: onClearDiscussionTime,
           ),
+
+          // 🆕 토론 조 정보 섹션 (토론 시간이 설정된 경우에만 표시)
+          if (meetingDetail.discussionTime != null) ...[
+            const SizedBox(height: 16),
+            DiscussionWidgets.buildDiscussionGroupSection(
+              context,
+              meetingDetail,
+              isLoading: onGetDiscussionGroupLoading(),
+              wantDiscussionList: onGetWantDiscussionList(),
+              discussionGroupList: onGetDiscussionGroupList(),
+              errorMessage: onGetDiscussionGroupErrorMessage(),
+              onRefresh: onRefreshDiscussionGroupData,
+            ),
+          ],
 
           const SizedBox(height: 16),
 
