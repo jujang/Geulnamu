@@ -115,6 +115,37 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
     return authProvider.isAdminLevel;
   }
 
+  // 🆕 편집 가능 여부 체크 (날짜 기반)
+  bool get canEditMeetingInfo {
+    if (_meetingDetail == null) return false;
+    
+    final now = DateTime.now();
+    final meetingDate = DateTime(
+      _meetingDetail!.meetingDateTime.year,
+      _meetingDetail!.meetingDateTime.month,
+      _meetingDetail!.meetingDateTime.day,
+    );
+    
+    // 🔥 모임 다음 날부터 편집 불가능 (모임 당일까지는 편집 가능)
+    final nextDay = meetingDate.add(const Duration(days: 1));
+    final canEdit = now.isBefore(nextDay);
+    
+    if (AppConfig.debugMode && !canEdit) {
+      print('🔒 [편집 제한] 모임 다음 날부터 편집이 제한됩니다.');
+      print('   - 현재 날짜: ${_formatDate(now)}');
+      print('   - 모임 날짜: ${_formatDate(_meetingDetail!.meetingDateTime)}');
+      print('   - 편집 가능 마지막일: ${_formatDate(meetingDate)} (모임 당일까지)');
+    }
+    
+    return canEdit;
+  }
+
+  // 🆕 토론 조 편집 가능 여부 체크 (추가 조건: 토론 시간 설정 필요)
+  bool get canEditDiscussionGroups {
+    if (_meetingDetail?.discussionTime == null) return false; // 토론 시간이 설정되지 않음
+    return canEditMeetingInfo; // 기본 날짜 조건과 동일
+  }
+
   bool get canDeleteMeeting {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
@@ -235,7 +266,16 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 모임 기본 정보 편집 토글
   void toggleBasicInfoEdit() {
-    if (!isStaffOrAbove) return;
+    if (!isStaffOrAbove) {
+      _showPermissionDeniedMessage('기본 정보를 편집할 권한이 없습니다.');
+      return;
+    }
+
+    // 🆕 날짜 기반 편집 제한 체크
+    if (!canEditMeetingInfo) {
+      _showEditingRestrictedMessage('모임 기본 정보');
+      return;
+    }
 
     setState(() {
       _isEditingBasicInfo = !_isEditingBasicInfo;
@@ -248,7 +288,16 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 토론 정보 편집 토글
   void toggleDiscussionEdit() {
-    if (!isStaffOrAbove) return;
+    if (!isStaffOrAbove) {
+      _showPermissionDeniedMessage('토론 정보를 편집할 권한이 없습니다.');
+      return;
+    }
+
+    // 🆕 날짜 기반 편집 제한 체크
+    if (!canEditMeetingInfo) {
+      _showEditingRestrictedMessage('토론 정보');
+      return;
+    }
 
     setState(() {
       _isEditingDiscussion = !_isEditingDiscussion;
@@ -944,7 +993,20 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 토론 그룹 편집 모드 토글
   void toggleDiscussionGroupEdit() {
-    if (!isStaffOrAbove) return;
+    if (!isStaffOrAbove) {
+      _showPermissionDeniedMessage('토론 그룹을 편집할 권한이 없습니다.');
+      return;
+    }
+
+    // 🆕 날짜 기반 편집 제한 체크 (토론 시간 설정 체크 포함)
+    if (!canEditDiscussionGroups) {
+      if (_meetingDetail?.discussionTime == null) {
+        _showPermissionDeniedMessage('토론 시간이 설정되지 않아 토론 그룹을 편집할 수 없습니다.');
+      } else {
+        _showEditingRestrictedMessage('토론 그룹');
+      }
+      return;
+    }
 
     setState(() {
       _isEditingDiscussionGroups = !_isEditingDiscussionGroups;
@@ -1370,5 +1432,43 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
         print('✅ [인원 추가] ${attendee.name}님을 미할당 인원에 추가했습니다.');
       }
     });
+  }
+
+  // ====================
+  // 🆕 안내 메시지 메서드들
+  // ====================
+  
+  /// 모임 날짜를 기준으로 편집 제한 메시지 표시
+  void _showEditingRestrictedMessage(String sectionName) {
+    if (!mounted) return;
+    
+    final meetingDateStr = _meetingDetail != null 
+        ? _formatDate(_meetingDetail!.meetingDateTime)
+        : '모임 날짜';
+        
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '🗓️ $sectionName 편집 제한\n'
+          '모임 다음 날($meetingDateStr 이후)부터는 편집이 불가능합니다.\n'
+          '모임 당일까지만 편집할 수 있습니다.',
+        ),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 5),
+      ),
+    );
+  }
+  
+  /// 권한 부족 메시지 표시
+  void _showPermissionDeniedMessage(String message) {
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('❌ $message'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 }

@@ -134,6 +134,9 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       isSaving: isSaving,
       canDeleteMeeting: canDeleteMeeting,
       canManagePrivacy: canManagePrivacy,
+      // 🆕 편집 가능 여부 전달 (날짜 기반 제한)
+      canEditMeetingInfo: canEditMeetingInfo,
+      canEditDiscussionGroups: canEditDiscussionGroups,
       onToggleBasicEdit: toggleBasicInfoEdit,
       onToggleDiscussionEdit: toggleDiscussionEdit,
       onSaveBasicInfo: () => saveBasicInfo(widget.meetingId),

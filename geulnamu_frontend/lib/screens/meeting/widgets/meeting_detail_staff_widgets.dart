@@ -42,6 +42,9 @@ class MeetingDetailStaffWidgets {
     required bool isSaving,
     required bool canDeleteMeeting,
     required bool canManagePrivacy,
+    // 🆕 편집 가능 여부 체크 (=날짜 기반 제한)
+    required bool canEditMeetingInfo,
+    required bool canEditDiscussionGroups,
     required VoidCallback onToggleBasicEdit,
     required VoidCallback onToggleDiscussionEdit,
     required VoidCallback onSaveBasicInfo,
