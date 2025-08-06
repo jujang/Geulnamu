@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/theme.dart';
 import '../../../../models/discussion/attendance_id_and_name_model.dart';
+import '../../../../core/config/app_config.dart';
 
 /// 🎯 토론 그룹 편집 모드 전용 위젯들 (드래그&드롭 방식)
 class DiscussionGroupEditWidgets {
@@ -18,15 +20,13 @@ class DiscussionGroupEditWidgets {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. 미할당 인원 섹션 (드롭 존)
-        if (editingUnassignedMembers.isNotEmpty) ...[
-          _buildUnassignedDropZone(
-            context,
-            editingUnassignedMembers: editingUnassignedMembers,
-            onRemoveMemberFromGroup: onRemoveMemberFromGroup,
-          ),
-          const SizedBox(height: 24),
-        ],
+        // 1. 미할당 인원 섹션 (항상 표시)
+        _buildUnassignedDropZone(
+          context,
+          editingUnassignedMembers: editingUnassignedMembers,
+          onRemoveMemberFromGroup: onRemoveMemberFromGroup,
+        ),
+        const SizedBox(height: 24),
 
         // 2. 토론 그룹들 (드래그&드롭 가능)
         _buildDraggableDiscussionGroups(
@@ -99,14 +99,11 @@ class DiscussionGroupEditWidgets {
                         : Theme.of(context).colorScheme.error,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    '📥 미할당 인원 (${editingUnassignedMembers.length}명)',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: isHighlighted 
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.error,
-                    ),
+                  // 🎯 미할당 인원 수 애니메이션
+                  _buildAnimatedUnassignedTitle(
+                    context,
+                    memberCount: editingUnassignedMembers.length,
+                    isHighlighted: isHighlighted,
                   ),
                   if (isHighlighted) ...[
                     const SizedBox(width: 8),
@@ -249,13 +246,11 @@ class DiscussionGroupEditWidgets {
                         : Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    '🎯 ${groupNumber}조 (${members.length}명)',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 16,
-                    ),
+                  // 🎯 그룹 제목 + 인원 수 애니메이션
+                  _buildAnimatedGroupTitle(
+                    context,
+                    groupNumber: groupNumber,
+                    memberCount: members.length,
                   ),
                   if (isHighlighted) ...[
                     const SizedBox(width: 8),
@@ -344,15 +339,16 @@ class DiscussionGroupEditWidgets {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(
-              isHighlighted ? 0.2 : 0.1,
-            ),
+            // 🎨 색상 강화: 라이트/다크 모드 모두에서 잘 보이도록
+            color: isHighlighted 
+                ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
+                : Theme.of(context).colorScheme.tertiary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isHighlighted 
                   ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.secondary.withOpacity(0.5),
-              width: isHighlighted ? 2.0 : 1.0,
+                  : Theme.of(context).colorScheme.tertiary,
+              width: isHighlighted ? 2.0 : 2.0, // 항상 두께 2.0으로 고정
               style: BorderStyle.solid,
             ),
           ),
@@ -363,7 +359,7 @@ class DiscussionGroupEditWidgets {
                 size: 20,
                 color: isHighlighted 
                     ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.secondary,
+                    : Theme.of(context).colorScheme.tertiary,
               ),
               const SizedBox(width: 8),
               Text(
@@ -371,10 +367,10 @@ class DiscussionGroupEditWidgets {
                     ? '➕ 새 그룹을 만들고 여기에 추가하세요!'
                     : '➕ 멤버를 여기로 드래그하면 새 그룹이 생성됩니다',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: isHighlighted ? FontWeight.bold : FontWeight.w500,
+                  fontWeight: isHighlighted ? FontWeight.bold : FontWeight.w600,
                   color: isHighlighted 
                       ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.secondary,
+                      : Theme.of(context).colorScheme.tertiary,
                 ),
               ),
             ],
@@ -384,7 +380,7 @@ class DiscussionGroupEditWidgets {
     );
   }
 
-  /// 🎯 드래그 가능한 멤버 카드
+  /// 🎯 드래그 가능한 멤버 카드 (고급 애니메이션)
   static Widget _buildDraggableMemberCard(
     BuildContext context, {
     required AttendanceIdAndNameModel member,
@@ -392,13 +388,37 @@ class DiscussionGroupEditWidgets {
     return Draggable<AttendanceIdAndNameModel>(
       data: member,
       dragAnchorStrategy: pointerDragAnchorStrategy,
+      
+      // 🎯 드래그 시작 시 핸틱 피드백
+      onDragStarted: () {
+        HapticFeedback.lightImpact();
+        if (AppConfig.debugMode) {
+          print('🚀 [드래그 시작] ${member.memberName} 드래그 시작');
+        }
+      },
+      
+      // 🎯 드래그 종료 시 로깅 및 핸틱 피드백
+      onDragEnd: (details) {
+        if (AppConfig.debugMode) {
+          print('📍 [드래그 종료] ${member.memberName} 드래그 종료: ${{"wasAccepted": details.wasAccepted, "offset": details.offset}}');
+        }
+        
+        // 드롭 성공 시 성공 피드백, 실패 시 실패 피드백
+        if (details.wasAccepted) {
+          HapticFeedback.mediumImpact(); // 성공: 중간 진동
+        } else {
+          HapticFeedback.lightImpact(); // 실패: 가벼운 진동
+        }
+      },
+      
+      // 🎯 드래그 중 피드백 (회전 효과 제거)
       feedback: Material(
-        elevation: 6,
+        elevation: 8, // 좌더 깊은 그림자
         borderRadius: BorderRadius.circular(8),
         child: Transform.scale(
-          scale: 1.1, // 드래그 중 살짝 크게
+          scale: 1.15, // 더 크게 확대
           child: Opacity(
-            opacity: 0.8, // 드래그 중 반투명
+            opacity: 0.9, // 덜 투명하게
             child: _buildMemberCard(
               context, 
               member: member,
@@ -407,68 +427,120 @@ class DiscussionGroupEditWidgets {
           ),
         ),
       ),
-      childWhenDragging: Opacity(
-        opacity: 0.3, // 원본은 흐리게
-        child: _buildMemberCard(context, member: member),
+      
+      // 🎯 드래그 중 원본 카드 상태
+      childWhenDragging: AnimatedScale(
+        scale: 0.95, // 살짝 작아지게
+        duration: const Duration(milliseconds: 150),
+        child: AnimatedOpacity(
+          opacity: 0.4, // 좌더 흐리게
+          duration: const Duration(milliseconds: 150),
+          child: _buildMemberCard(context, member: member, isDimmed: true),
+        ),
       ),
+      
       child: _buildMemberCard(context, member: member),
     );
   }
 
-  /// 🎯 멤버 카드 (공통 디자인)
+  /// 🎯 멤버 카드 (고급 디자인 + 애니메이션)
   static Widget _buildMemberCard(
     BuildContext context, {
     required AttendanceIdAndNameModel member,
     bool isDragging = false,
+    bool isDimmed = false,
   }) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: isDragging 
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Theme.of(context).colorScheme.surface,
+        color: _getMemberCardColor(context, isDragging: isDragging, isDimmed: isDimmed),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDragging 
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          color: _getMemberCardBorderColor(context, isDragging: isDragging, isDimmed: isDimmed),
           width: isDragging ? 2.0 : 1.0,
         ),
-        boxShadow: isDragging ? [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(2, 4),
-          ),
-        ] : null,
+        boxShadow: _getMemberCardShadow(context, isDragging: isDragging),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 🎯 드래그 인디케이터 (회전 효과 제거)
           Icon(
             Icons.drag_indicator,
             size: 16,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-          ),
-          const SizedBox(width: 6),
-          Icon(
-            Icons.person,
-            size: 16,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            member.memberName,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: isDragging 
-                  ? Theme.of(context).colorScheme.onPrimaryContainer
-                  : Theme.of(context).colorScheme.onSurface,
+            color: Theme.of(context).colorScheme.primary.withOpacity(
+              isDimmed ? 0.4 : 0.7,
             ),
+          ),
+          const SizedBox(width: 6),
+          
+          // 🎯 사용자 아이콘 (애니메이션)
+          AnimatedScale(
+            scale: isDragging ? 1.1 : 1.0,
+            duration: const Duration(milliseconds: 200),
+            child: Icon(
+              Icons.person,
+              size: 16,
+              color: Theme.of(context).colorScheme.primary.withOpacity(
+                isDimmed ? 0.5 : 1.0,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          
+          // 🎯 멤버 이름 (애니메이션)
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 200),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: isDragging ? FontWeight.bold : FontWeight.w600,
+              color: _getMemberCardTextColor(context, isDragging: isDragging, isDimmed: isDimmed),
+            ) ?? const TextStyle(),
+            child: Text(member.memberName),
           ),
         ],
       ),
     );
+  }
+  
+  /// 🎨 멤버 카드 색상 결정
+  static Color _getMemberCardColor(BuildContext context, {bool isDragging = false, bool isDimmed = false}) {
+    if (isDragging) return Theme.of(context).colorScheme.primaryContainer;
+    if (isDimmed) return Theme.of(context).colorScheme.surface.withOpacity(0.7);
+    return Theme.of(context).colorScheme.surface;
+  }
+  
+  /// 🎨 멤버 카드 테두리 색상 결정
+  static Color _getMemberCardBorderColor(BuildContext context, {bool isDragging = false, bool isDimmed = false}) {
+    if (isDragging) return Theme.of(context).colorScheme.primary;
+    if (isDimmed) return Theme.of(context).colorScheme.outline.withOpacity(0.1);
+    return Theme.of(context).colorScheme.outline.withOpacity(0.2);
+  }
+  
+  /// 🎨 멤버 카드 텍스트 색상 결정
+  static Color _getMemberCardTextColor(BuildContext context, {bool isDragging = false, bool isDimmed = false}) {
+    if (isDragging) return Theme.of(context).colorScheme.onPrimaryContainer;
+    if (isDimmed) return Theme.of(context).colorScheme.onSurface.withOpacity(0.5);
+    return Theme.of(context).colorScheme.onSurface;
+  }
+  
+  /// 🎨 멤버 카드 그림자 결정
+  static List<BoxShadow>? _getMemberCardShadow(BuildContext context, {bool isDragging = false}) {
+    if (isDragging) {
+      return [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.3),
+          blurRadius: 12,
+          offset: const Offset(3, 6),
+        ),
+        BoxShadow(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ];
+    }
+    return null;
   }
 
   /// 편집 모드 하단 액션 버튼들 (기존 유지)
@@ -514,6 +586,82 @@ class DiscussionGroupEditWidgets {
     );
   }
 
+  /// 🎯 애니메이션 미할당 인원 제목
+  static Widget _buildAnimatedUnassignedTitle(
+    BuildContext context, {
+    required int memberCount,
+    required bool isHighlighted,
+  }) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) {
+        return ScaleTransition(
+          scale: Tween<double>(
+            begin: 0.7,
+            end: 1.0,
+          ).animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: Curves.bounceOut,
+            ),
+          ),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      child: Text(
+        '📥 미할당 인원 (${memberCount}명)',
+        key: ValueKey<String>('unassigned_count_${memberCount}'),
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: isHighlighted 
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.error,
+        ),
+      ),
+    );
+  }
+  
+  /// 🎯 애니메이션 그룹 제목 (인원 수 변화 시 애니메이션)
+  static Widget _buildAnimatedGroupTitle(
+    BuildContext context, {
+    required int groupNumber,
+    required int memberCount,
+  }) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) {
+        // 🎯 세련된 결합 애니메이션: 스케일 + 페이드
+        return ScaleTransition(
+          scale: Tween<double>(
+            begin: 0.8,
+            end: 1.0,
+          ).animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: Curves.elasticOut,
+            ),
+          ),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      child: Text(
+        '🎯 ${groupNumber}조 (${memberCount}명)',
+        key: ValueKey<String>('group_${groupNumber}_count_${memberCount}'), // 고유한 키로 애니메이션 트리거
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.onSurface,
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+  
   /// 그룹이 없을 때 메시지 (기존 유지)
   static Widget _buildNoGroupsMessage(BuildContext context) {
     return Container(
