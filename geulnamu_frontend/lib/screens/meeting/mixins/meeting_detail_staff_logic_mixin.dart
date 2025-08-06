@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/meeting/meeting_service.dart';
+import '../../../services/discussion/discussion_service.dart';
+import '../../../services/attendance/attendance_service.dart';
 import '../../../models/meeting/meeting_detail_staff_model.dart';
 import '../../../models/meeting/request/meeting_update_requests.dart';
+import '../../../models/discussion/attendance_id_and_name_model.dart';
+import '../../../models/discussion/discussion_group_model.dart';
+import '../../../models/discussion/assign_discussion_groups_request.dart';
+import '../../../models/attendance/attendance_status_model.dart';
 import '../../../core/config/app_config.dart';
 
 /// 운영진용 모임 상세 화면 로직 처리 Mixin
@@ -15,6 +21,8 @@ import '../../../core/config/app_config.dart';
 /// - 권한별 기능 제어
 mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   final MeetingService _meetingService = MeetingService();
+  final DiscussionService _discussionService = DiscussionService();
+  final AttendanceService _attendanceService = AttendanceService(); // 🆕 출석 서비스 추가
 
   // 🎯 로딩 상태
   bool _isLoading = false;
@@ -27,6 +35,7 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   // 🎯 편집 상태 (각 섹션별 독립 관리)
   bool _isEditingBasicInfo = false;
   bool _isEditingDiscussion = false;
+  bool _isEditingDiscussionGroups = false; // 🆕 토론 그룹 편집 상태
 
   // 🎯 폼 컨트롤러들
   final TextEditingController _meetingNameController = TextEditingController();
@@ -43,13 +52,42 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   // 🆕 X 버튼 상태 추적
   bool _isDiscussionTimeCleared = false; // X 버튼으로 토론 시간을 클리어했는지 여부
 
+  // 🆕 토론 조 관련 상태
+  bool _isDiscussionGroupLoading = false;
+  String? _discussionGroupErrorMessage;
+  List<AttendanceIdAndNameModel>? _wantDiscussionList;
+  DiscussionGroupListResponse? _discussionGroupList;
+  
+  // 🆕 토론 그룹 편집 데이터 (편집 중인 상태를 별도 관리)
+  Map<int, List<AttendanceIdAndNameModel>> _editingGroups = {}; // 그룹 번호 -> 멤버 리스트
+  List<AttendanceIdAndNameModel> _editingUnassignedMembers = []; // 미할당 멤버들
+  
+  // 🆕 인원 추가 기능 관련 상태
+  MeetingAttendanceDetails? _allAttendanceDetails; // 전체 출석자 목록
+  List<AttendanceIdAndNameModel> _temporaryAddedMembers = []; // 임시 추가된 인원들
+
   // 🎯 Getter들
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
   MeetingDetailStaffInfo? get meetingDetail => _meetingDetail;
+  
+  // 🆕 토론 조 관련 Getter들
+  bool get isDiscussionGroupLoading => _isDiscussionGroupLoading;
+  String? get discussionGroupErrorMessage => _discussionGroupErrorMessage;
+  List<AttendanceIdAndNameModel>? get wantDiscussionList => _wantDiscussionList;
+  DiscussionGroupListResponse? get discussionGroupList => _discussionGroupList;
   bool get isEditingBasicInfo => _isEditingBasicInfo;
   bool get isEditingDiscussion => _isEditingDiscussion;
+  bool get isEditingDiscussionGroups => _isEditingDiscussionGroups;
+  
+  // 🆕 토론 그룹 편집 데이터 Getter들
+  Map<int, List<AttendanceIdAndNameModel>> get editingGroups => Map.from(_editingGroups);
+  List<AttendanceIdAndNameModel> get editingUnassignedMembers => List.from(_editingUnassignedMembers);
+  
+  // 🆕 인원 추가 기능 관련 Getter들
+  MeetingAttendanceDetails? get allAttendanceDetails => _allAttendanceDetails;
+  List<AttendanceIdAndNameModel> get temporaryAddedMembers => List.from(_temporaryAddedMembers);
 
   // 🎯 컨트롤러 Getter들
   TextEditingController get meetingNameController => _meetingNameController;
@@ -77,6 +115,37 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
     return authProvider.isAdminLevel;
   }
 
+  // 🆕 편집 가능 여부 체크 (날짜 기반)
+  bool get canEditMeetingInfo {
+    if (_meetingDetail == null) return false;
+    
+    final now = DateTime.now();
+    final meetingDate = DateTime(
+      _meetingDetail!.meetingDateTime.year,
+      _meetingDetail!.meetingDateTime.month,
+      _meetingDetail!.meetingDateTime.day,
+    );
+    
+    // 🔥 모임 다음 날부터 편집 불가능 (모임 당일까지는 편집 가능)
+    final nextDay = meetingDate.add(const Duration(days: 1));
+    final canEdit = now.isBefore(nextDay);
+    
+    if (AppConfig.debugMode && !canEdit) {
+      print('🔒 [편집 제한] 모임 다음 날부터 편집이 제한됩니다.');
+      print('   - 현재 날짜: ${_formatDate(now)}');
+      print('   - 모임 날짜: ${_formatDate(_meetingDetail!.meetingDateTime)}');
+      print('   - 편집 가능 마지막일: ${_formatDate(meetingDate)} (모임 당일까지)');
+    }
+    
+    return canEdit;
+  }
+
+  // 🆕 토론 조 편집 가능 여부 체크 (추가 조건: 토론 시간 설정 필요)
+  bool get canEditDiscussionGroups {
+    if (_meetingDetail?.discussionTime == null) return false; // 토론 시간이 설정되지 않음
+    return canEditMeetingInfo; // 기본 날짜 조건과 동일
+  }
+
   bool get canDeleteMeeting {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
@@ -100,6 +169,12 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   bool get canManagePrivacy {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     return authProvider.isAdminLevel; // 관리자만 비공개/공개 처리 가능
+  }
+  
+  // 🆕 인원 추가 기능 권한 체크
+  bool get canAddMembers {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    return authProvider.isAdminLevel; // ADMIN 레벨만 가능 (관리자, 모임장, 부모임장)
   }
 
   @override
@@ -146,6 +221,11 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
             print('🔄 [캐시 무효화] 새로운 데이터로 업데이트 완료');
           }
         }
+        
+        // 🆕 토론 시간이 설정된 경우 토론 조 데이터 로드
+        if (meetingDetail.discussionTime != null) {
+          loadDiscussionGroupData(meetingId);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -186,7 +266,16 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 모임 기본 정보 편집 토글
   void toggleBasicInfoEdit() {
-    if (!isStaffOrAbove) return;
+    if (!isStaffOrAbove) {
+      _showPermissionDeniedMessage('기본 정보를 편집할 권한이 없습니다.');
+      return;
+    }
+
+    // 🆕 날짜 기반 편집 제한 체크
+    if (!canEditMeetingInfo) {
+      _showEditingRestrictedMessage('모임 기본 정보');
+      return;
+    }
 
     setState(() {
       _isEditingBasicInfo = !_isEditingBasicInfo;
@@ -199,7 +288,16 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 토론 정보 편집 토글
   void toggleDiscussionEdit() {
-    if (!isStaffOrAbove) return;
+    if (!isStaffOrAbove) {
+      _showPermissionDeniedMessage('토론 정보를 편집할 권한이 없습니다.');
+      return;
+    }
+
+    // 🆕 날짜 기반 편집 제한 체크
+    if (!canEditMeetingInfo) {
+      _showEditingRestrictedMessage('토론 정보');
+      return;
+    }
 
     setState(() {
       _isEditingDiscussion = !_isEditingDiscussion;
@@ -352,6 +450,9 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
             print('🔄 [토론 정보 수정] 데이터 새로고침 시작...');
           }
           await refreshMeetingDetailStaff(meetingId);
+          
+          // 🆕 토론 시간 변경에 따른 토론 조 데이터 처리
+          handleDiscussionTimeUpdate(meetingId);
         }
       }
     } catch (e) {
@@ -794,5 +895,599 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
         ),
       );
     }
+  }
+
+  // ====================
+  // 토론 조 관련 메서드들
+  // ====================
+
+  /// 토론 조 데이터 로드 
+  /// 조건: discussionTime != null인 경우에만 호출
+  Future<void> loadDiscussionGroupData(int meetingId) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final accessToken = await authProvider.accessToken; // 🔧 await 추가
+    
+    if (accessToken == null) {
+      if (AppConfig.debugMode) {
+        print('❌ [토론 조 데이터 로드] 액세스 토큰이 없습니다.');
+      }
+      return;
+    }
+
+    setState(() {
+      _isDiscussionGroupLoading = true;
+      _discussionGroupErrorMessage = null;
+    });
+
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [토론 조 데이터 로드] 시작... meetingId: $meetingId');
+      }
+
+      final results = await _discussionService.refreshDiscussionData(
+        meetingId: meetingId,
+        accessToken: accessToken,
+      );
+
+      setState(() {
+        _wantDiscussionList = results['wantDiscussionList'] as List<AttendanceIdAndNameModel>?;
+        _discussionGroupList = results['discussionGroupList'] as DiscussionGroupListResponse?;
+        _isDiscussionGroupLoading = false;
+        _discussionGroupErrorMessage = null;
+      });
+
+      if (AppConfig.debugMode) {
+        print('✅ [토론 조 데이터 로드] 성공');
+        print('   - 참여 희망자: ${_wantDiscussionList?.length ?? 0}명');
+        print('   - 토론 그룹: ${_discussionGroupList?.groupCount ?? 0}개');
+      }
+
+    } catch (e) {
+      setState(() {
+        _isDiscussionGroupLoading = false;
+        _discussionGroupErrorMessage = e.toString();
+      });
+
+      if (AppConfig.debugMode) {
+        print('❌ [토론 조 데이터 로드] 오류: $e');
+      }
+    }
+  }
+
+  /// 토론 조 데이터 새로고침
+  Future<void> refreshDiscussionGroupData(int meetingId) async {
+    if (_meetingDetail?.discussionTime == null) {
+      if (AppConfig.debugMode) {
+        print('ℹ️ [토론 조 새로고침] 토론 시간이 설정되지 않아 새로고침을 건너뛔니다.');
+      }
+      return;
+    }
+
+    await loadDiscussionGroupData(meetingId);
+  }
+
+  /// 토론 시간 변경에 따른 토론 조 데이터 처리
+  /// 토론 정보 저장 후 호출
+  void handleDiscussionTimeUpdate(int meetingId) {
+    if (_meetingDetail?.discussionTime != null) {
+      // 토론 시간이 설정된 경우 데이터 로드
+      loadDiscussionGroupData(meetingId);
+    } else {
+      // 토론 시간이 제거된 경우 데이터 초기화
+      setState(() {
+        _wantDiscussionList = null;
+        _discussionGroupList = null;
+        _discussionGroupErrorMessage = null;
+        _isDiscussionGroupLoading = false;
+      });
+      
+      if (AppConfig.debugMode) {
+        print('🆕 [토론 조 데이터] 토론 시간 제거로 인한 데이터 초기화');
+      }
+    }
+  }
+
+  // ====================
+  // 토론 그룹 편집 관련 메서드들
+  // ====================
+
+  /// 토론 그룹 편집 모드 토글
+  void toggleDiscussionGroupEdit() {
+    if (!isStaffOrAbove) {
+      _showPermissionDeniedMessage('토론 그룹을 편집할 권한이 없습니다.');
+      return;
+    }
+
+    // 🆕 날짜 기반 편집 제한 체크 (토론 시간 설정 체크 포함)
+    if (!canEditDiscussionGroups) {
+      if (_meetingDetail?.discussionTime == null) {
+        _showPermissionDeniedMessage('토론 시간이 설정되지 않아 토론 그룹을 편집할 수 없습니다.');
+      } else {
+        _showEditingRestrictedMessage('토론 그룹');
+      }
+      return;
+    }
+
+    setState(() {
+      _isEditingDiscussionGroups = !_isEditingDiscussionGroups;
+      
+      if (_isEditingDiscussionGroups) {
+        // 편집 모드 시작: 현재 데이터를 편집용으로 복사
+        _initializeEditingData();
+        
+        // 🆕 ADMIN 급인 경우 출석자 목록도 로드
+        if (canAddMembers && _meetingDetail != null) {
+          _loadAllAttendanceList(_meetingDetail!.meetingId);
+        }
+        
+        if (AppConfig.debugMode) {
+          print('🎨 [토론 그룹 편집] 편집 모드 시작');
+        }
+      } else {
+        // 편집 모드 종료: 편집 데이터 초기화 (취소)
+        _clearEditingData();
+        
+        if (AppConfig.debugMode) {
+          print('❌ [토론 그룹 편집] 편집 모드 취소');
+        }
+      }
+    });
+  }
+
+  /// 편집 데이터 초기화 (현재 토론 그룹 데이터를 편집용으로 복사)
+  void _initializeEditingData() {
+    _editingGroups.clear();
+    _editingUnassignedMembers.clear();
+    
+    if (_discussionGroupList == null || _wantDiscussionList == null) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [토론 그룹 편집] 데이터가 없어 편집 데이터를 초기화할 수 없습니다.');
+      }
+      return;
+    }
+    
+    // 기존 그룹 데이터 복사
+    for (int i = 0; i < _discussionGroupList!.groups.length; i++) {
+      final group = _discussionGroupList!.groups[i];
+      final groupNumber = i + 1; // 1부터 시작
+      _editingGroups[groupNumber] = List.from(group.members);
+    }
+    
+    // 미할당 멤버 계산 (토론 희망자 중 그룹에 속하지 않은 멤버들 + 임시 추가된 남은 인원들)
+    _calculateUnassignedMembers();
+    
+    if (AppConfig.debugMode) {
+      print('📋 [토론 그룹 편집] 편집 데이터 초기화 완료');
+      print('   - 그룹 수: ${_editingGroups.length}개');
+      print('   - 미할당 맴버: ${_editingUnassignedMembers.length}명');
+      print('   - 임시 추가된 인원: ${_temporaryAddedMembers.length}명');
+    }
+  }
+
+  /// 미할당 멤버 계산 (임시 추가된 인원들도 포함)
+  void _calculateUnassignedMembers() {
+    if (_wantDiscussionList == null) return;
+    
+    // 1. 토론 희망자 전체 리스트
+    final allWantMembers = Set<int>.from(
+      _wantDiscussionList!.map((member) => member.attendanceId)
+    );
+    
+    // 2. 임시 추가된 인원들 추가
+    final temporaryMemberIds = Set<int>.from(
+      _temporaryAddedMembers.map((member) => member.attendanceId)
+    );
+    
+    // 3. 전체 대상자 = 기존 토론 희망자 + 임시 추가된 인원
+    final allTargetMembers = {...allWantMembers, ...temporaryMemberIds};
+    
+    // 4. 현재 그룹에 할당된 멤버들
+    final assignedMembers = Set<int>();
+    for (final group in _editingGroups.values) {
+      for (final member in group) {
+        assignedMembers.add(member.attendanceId);
+      }
+    }
+    
+    // 5. 미할당 멤버 = 전체 대상자 - 할당된 멤버
+    final unassignedIds = allTargetMembers.difference(assignedMembers);
+    
+    // 6. 미할당 멤버 리스트 생성 (기존 + 임시 추가)
+    _editingUnassignedMembers.clear();
+    
+    // 6-1. 기존 토론 희망자 중 미할당
+    _editingUnassignedMembers.addAll(
+      _wantDiscussionList!
+          .where((member) => unassignedIds.contains(member.attendanceId))
+    );
+    
+    // 6-2. 임시 추가된 인원 중 미할당
+    _editingUnassignedMembers.addAll(
+      _temporaryAddedMembers
+          .where((member) => unassignedIds.contains(member.attendanceId))
+    );
+  }
+  
+  /// 편집 데이터 초기화 (취소 시 사용)
+  void _clearEditingData() {
+    _editingGroups.clear();
+    _editingUnassignedMembers.clear();
+    
+    // 🆕 임시 추가된 인원들도 제거
+    _temporaryAddedMembers.clear();
+  }
+
+  /// 멤버를 다른 그룹으로 이동
+  void moveMemberToGroup(AttendanceIdAndNameModel member, int targetGroupNumber) {
+    if (!_isEditingDiscussionGroups) return;
+    
+    setState(() {
+      // 1. 기존 그룹에서 제거
+      _removeMemberFromAllGroups(member);
+      _editingUnassignedMembers.removeWhere((m) => m.attendanceId == member.attendanceId);
+      
+      // 2. 타겟 그룹에 추가
+      if (!_editingGroups.containsKey(targetGroupNumber)) {
+        _editingGroups[targetGroupNumber] = [];
+      }
+      _editingGroups[targetGroupNumber]!.add(member);
+      
+      if (AppConfig.debugMode) {
+        print('🔄 [멤버 이동] ${member.memberName}를 ${targetGroupNumber}조로 이동');
+      }
+    });
+  }
+
+  /// 멤버를 그룹에서 제거 (미할당으로 이동)
+  void removeMemberFromGroup(AttendanceIdAndNameModel member) {
+    if (!_isEditingDiscussionGroups) return;
+    
+    setState(() {
+      // 모든 그룹에서 제거
+      _removeMemberFromAllGroups(member);
+      
+      // 미할당 리스트에 추가 (중복 방지)
+      if (!_editingUnassignedMembers.any((m) => m.attendanceId == member.attendanceId)) {
+        _editingUnassignedMembers.add(member);
+      }
+      
+      if (AppConfig.debugMode) {
+        print('🗑️ [멤버 제거] ${member.memberName}를 그룹에서 제거하여 미할당으로 이동');
+      }
+    });
+  }
+  
+  /// 모든 그룹에서 특정 멤버 제거 (내부 유틸리티)
+  void _removeMemberFromAllGroups(AttendanceIdAndNameModel member) {
+    for (final groupMembers in _editingGroups.values) {
+      groupMembers.removeWhere((m) => m.attendanceId == member.attendanceId);
+    }
+  }
+
+  /// 새 그룹 생성
+  void createNewGroup() {
+    if (!_isEditingDiscussionGroups) return;
+    
+    setState(() {
+      // 가장 큰 그룹 번호 + 1
+      final newGroupNumber = _editingGroups.isEmpty 
+          ? 1 
+          : _editingGroups.keys.reduce((a, b) => a > b ? a : b) + 1;
+      
+      _editingGroups[newGroupNumber] = [];
+      
+      if (AppConfig.debugMode) {
+        print('➕ [새 그룹 생성] ${newGroupNumber}조 생성');
+      }
+    });
+  }
+
+  /// 빈 그룹 제거
+  void removeEmptyGroups() {
+    if (!_isEditingDiscussionGroups) return;
+    
+    setState(() {
+      final groupsToRemove = <int>[];
+      
+      for (final entry in _editingGroups.entries) {
+        if (entry.value.isEmpty) {
+          groupsToRemove.add(entry.key);
+        }
+      }
+      
+      for (final groupNumber in groupsToRemove) {
+        _editingGroups.remove(groupNumber);
+      }
+      
+      if (AppConfig.debugMode && groupsToRemove.isNotEmpty) {
+        print('🗑️ [빈 그룹 제거] 제거된 그룹: ${groupsToRemove.join(', ')}조');
+      }
+    });
+  }
+
+  /// 모든 그룹 해제 (모든 멤버를 미할당으로 이동)
+  void clearAllGroups() {
+    if (!_isEditingDiscussionGroups) return;
+    
+    setState(() {
+      // 모든 그룹 멤버를 미할당으로 이동
+      for (final groupMembers in _editingGroups.values) {
+        for (final member in groupMembers) {
+          if (!_editingUnassignedMembers.any((m) => m.attendanceId == member.attendanceId)) {
+            _editingUnassignedMembers.add(member);
+          }
+        }
+      }
+      
+      _editingGroups.clear();
+      
+      if (AppConfig.debugMode) {
+        print('🗑️ [모든 그룹 해제] 모든 멤버를 미할당으로 이동');
+      }
+    });
+  }
+
+  /// 토론 그룹 수정 내용 저장
+  Future<void> saveDiscussionGroupChanges(int meetingId) async {
+    if (!_isEditingDiscussionGroups) return;
+    
+    // 빈 그룹 제거
+    removeEmptyGroups();
+    
+    setState(() => _isSaving = true);
+    
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+      if (accessToken == null) {
+        throw Exception('인증 토큰이 없습니다.');
+      }
+      
+      // API 요청 모델 생성
+      final request = _buildAssignDiscussionGroupsRequest();
+      
+      if (AppConfig.debugMode) {
+        print('💾 [토론 그룹 저장] API 요청 생성: $request');
+      }
+      
+      // API 호출
+      await _discussionService.manuallyAssignDiscussionGroups(
+        meetingId: meetingId,
+        request: request,
+        accessToken: accessToken,
+      );
+      
+      if (mounted) {
+        setState(() {
+          _isEditingDiscussionGroups = false;
+          _isSaving = false;
+        });
+        
+        // 성공 메시지
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('토론 그룹이 수정되었습니다. (총 ${request.groups.length}개 그룹)'),
+          ),
+        );
+        
+        // 짧은 지연 후 데이터 새로고침
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          if (AppConfig.debugMode) {
+            print('🔄 [토론 그룹 저장] 데이터 새로고침 시작...');
+          }
+          await loadDiscussionGroupData(meetingId);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSaving = false);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('토론 그룹 수정 실패: $e')),
+        );
+      }
+      
+      if (AppConfig.debugMode) {
+        print('❌ [토론 그룹 저장] 실패: $e');
+      }
+    }
+  }
+  
+  /// API 요청 모델 빌더
+  AssignDiscussionGroupsRequest _buildAssignDiscussionGroupsRequest() {
+    final groups = <DiscussionGroupRequest>[];
+    
+    // 그룹 번호 순으로 정렬
+    final sortedGroupNumbers = _editingGroups.keys.toList()..sort();
+    
+    for (final groupNumber in sortedGroupNumbers) {
+      final members = _editingGroups[groupNumber]!;
+      if (members.isNotEmpty) { // 빈 그룹은 제외
+        final attendanceIds = members.map((member) => member.attendanceId).toList();
+        groups.add(DiscussionGroupRequest(attendanceIdList: attendanceIds));
+      }
+    }
+    
+    return AssignDiscussionGroupsRequest(groups: groups);
+  }
+  
+  // ====================
+  // 🆕 인원 추가 기능 관련 메서드들
+  // ====================
+  
+  /// 전체 출석자 목록 로드 (ADMIN 급만 호출)
+  Future<void> _loadAllAttendanceList(int meetingId) async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+      
+      if (accessToken == null) {
+        if (AppConfig.debugMode) {
+          print('❌ [출석자 목록 로드] 액세스 토큰이 없습니다.');
+        }
+        return;
+      }
+      
+      if (AppConfig.debugMode) {
+        print('🚀 [출석자 목록 로드] 시작... meetingId: $meetingId');
+      }
+      
+      final attendanceDetails = await _attendanceService.getMeetingAttendanceStatus(
+        meetingId: meetingId,
+        accessToken: accessToken,
+      );
+      
+      if (mounted) {
+        setState(() {
+          _allAttendanceDetails = attendanceDetails;
+        });
+        
+        if (AppConfig.debugMode) {
+          print('✅ [출석자 목록 로드] 성공 - 총 출석자: ${attendanceDetails.attendanceList.length}명');
+        }
+      }
+      
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [출석자 목록 로드] 오류: $e');
+      }
+    }
+  }
+  
+  /// 추가 가능한 인원 목록 반환 (토론 미참여자 중 아직 추가안된 인원)
+  List<AttendanceStatus> getAvailableMembersToAdd() {
+    if (_allAttendanceDetails == null || _wantDiscussionList == null) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [추가 가능한 인원] 데이터가 없습니다. allAttendanceDetails=${_allAttendanceDetails != null}, wantDiscussionList=${_wantDiscussionList != null}');
+      }
+      return [];
+    }
+    
+    // 1. 현재 토론 참여 희망자 ID 집합 (이미 토론에 참여 중인 인원들)
+    final wantDiscussionIds = Set<int>.from(
+      _wantDiscussionList!.map((member) => member.attendanceId)
+    );
+    
+    // 2. 이미 임시 추가된 인원 ID 집합
+    final temporaryAddedIds = Set<int>.from(
+      _temporaryAddedMembers.map((member) => member.attendanceId)
+    );
+    
+    // 🆕 3. 편집 중인 모든 그룹에 이미 할당된 인원 ID 집합 (신규 첔크!)
+    final editingAssignedIds = Set<int>();
+    if (_isEditingDiscussionGroups) {
+      // 모든 편집 그룹에서 할당된 인원들 수집
+      for (final groupMembers in _editingGroups.values) {
+        for (final member in groupMembers) {
+          editingAssignedIds.add(member.attendanceId);
+        }
+      }
+      // 미할당 인원들도 수집 (이미 추가된 상태로 보아야 함)
+      for (final member in _editingUnassignedMembers) {
+        editingAssignedIds.add(member.attendanceId);
+      }
+    }
+    
+    if (AppConfig.debugMode) {
+      print('🔍 [추가 가능한 인원 필터링]');
+      print('   - 전체 출석자: ${_allAttendanceDetails!.attendanceList.length}명');
+      print('   - 토론 참여 희망자 ID: $wantDiscussionIds');
+      print('   - 임시 추가된 인원 ID: $temporaryAddedIds');
+      print('   - 편집 중 할당된 인원 ID: $editingAssignedIds'); // 🆕 신규 로그
+    }
+    
+    // 4. 출석자 중 아직 추가되지 않은 인원만 필터링
+    final availableMembers = _allAttendanceDetails!.attendanceList
+        .where((attendee) {
+          final isNotInOriginalDiscussion = !wantDiscussionIds.contains(attendee.attendanceId);
+          final isNotTemporaryAdded = !temporaryAddedIds.contains(attendee.attendanceId);
+          final isNotEditingAssigned = !editingAssignedIds.contains(attendee.attendanceId); // 🆕 신규 체크!
+          
+          if (AppConfig.debugMode) {
+            print('   🔍 ${attendee.name}(ID:${attendee.attendanceId}): '
+                '원래토론미참여=$isNotInOriginalDiscussion, '
+                '임시추가안됨=$isNotTemporaryAdded, '
+                '편집중미할당=$isNotEditingAssigned'); // 🆕 신규 로그
+          }
+          
+          return isNotInOriginalDiscussion && isNotTemporaryAdded && isNotEditingAssigned; // 🆕 조건 추가!
+        })
+        .toList();
+    
+    if (AppConfig.debugMode) {
+      print('✅ [추가 가능한 인원] 총 ${availableMembers.length}명: ${availableMembers.map((m) => m.name).join(", ")}');
+    }
+    
+    return availableMembers;
+  }
+  
+  /// 인원을 토론에 추가 (미할당 인원으로)
+  void addMemberToDiscussion(AttendanceStatus attendee) {
+    if (!_isEditingDiscussionGroups) return;
+    
+    // 1. AttendanceStatus를 AttendanceIdAndNameModel로 변환
+    final newMember = AttendanceIdAndNameModel(
+      attendanceId: attendee.attendanceId,
+      memberName: attendee.name,
+    );
+    
+    // 2. 중복 체크
+    if (_temporaryAddedMembers.any((member) => member.attendanceId == attendee.attendanceId)) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [인원 추가] ${attendee.name}님은 이미 추가된 인원입니다.');
+      }
+      return;
+    }
+    
+    setState(() {
+      // 3. 임시 추가된 인원 목록에 추가
+      _temporaryAddedMembers.add(newMember);
+      
+      // 4. 미할당 인원에 직접 추가
+      _editingUnassignedMembers.add(newMember);
+      
+      if (AppConfig.debugMode) {
+        print('✅ [인원 추가] ${attendee.name}님을 미할당 인원에 추가했습니다.');
+      }
+    });
+  }
+
+  // ====================
+  // 🆕 안내 메시지 메서드들
+  // ====================
+  
+  /// 모임 날짜를 기준으로 편집 제한 메시지 표시
+  void _showEditingRestrictedMessage(String sectionName) {
+    if (!mounted) return;
+    
+    final meetingDateStr = _meetingDetail != null 
+        ? _formatDate(_meetingDetail!.meetingDateTime)
+        : '모임 날짜';
+        
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '🗓️ $sectionName 편집 제한\n'
+          '모임 다음 날($meetingDateStr 이후)부터는 편집이 불가능합니다.\n'
+          '모임 당일까지만 편집할 수 있습니다.',
+        ),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 5),
+      ),
+    );
+  }
+  
+  /// 권한 부족 메시지 표시
+  void _showPermissionDeniedMessage(String message) {
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('❌ $message'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 }

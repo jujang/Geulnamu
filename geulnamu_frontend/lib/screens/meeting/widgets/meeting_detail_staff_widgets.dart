@@ -4,6 +4,9 @@ import '../../../widgets/common/loading_widgets.dart';
 import 'meeting_detail_staff/basic_info_widgets.dart';
 import 'meeting_detail_staff/discussion_widgets.dart';
 import 'meeting_detail_staff/management_widgets.dart';
+import '../../../models/discussion/attendance_id_and_name_model.dart';
+import '../../../models/discussion/discussion_group_model.dart';
+import '../../../models/attendance/attendance_status_model.dart';
 
 /// 운영진용 모임 상세 화면 메인 위젯들
 ///
@@ -39,6 +42,9 @@ class MeetingDetailStaffWidgets {
     required bool isSaving,
     required bool canDeleteMeeting,
     required bool canManagePrivacy,
+    // 🆕 편집 가능 여부 체크 (=날짜 기반 제한)
+    required bool canEditMeetingInfo,
+    required bool canEditDiscussionGroups,
     required VoidCallback onToggleBasicEdit,
     required VoidCallback onToggleDiscussionEdit,
     required VoidCallback onSaveBasicInfo,
@@ -65,6 +71,26 @@ class MeetingDetailStaffWidgets {
     required ValueChanged<DateTime?> onLateThresholdTimeChanged,
     required ValueChanged<DateTime?> onDiscussionTimeChanged,
     required VoidCallback onClearDiscussionTime,
+    // 🆕 토론 조 관련 콜백들
+    required bool Function() onGetDiscussionGroupLoading,
+    required List<AttendanceIdAndNameModel>? Function() onGetWantDiscussionList,
+    required DiscussionGroupListResponse? Function() onGetDiscussionGroupList,
+    required String? Function() onGetDiscussionGroupErrorMessage,
+    required VoidCallback onRefreshDiscussionGroupData,
+    // 🆕 토론 그룹 편집 콜백들
+    required bool isEditingDiscussionGroups,
+    required Map<int, List<AttendanceIdAndNameModel>> editingGroups,
+    required List<AttendanceIdAndNameModel> editingUnassignedMembers,
+    required VoidCallback onToggleDiscussionGroupEdit,
+    required VoidCallback onSaveDiscussionGroupChanges,
+    required void Function(AttendanceIdAndNameModel member, int targetGroupNumber) onMoveMemberToGroup,
+    required void Function(AttendanceIdAndNameModel member) onRemoveMemberFromGroup,
+    required VoidCallback onCreateNewGroup,
+    required VoidCallback onClearAllGroups,
+    // 🆕 인원 추가 기능 관련 콜백들
+    required bool canAddMembers,
+    required List<AttendanceStatus> availableMembersToAdd,
+    required void Function(AttendanceStatus) onAddMember,
   }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -111,6 +137,35 @@ class MeetingDetailStaffWidgets {
             onDiscussionTimeChanged: onDiscussionTimeChanged,
             onClearDiscussionTime: onClearDiscussionTime,
           ),
+
+          // 🆕 토론 조 정보 섹션 (토론 시간이 설정된 경우에만 표시)
+          if (meetingDetail.discussionTime != null) ...[
+            const SizedBox(height: 16),
+            DiscussionWidgets.buildDiscussionGroupSection(
+              context,
+              meetingDetail,
+              isLoading: onGetDiscussionGroupLoading(),
+              wantDiscussionList: onGetWantDiscussionList(),
+              discussionGroupList: onGetDiscussionGroupList(),
+              errorMessage: onGetDiscussionGroupErrorMessage(),
+              onRefresh: onRefreshDiscussionGroupData,
+              // 🆕 편집 관련 매개변수들 추가
+              isEditingDiscussionGroups: isEditingDiscussionGroups,
+              isSaving: isSaving,
+              editingGroups: editingGroups,
+              editingUnassignedMembers: editingUnassignedMembers,
+              onToggleDiscussionGroupEdit: onToggleDiscussionGroupEdit,
+              onSaveDiscussionGroupChanges: onSaveDiscussionGroupChanges,
+              onMoveMemberToGroup: onMoveMemberToGroup,
+              onRemoveMemberFromGroup: onRemoveMemberFromGroup,
+              onCreateNewGroup: onCreateNewGroup,
+              onClearAllGroups: onClearAllGroups,
+              // 🆕 인원 추가 기능 매개변수 전달
+              canAddMembers: canAddMembers,
+              availableMembersToAdd: availableMembersToAdd,
+              onAddMember: onAddMember,
+            ),
+          ],
 
           const SizedBox(height: 16),
 

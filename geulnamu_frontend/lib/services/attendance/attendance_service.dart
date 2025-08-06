@@ -285,6 +285,8 @@ class AttendanceService {
     }
   }
 
+
+
   /// 출석 삭제
   /// 
   /// API: DELETE /attendances/{attendanceId}

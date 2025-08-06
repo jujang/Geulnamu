@@ -134,6 +134,9 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       isSaving: isSaving,
       canDeleteMeeting: canDeleteMeeting,
       canManagePrivacy: canManagePrivacy,
+      // 🆕 편집 가능 여부 전달 (날짜 기반 제한)
+      canEditMeetingInfo: canEditMeetingInfo,
+      canEditDiscussionGroups: canEditDiscussionGroups,
       onToggleBasicEdit: toggleBasicInfoEdit,
       onToggleDiscussionEdit: toggleDiscussionEdit,
       onSaveBasicInfo: () => saveBasicInfo(widget.meetingId),
@@ -160,6 +163,26 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       onLateThresholdTimeChanged: onLateThresholdTimeChanged,
       onDiscussionTimeChanged: onDiscussionTimeChanged,
       onClearDiscussionTime: clearDiscussionTime, // 🆕 X 버튼 콜백 전달
+      // 🆕 토론 조 관련 콜백들
+      onGetDiscussionGroupLoading: () => isDiscussionGroupLoading,
+      onGetWantDiscussionList: () => wantDiscussionList,
+      onGetDiscussionGroupList: () => discussionGroupList,
+      onGetDiscussionGroupErrorMessage: () => discussionGroupErrorMessage,
+      onRefreshDiscussionGroupData: () => refreshDiscussionGroupData(widget.meetingId),
+      // 🆕 토론 그룹 편집 콜백들
+      isEditingDiscussionGroups: isEditingDiscussionGroups,
+      editingGroups: editingGroups,
+      editingUnassignedMembers: editingUnassignedMembers,
+      onToggleDiscussionGroupEdit: toggleDiscussionGroupEdit,
+      onSaveDiscussionGroupChanges: () => saveDiscussionGroupChanges(widget.meetingId),
+      onMoveMemberToGroup: moveMemberToGroup,
+      onRemoveMemberFromGroup: removeMemberFromGroup,
+      onCreateNewGroup: createNewGroup,
+      onClearAllGroups: clearAllGroups,
+      // 🆕 인원 추가 기능 콜백들 전달
+      canAddMembers: canAddMembers,
+      availableMembersToAdd: getAvailableMembersToAdd(),
+      onAddMember: addMemberToDiscussion,
     );
   }
 

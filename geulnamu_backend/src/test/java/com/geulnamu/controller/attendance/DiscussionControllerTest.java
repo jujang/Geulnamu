@@ -236,7 +236,7 @@ public class DiscussionControllerTest extends ControllerTest {
                 ),
                 requestFields(
                     fieldWithPath("groups[]").type(JsonFieldType.ARRAY).attributes(key("format").value("7개 이하의 리스트를 담고 있는 리스트")).description("전체 그룹(7개 이하)"),
-                    fieldWithPath("groups[].attendanceIdList[]").type(JsonFieldType.ARRAY).attributes(key("format").value("1 이상의 정수가 하나 이상 담긴 리스트")).description("출석 고유번호 리스트")
+                    fieldWithPath("groups[].attendanceIdList[]").type(JsonFieldType.ARRAY).attributes(key("format").value("1 이상의 정수가 하나 이상 담긴 리스트")).description("출석 고유번호 리스트").optional()
                 ),
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
