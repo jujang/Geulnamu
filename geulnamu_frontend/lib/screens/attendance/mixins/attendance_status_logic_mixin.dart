@@ -22,10 +22,11 @@ mixin AttendanceStatusLogicMixin<T extends StatefulWidget> on State<T> {
   String? get errorMessage => _errorMessage;
   MeetingAttendanceDetails? get attendanceDetails => _attendanceDetails;
   AttendanceSummary? get summary => _attendanceDetails?.summary;
-  List<AttendanceStatus> get attendanceList => _attendanceDetails?.attendanceList ?? [];
+  List<AttendanceStatus> get attendanceList =>
+      _attendanceDetails?.attendanceList ?? [];
 
   /// 출석 현황 초기 로드
-  /// 
+  ///
   /// [meetingId] 모임 ID
   Future<void> initializeAttendanceStatus(int meetingId) async {
     _currentMeetingId = meetingId;
@@ -36,17 +37,49 @@ mixin AttendanceStatusLogicMixin<T extends StatefulWidget> on State<T> {
   ///
   /// [showLoading] 로딩 표시 여부
   Future<void> loadAttendanceStatus({bool showLoading = false}) async {
-    if (_currentMeetingId == null) return;
+    if (AppConfig.debugMode) {
+      print('📊 [AttendanceStatusLogicMixin] loadAttendanceStatus 시작');
+      print(
+        '📊 [AttendanceStatusLogicMixin] _currentMeetingId: $_currentMeetingId',
+      );
+      print('📊 [AttendanceStatusLogicMixin] showLoading: $showLoading');
+    }
+
+    if (_currentMeetingId == null) {
+      if (AppConfig.debugMode) {
+        print(
+          '❌ [AttendanceStatusLogicMixin] _currentMeetingId가 null입니다. 조기 리턴',
+        );
+      }
+      return;
+    }
 
     try {
       if (showLoading) {
+        if (AppConfig.debugMode) {
+          print('🔄 [AttendanceStatusLogicMixin] 로딩 시작...');
+        }
         _setLoading(true);
       }
       _clearError();
 
+      if (AppConfig.debugMode) {
+        print('🔑 [AttendanceStatusLogicMixin] 액세스 토큰 가져오기 시도...');
+      }
+
       final accessToken = await _getAccessToken();
       if (accessToken == null) {
+        if (AppConfig.debugMode) {
+          print('❌ [AttendanceStatusLogicMixin] 액세스 토큰이 null입니다!');
+        }
         throw Exception('인증 토큰을 가져올 수 없습니다.');
+      }
+
+      if (AppConfig.debugMode) {
+        print('✅ [AttendanceStatusLogicMixin] 액세스 토큰 획득 성공');
+        print(
+          '🌐 [AttendanceStatusLogicMixin] API 호출 시작: meetingId=$_currentMeetingId',
+        );
       }
 
       final response = await _attendanceService.getMeetingAttendanceStatus(
@@ -54,20 +87,37 @@ mixin AttendanceStatusLogicMixin<T extends StatefulWidget> on State<T> {
         accessToken: accessToken,
       );
 
+      if (AppConfig.debugMode) {
+        print('✅ [AttendanceStatusLogicMixin] API 응답 수신 성공');
+        print(
+          '📊 [AttendanceStatusLogicMixin] 출석자 수: ${response.attendanceList.length}명',
+        );
+      }
+
       _attendanceDetails = response;
 
       if (AppConfig.debugMode) {
         print('✅ [AttendanceStatusLogicMixin] 출석 현황 로드 성공');
-        print('📊 [AttendanceStatusLogicMixin] 출석자: ${response.attendanceList.length}명');
+        print(
+          '📊 [AttendanceStatusLogicMixin] 출석자: ${response.attendanceList.length}명',
+        );
       }
     } catch (e) {
-      _setError(_getErrorMessage(e));
       if (AppConfig.debugMode) {
         print('❌ [AttendanceStatusLogicMixin] 출석 현황 로드 실패: $e');
+        print('❌ [AttendanceStatusLogicMixin] 오류 타입: ${e.runtimeType}');
       }
+      _setError(_getErrorMessage(e));
     } finally {
       if (showLoading) {
+        if (AppConfig.debugMode) {
+          print('🔄 [AttendanceStatusLogicMixin] 로딩 종료');
+        }
         _setLoading(false);
+      }
+
+      if (AppConfig.debugMode) {
+        print('🌁 [AttendanceStatusLogicMixin] loadAttendanceStatus 완료');
       }
     }
   }
@@ -86,7 +136,7 @@ mixin AttendanceStatusLogicMixin<T extends StatefulWidget> on State<T> {
   }
 
   /// 출석 삭제
-  /// 
+  ///
   /// [attendanceId] 삭제할 출석 ID
   /// [attendeeName] 출석자 이름 (로그용)
   Future<void> deleteAttendance(int attendanceId, String attendeeName) async {
@@ -97,7 +147,9 @@ mixin AttendanceStatusLogicMixin<T extends StatefulWidget> on State<T> {
       }
 
       if (AppConfig.debugMode) {
-        print('🗑️ [AttendanceStatusLogicMixin] 출석 삭제 시작: $attendeeName (ID: $attendanceId)');
+        print(
+          '🗑️ [AttendanceStatusLogicMixin] 출석 삭제 시작: $attendeeName (ID: $attendanceId)',
+        );
       }
 
       await _attendanceService.deleteAttendance(
@@ -112,18 +164,19 @@ mixin AttendanceStatusLogicMixin<T extends StatefulWidget> on State<T> {
 
       // 삭제 성공 후 전체 새로고침 (강제 UI 업데이트)
       await loadAttendanceStatus(showLoading: false);
-      
+
       // 🎯 강제로 setState 호출하여 UI 업데이트 보장
       if (mounted) {
         setState(() {
           // 상태 강제 업데이트를 위한 빈 setState
         });
       }
-      
-      if (AppConfig.debugMode) {
-        print('✅ [AttendanceStatusLogicMixin] 새로고침 완료 - 출석자: ${attendanceList.length}명');
-      }
 
+      if (AppConfig.debugMode) {
+        print(
+          '✅ [AttendanceStatusLogicMixin] 새로고침 완료 - 출석자: ${attendanceList.length}명',
+        );
+      }
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ [AttendanceStatusLogicMixin] 출석 삭제 실패: $e');
@@ -165,7 +218,22 @@ mixin AttendanceStatusLogicMixin<T extends StatefulWidget> on State<T> {
   Future<String?> _getAccessToken() async {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      return authProvider.accessToken;
+      final token = authProvider.accessToken;
+
+      // 🔍 디버그: 현재 사용자 정보 출력
+      if (AppConfig.debugMode) {
+        print(
+          '👤 [AttendanceStatusLogicMixin] 현재 사용자 ID: ${authProvider.userId}',
+        );
+        print(
+          '👤 [AttendanceStatusLogicMixin] 현재 사용자 이름: ${authProvider.userNickname}',
+        );
+        print(
+          '👤 [AttendanceStatusLogicMixin] 현재 사용자 역할: ${authProvider.userRole}',
+        );
+      }
+
+      return token;
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ [AttendanceStatusLogicMixin] 액세스 토큰 가져오기 실패: $e');

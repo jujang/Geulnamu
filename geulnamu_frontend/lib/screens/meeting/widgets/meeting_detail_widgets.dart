@@ -166,8 +166,7 @@ class MeetingDetailWidgets {
                 '모임 상세 내용',
                 style: context.textStyles.labelLarge?.copyWith(
                   color: context.colors.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
+                  fontSize: 16, // 🆕 fontWeight 제거하여 다른 라벨과 통일
                 ),
               ),
               const SizedBox(height: 8),
@@ -329,40 +328,18 @@ class MeetingDetailWidgets {
               timeRemaining: timeRemaining, // 🆕 남은 시간 정보 전달
             ),
 
-            // 토론 조 구성원
-            if (meeting.groupMemberList != null &&
-                meeting.groupMemberList!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _buildGroupMembersSection(context, meeting.groupMemberList!),
-            ],
-
-            // 알림 메시지
+            // 알림 메시지 (🆕 별도 Card로 개선)
             if (meeting.alarmMessage != null &&
                 meeting.alarmMessage!.isNotEmpty) ...[
               const SizedBox(height: 12),
-              Text(
-                '토론 알림 메시지',
-                style: context.textStyles.labelLarge?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  meeting.alarmMessage!,
-                  style: context.textStyles.bodyLarge?.copyWith(fontSize: 16),
-                ),
-              ),
+              _buildAlarmMessageCard(context, meeting.alarmMessage!),
+            ],
+
+            // 토론 조 구성원 (🆕 별도 Card로 개선)
+            if (meeting.groupMemberList != null &&
+                meeting.groupMemberList!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _buildGroupMembersCard(context, meeting.groupMemberList!),
             ],
           ],
         ),
@@ -542,7 +519,90 @@ class MeetingDetailWidgets {
     );
   }
 
-  /// 토론 조 구성원 섹션
+  /// 토론 조 구성원 섹션 (🆕 Card로 감싸서 구분감 강화)
+  static Widget _buildGroupMembersCard(
+    BuildContext context,
+    List<GroupMember> groupMembers,
+  ) {
+    return Card(
+      margin: EdgeInsets.zero, // 상위 Card와의 여백 제거
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.people_outline,
+                  color: context.colors.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '나의 토론 조 구성원',
+                  style: context.textStyles.labelLarge?.copyWith(
+                    color: context.colors.onSurfaceVariant,
+                    fontSize: 16, // 🆕 다른 라벨과 동일하게 수정
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 6.0,
+              children: groupMembers
+                  .map((member) => _buildMemberChip(context, member))
+                  .toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 토론 알림 메시지 카드 (🆕 별도 Card로 구분감 강화)
+  static Widget _buildAlarmMessageCard(
+    BuildContext context,
+    String alarmMessage,
+  ) {
+    return Card(
+      margin: EdgeInsets.zero, // 상위 Card와의 여백 제거
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.notifications_outlined,
+                  color: context.colors.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '토론 알림 메시지',
+                  style: context.textStyles.labelLarge?.copyWith(
+                    color: context.colors.onSurfaceVariant,
+                    fontSize: 16, // 🆕 다른 라벨과 동일하게 수정
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              alarmMessage,
+              style: context.textStyles.bodyLarge?.copyWith(fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 토론 조 구성원 섹션 (기존 방식 - 호환성을 위해 유지)
   static Widget _buildGroupMembersSection(
     BuildContext context,
     List<GroupMember> groupMembers,
@@ -551,11 +611,10 @@ class MeetingDetailWidgets {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '토론 조 구성원',
+          '나의 토론 조 구성원',
           style: context.textStyles.labelLarge?.copyWith(
             color: context.colors.onSurfaceVariant,
-            fontWeight: FontWeight.w500,
-            fontSize: 16,
+            fontSize: 16, // 🆕 fontWeight 제거하여 다른 라벨과 통일
           ),
         ),
         const SizedBox(height: 8),

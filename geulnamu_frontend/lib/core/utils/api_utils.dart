@@ -262,17 +262,27 @@ class _CacheControlInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     // GET 요청에만 캐시 제어 헤더 추가
     if (options.method.toUpperCase() == 'GET') {
+      // 🔥 Flutter Web에서 더 강력한 캐시 무효화
       options.headers.addAll({
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
         'Pragma': 'no-cache',
         'Expires': '0',
-        // 타임스탬프를 추가하여 URL을 고유하게 만들기
-        if (!options.queryParameters.containsKey('_t'))
-          '_t': DateTime.now().millisecondsSinceEpoch.toString(),
+        // 🆕 HTTP/1.1 및 HTTP/1.0 호환성을 위한 추가 헤더
+        'If-Modified-Since': 'Thu, 01 Jan 1970 00:00:00 GMT',
+        'If-None-Match': '*', // ETag 캐시 무효화
       });
+      
+      // 🆕 Flutter Web에서 타임스탬프 쿼리 파라미터 추가 (필요시)
+      if (kIsWeb) {
+        final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+        options.queryParameters['_nocache'] = timestamp;
+      }
 
       if (AppConfig.debugMode) {
         print('📅 [캐시 무효화] ${options.method} ${options.path}');
+        if (kIsWeb) {
+          print('🌐 [Flutter Web] 타임스탬프 캐시버스터 추가');
+        }
       }
     }
 

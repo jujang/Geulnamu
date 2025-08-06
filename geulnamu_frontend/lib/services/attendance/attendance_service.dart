@@ -241,7 +241,6 @@ class AttendanceService {
     try {
       if (AppConfig.debugMode) {
         print('🚀 [출석 현황 조회] API 요청 시작...');
-        print('🔗 [출석 현황 조회] 요청 URL: ${_dio.options.baseUrl}/attendances/list?meetingId=$meetingId');
       }
 
       final response = await _dio.get(

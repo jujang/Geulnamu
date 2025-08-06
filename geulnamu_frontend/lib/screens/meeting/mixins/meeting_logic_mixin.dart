@@ -221,7 +221,10 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
     Navigator.pushNamed(
       context,
       '/attendance/status',
-      arguments: {'meetingId': meetingId},
+      arguments: {
+        'meetingId': meetingId,
+        'meetingTitle': null, // 추후 필요시 모임 제목 추가
+      },
     );
   }
 
