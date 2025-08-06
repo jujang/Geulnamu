@@ -451,14 +451,18 @@ class DiscussionWidgets {
             Icon(
               Icons.groups,
               size: 20,
-              color: Theme.of(context).colorScheme.primary, // 🔧 secondary → primary
+              color: Theme.of(
+                context,
+              ).colorScheme.primary, // 🔧 secondary → primary
             ),
             const SizedBox(width: 8),
             Text(
               '토론 그룹 구성 현황',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold, // 🔧 w600 → bold
-                color: Theme.of(context).colorScheme.onSurface, // 🔧 secondary → onSurface
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface, // 🔧 secondary → onSurface
                 fontSize: 16, // 🔧 크기 증가
               ),
             ),
@@ -572,12 +576,11 @@ class DiscussionWidgets {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.secondaryContainer.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          width: 1.5, // 🔧 두께 증가
         ),
       ),
       child: Column(
@@ -588,7 +591,9 @@ class DiscussionWidgets {
             '총 ${groupList.groupCount}개 그룹, ${groupList.totalMemberCount}명 참여',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.bold, // 🔧 w600 → bold
-              color: Theme.of(context).colorScheme.onSurface, // 🔧 secondary → onSurface
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface, // 🔧 secondary → onSurface
               fontSize: 14, // 🔧 크기 증가
             ),
           ),
@@ -648,7 +653,9 @@ class DiscussionWidgets {
                 '$groupNumber조',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold, // 🔧 더 굵게
-                  color: Theme.of(context).colorScheme.onSurface, // 🔧 표준 텍스트 색상
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface, // 🔧 표준 텍스트 색상
                   fontSize: 15, // 🔧 약간 크게
                 ),
               ),
@@ -656,7 +663,9 @@ class DiscussionWidgets {
               Text(
                 '(${group.memberCount}명)',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), // 🔧 약간 연하게
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.7), // 🔧 약간 연하게
                   fontWeight: FontWeight.w500, // 🔧 약간 굵게
                 ),
               ),
@@ -677,10 +686,15 @@ class DiscussionWidgets {
                     vertical: 6, // 🔧 패딩 증가
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer, // 🔧 더 진한 배경
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer, // 🔧 더 진한 배경
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all( // 🔧 테두리 추가
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    border: Border.all(
+                      // 🔧 테두리 추가
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.3),
                       width: 1,
                     ),
                   ),
@@ -689,7 +703,9 @@ class DiscussionWidgets {
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontSize: 12, // 🔧 약간 크게
                       fontWeight: FontWeight.w600, // 🔧 더 굵게
-                      color: Theme.of(context).colorScheme.onPrimaryContainer, // 🔧 대비되는 색상
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onPrimaryContainer, // 🔧 대비되는 색상
                     ),
                   ),
                 );
@@ -701,7 +717,9 @@ class DiscussionWidgets {
               '참여자 없음',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontStyle: FontStyle.italic,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6), // 🔧 더 진한 회색
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withOpacity(0.6), // 🔧 더 진한 회색
                 fontWeight: FontWeight.w500, // 🔧 약간 굵게
               ),
             ),
