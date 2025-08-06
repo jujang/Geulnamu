@@ -339,27 +339,25 @@ class DiscussionGroupEditWidgets {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            // 🎨 색상 강화: 라이트/다크 모드 모두에서 잘 보이도록
-            color: isHighlighted 
-                ? Theme.of(context).colorScheme.primary.withOpacity(0.15)
-                : Theme.of(context).colorScheme.tertiary.withOpacity(0.1),
+            // 🎨 기존 그룹과 동일한 색상 시스템 사용
+            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(
+              isHighlighted ? 0.2 : 0.1,
+            ),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isHighlighted 
                   ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.tertiary,
-              width: isHighlighted ? 2.0 : 2.0, // 항상 두께 2.0으로 고정
-              style: BorderStyle.solid,
+                  : Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              width: isHighlighted ? 2.0 : 1.5,
             ),
           ),
           child: Row(
             children: [
+              // 🎯 그룹 아이콘과 동일하게 변경
               Icon(
-                Icons.add_circle_outline,
-                size: 20,
-                color: isHighlighted 
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.tertiary,
+                Icons.group_add,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: 8),
               Text(
@@ -368,9 +366,8 @@ class DiscussionGroupEditWidgets {
                     : '➕ 멤버를 여기로 드래그하면 새 그룹이 생성됩니다',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: isHighlighted ? FontWeight.bold : FontWeight.w600,
-                  color: isHighlighted 
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.tertiary,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 16,
                 ),
               ),
             ],
