@@ -1374,25 +1374,44 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       _temporaryAddedMembers.map((member) => member.attendanceId)
     );
     
+    // 🆕 3. 편집 중인 모든 그룹에 이미 할당된 인원 ID 집합 (신규 첔크!)
+    final editingAssignedIds = Set<int>();
+    if (_isEditingDiscussionGroups) {
+      // 모든 편집 그룹에서 할당된 인원들 수집
+      for (final groupMembers in _editingGroups.values) {
+        for (final member in groupMembers) {
+          editingAssignedIds.add(member.attendanceId);
+        }
+      }
+      // 미할당 인원들도 수집 (이미 추가된 상태로 보아야 함)
+      for (final member in _editingUnassignedMembers) {
+        editingAssignedIds.add(member.attendanceId);
+      }
+    }
+    
     if (AppConfig.debugMode) {
       print('🔍 [추가 가능한 인원 필터링]');
       print('   - 전체 출석자: ${_allAttendanceDetails!.attendanceList.length}명');
       print('   - 토론 참여 희망자 ID: $wantDiscussionIds');
       print('   - 임시 추가된 인원 ID: $temporaryAddedIds');
+      print('   - 편집 중 할당된 인원 ID: $editingAssignedIds'); // 🆕 신규 로그
     }
     
-    // 3. 출석자 중 토론 미참여자이며 아직 임시 추가안된 인원만 필터링
+    // 4. 출석자 중 아직 추가되지 않은 인원만 필터링
     final availableMembers = _allAttendanceDetails!.attendanceList
         .where((attendee) {
-          // 토론 참여 희망자가 아니고 && 아직 임시 추가안된 인원만
-          final isNotInDiscussion = !wantDiscussionIds.contains(attendee.attendanceId);
+          final isNotInOriginalDiscussion = !wantDiscussionIds.contains(attendee.attendanceId);
           final isNotTemporaryAdded = !temporaryAddedIds.contains(attendee.attendanceId);
+          final isNotEditingAssigned = !editingAssignedIds.contains(attendee.attendanceId); // 🆕 신규 체크!
           
           if (AppConfig.debugMode) {
-            print('   🔍 ${attendee.name}(ID:${attendee.attendanceId}): 토론미참여=$isNotInDiscussion, 임시추가안됨=$isNotTemporaryAdded');
+            print('   🔍 ${attendee.name}(ID:${attendee.attendanceId}): '
+                '원래토론미참여=$isNotInOriginalDiscussion, '
+                '임시추가안됨=$isNotTemporaryAdded, '
+                '편집중미할당=$isNotEditingAssigned'); // 🆕 신규 로그
           }
           
-          return isNotInDiscussion && isNotTemporaryAdded;
+          return isNotInOriginalDiscussion && isNotTemporaryAdded && isNotEditingAssigned; // 🆕 조건 추가!
         })
         .toList();
     
