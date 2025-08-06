@@ -73,6 +73,16 @@ class MeetingDetailStaffWidgets {
     required DiscussionGroupListResponse? Function() onGetDiscussionGroupList,
     required String? Function() onGetDiscussionGroupErrorMessage,
     required VoidCallback onRefreshDiscussionGroupData,
+    // 🆕 토론 그룹 편집 콜백들
+    required bool isEditingDiscussionGroups,
+    required Map<int, List<AttendanceIdAndNameModel>> editingGroups,
+    required List<AttendanceIdAndNameModel> editingUnassignedMembers,
+    required VoidCallback onToggleDiscussionGroupEdit,
+    required VoidCallback onSaveDiscussionGroupChanges,
+    required void Function(AttendanceIdAndNameModel member, int targetGroupNumber) onMoveMemberToGroup,
+    required void Function(AttendanceIdAndNameModel member) onRemoveMemberFromGroup,
+    required VoidCallback onCreateNewGroup,
+    required VoidCallback onClearAllGroups,
   }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -131,6 +141,17 @@ class MeetingDetailStaffWidgets {
               discussionGroupList: onGetDiscussionGroupList(),
               errorMessage: onGetDiscussionGroupErrorMessage(),
               onRefresh: onRefreshDiscussionGroupData,
+              // 🆕 편집 관련 매개변수들 추가
+              isEditingDiscussionGroups: isEditingDiscussionGroups,
+              isSaving: isSaving,
+              editingGroups: editingGroups,
+              editingUnassignedMembers: editingUnassignedMembers,
+              onToggleDiscussionGroupEdit: onToggleDiscussionGroupEdit,
+              onSaveDiscussionGroupChanges: onSaveDiscussionGroupChanges,
+              onMoveMemberToGroup: onMoveMemberToGroup,
+              onRemoveMemberFromGroup: onRemoveMemberFromGroup,
+              onCreateNewGroup: onCreateNewGroup,
+              onClearAllGroups: onClearAllGroups,
             ),
           ],
 

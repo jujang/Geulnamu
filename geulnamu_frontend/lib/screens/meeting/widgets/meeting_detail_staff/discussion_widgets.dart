@@ -3,6 +3,7 @@ import '../../../../core/theme.dart';
 import '../../../../models/meeting/meeting_detail_staff_model.dart';
 import '../../../../models/discussion/attendance_id_and_name_model.dart';
 import '../../../../models/discussion/discussion_group_model.dart';
+import 'discussion_group_edit_widgets.dart';
 
 /// 운영진용 모임 상세 - 토론 정보 섹션 위젯들
 class DiscussionWidgets {
@@ -65,6 +66,22 @@ class DiscussionWidgets {
     required DiscussionGroupListResponse? discussionGroupList,
     required String? errorMessage,
     required VoidCallback onRefresh,
+    // 🆕 토론 그룹 편집 관련 매개변수들
+    required bool isEditingDiscussionGroups,
+    required bool isSaving,
+    required Map<int, List<AttendanceIdAndNameModel>> editingGroups,
+    required List<AttendanceIdAndNameModel> editingUnassignedMembers,
+    required VoidCallback onToggleDiscussionGroupEdit,
+    required VoidCallback onSaveDiscussionGroupChanges,
+    required void Function(
+      AttendanceIdAndNameModel member,
+      int targetGroupNumber,
+    )
+    onMoveMemberToGroup,
+    required void Function(AttendanceIdAndNameModel member)
+    onRemoveMemberFromGroup,
+    required VoidCallback onCreateNewGroup,
+    required VoidCallback onClearAllGroups,
   }) {
     return Card(
       child: Padding(
@@ -72,8 +89,15 @@ class DiscussionWidgets {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 섹션 헤더
-            _buildDiscussionGroupHeader(context, onRefresh),
+            // 섹션 헤더 (편집 상태에 따라 다르게 표시)
+            _buildDiscussionGroupHeader(
+              context,
+              onRefresh,
+              isEditingDiscussionGroups: isEditingDiscussionGroups,
+              isSaving: isSaving,
+              onToggleEdit: onToggleDiscussionGroupEdit,
+              onSave: onSaveDiscussionGroupChanges,
+            ),
 
             const SizedBox(height: 16),
 
@@ -82,7 +106,19 @@ class DiscussionWidgets {
               _buildDiscussionGroupLoading(context)
             else if (errorMessage != null)
               _buildDiscussionGroupError(context, errorMessage, onRefresh)
+            else if (isEditingDiscussionGroups)
+              // 🆕 편집 모드 UI
+              DiscussionGroupEditWidgets.buildDiscussionGroupEditingContent(
+                context,
+                editingGroups: editingGroups,
+                editingUnassignedMembers: editingUnassignedMembers,
+                onMoveMemberToGroup: onMoveMemberToGroup,
+                onRemoveMemberFromGroup: onRemoveMemberFromGroup,
+                onCreateNewGroup: onCreateNewGroup,
+                onClearAllGroups: onClearAllGroups,
+              )
             else
+              // 일반 조회 모드 UI
               _buildDiscussionGroupContent(
                 context,
                 wantDiscussionList: wantDiscussionList,
@@ -300,27 +336,57 @@ class DiscussionWidgets {
   // 토론 조 정보 섹션 헬퍼 메서드들
   // ====================
 
-  /// 토론 조 정보 섹션 헤더
+  /// 토론 조 정보 섹션 헤더 (🆕 편집 기능 포함)
   static Widget _buildDiscussionGroupHeader(
     BuildContext context,
-    VoidCallback onRefresh,
-  ) {
+    VoidCallback onRefresh, {
+    required bool isEditingDiscussionGroups,
+    required bool isSaving,
+    required VoidCallback onToggleEdit,
+    required VoidCallback onSave,
+  }) {
     return Row(
       children: [
         Text(
-          '👥 토론 조 정보',
+          isEditingDiscussionGroups ? '👥 토론 조 정보 (편집 중)' : '👥 토론 조 정보',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
         const Spacer(),
-        // 새로고침 버튼
-        IconButton(
-          onPressed: onRefresh,
-          icon: const Icon(Icons.refresh),
-          tooltip: '토론 조 데이터 새로고침',
-        ),
+
+        if (isEditingDiscussionGroups) ...[
+          // 편집 모드: 취소 + 저장 버튼
+          TextButton(
+            onPressed: isSaving ? null : onToggleEdit,
+            child: const Text('취소'),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton.icon(
+            onPressed: isSaving ? null : onSave,
+            icon: isSaving
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.save),
+            label: Text(isSaving ? '저장 중...' : '저장'),
+          ),
+        ] else ...[
+          // 조회 모드: 새로고침 + 편집 버튼
+          IconButton(
+            onPressed: onRefresh,
+            icon: const Icon(Icons.refresh),
+            tooltip: '토론 조 데이터 새로고침',
+          ),
+          IconButton(
+            onPressed: onToggleEdit,
+            icon: const Icon(Icons.edit),
+            tooltip: '토론 그룹 편집',
+          ),
+        ],
       ],
     );
   }

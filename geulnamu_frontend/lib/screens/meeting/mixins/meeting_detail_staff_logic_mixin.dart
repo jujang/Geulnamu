@@ -7,6 +7,7 @@ import '../../../models/meeting/meeting_detail_staff_model.dart';
 import '../../../models/meeting/request/meeting_update_requests.dart';
 import '../../../models/discussion/attendance_id_and_name_model.dart';
 import '../../../models/discussion/discussion_group_model.dart';
+import '../../../models/discussion/assign_discussion_groups_request.dart';
 import '../../../core/config/app_config.dart';
 
 /// 운영진용 모임 상세 화면 로직 처리 Mixin
@@ -31,6 +32,7 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   // 🎯 편집 상태 (각 섹션별 독립 관리)
   bool _isEditingBasicInfo = false;
   bool _isEditingDiscussion = false;
+  bool _isEditingDiscussionGroups = false; // 🆕 토론 그룹 편집 상태
 
   // 🎯 폼 컨트롤러들
   final TextEditingController _meetingNameController = TextEditingController();
@@ -52,6 +54,10 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   String? _discussionGroupErrorMessage;
   List<AttendanceIdAndNameModel>? _wantDiscussionList;
   DiscussionGroupListResponse? _discussionGroupList;
+  
+  // 🆕 토론 그룹 편집 데이터 (편집 중인 상태를 별도 관리)
+  Map<int, List<AttendanceIdAndNameModel>> _editingGroups = {}; // 그룹 번호 -> 멤버 리스트
+  List<AttendanceIdAndNameModel> _editingUnassignedMembers = []; // 미할당 멤버들
 
   // 🎯 Getter들
   bool get isLoading => _isLoading;
@@ -66,6 +72,11 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   DiscussionGroupListResponse? get discussionGroupList => _discussionGroupList;
   bool get isEditingBasicInfo => _isEditingBasicInfo;
   bool get isEditingDiscussion => _isEditingDiscussion;
+  bool get isEditingDiscussionGroups => _isEditingDiscussionGroups;
+  
+  // 🆕 토론 그룹 편집 데이터 Getter들
+  Map<int, List<AttendanceIdAndNameModel>> get editingGroups => Map.from(_editingGroups);
+  List<AttendanceIdAndNameModel> get editingUnassignedMembers => List.from(_editingUnassignedMembers);
 
   // 🎯 컨트롤러 Getter들
   TextEditingController get meetingNameController => _meetingNameController;
@@ -908,5 +919,289 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
         print('🆕 [토론 조 데이터] 토론 시간 제거로 인한 데이터 초기화');
       }
     }
+  }
+
+  // ====================
+  // 토론 그룹 편집 관련 메서드들
+  // ====================
+
+  /// 토론 그룹 편집 모드 토글
+  void toggleDiscussionGroupEdit() {
+    if (!isStaffOrAbove) return;
+
+    setState(() {
+      _isEditingDiscussionGroups = !_isEditingDiscussionGroups;
+      
+      if (_isEditingDiscussionGroups) {
+        // 편집 모드 시작: 현재 데이터를 편집용으로 복사
+        _initializeEditingData();
+        
+        if (AppConfig.debugMode) {
+          print('🎨 [토론 그룹 편집] 편집 모드 시작');
+        }
+      } else {
+        // 편집 모드 종료: 편집 데이터 초기화 (취소)
+        _clearEditingData();
+        
+        if (AppConfig.debugMode) {
+          print('❌ [토론 그룹 편집] 편집 모드 취소');
+        }
+      }
+    });
+  }
+
+  /// 편집 데이터 초기화 (현재 토론 그룹 데이터를 편집용으로 복사)
+  void _initializeEditingData() {
+    _editingGroups.clear();
+    _editingUnassignedMembers.clear();
+    
+    if (_discussionGroupList == null || _wantDiscussionList == null) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [토론 그룹 편집] 데이터가 없어 편집 데이터를 초기화할 수 없습니다.');
+      }
+      return;
+    }
+    
+    // 기존 그룹 데이터 복사
+    for (int i = 0; i < _discussionGroupList!.groups.length; i++) {
+      final group = _discussionGroupList!.groups[i];
+      final groupNumber = i + 1; // 1부터 시작
+      _editingGroups[groupNumber] = List.from(group.members);
+    }
+    
+    // 미할당 멤버 계산 (토론 희망자 중 그룹에 속하지 않은 멤버들)
+    _calculateUnassignedMembers();
+    
+    if (AppConfig.debugMode) {
+      print('📋 [토론 그룹 편집] 편집 데이터 초기화 완료');
+      print('   - 그룹 수: ${_editingGroups.length}개');
+      print('   - 미할당 맴버: ${_editingUnassignedMembers.length}명');
+    }
+  }
+
+  /// 미할당 멤버 계산
+  void _calculateUnassignedMembers() {
+    if (_wantDiscussionList == null) return;
+    
+    // 토론 희망자 전체 리스트
+    final allWantMembers = Set<int>.from(
+      _wantDiscussionList!.map((member) => member.attendanceId)
+    );
+    
+    // 현재 그룹에 할당된 멤버들
+    final assignedMembers = Set<int>();
+    for (final group in _editingGroups.values) {
+      for (final member in group) {
+        assignedMembers.add(member.attendanceId);
+      }
+    }
+    
+    // 미할당 멤버 = 토론 희망자 - 할당된 멤버
+    final unassignedIds = allWantMembers.difference(assignedMembers);
+    
+    _editingUnassignedMembers = _wantDiscussionList!
+        .where((member) => unassignedIds.contains(member.attendanceId))
+        .toList();
+  }
+  
+  /// 편집 데이터 초기화 (취소 시 사용)
+  void _clearEditingData() {
+    _editingGroups.clear();
+    _editingUnassignedMembers.clear();
+  }
+
+  /// 멤버를 다른 그룹으로 이동
+  void moveMemberToGroup(AttendanceIdAndNameModel member, int targetGroupNumber) {
+    if (!_isEditingDiscussionGroups) return;
+    
+    setState(() {
+      // 1. 기존 그룹에서 제거
+      _removeMemberFromAllGroups(member);
+      _editingUnassignedMembers.removeWhere((m) => m.attendanceId == member.attendanceId);
+      
+      // 2. 타겟 그룹에 추가
+      if (!_editingGroups.containsKey(targetGroupNumber)) {
+        _editingGroups[targetGroupNumber] = [];
+      }
+      _editingGroups[targetGroupNumber]!.add(member);
+      
+      if (AppConfig.debugMode) {
+        print('🔄 [멤버 이동] ${member.memberName}를 ${targetGroupNumber}조로 이동');
+      }
+    });
+  }
+
+  /// 멤버를 그룹에서 제거 (미할당으로 이동)
+  void removeMemberFromGroup(AttendanceIdAndNameModel member) {
+    if (!_isEditingDiscussionGroups) return;
+    
+    setState(() {
+      // 모든 그룹에서 제거
+      _removeMemberFromAllGroups(member);
+      
+      // 미할당 리스트에 추가 (중복 방지)
+      if (!_editingUnassignedMembers.any((m) => m.attendanceId == member.attendanceId)) {
+        _editingUnassignedMembers.add(member);
+      }
+      
+      if (AppConfig.debugMode) {
+        print('🗑️ [멤버 제거] ${member.memberName}를 그룹에서 제거하여 미할당으로 이동');
+      }
+    });
+  }
+  
+  /// 모든 그룹에서 특정 멤버 제거 (내부 유틸리티)
+  void _removeMemberFromAllGroups(AttendanceIdAndNameModel member) {
+    for (final groupMembers in _editingGroups.values) {
+      groupMembers.removeWhere((m) => m.attendanceId == member.attendanceId);
+    }
+  }
+
+  /// 새 그룹 생성
+  void createNewGroup() {
+    if (!_isEditingDiscussionGroups) return;
+    
+    setState(() {
+      // 가장 큰 그룹 번호 + 1
+      final newGroupNumber = _editingGroups.isEmpty 
+          ? 1 
+          : _editingGroups.keys.reduce((a, b) => a > b ? a : b) + 1;
+      
+      _editingGroups[newGroupNumber] = [];
+      
+      if (AppConfig.debugMode) {
+        print('➕ [새 그룹 생성] ${newGroupNumber}조 생성');
+      }
+    });
+  }
+
+  /// 빈 그룹 제거
+  void removeEmptyGroups() {
+    if (!_isEditingDiscussionGroups) return;
+    
+    setState(() {
+      final groupsToRemove = <int>[];
+      
+      for (final entry in _editingGroups.entries) {
+        if (entry.value.isEmpty) {
+          groupsToRemove.add(entry.key);
+        }
+      }
+      
+      for (final groupNumber in groupsToRemove) {
+        _editingGroups.remove(groupNumber);
+      }
+      
+      if (AppConfig.debugMode && groupsToRemove.isNotEmpty) {
+        print('🗑️ [빈 그룹 제거] 제거된 그룹: ${groupsToRemove.join(', ')}조');
+      }
+    });
+  }
+
+  /// 모든 그룹 해제 (모든 멤버를 미할당으로 이동)
+  void clearAllGroups() {
+    if (!_isEditingDiscussionGroups) return;
+    
+    setState(() {
+      // 모든 그룹 멤버를 미할당으로 이동
+      for (final groupMembers in _editingGroups.values) {
+        for (final member in groupMembers) {
+          if (!_editingUnassignedMembers.any((m) => m.attendanceId == member.attendanceId)) {
+            _editingUnassignedMembers.add(member);
+          }
+        }
+      }
+      
+      _editingGroups.clear();
+      
+      if (AppConfig.debugMode) {
+        print('🗑️ [모든 그룹 해제] 모든 멤버를 미할당으로 이동');
+      }
+    });
+  }
+
+  /// 토론 그룹 수정 내용 저장
+  Future<void> saveDiscussionGroupChanges(int meetingId) async {
+    if (!_isEditingDiscussionGroups) return;
+    
+    // 빈 그룹 제거
+    removeEmptyGroups();
+    
+    setState(() => _isSaving = true);
+    
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+      if (accessToken == null) {
+        throw Exception('인증 토큰이 없습니다.');
+      }
+      
+      // API 요청 모델 생성
+      final request = _buildAssignDiscussionGroupsRequest();
+      
+      if (AppConfig.debugMode) {
+        print('💾 [토론 그룹 저장] API 요청 생성: $request');
+      }
+      
+      // API 호출
+      await _discussionService.manuallyAssignDiscussionGroups(
+        meetingId: meetingId,
+        request: request,
+        accessToken: accessToken,
+      );
+      
+      if (mounted) {
+        setState(() {
+          _isEditingDiscussionGroups = false;
+          _isSaving = false;
+        });
+        
+        // 성공 메시지
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('토론 그룹이 수정되었습니다. (총 ${request.groups.length}개 그룹)'),
+          ),
+        );
+        
+        // 짧은 지연 후 데이터 새로고침
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          if (AppConfig.debugMode) {
+            print('🔄 [토론 그룹 저장] 데이터 새로고침 시작...');
+          }
+          await loadDiscussionGroupData(meetingId);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSaving = false);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('토론 그룹 수정 실패: $e')),
+        );
+      }
+      
+      if (AppConfig.debugMode) {
+        print('❌ [토론 그룹 저장] 실패: $e');
+      }
+    }
+  }
+  
+  /// API 요청 모델 빌더
+  AssignDiscussionGroupsRequest _buildAssignDiscussionGroupsRequest() {
+    final groups = <DiscussionGroupRequest>[];
+    
+    // 그룹 번호 순으로 정렬
+    final sortedGroupNumbers = _editingGroups.keys.toList()..sort();
+    
+    for (final groupNumber in sortedGroupNumbers) {
+      final members = _editingGroups[groupNumber]!;
+      if (members.isNotEmpty) { // 빈 그룹은 제외
+        final attendanceIds = members.map((member) => member.attendanceId).toList();
+        groups.add(DiscussionGroupRequest(attendanceIdList: attendanceIds));
+      }
+    }
+    
+    return AssignDiscussionGroupsRequest(groups: groups);
   }
 }

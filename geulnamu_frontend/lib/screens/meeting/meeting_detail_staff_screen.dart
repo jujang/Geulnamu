@@ -166,6 +166,16 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       onGetDiscussionGroupList: () => discussionGroupList,
       onGetDiscussionGroupErrorMessage: () => discussionGroupErrorMessage,
       onRefreshDiscussionGroupData: () => refreshDiscussionGroupData(widget.meetingId),
+      // 🆕 토론 그룹 편집 콜백들
+      isEditingDiscussionGroups: isEditingDiscussionGroups,
+      editingGroups: editingGroups,
+      editingUnassignedMembers: editingUnassignedMembers,
+      onToggleDiscussionGroupEdit: toggleDiscussionGroupEdit,
+      onSaveDiscussionGroupChanges: () => saveDiscussionGroupChanges(widget.meetingId),
+      onMoveMemberToGroup: moveMemberToGroup,
+      onRemoveMemberFromGroup: removeMemberFromGroup,
+      onCreateNewGroup: createNewGroup,
+      onClearAllGroups: clearAllGroups,
     );
   }
 

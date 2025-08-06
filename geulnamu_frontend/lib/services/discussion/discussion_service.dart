@@ -3,6 +3,7 @@ import '../../core/config/app_config.dart';
 import '../../core/utils/api_utils.dart';
 import '../../models/discussion/attendance_id_and_name_model.dart';
 import '../../models/discussion/discussion_group_model.dart';
+import '../../models/discussion/assign_discussion_groups_request.dart';
 
 /// 토론 관리 서비스 (Singleton)
 ///
@@ -234,6 +235,113 @@ class DiscussionService {
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ [토론 데이터 새로고침] 오류: $e');
+      }
+      rethrow;
+    }
+  }
+
+  /// 토론 그룹 수동 구성
+  ///
+  /// API: PATCH /discussions/groups/assign?meetingId={meetingId}
+  /// 권한: STAFF 이상
+  Future<void> manuallyAssignDiscussionGroups({
+    required int meetingId,
+    required AssignDiscussionGroupsRequest request,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [토론 그룹 수동 구성] API 요청 시작... meetingId: $meetingId');
+        print('📝 [토론 그룹 구성] 요청 데이터: ${request.toString()}');
+      }
+
+      final response = await _dio.patch(
+        '/discussions/groups/assign',
+        queryParameters: {
+          'meetingId': meetingId.toString(),
+        },
+        data: request.toJson(),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '토론 그룹 수동 구성',
+        );
+
+        if (AppConfig.debugMode) {
+          print('✅ [토론 그룹 수동 구성] 성공 - 총 ${request.groups.length}개 그룹 구성 완료');
+        }
+      } else {
+        throw Exception('[토론 그룹 수동 구성] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [토론 그룹 수동 구성] 오류 발생: $e');
+      }
+
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '토론 그룹 수동 구성');
+      }
+      rethrow;
+    }
+  }
+
+  /// 개별 멤버 토론 그룹 할당
+  ///
+  /// API: PATCH /discussions/groups/assign-member?meetingId={meetingId}&attendanceId={attendanceId}&groupNumber={groupNumber}
+  /// 권한: ADMIN 이상 (현재는 미사용, 향후 개별 할당 기능용)
+  Future<void> manuallyAssignDiscussionGroup({
+    required int meetingId,
+    required int attendanceId,
+    required int groupNumber,
+    required String accessToken,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [개별 멤버 그룹 할당] API 요청 시작... meetingId: $meetingId, attendanceId: $attendanceId, groupNumber: $groupNumber');
+      }
+
+      final response = await _dio.patch(
+        '/discussions/groups/assign-member',
+        queryParameters: {
+          'meetingId': meetingId.toString(),
+          'attendanceId': attendanceId.toString(),
+          'groupNumber': groupNumber.toString(),
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '개별 멤버 그룹 할당',
+        );
+
+        if (AppConfig.debugMode) {
+          print('✅ [개별 멤버 그룹 할당] 성공 - attendanceId: $attendanceId를 ${groupNumber}조에 할당 완료');
+        }
+      } else {
+        throw Exception('[개별 멤버 그룹 할당] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [개별 멤버 그룹 할당] 오류 발생: $e');
+      }
+
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '개별 멤버 그룹 할당');
       }
       rethrow;
     }
