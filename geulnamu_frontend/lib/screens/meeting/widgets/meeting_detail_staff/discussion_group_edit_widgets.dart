@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme.dart';
 import '../../../../models/discussion/attendance_id_and_name_model.dart';
+import '../../../../models/attendance/attendance_status_model.dart';
 import '../../../../core/config/app_config.dart';
+import '../../../../widgets/dialogs/add_members_dialog.dart';
 
 /// 🎯 토론 그룹 편집 모드 전용 위젯들 (드래그&드롭 방식)
 class DiscussionGroupEditWidgets {
@@ -16,6 +18,10 @@ class DiscussionGroupEditWidgets {
     required void Function(AttendanceIdAndNameModel member) onRemoveMemberFromGroup,
     required VoidCallback onCreateNewGroup,
     required VoidCallback onClearAllGroups,
+    // 🆕 인원 추가 기능 관련 콜백 추가
+    required bool canAddMembers, // 권한 체크
+    required List<AttendanceStatus> availableMembersToAdd, // 추가 가능한 인원 목록
+    required void Function(AttendanceStatus) onAddMember, // 인원 추가 콜백
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,6 +31,10 @@ class DiscussionGroupEditWidgets {
           context,
           editingUnassignedMembers: editingUnassignedMembers,
           onRemoveMemberFromGroup: onRemoveMemberFromGroup,
+          // 🆕 인원 추가 기능 전달
+          canAddMembers: canAddMembers,
+          availableMembersToAdd: availableMembersToAdd,
+          onAddMember: onAddMember,
         ),
         const SizedBox(height: 24),
 
@@ -63,6 +73,10 @@ class DiscussionGroupEditWidgets {
     BuildContext context, {
     required List<AttendanceIdAndNameModel> editingUnassignedMembers,
     required void Function(AttendanceIdAndNameModel member) onRemoveMemberFromGroup,
+    // 🆕 인원 추가 기능 파라미터 추가
+    required bool canAddMembers,
+    required List<AttendanceStatus> availableMembersToAdd,
+    required void Function(AttendanceStatus) onAddMember,
   }) {
     return DragTarget<AttendanceIdAndNameModel>(
       onAcceptWithDetails: (details) {
@@ -105,6 +119,30 @@ class DiscussionGroupEditWidgets {
                     memberCount: editingUnassignedMembers.length,
                     isHighlighted: isHighlighted,
                   ),
+                  
+                  // 🆕 인원 추가 버튼 (ADMIN만 표시)
+                  if (canAddMembers) ...[
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => _showAddMembersDialog(
+                        context,
+                        availableMembersToAdd: availableMembersToAdd,
+                        onAddMember: onAddMember,
+                      ),
+                      icon: Icon(
+                        Icons.person_add,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      tooltip: '인원 추가',
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
+                      padding: const EdgeInsets.all(4),
+                    ),
+                  ],
+                  
                   if (isHighlighted) ...[
                     const SizedBox(width: 8),
                     Text(
@@ -580,6 +618,24 @@ class DiscussionGroupEditWidgets {
           ),
         ),
       ],
+    );
+  }
+
+  /// 🆕 인원 추가 다이얼로그 표시
+  static void _showAddMembersDialog(
+    BuildContext context, {
+    required List<AttendanceStatus> availableMembersToAdd,
+    required void Function(AttendanceStatus) onAddMember,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => AddMembersDialog(
+        availableMembers: availableMembersToAdd,
+        onAddMember: (member) {
+          onAddMember(member);
+          Navigator.of(context).pop(); // 다이얼로그 닫기
+        },
+      ),
     );
   }
 

@@ -3,11 +3,13 @@ import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/meeting/meeting_service.dart';
 import '../../../services/discussion/discussion_service.dart';
+import '../../../services/attendance/attendance_service.dart';
 import '../../../models/meeting/meeting_detail_staff_model.dart';
 import '../../../models/meeting/request/meeting_update_requests.dart';
 import '../../../models/discussion/attendance_id_and_name_model.dart';
 import '../../../models/discussion/discussion_group_model.dart';
 import '../../../models/discussion/assign_discussion_groups_request.dart';
+import '../../../models/attendance/attendance_status_model.dart';
 import '../../../core/config/app_config.dart';
 
 /// 운영진용 모임 상세 화면 로직 처리 Mixin
@@ -20,6 +22,7 @@ import '../../../core/config/app_config.dart';
 mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   final MeetingService _meetingService = MeetingService();
   final DiscussionService _discussionService = DiscussionService();
+  final AttendanceService _attendanceService = AttendanceService(); // 🆕 출석 서비스 추가
 
   // 🎯 로딩 상태
   bool _isLoading = false;
@@ -58,6 +61,10 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   // 🆕 토론 그룹 편집 데이터 (편집 중인 상태를 별도 관리)
   Map<int, List<AttendanceIdAndNameModel>> _editingGroups = {}; // 그룹 번호 -> 멤버 리스트
   List<AttendanceIdAndNameModel> _editingUnassignedMembers = []; // 미할당 멤버들
+  
+  // 🆕 인원 추가 기능 관련 상태
+  MeetingAttendanceDetails? _allAttendanceDetails; // 전체 출석자 목록
+  List<AttendanceIdAndNameModel> _temporaryAddedMembers = []; // 임시 추가된 인원들
 
   // 🎯 Getter들
   bool get isLoading => _isLoading;
@@ -77,6 +84,10 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   // 🆕 토론 그룹 편집 데이터 Getter들
   Map<int, List<AttendanceIdAndNameModel>> get editingGroups => Map.from(_editingGroups);
   List<AttendanceIdAndNameModel> get editingUnassignedMembers => List.from(_editingUnassignedMembers);
+  
+  // 🆕 인원 추가 기능 관련 Getter들
+  MeetingAttendanceDetails? get allAttendanceDetails => _allAttendanceDetails;
+  List<AttendanceIdAndNameModel> get temporaryAddedMembers => List.from(_temporaryAddedMembers);
 
   // 🎯 컨트롤러 Getter들
   TextEditingController get meetingNameController => _meetingNameController;
@@ -127,6 +138,12 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   bool get canManagePrivacy {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     return authProvider.isAdminLevel; // 관리자만 비공개/공개 처리 가능
+  }
+  
+  // 🆕 인원 추가 기능 권한 체크
+  bool get canAddMembers {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    return authProvider.isAdminLevel; // ADMIN 레벨만 가능 (관리자, 모임장, 부모임장)
   }
 
   @override
@@ -936,6 +953,11 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
         // 편집 모드 시작: 현재 데이터를 편집용으로 복사
         _initializeEditingData();
         
+        // 🆕 ADMIN 급인 경우 출석자 목록도 로드
+        if (canAddMembers && _meetingDetail != null) {
+          _loadAllAttendanceList(_meetingDetail!.meetingId);
+        }
+        
         if (AppConfig.debugMode) {
           print('🎨 [토론 그룹 편집] 편집 모드 시작');
         }
@@ -969,26 +991,35 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       _editingGroups[groupNumber] = List.from(group.members);
     }
     
-    // 미할당 멤버 계산 (토론 희망자 중 그룹에 속하지 않은 멤버들)
+    // 미할당 멤버 계산 (토론 희망자 중 그룹에 속하지 않은 멤버들 + 임시 추가된 남은 인원들)
     _calculateUnassignedMembers();
     
     if (AppConfig.debugMode) {
       print('📋 [토론 그룹 편집] 편집 데이터 초기화 완료');
       print('   - 그룹 수: ${_editingGroups.length}개');
       print('   - 미할당 맴버: ${_editingUnassignedMembers.length}명');
+      print('   - 임시 추가된 인원: ${_temporaryAddedMembers.length}명');
     }
   }
 
-  /// 미할당 멤버 계산
+  /// 미할당 멤버 계산 (임시 추가된 인원들도 포함)
   void _calculateUnassignedMembers() {
     if (_wantDiscussionList == null) return;
     
-    // 토론 희망자 전체 리스트
+    // 1. 토론 희망자 전체 리스트
     final allWantMembers = Set<int>.from(
       _wantDiscussionList!.map((member) => member.attendanceId)
     );
     
-    // 현재 그룹에 할당된 멤버들
+    // 2. 임시 추가된 인원들 추가
+    final temporaryMemberIds = Set<int>.from(
+      _temporaryAddedMembers.map((member) => member.attendanceId)
+    );
+    
+    // 3. 전체 대상자 = 기존 토론 희망자 + 임시 추가된 인원
+    final allTargetMembers = {...allWantMembers, ...temporaryMemberIds};
+    
+    // 4. 현재 그룹에 할당된 멤버들
     final assignedMembers = Set<int>();
     for (final group in _editingGroups.values) {
       for (final member in group) {
@@ -996,18 +1027,32 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       }
     }
     
-    // 미할당 멤버 = 토론 희망자 - 할당된 멤버
-    final unassignedIds = allWantMembers.difference(assignedMembers);
+    // 5. 미할당 멤버 = 전체 대상자 - 할당된 멤버
+    final unassignedIds = allTargetMembers.difference(assignedMembers);
     
-    _editingUnassignedMembers = _wantDiscussionList!
-        .where((member) => unassignedIds.contains(member.attendanceId))
-        .toList();
+    // 6. 미할당 멤버 리스트 생성 (기존 + 임시 추가)
+    _editingUnassignedMembers.clear();
+    
+    // 6-1. 기존 토론 희망자 중 미할당
+    _editingUnassignedMembers.addAll(
+      _wantDiscussionList!
+          .where((member) => unassignedIds.contains(member.attendanceId))
+    );
+    
+    // 6-2. 임시 추가된 인원 중 미할당
+    _editingUnassignedMembers.addAll(
+      _temporaryAddedMembers
+          .where((member) => unassignedIds.contains(member.attendanceId))
+    );
   }
   
   /// 편집 데이터 초기화 (취소 시 사용)
   void _clearEditingData() {
     _editingGroups.clear();
     _editingUnassignedMembers.clear();
+    
+    // 🆕 임시 추가된 인원들도 제거
+    _temporaryAddedMembers.clear();
   }
 
   /// 멤버를 다른 그룹으로 이동
@@ -1203,5 +1248,104 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
     }
     
     return AssignDiscussionGroupsRequest(groups: groups);
+  }
+  
+  // ====================
+  // 🆕 인원 추가 기능 관련 메서드들
+  // ====================
+  
+  /// 전체 출석자 목록 로드 (ADMIN 급만 호출)
+  Future<void> _loadAllAttendanceList(int meetingId) async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+      
+      if (accessToken == null) {
+        if (AppConfig.debugMode) {
+          print('❌ [출석자 목록 로드] 액세스 토큰이 없습니다.');
+        }
+        return;
+      }
+      
+      if (AppConfig.debugMode) {
+        print('🚀 [출석자 목록 로드] 시작... meetingId: $meetingId');
+      }
+      
+      final attendanceDetails = await _attendanceService.getMeetingAttendanceStatus(
+        meetingId: meetingId,
+        accessToken: accessToken,
+      );
+      
+      if (mounted) {
+        setState(() {
+          _allAttendanceDetails = attendanceDetails;
+        });
+        
+        if (AppConfig.debugMode) {
+          print('✅ [출석자 목록 로드] 성공 - 총 출석자: ${attendanceDetails.attendanceList.length}명');
+        }
+      }
+      
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [출석자 목록 로드] 오류: $e');
+      }
+    }
+  }
+  
+  /// 추가 가능한 인원 목록 반환 (토론 미참여자 중 아직 추가안된 인원)
+  List<AttendanceStatus> getAvailableMembersToAdd() {
+    if (_allAttendanceDetails == null || _wantDiscussionList == null) {
+      return [];
+    }
+    
+    // 1. 현재 토론 참여 희망자 ID 집합
+    final wantDiscussionIds = Set<int>.from(
+      _wantDiscussionList!.map((member) => member.attendanceId)
+    );
+    
+    // 2. 이미 임시 추가된 인원 ID 집합
+    final temporaryAddedIds = Set<int>.from(
+      _temporaryAddedMembers.map((member) => member.attendanceId)
+    );
+    
+    // 3. 출석자 중 토론 미참여자이며 아직 임시 추가안된 인원
+    return _allAttendanceDetails!.attendanceList
+        .where((attendee) => 
+            !wantDiscussionIds.contains(attendee.attendanceId) && // 토론 미참여자
+            !temporaryAddedIds.contains(attendee.attendanceId)     // 아직 추가안된 인원
+        )
+        .toList();
+  }
+  
+  /// 인원을 토론에 추가 (미할당 인원으로)
+  void addMemberToDiscussion(AttendanceStatus attendee) {
+    if (!_isEditingDiscussionGroups) return;
+    
+    // 1. AttendanceStatus를 AttendanceIdAndNameModel로 변환
+    final newMember = AttendanceIdAndNameModel(
+      attendanceId: attendee.attendanceId,
+      memberName: attendee.name,
+    );
+    
+    // 2. 중복 체크
+    if (_temporaryAddedMembers.any((member) => member.attendanceId == attendee.attendanceId)) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [인원 추가] ${attendee.name}님은 이미 추가된 인원입니다.');
+      }
+      return;
+    }
+    
+    setState(() {
+      // 3. 임시 추가된 인원 목록에 추가
+      _temporaryAddedMembers.add(newMember);
+      
+      // 4. 미할당 인원에 직접 추가
+      _editingUnassignedMembers.add(newMember);
+      
+      if (AppConfig.debugMode) {
+        print('✅ [인원 추가] ${attendee.name}님을 미할당 인원에 추가했습니다.');
+      }
+    });
   }
 }
