@@ -6,6 +6,7 @@ import 'meeting_detail_staff/discussion_widgets.dart';
 import 'meeting_detail_staff/management_widgets.dart';
 import '../../../models/discussion/attendance_id_and_name_model.dart';
 import '../../../models/discussion/discussion_group_model.dart';
+import '../../../models/attendance/attendance_status_model.dart';
 
 /// 운영진용 모임 상세 화면 메인 위젯들
 ///
@@ -83,6 +84,10 @@ class MeetingDetailStaffWidgets {
     required void Function(AttendanceIdAndNameModel member) onRemoveMemberFromGroup,
     required VoidCallback onCreateNewGroup,
     required VoidCallback onClearAllGroups,
+    // 🆕 인원 추가 기능 관련 콜백들
+    required bool canAddMembers,
+    required List<AttendanceStatus> availableMembersToAdd,
+    required void Function(AttendanceStatus) onAddMember,
   }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -152,6 +157,10 @@ class MeetingDetailStaffWidgets {
               onRemoveMemberFromGroup: onRemoveMemberFromGroup,
               onCreateNewGroup: onCreateNewGroup,
               onClearAllGroups: onClearAllGroups,
+              // 🆕 인원 추가 기능 매개변수 전달
+              canAddMembers: canAddMembers,
+              availableMembersToAdd: availableMembersToAdd,
+              onAddMember: onAddMember,
             ),
           ],
 

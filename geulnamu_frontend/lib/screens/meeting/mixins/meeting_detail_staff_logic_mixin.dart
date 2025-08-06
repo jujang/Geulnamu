@@ -1296,10 +1296,13 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   /// 추가 가능한 인원 목록 반환 (토론 미참여자 중 아직 추가안된 인원)
   List<AttendanceStatus> getAvailableMembersToAdd() {
     if (_allAttendanceDetails == null || _wantDiscussionList == null) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [추가 가능한 인원] 데이터가 없습니다. allAttendanceDetails=${_allAttendanceDetails != null}, wantDiscussionList=${_wantDiscussionList != null}');
+      }
       return [];
     }
     
-    // 1. 현재 토론 참여 희망자 ID 집합
+    // 1. 현재 토론 참여 희망자 ID 집합 (이미 토론에 참여 중인 인원들)
     final wantDiscussionIds = Set<int>.from(
       _wantDiscussionList!.map((member) => member.attendanceId)
     );
@@ -1309,13 +1312,33 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       _temporaryAddedMembers.map((member) => member.attendanceId)
     );
     
-    // 3. 출석자 중 토론 미참여자이며 아직 임시 추가안된 인원
-    return _allAttendanceDetails!.attendanceList
-        .where((attendee) => 
-            !wantDiscussionIds.contains(attendee.attendanceId) && // 토론 미참여자
-            !temporaryAddedIds.contains(attendee.attendanceId)     // 아직 추가안된 인원
-        )
+    if (AppConfig.debugMode) {
+      print('🔍 [추가 가능한 인원 필터링]');
+      print('   - 전체 출석자: ${_allAttendanceDetails!.attendanceList.length}명');
+      print('   - 토론 참여 희망자 ID: $wantDiscussionIds');
+      print('   - 임시 추가된 인원 ID: $temporaryAddedIds');
+    }
+    
+    // 3. 출석자 중 토론 미참여자이며 아직 임시 추가안된 인원만 필터링
+    final availableMembers = _allAttendanceDetails!.attendanceList
+        .where((attendee) {
+          // 토론 참여 희망자가 아니고 && 아직 임시 추가안된 인원만
+          final isNotInDiscussion = !wantDiscussionIds.contains(attendee.attendanceId);
+          final isNotTemporaryAdded = !temporaryAddedIds.contains(attendee.attendanceId);
+          
+          if (AppConfig.debugMode) {
+            print('   🔍 ${attendee.name}(ID:${attendee.attendanceId}): 토론미참여=$isNotInDiscussion, 임시추가안됨=$isNotTemporaryAdded');
+          }
+          
+          return isNotInDiscussion && isNotTemporaryAdded;
+        })
         .toList();
+    
+    if (AppConfig.debugMode) {
+      print('✅ [추가 가능한 인원] 총 ${availableMembers.length}명: ${availableMembers.map((m) => m.name).join(", ")}');
+    }
+    
+    return availableMembers;
   }
   
   /// 인원을 토론에 추가 (미할당 인원으로)

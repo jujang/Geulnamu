@@ -3,6 +3,7 @@ import '../../../../core/theme.dart';
 import '../../../../models/meeting/meeting_detail_staff_model.dart';
 import '../../../../models/discussion/attendance_id_and_name_model.dart';
 import '../../../../models/discussion/discussion_group_model.dart';
+import '../../../../models/attendance/attendance_status_model.dart';
 import 'discussion_group_edit_widgets.dart';
 
 /// 운영진용 모임 상세 - 토론 정보 섹션 위젯들
@@ -82,6 +83,10 @@ class DiscussionWidgets {
     onRemoveMemberFromGroup,
     required VoidCallback onCreateNewGroup,
     required VoidCallback onClearAllGroups,
+    // 🆕 인원 추가 기능 관련 매개변수들
+    required bool canAddMembers,
+    required List<AttendanceStatus> availableMembersToAdd,
+    required void Function(AttendanceStatus) onAddMember,
   }) {
     return Card(
       child: Padding(
@@ -116,6 +121,10 @@ class DiscussionWidgets {
                 onRemoveMemberFromGroup: onRemoveMemberFromGroup,
                 onCreateNewGroup: onCreateNewGroup,
                 onClearAllGroups: onClearAllGroups,
+                // 🆕 인원 추가 기능 매개변수 전달
+                canAddMembers: canAddMembers,
+                availableMembersToAdd: availableMembersToAdd,
+                onAddMember: onAddMember,
               )
             else
               // 일반 조회 모드 UI

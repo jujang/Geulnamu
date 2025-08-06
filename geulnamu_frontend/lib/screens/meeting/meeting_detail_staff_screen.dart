@@ -176,6 +176,10 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       onRemoveMemberFromGroup: removeMemberFromGroup,
       onCreateNewGroup: createNewGroup,
       onClearAllGroups: clearAllGroups,
+      // 🆕 인원 추가 기능 콜백들 전달
+      canAddMembers: canAddMembers,
+      availableMembersToAdd: getAvailableMembersToAdd(),
+      onAddMember: addMemberToDiscussion,
     );
   }
 

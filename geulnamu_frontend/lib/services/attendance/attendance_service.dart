@@ -285,60 +285,7 @@ class AttendanceService {
     }
   }
 
-  /// 모임별 출석 현황 조회 (전체 출석자 목록)
-  /// 
-  /// API: GET /attendances/list?meetingId={meetingId}
-  /// 권한: MEMBER 이상
-  Future<MeetingAttendanceDetails> getMeetingAttendanceStatus({
-    required int meetingId,
-    required String accessToken,
-  }) async {
-    try {
-      if (AppConfig.debugMode) {
-        print('🚀 [모임 출석 현황 조회] API 요청 시작...');
-        print('🔗 [모임 출석 현황 조회] 요청 URL: ${_dio.options.baseUrl}/attendances/list?meetingId=$meetingId');
-      }
 
-      final response = await _dio.get(
-        '/attendances/list',
-        queryParameters: {'meetingId': meetingId},
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $accessToken',
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        final processedResponse = ApiUtils.processBackendResponse(
-          response,
-          '모임 출석 현황 조회',
-        );
-        
-        final attendanceDetails = MeetingAttendanceDetails.fromJson(
-          processedResponse['data'] as Map<String, dynamic>,
-        );
-        
-        if (AppConfig.debugMode) {
-          print('✅ [모임 출석 현황 조회] 성공 - 총 출석자: ${attendanceDetails.attendanceList.length}명');
-        }
-        
-        return attendanceDetails;
-      } else {
-        throw Exception('[모임 출석 현황 조회] HTTP 오류: ${response.statusCode}');
-      }
-    } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [모임 출석 현황 조회] 오류 발생: $e');
-      }
-      
-      if (e is DioException) {
-        throw ApiUtils.processDioException(e, '모임 출석 현황 조회');
-      }
-      rethrow;
-    }
-  }
 
   /// 출석 삭제
   /// 
