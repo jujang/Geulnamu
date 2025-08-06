@@ -329,6 +329,7 @@ class MeetingDetailInfo {
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ [MeetingDetailInfo] groupMemberList 파싱 오류: $e');
+        print('❌ [MeetingDetailInfo] 오류 발생한 value: $value');
       }
       return null;
     }

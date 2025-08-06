@@ -329,13 +329,6 @@ class MeetingDetailWidgets {
               timeRemaining: timeRemaining, // 🆕 남은 시간 정보 전달
             ),
 
-            // 토론 조 구성원
-            if (meeting.groupMemberList != null &&
-                meeting.groupMemberList!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _buildGroupMembersSection(context, meeting.groupMemberList!),
-            ],
-
             // 알림 메시지
             if (meeting.alarmMessage != null &&
                 meeting.alarmMessage!.isNotEmpty) ...[
@@ -363,6 +356,13 @@ class MeetingDetailWidgets {
                   style: context.textStyles.bodyLarge?.copyWith(fontSize: 16),
                 ),
               ),
+            ],
+
+            // 토론 조 구성원 (🆕 알림 메시지 다음으로 이동)
+            if (meeting.groupMemberList != null &&
+                meeting.groupMemberList!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _buildGroupMembersSection(context, meeting.groupMemberList!),
             ],
           ],
         ),
@@ -551,7 +551,7 @@ class MeetingDetailWidgets {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '토론 조 구성원',
+          '나의 토론 조 구성원', // 🆕 제목 변경
           style: context.textStyles.labelLarge?.copyWith(
             color: context.colors.onSurfaceVariant,
             fontWeight: FontWeight.w500,
