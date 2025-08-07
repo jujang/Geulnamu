@@ -79,18 +79,22 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
           scale: _scaleAnimation.value,
           child: Draggable<BookQuestionModel>(
             data: widget.bookQuestion,
+            // 드래그 중일 때의 피드백 (회전 제거)
             feedback: _buildPostItCard(
               context,
               isDragging: true,
-              elevation: 12.0,
-              opacity: 0.8,
+              elevation: 16.0, // 더 높은 그림자
+              opacity: 0.95, // 더 선명하게
+              isFloating: true, // 플로팅 상태 표시
             ),
+            // 드래그 중인 원본은 더 투명하게
             childWhenDragging: _buildPostItCard(
               context,
               isDragging: true,
-              elevation: 2.0,
-              opacity: 0.3,
+              elevation: 1.0,
+              opacity: 0.2, // 더 투명하게
             ),
+            // 드래그 시작/종료 애니메이션
             onDragStarted: () {
               setState(() => _isDragging = true);
               widget.onDragStarted?.call(widget.bookQuestion);
@@ -135,6 +139,7 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
     bool isDragging = false,
     double? elevation,
     double opacity = 1.0,
+    bool isFloating = false, // 🆕 플로팅 상태 (드래그 중 피드백용)
   }) {
     final theme = Theme.of(context);
     final postItColor = _getPostItColor(context);
@@ -159,17 +164,28 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
             padding: const EdgeInsets.all(12.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.0),
-              // 포스트잇 특유의 미묘한 그라디언트
+              // 🆕 플로팅 상태에서는 더 강한 그라디언트
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
                   postItColor,
-                  postItColor.withOpacity(0.9),
+                  postItColor.withOpacity(isFloating ? 0.95 : 0.9),
                 ],
               ),
-              // 포스트잇 상단의 약간 어두운 테이프 효과
-              boxShadow: [
+              // 🆕 플로팅 상태에서는 더 화려한 그림자
+              boxShadow: isFloating ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 15.0,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: theme.colorScheme.primary.withOpacity(0.2),
+                  blurRadius: 25.0,
+                  offset: const Offset(0, 5),
+                ),
+              ] : [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
                   blurRadius: 6.0,
@@ -198,9 +214,9 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
                     widget.bookQuestion.content,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: textColor,
-                      fontSize: 13, // 🔥 11 → 13으로 텍스트 크기 증가!
+                      fontSize: isFloating ? 14 : 13, // 🆕 플로팅 시 더 크게!
                       height: 1.4,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: isFloating ? FontWeight.w500 : FontWeight.w400, // 🆕 플로팅 시 더 굵게!
                     ),
                     maxLines: null,
                   ),
@@ -232,7 +248,7 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
 }
 
 /// 포스트잇들을 배치하는 컨테이너 위젯
-/// 🔥 실제 순서 변경 기능 추가!
+/// 🔥 정확한 인덱스 기반 드롭과 부드러운 애니메이션 구현!
 class PostItCollectionWidget extends StatefulWidget {
   final List<BookQuestionModel> bookQuestions;
   final int currentUserId;
@@ -249,15 +265,37 @@ class PostItCollectionWidget extends StatefulWidget {
   State<PostItCollectionWidget> createState() => _PostItCollectionWidgetState();
 }
 
-class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
+class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
+    with TickerProviderStateMixin {
   BookQuestionModel? _draggingQuestion;
-  List<BookQuestionModel> _orderedQuestions = []; // 🔥 순서가 변경된 발제문 리스트
-
+  List<BookQuestionModel> _orderedQuestions = []; // 순서가 변경된 발제문 리스트
+  
+  // 🆕 애니메이션 관련
+  late AnimationController _reorderController;
+  late Animation<double> _reorderAnimation;
+  int? _targetDropIndex; // 드롭 대상 인덱스
+  
   @override
   void initState() {
     super.initState();
     // 초기 순서 설정
     _orderedQuestions = List.from(widget.bookQuestions);
+    
+    // 🆕 애니메이션 컨트롤러 초기화
+    _reorderController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _reorderAnimation = CurvedAnimation(
+      parent: _reorderController,
+      curve: Curves.easeInOut,
+    );
+  }
+  
+  @override
+  void dispose() {
+    _reorderController.dispose();
+    super.dispose();
   }
 
   @override
@@ -265,7 +303,9 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
     super.didUpdateWidget(oldWidget);
     // widget.bookQuestions가 변경되면 _orderedQuestions도 업데이트
     if (oldWidget.bookQuestions != widget.bookQuestions) {
-      _orderedQuestions = List.from(widget.bookQuestions);
+      setState(() {
+        _orderedQuestions = List.from(widget.bookQuestions);
+      });
     }
   }
 
@@ -275,71 +315,203 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
       return _buildEmptyState(context);
     }
 
-    // 🔥 maxHeight 제한 완전 제거 - 전체 포스트잏 표시!
-    return DragTarget<BookQuestionModel>(
-      onWillAccept: (data) => true,
-      onAccept: (BookQuestionModel data) {
-        // 🔥 실제 순서 변경 로직 추가!
-        _reorderQuestions(data);
-      },
-        builder: (context, candidateData, rejectedData) {
-          return Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: candidateData.isNotEmpty
-                    ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
-                    : Colors.transparent,
-                width: 2,
-              ),
-              color: candidateData.isNotEmpty
-                  ? Theme.of(context).colorScheme.primary.withOpacity(0.05)
-                  : null,
-            ),
-            padding: const EdgeInsets.all(16),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: _orderedQuestions // 🔥 순서가 변경된 리스트 사용!
-                  // 🔥 드래그 시 사라짐 문제 해결: 비교 로직 수정
-                  .where((question) => _draggingQuestion?.bookQuestionId != question.bookQuestionId)
-                  .map((question) => PostItBookQuestionWidget(
-                        bookQuestion: question,
-                        isMyQuestion: question.writerMemberId == widget.currentUserId,
-                        onTap: () => widget.onQuestionTap?.call(question),
-                        onDragStarted: (draggingQuestion) {
-                          setState(() => _draggingQuestion = draggingQuestion);
-                        },
-                        onDragEnd: (draggingQuestion) {
-                          setState(() => _draggingQuestion = null);
-                        },
-                      ))
-                  .toList(),
-            ),
-          );
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _draggingQuestion != null
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+              : Colors.transparent,
+          width: 1,
+        ),
+        color: _draggingQuestion != null
+            ? Theme.of(context).colorScheme.primary.withOpacity(0.02)
+            : null,
+      ),
+      padding: const EdgeInsets.all(16),
+      child: AnimatedBuilder(
+        animation: _reorderAnimation,
+        builder: (context, child) {
+          return _buildDragTargetGrid(context);
         },
-      );
+      ),
+    );
+  }
+  
+  /// 🆕 드래그 타겟이 포함된 그리드 빌드
+  Widget _buildDragTargetGrid(BuildContext context) {
+    final children = <Widget>[];
+    
+    for (int i = 0; i <= _orderedQuestions.length; i++) {
+      // 각 포스트잇 앞에 드롭존 추가
+      children.add(_buildDropZone(context, i));
+      
+      // 마지막이 아니라면 포스트잇 추가
+      if (i < _orderedQuestions.length) {
+        final question = _orderedQuestions[i];
+        
+        // 드래그 중인 아이템은 반투명하게 표시
+        final isDragging = _draggingQuestion?.bookQuestionId == question.bookQuestionId;
+        
+        children.add(
+          AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: isDragging ? 0.3 : 1.0,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: PostItBookQuestionWidget(
+                bookQuestion: question,
+                isMyQuestion: question.writerMemberId == widget.currentUserId,
+                onTap: () => widget.onQuestionTap?.call(question),
+                onDragStarted: (draggingQuestion) {
+                  setState(() {
+                    _draggingQuestion = draggingQuestion;
+                    _targetDropIndex = null;
+                  });
+                },
+                onDragEnd: (draggingQuestion) {
+                  setState(() {
+                    _draggingQuestion = null;
+                    _targetDropIndex = null;
+                  });
+                },
+              ),
+            ),
+          ),
+        );
+      }
+    }
+    
+    return Wrap(
+      spacing: 8, // 드롭존을 위해 간격 줄임
+      runSpacing: 12,
+      children: children,
+    );
+  }
+  
+  /// 🆕 드롭존 위젯 생성
+  Widget _buildDropZone(BuildContext context, int index) {
+    final theme = Theme.of(context);
+    
+    return DragTarget<BookQuestionModel>(
+      onWillAccept: (data) {
+        if (data == null || _draggingQuestion == null) return false;
+        
+        // 현재 위치와 같으면 드롭 불허
+        final currentIndex = _orderedQuestions.indexWhere(
+            (q) => q.bookQuestionId == data.bookQuestionId);
+        
+        return currentIndex != index && currentIndex != index - 1;
+      },
+      onAccept: (data) {
+        _reorderQuestions(data, index);
+      },
+      onMove: (details) {
+        // 호버 시 대상 인덱스 업데이트
+        if (_targetDropIndex != index) {
+          setState(() => _targetDropIndex = index);
+        }
+      },
+      onLeave: (data) {
+        // 떠날 때 대상 인덱스 클리어
+        if (_targetDropIndex == index) {
+          setState(() => _targetDropIndex = null);
+        }
+      },
+      builder: (context, candidateData, rejectedData) {
+        final isActive = candidateData.isNotEmpty;
+        final isTarget = _targetDropIndex == index;
+        
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: isActive || isTarget ? 40 : 8,
+          height: isActive || isTarget ? 120 : 8,
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: isActive
+                ? theme.colorScheme.primary.withOpacity(0.3)
+                : isTarget
+                    ? theme.colorScheme.primary.withOpacity(0.1)
+                    : Colors.transparent,
+            border: isActive
+                ? Border.all(
+                    color: theme.colorScheme.primary.withOpacity(0.6),
+                    width: 2,
+                  )
+                : isTarget
+                    ? Border.all(
+                        color: theme.colorScheme.primary.withOpacity(0.3),
+                        width: 1,
+                      )
+                    : null,
+          ),
+          child: isActive
+              ? Icon(
+                  Icons.add_circle_outline,
+                  color: theme.colorScheme.primary,
+                  size: 24,
+                )
+              : null,
+        );
+      },
+    );
   }
 
-  /// 🔥 포스트잏 순서 변경 메서드
-  void _reorderQuestions(BookQuestionModel draggedQuestion) {
+  /// 🆕 정확한 인덱스 기반 포스트잇 순서 변경 메서드 (adjustedIndex → finalIndex 변경)
+  void _reorderQuestions(BookQuestionModel draggedQuestion, int targetIndex) {
     if (!mounted) return;
 
-    // 드래그된 포스트잏을 마지막으로 이동 (가장 간단한 로직)
+    final currentIndex = _orderedQuestions.indexWhere(
+        (q) => q.bookQuestionId == draggedQuestion.bookQuestionId);
+    
+    if (currentIndex == -1) return; // 찾을 수 없으면 리턴
+    
+    // 애니메이션 시작
+    _reorderController.forward().then((_) {
+      _reorderController.reset();
+    });
+
+    // 🔧 finalIndex를 setState 밖에서 계산
+    int finalIndex = targetIndex;
+    if (currentIndex < targetIndex) {
+      finalIndex = targetIndex - 1;
+    }
+    
+    // 경계 검사
+    finalIndex = finalIndex.clamp(0, _orderedQuestions.length);
+
     setState(() {
-      // 기존 위치에서 제거
-      _orderedQuestions.removeWhere((q) => q.bookQuestionId == draggedQuestion.bookQuestionId);
-      // 마지막에 추가
-      _orderedQuestions.add(draggedQuestion);
+      // 1. 기존 위치에서 제거
+      _orderedQuestions.removeAt(currentIndex);
+      
+      // 2. 새 위치에 삽입
+      _orderedQuestions.insert(finalIndex, draggedQuestion);
+      
+      // 3. 타겟 인덱스 클리어
+      _targetDropIndex = null;
     });
 
     // 사용자에게 피드백 제공
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('🔄 포스트잏 순서가 변경되었습니다'),
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text('포스트잇이 ${finalIndex + 1}번째 위치로 이동했습니다'),
+            ],
+          ),
           duration: const Duration(seconds: 2),
           backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
