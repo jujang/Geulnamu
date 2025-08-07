@@ -7,6 +7,7 @@ import '../../services/home/home_route_service.dart';
 import '../../core/config/app_config.dart'; // AppConfig import 추가
 import 'mixins/meeting_detail_staff_logic_mixin.dart';
 import 'widgets/meeting_detail_staff_widgets.dart';
+import '../../models/book_question/book_question_model.dart';
 import 'meeting_qr_display_screen.dart'; // 🆕 QR 표시 화면
 import 'meeting_detail_screen.dart'; // 🆕 일반 사용자 화면
 
@@ -183,6 +184,13 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       canAddMembers: canAddMembers,
       availableMembersToAdd: getAvailableMembersToAdd(),
       onAddMember: addMemberToDiscussion,
+      // 🆕 발제문 관련 콜백들
+      isBookQuestionLoading: isBookQuestionLoading,
+      bookQuestionErrorMessage: bookQuestionErrorMessage,
+      bookQuestionList: bookQuestionList,
+      currentUserId: Provider.of<AuthProvider>(context, listen: false).userId ?? 0,
+      onRefreshBookQuestionData: () => refreshBookQuestionData(widget.meetingId),
+      onBookQuestionTap: _handleBookQuestionTap,
     );
   }
 
@@ -223,5 +231,67 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
   Future<void> _handleLogout() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     await _homeService.handleLogout(context, authProvider);
+  }
+  
+  /// 발제문 탭 처리
+  void _handleBookQuestionTap(BookQuestionModel bookQuestion) {
+    if (AppConfig.debugMode) {
+      print('📝 [발제문 탭] ID: ${bookQuestion.bookQuestionId}');
+      print('   - 내용: ${bookQuestion.content.length > 50 ? bookQuestion.content.substring(0, 50) + "..." : bookQuestion.content}');
+    }
+    
+    // 현재는 발제문 내용을 다이얼로그로 표시
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.sticky_note_2,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                '발제문',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            // 내 발제문인지 표시
+            if (bookQuestion.writerMemberId == (Provider.of<AuthProvider>(context, listen: false).userId ?? 0))
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '내 발제문',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: SelectableText(
+            bookQuestion.content,
+            style: const TextStyle(
+              fontSize: 14,
+              height: 1.5,
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('닫기'),
+          ),
+        ],
+      ),
+    );
   }
 }

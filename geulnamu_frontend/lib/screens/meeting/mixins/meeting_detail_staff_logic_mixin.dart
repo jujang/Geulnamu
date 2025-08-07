@@ -4,12 +4,14 @@ import '../../../providers/auth_provider.dart';
 import '../../../services/meeting/meeting_service.dart';
 import '../../../services/discussion/discussion_service.dart';
 import '../../../services/attendance/attendance_service.dart';
+import '../../../services/book_question/book_question_service.dart';
 import '../../../models/meeting/meeting_detail_staff_model.dart';
 import '../../../models/meeting/request/meeting_update_requests.dart';
 import '../../../models/discussion/attendance_id_and_name_model.dart';
 import '../../../models/discussion/discussion_group_model.dart';
 import '../../../models/discussion/assign_discussion_groups_request.dart';
 import '../../../models/attendance/attendance_status_model.dart';
+import '../../../models/book_question/book_question_model.dart';
 import '../../../core/config/app_config.dart';
 
 /// 운영진용 모임 상세 화면 로직 처리 Mixin
@@ -23,6 +25,7 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   final MeetingService _meetingService = MeetingService();
   final DiscussionService _discussionService = DiscussionService();
   final AttendanceService _attendanceService = AttendanceService(); // 🆕 출석 서비스 추가
+  final BookQuestionService _bookQuestionService = BookQuestionService(); // 🆕 발제문 서비스 추가
 
   // 🎯 로딩 상태
   bool _isLoading = false;
@@ -65,6 +68,11 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   // 🆕 인원 추가 기능 관련 상태
   MeetingAttendanceDetails? _allAttendanceDetails; // 전체 출석자 목록
   List<AttendanceIdAndNameModel> _temporaryAddedMembers = []; // 임시 추가된 인원들
+  
+  // 🆕 발제문 관련 상태
+  bool _isBookQuestionLoading = false;
+  String? _bookQuestionErrorMessage;
+  List<BookQuestionModel>? _bookQuestionList;
 
   // 🎯 Getter들
   bool get isLoading => _isLoading;
@@ -88,6 +96,11 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   // 🆕 인원 추가 기능 관련 Getter들
   MeetingAttendanceDetails? get allAttendanceDetails => _allAttendanceDetails;
   List<AttendanceIdAndNameModel> get temporaryAddedMembers => List.from(_temporaryAddedMembers);
+  
+  // 🆕 발제문 관련 Getter들
+  bool get isBookQuestionLoading => _isBookQuestionLoading;
+  String? get bookQuestionErrorMessage => _bookQuestionErrorMessage;
+  List<BookQuestionModel>? get bookQuestionList => _bookQuestionList;
 
   // 🎯 컨트롤러 Getter들
   TextEditingController get meetingNameController => _meetingNameController;
@@ -194,6 +207,97 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       _isLoading = true;
       _errorMessage = null;
     });
+  }
+  
+  // ====================
+  // 🆕 발제문 관련 메서드들
+  // ====================
+  
+  /// 발제문 데이터 로드
+  /// 조건: discussionTime != null인 경우에만 호출
+  Future<void> loadBookQuestionData(int meetingId) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final accessToken = await authProvider.accessToken;
+    
+    if (accessToken == null) {
+      if (AppConfig.debugMode) {
+        print('❌ [발제문 데이터 로드] 액세스 토큰이 없습니다.');
+      }
+      return;
+    }
+
+    setState(() {
+      _isBookQuestionLoading = true;
+      _bookQuestionErrorMessage = null;
+    });
+
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [발제문 데이터 로드] 시작... meetingId: $meetingId');
+      }
+
+      // API 호출: 본인 토론 그룹 발제문 조회
+      final bookQuestions = await _bookQuestionService.getMyGroupBookQuestions(
+        meetingId: meetingId,
+        accessToken: accessToken,
+      );
+
+      setState(() {
+        _bookQuestionList = bookQuestions;
+        _isBookQuestionLoading = false;
+        _bookQuestionErrorMessage = null;
+      });
+
+      if (AppConfig.debugMode) {
+        print('✅ [발제문 데이터 로드] 성공');
+        print('   - 발제문 수: ${bookQuestions.length}개');
+        for (final question in bookQuestions) {
+          print('   📝 발제문 ${question.bookQuestionId}: ${question.content.length > 30 ? question.content.substring(0, 30) + "..." : question.content}');
+        }
+      }
+
+    } catch (e) {
+      setState(() {
+        _isBookQuestionLoading = false;
+        _bookQuestionErrorMessage = e.toString();
+      });
+
+      if (AppConfig.debugMode) {
+        print('❌ [발제문 데이터 로드] 오류: $e');
+      }
+    }
+  }
+
+  /// 발제문 데이터 새로고침
+  Future<void> refreshBookQuestionData(int meetingId) async {
+    if (_meetingDetail?.discussionTime == null) {
+      if (AppConfig.debugMode) {
+        print('ℹ️ [발제문 새로고침] 토론 시간이 설정되지 않아 새로고침을 건너뛸니다.');
+      }
+      return;
+    }
+
+    await loadBookQuestionData(meetingId);
+  }
+
+  /// 토론 시간 변경에 따른 발제문 데이터 처리
+  /// 토론 정보 저장 후 호출
+  void handleBookQuestionDataUpdate(int meetingId) {
+    if (_meetingDetail?.discussionTime != null) {
+      // 토론 시간이 설정된 경우 발제문 데이터 로드
+      loadBookQuestionData(meetingId);
+    } else {
+      // 토론 시간이 제거된 경우 발제문 데이터 초기화
+      setState(() {
+        _bookQuestionList = null;
+        _bookQuestionErrorMessage = null;
+        _isBookQuestionLoading = false;
+      });
+      
+      if (AppConfig.debugMode) {
+        print('🆕 [발제문 데이터] 토론 시간 제거로 인한 데이터 초기화');
+      }
+    }
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -225,6 +329,9 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
         // 🆕 토론 시간이 설정된 경우 토론 조 데이터 로드
         if (meetingDetail.discussionTime != null) {
           loadDiscussionGroupData(meetingId);
+          
+          // 🆕 발제문 데이터도 로드 (토론 시간 설정 시)
+          loadBookQuestionData(meetingId);
         }
       }
     } catch (e) {
@@ -453,6 +560,9 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
           
           // 🆕 토론 시간 변경에 따른 토론 조 데이터 처리
           handleDiscussionTimeUpdate(meetingId);
+          
+          // 🆕 토론 시간 변경에 따른 발제문 데이터 처리
+          handleBookQuestionDataUpdate(meetingId);
         }
       }
     } catch (e) {
