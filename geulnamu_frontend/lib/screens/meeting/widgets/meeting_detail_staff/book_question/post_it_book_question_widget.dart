@@ -194,16 +194,15 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
                 
                 // 발제문 내용
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Text(
-                      widget.bookQuestion.content,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: textColor,
-                        fontSize: 11,
-                        height: 1.3,
-                      ),
-                      maxLines: null,
+                  child: Text(
+                    widget.bookQuestion.content,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: textColor,
+                      fontSize: 13, // 🔥 11 → 13으로 텍스트 크기 증가!
+                      height: 1.4,
+                      fontWeight: FontWeight.w400,
                     ),
+                    maxLines: null,
                   ),
                 ),
                 
@@ -259,14 +258,14 @@ class PostItCollectionWidget extends StatefulWidget {
   final List<BookQuestionModel> bookQuestions;
   final int currentUserId;
   final Function(BookQuestionModel)? onQuestionTap;
-  final double? maxHeight;
+  // 🔥 maxHeight 매개변수 제거!
 
   const PostItCollectionWidget({
     super.key,
     required this.bookQuestions,
     required this.currentUserId,
     this.onQuestionTap,
-    this.maxHeight,
+    // 🔥 maxHeight 매개변수 제거!
   });
 
   @override
@@ -282,23 +281,20 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
       return _buildEmptyState(context);
     }
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: widget.maxHeight ?? 300,
-      ),
-      child: DragTarget<BookQuestionModel>(
-        onWillAccept: (data) => true,
-        onAccept: (BookQuestionModel data) {
-          // 드래그 완료 처리 (현재는 단순 표시용)
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('📝 "${data.content.length > 20 ? data.content.substring(0, 20) + "..." : data.content}" 위치 이동됨'),
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          }
-        },
+    // 🔥 maxHeight 제한 완전 제거 - 전체 포스트잏 표시!
+    return DragTarget<BookQuestionModel>(
+      onWillAccept: (data) => true,
+      onAccept: (BookQuestionModel data) {
+        // 드래그 완료 처리 (현재는 단순 표시용)
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('📝 "${data.content.length > 20 ? data.content.substring(0, 20) + "..." : data.content}" 위치 이동됨'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
         builder: (context, candidateData, rejectedData) {
           return Container(
             decoration: BoxDecoration(
@@ -314,30 +310,28 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
                   : null,
             ),
             padding: const EdgeInsets.all(16),
-            child: SingleChildScrollView(
-              child: Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: widget.bookQuestions
-                    .where((question) => question != _draggingQuestion)
-                    .map((question) => PostItBookQuestionWidget(
-                          bookQuestion: question,
-                          isMyQuestion: question.writerMemberId == widget.currentUserId,
-                          onTap: () => widget.onQuestionTap?.call(question),
-                          onDragStarted: (draggingQuestion) {
-                            setState(() => _draggingQuestion = draggingQuestion);
-                          },
-                          onDragEnd: (draggingQuestion) {
-                            setState(() => _draggingQuestion = null);
-                          },
-                        ))
-                    .toList(),
-              ),
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: widget.bookQuestions
+                  // 🔥 드래그 시 사라짐 문제 해결: 비교 로직 수정
+                  .where((question) => _draggingQuestion?.bookQuestionId != question.bookQuestionId)
+                  .map((question) => PostItBookQuestionWidget(
+                        bookQuestion: question,
+                        isMyQuestion: question.writerMemberId == widget.currentUserId,
+                        onTap: () => widget.onQuestionTap?.call(question),
+                        onDragStarted: (draggingQuestion) {
+                          setState(() => _draggingQuestion = draggingQuestion);
+                        },
+                        onDragEnd: (draggingQuestion) {
+                          setState(() => _draggingQuestion = null);
+                        },
+                      ))
+                  .toList(),
             ),
           );
         },
-      ),
-    );
+      );
   }
 
   /// 빈 상태 위젯

@@ -211,7 +211,7 @@ class BookQuestionWidgets {
           bookQuestions: bookQuestionList,
           currentUserId: currentUserId,
           onQuestionTap: onQuestionTap,
-          maxHeight: 280,
+          // 🔥 maxHeight 제거 - 전체 포스트잏을 보여주도록!
         ),
         
         const SizedBox(height: 12),
