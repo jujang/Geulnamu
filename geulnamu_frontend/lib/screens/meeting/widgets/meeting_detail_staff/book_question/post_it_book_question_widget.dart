@@ -232,18 +232,17 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
 }
 
 /// 포스트잇들을 배치하는 컨테이너 위젯
+/// 🔥 실제 순서 변경 기능 추가!
 class PostItCollectionWidget extends StatefulWidget {
   final List<BookQuestionModel> bookQuestions;
   final int currentUserId;
   final Function(BookQuestionModel)? onQuestionTap;
-  // 🔥 maxHeight 매개변수 제거!
 
   const PostItCollectionWidget({
     super.key,
     required this.bookQuestions,
     required this.currentUserId,
     this.onQuestionTap,
-    // 🔥 maxHeight 매개변수 제거!
   });
 
   @override
@@ -252,6 +251,23 @@ class PostItCollectionWidget extends StatefulWidget {
 
 class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
   BookQuestionModel? _draggingQuestion;
+  List<BookQuestionModel> _orderedQuestions = []; // 🔥 순서가 변경된 발제문 리스트
+
+  @override
+  void initState() {
+    super.initState();
+    // 초기 순서 설정
+    _orderedQuestions = List.from(widget.bookQuestions);
+  }
+
+  @override
+  void didUpdateWidget(PostItCollectionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // widget.bookQuestions가 변경되면 _orderedQuestions도 업데이트
+    if (oldWidget.bookQuestions != widget.bookQuestions) {
+      _orderedQuestions = List.from(widget.bookQuestions);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -263,15 +279,8 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
     return DragTarget<BookQuestionModel>(
       onWillAccept: (data) => true,
       onAccept: (BookQuestionModel data) {
-        // 드래그 완료 처리 (현재는 단순 표시용)
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('📝 "${data.content.length > 20 ? data.content.substring(0, 20) + "..." : data.content}" 위치 이동됨'),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
+        // 🔥 실제 순서 변경 로직 추가!
+        _reorderQuestions(data);
       },
         builder: (context, candidateData, rejectedData) {
           return Container(
@@ -291,7 +300,7 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
             child: Wrap(
               spacing: 12,
               runSpacing: 12,
-              children: widget.bookQuestions
+              children: _orderedQuestions // 🔥 순서가 변경된 리스트 사용!
                   // 🔥 드래그 시 사라짐 문제 해결: 비교 로직 수정
                   .where((question) => _draggingQuestion?.bookQuestionId != question.bookQuestionId)
                   .map((question) => PostItBookQuestionWidget(
@@ -310,6 +319,30 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
           );
         },
       );
+  }
+
+  /// 🔥 포스트잏 순서 변경 메서드
+  void _reorderQuestions(BookQuestionModel draggedQuestion) {
+    if (!mounted) return;
+
+    // 드래그된 포스트잏을 마지막으로 이동 (가장 간단한 로직)
+    setState(() {
+      // 기존 위치에서 제거
+      _orderedQuestions.removeWhere((q) => q.bookQuestionId == draggedQuestion.bookQuestionId);
+      // 마지막에 추가
+      _orderedQuestions.add(draggedQuestion);
+    });
+
+    // 사용자에게 피드백 제공
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('🔄 포스트잏 순서가 변경되었습니다'),
+          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   /// 빈 상태 위젯

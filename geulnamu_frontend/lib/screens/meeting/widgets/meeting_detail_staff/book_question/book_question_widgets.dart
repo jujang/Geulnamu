@@ -4,7 +4,7 @@ import '../../../../../core/config/app_config.dart';
 import 'post_it_book_question_widget.dart';
 
 /// 발제문 섹션 위젯들
-/// 
+///
 /// 운영진용 모임 상세 화면에서 사용되는 발제문 관련 UI 위젯들
 class BookQuestionWidgets {
   /// 발제문 섹션 메인 위젯
@@ -28,7 +28,7 @@ class BookQuestionWidgets {
             // 섹션 헤더
             _buildSectionHeader(context, onRefresh),
             const SizedBox(height: 16),
-            
+
             // 내용
             if (!hasDiscussionTime)
               _buildNoDiscussionTimeMessage(context)
@@ -50,16 +50,15 @@ class BookQuestionWidgets {
   }
 
   /// 섹션 헤더
-  static Widget _buildSectionHeader(BuildContext context, VoidCallback onRefresh) {
+  static Widget _buildSectionHeader(
+    BuildContext context,
+    VoidCallback onRefresh,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Row(
       children: [
-        Icon(
-          Icons.sticky_note_2,
-          color: theme.colorScheme.primary,
-          size: 24,
-        ),
+        Icon(Icons.sticky_note_2, color: theme.colorScheme.primary, size: 24),
         const SizedBox(width: 8),
         Text(
           '발제문',
@@ -80,15 +79,13 @@ class BookQuestionWidgets {
   /// 토론 시간 미설정 안내 메시지
   static Widget _buildNoDiscussionTimeMessage(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.3),
-        ),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
       ),
       child: Row(
         children: [
@@ -135,25 +132,19 @@ class BookQuestionWidgets {
     VoidCallback onRetry,
   ) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: 150,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.errorContainer.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: theme.colorScheme.error.withOpacity(0.3),
-        ),
+        border: Border.all(color: theme.colorScheme.error.withOpacity(0.3)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            color: theme.colorScheme.error,
-            size: 32,
-          ),
+          Icon(Icons.error_outline, color: theme.colorScheme.error, size: 32),
           const SizedBox(height: 12),
           Text(
             '발제문을 불러오는 중 오류가 발생했습니다',
@@ -205,7 +196,7 @@ class BookQuestionWidgets {
         // 통계 정보
         _buildStatistics(context, bookQuestionList, currentUserId),
         const SizedBox(height: 16),
-        
+
         // 포스트잇 발제문 컬렉션
         PostItCollectionWidget(
           bookQuestions: bookQuestionList,
@@ -213,9 +204,9 @@ class BookQuestionWidgets {
           onQuestionTap: onQuestionTap,
           // 🔥 maxHeight 제거 - 전체 포스트잏을 보여주도록!
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         // 도움말
         _buildHelpText(context),
       ],
@@ -230,7 +221,9 @@ class BookQuestionWidgets {
   ) {
     final theme = Theme.of(context);
     final totalCount = bookQuestionList.length;
-    final myCount = bookQuestionList.where((q) => q.writerMemberId == currentUserId).length;
+    final myCount = bookQuestionList
+        .where((q) => q.writerMemberId == currentUserId)
+        .length;
     final othersCount = totalCount - myCount;
 
     return Container(
@@ -249,7 +242,7 @@ class BookQuestionWidgets {
           ),
           const SizedBox(width: 6),
           Text(
-            '총 ${totalCount}개',
+            '총 $totalCount개',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onPrimaryContainer,
               fontWeight: FontWeight.w500,
@@ -264,7 +257,7 @@ class BookQuestionWidgets {
   /// 빈 상태
   static Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: 180,
       decoration: BoxDecoration(
@@ -310,11 +303,11 @@ class BookQuestionWidgets {
   /// 도움말 텍스트
   static Widget _buildHelpText(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -327,7 +320,7 @@ class BookQuestionWidgets {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '💡 포스트잇을 드래그해서 위치를 이동할 수 있습니다. 모든 발제문이 노란색 포스트잏로 표시됩니다.',
+              '💡 포스트잇을 드래그해서 위치를 이동할 수 있습니다.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
                 fontSize: 11,
