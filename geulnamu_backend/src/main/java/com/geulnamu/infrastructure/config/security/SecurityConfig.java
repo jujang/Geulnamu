@@ -50,7 +50,10 @@ public class SecurityConfig {
         "/attendances/{attendanceId}/just-read",
         "/attendances/{attendanceId}/want-discussion",
         "/discussions/{attendanceId}/my-group",
-        "/book-questions/**",
+        "/book-questions/create",
+        "/book-questions/me",
+        "/book-questions/meeting",
+        "/book-questions/{bookQuestionId}",
         "/voc/error-report",
         "/voc/feature-request"
     };
@@ -64,7 +67,8 @@ public class SecurityConfig {
         "/meetings/{meetingId}/remove",
         "/discussions/list/want-discussion",
         "/discussions/groups",
-        "/discussions/groups/assign"
+        "/discussions/groups/assign",
+        "/book-questions/my-group"
     };
 
     private static final String[] AUTH_FOR_ADMIN = {

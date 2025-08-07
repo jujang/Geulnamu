@@ -6,24 +6,26 @@ import com.geulnamu.controller.bookQuestion.dto.response.BookQuestionGroupViewRe
 import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.bookQuestion.BookQuestion;
+import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.domain.shared.enums.Role;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.repository.attendance.AttendanceQueryRepository;
 import com.geulnamu.repository.bookQuestion.BookQuestionCommandRepository;
 import com.geulnamu.repository.bookQuestion.BookQuestionQueryRepository;
+import com.geulnamu.repository.meeting.MeetingQueryRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class BookQuestionService {
 
+    private final MeetingQueryRepository meetingQueryRepository;
     private final AttendanceQueryRepository attendanceQueryRepository;
     private final BookQuestionQueryRepository bookQuestionQueryRepository;
     private final BookQuestionCommandRepository bookQuestionCommandRepository;
@@ -47,11 +49,24 @@ public class BookQuestionService {
     }
 
     @Transactional(readOnly = true)
-    public List<BookQuestionViewResponse> findMyDiscussionGroupBookQuestions(Long attendanceId) {
+    public List<BookQuestionViewResponse> findMyDiscussionGroupBookQuestions_origin(Long attendanceId) {
         Attendance attendance = findAttendanceById(attendanceId);
         attendance.checkMemberIsAssignDiscussionGroupForViewGroupBookQuestion();
         return bookQuestionQueryRepository
             .findMyDiscussionGroupBookQuestion(attendance.getMeeting().getId(), attendance.getDiscussionGroup());
+    }
+
+    @Transactional(readOnly = true)
+    public List<BookQuestionViewResponse> findMyDiscussionGroupBookQuestions(Long memberId, Long meetingId) {
+        Meeting meeting =  meetingQueryRepository.findById(meetingId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
+        Attendance attendance = attendanceQueryRepository.findByMeetingIdAndMemberId(meetingId, memberId)
+            .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
+        if(attendance.getDiscussionGroup() == null) {
+            return new ArrayList<>();
+        }
+        return bookQuestionQueryRepository
+            .findMyDiscussionGroupBookQuestion(meeting.getId(), attendance.getDiscussionGroup());
     }
 
     @Transactional(readOnly = true)
