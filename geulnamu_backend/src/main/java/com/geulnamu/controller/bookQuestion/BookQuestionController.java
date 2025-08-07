@@ -36,6 +36,15 @@ public class BookQuestionController {
         return BaseResponse.ofSuccess(bookQuestionId);
     }
 
+    @ErrorLogAction(value = ActionType.BOOK_QUESTION_MY_LIST_VIEW, actionDomain = DomainType.BOOK_QUESTION)
+    @AccessLevel(Level.MEMBER)
+    @GetMapping(value = "/me", name = "발제문 리스트 조회 - 본인")
+    public BaseResponse<List<BookQuestionViewResponse>> getMyBookQuestions(@AuthMemberId Long memberId,
+                                                                           @RequestParam @Min(value = 1) Long attendanceId) {
+        List<BookQuestionViewResponse> responseList = bookQuestionService.findMyBookQuestions(memberId, attendanceId);
+        return BaseResponse.ofSuccess(responseList);
+    }
+
     @ErrorLogAction(value = ActionType.BOOK_QUESTION_MY_GROUP_LIST_VIEW, actionDomain = DomainType.BOOK_QUESTION)
     @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/my-group", name = "발제문 리스트 조회 - 본인 토론 그룹")

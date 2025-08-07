@@ -50,6 +50,7 @@ public enum ActionType {
 
     // 발제문 관련
     BOOK_QUESTION_CREATE("발제문 작성"),
+    BOOK_QUESTION_MY_LIST_VIEW("본인 발제문 조회"),
     BOOK_QUESTION_MY_GROUP_LIST_VIEW("본인 그룹 발제문 리스트 조회"),
     BOOK_QUESTION_ALL_GROUP_LIST_VIEW("전체 그룹 발제문 리스트 조회"),
     BOOK_QUESTION_MODIFY("발제문 수정"),

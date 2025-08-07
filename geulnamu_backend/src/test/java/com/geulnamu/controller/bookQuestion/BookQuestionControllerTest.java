@@ -91,6 +91,56 @@ public class BookQuestionControllerTest extends ControllerTest {
 
     @Test
     @WithMockUser(roles = "MEMBER")
+    public void getMyBookQuestionsTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+
+        List<BookQuestionViewResponse> bookQuestionViewResponseList =
+            Arrays.asList(
+                new BookQuestionViewResponse(1L, 1L, "오늘 점심 뭔가요?"),
+                new BookQuestionViewResponse(2L, 1L, "사랑이 뭐라고 생각하시나요?")
+            );
+
+        given(bookQuestionService.findMyBookQuestions(any(), any())).willReturn(bookQuestionViewResponseList);
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                get("/book-questions/me")
+                    .param("attendanceId", "1")
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andDo(document(
+                "/book-questions/me/view",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                queryParameters(
+                    parameterWithName("attendanceId").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("출석 고유번호")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("토론 그룹 단위 발제문 리스트"),
+                    fieldWithPath("data[].bookQuestionId").type(JsonFieldType.NUMBER).description("발제문 고유번호"),
+                    fieldWithPath("data[].writerMemberId").type(JsonFieldType.NUMBER).description("발제문 작성 모임원 고유번호"),
+                    fieldWithPath("data[].content").type(JsonFieldType.STRING).description("발제문 내용")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "MEMBER")
     public void getMyGroupBookQuestionsTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";

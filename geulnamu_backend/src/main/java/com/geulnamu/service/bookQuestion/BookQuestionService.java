@@ -40,6 +40,13 @@ public class BookQuestionService {
     }
 
     @Transactional(readOnly = true)
+    public List<BookQuestionViewResponse> findMyBookQuestions(Long memberId, Long attendanceId) {
+        Attendance attendance = findAttendanceById(attendanceId);
+        attendance.checkRequestedMember(memberId);
+        return bookQuestionQueryRepository.findMyBookQuestion(attendanceId);
+    }
+
+    @Transactional(readOnly = true)
     public List<BookQuestionViewResponse> findMyDiscussionGroupBookQuestions(Long attendanceId) {
         Attendance attendance = findAttendanceById(attendanceId);
         attendance.checkMemberIsAssignDiscussionGroupForViewGroupBookQuestion();
