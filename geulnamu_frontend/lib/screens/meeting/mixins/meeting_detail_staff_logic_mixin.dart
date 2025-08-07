@@ -117,10 +117,32 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
   // 🆕 X 버튼 상태 Getter
   bool get isDiscussionTimeCleared => _isDiscussionTimeCleared;
 
-  // 🎯 권한 체크
   bool get isStaffOrAbove {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     return authProvider.isStaffLevel;
+  }
+
+  /// 새로고침 (강제 캐시 무효화)
+  Future<void> refreshMeetingDetailStaff(int meetingId) async {
+    await initializeMeetingDetailStaff(meetingId, forceRefresh: true); // 강제 새로고침 옵션
+  }
+
+  /// 폼 컨트롤러 초기화
+  void _initializeFormControllers() {
+    if (_meetingDetail == null) return;
+
+    _meetingNameController.text = _meetingDetail!.meetingName;
+    _meetingPlaceController.text = _meetingDetail!.meetingPlace;
+    _descriptionController.text = _meetingDetail!.description ?? '';  // null 안전 처리
+    _alarmMessageController.text = _meetingDetail!.alarmMessage ?? '';  // null 안전 처리
+    
+    _selectedMeetingType = _meetingDetail!.meetingType;
+    _selectedMeetingDateTime = _meetingDetail!.meetingDateTime;
+    _selectedLateThresholdTime = _meetingDetail!.lateThresholdTime;
+    _selectedDiscussionTime = _meetingDetail!.discussionTime;  // null 가능
+    
+    // 🆕 X 버튼 상태 초기화
+    _isDiscussionTimeCleared = false;
   }
 
   bool get isAdmin {
@@ -207,6 +229,54 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
       _isLoading = true;
       _errorMessage = null;
     });
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+      if (accessToken == null) {
+        throw Exception('인증 토큰이 없습니다.');
+      }
+
+      final meetingDetail = await _meetingService.getMeetingDetailForStaff(
+        meetingId: meetingId,
+        accessToken: accessToken,
+        forceRefresh: forceRefresh, // 강제 새로고침 옵션 전달
+      );
+
+      if (mounted) {
+        setState(() {
+          _meetingDetail = meetingDetail;
+          _isLoading = false;
+          _initializeFormControllers();
+        });
+
+        if (AppConfig.debugMode) {
+          print('✅ [운영진용 모임 상세] 데이터 로딩 완료: ${meetingDetail.meetingName}');
+          if (forceRefresh) {
+            print('🔄 [캐시 무효화] 새로운 데이터로 업데이트 완료');
+          }
+        }
+        
+        // 🆕 토론 시간이 설정된 경우 토론 조 데이터 로드
+        if (meetingDetail.discussionTime != null) {
+          loadDiscussionGroupData(meetingId);
+          
+          // 🆕 발제문 데이터도 로드 (토론 시간 설정 시)
+          loadBookQuestionData(meetingId);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = e.toString();
+        });
+      }
+      
+      if (AppConfig.debugMode) {
+        print('❌ [운영진용 모임 상세] 로딩 실패: $e');
+      }
+    }
   }
   
   // ====================
@@ -298,77 +368,6 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
         print('🆕 [발제문 데이터] 토론 시간 제거로 인한 데이터 초기화');
       }
     }
-
-    try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final accessToken = await authProvider.accessToken;
-      if (accessToken == null) {
-        throw Exception('인증 토큰이 없습니다.');
-      }
-
-      final meetingDetail = await _meetingService.getMeetingDetailForStaff(
-        meetingId: meetingId,
-        accessToken: accessToken,
-        forceRefresh: forceRefresh, // 강제 새로고침 옵션 전달
-      );
-
-      if (mounted) {
-        setState(() {
-          _meetingDetail = meetingDetail;
-          _isLoading = false;
-          _initializeFormControllers();
-        });
-
-        if (AppConfig.debugMode) {
-          print('✅ [운영진용 모임 상세] 데이터 로딩 완료: ${meetingDetail.meetingName}');
-          if (forceRefresh) {
-            print('🔄 [캐시 무효화] 새로운 데이터로 업데이트 완료');
-          }
-        }
-        
-        // 🆕 토론 시간이 설정된 경우 토론 조 데이터 로드
-        if (meetingDetail.discussionTime != null) {
-          loadDiscussionGroupData(meetingId);
-          
-          // 🆕 발제문 데이터도 로드 (토론 시간 설정 시)
-          loadBookQuestionData(meetingId);
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = e.toString();
-        });
-      }
-      
-      if (AppConfig.debugMode) {
-        print('❌ [운영진용 모임 상세] 로딩 실패: $e');
-      }
-    }
-  }
-
-  /// 새로고침 (강제 캐시 무효화)
-  Future<void> refreshMeetingDetailStaff(int meetingId) async {
-    await initializeMeetingDetailStaff(meetingId, forceRefresh: true); // 강제 새로고침 옵션
-  }
-
-  /// 폼 컨트롤러 초기화
-  void _initializeFormControllers() {
-    if (_meetingDetail == null) return;
-
-    _meetingNameController.text = _meetingDetail!.meetingName;
-    _meetingPlaceController.text = _meetingDetail!.meetingPlace;
-    _descriptionController.text = _meetingDetail!.description ?? '';  // null 안전 처리
-    _alarmMessageController.text = _meetingDetail!.alarmMessage ?? '';  // null 안전 처리
-    
-    _selectedMeetingType = _meetingDetail!.meetingType;
-    _selectedMeetingDateTime = _meetingDetail!.meetingDateTime;
-    _selectedLateThresholdTime = _meetingDetail!.lateThresholdTime;
-    _selectedDiscussionTime = _meetingDetail!.discussionTime;  // null 가능
-    
-    // 🆕 X 버튼 상태 초기화
-    _isDiscussionTimeCleared = false;
   }
 
   /// 모임 기본 정보 편집 토글
