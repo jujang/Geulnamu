@@ -21,14 +21,12 @@ import 'meeting_detail_screen.dart'; // 🆕 일반 사용자 화면
 class MeetingDetailStaffScreen extends StatefulWidget {
   /// 모임 ID
   final int meetingId;
-  
-  const MeetingDetailStaffScreen({
-    super.key,
-    required this.meetingId,
-  });
+
+  const MeetingDetailStaffScreen({super.key, required this.meetingId});
 
   @override
-  State<MeetingDetailStaffScreen> createState() => _MeetingDetailStaffScreenState();
+  State<MeetingDetailStaffScreen> createState() =>
+      _MeetingDetailStaffScreenState();
 }
 
 class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
@@ -43,7 +41,7 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       initializeMeetingDetailStaff(widget.meetingId);
     });
   }
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -53,14 +51,14 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       HomeRouteService.routeObserver.subscribe(this, route);
     }
   }
-  
+
   @override
   void dispose() {
     // RouteObserver 등록 해제
     HomeRouteService.routeObserver.unsubscribe(this);
     super.dispose();
   }
-  
+
   @override
   void didPopNext() {
     // 다른 화면에서 돌아왔을 때 새로고침
@@ -75,7 +73,7 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       builder: (context, homeService, child) {
         // 모임 정보가 업데이트되면 타이틀도 자동 업데이트
         final currentTitle = meetingDetail?.meetingName ?? '모임 상세 (운영진용)';
-        
+
         return MainLayout(
           title: currentTitle,
           isHomePage: false, // 서브 페이지이므로 뒤로가기 버튼 표시
@@ -169,13 +167,15 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       onGetWantDiscussionList: () => wantDiscussionList,
       onGetDiscussionGroupList: () => discussionGroupList,
       onGetDiscussionGroupErrorMessage: () => discussionGroupErrorMessage,
-      onRefreshDiscussionGroupData: () => refreshDiscussionGroupData(widget.meetingId),
+      onRefreshDiscussionGroupData: () =>
+          refreshDiscussionGroupData(widget.meetingId),
       // 🆕 토론 그룹 편집 콜백들
       isEditingDiscussionGroups: isEditingDiscussionGroups,
       editingGroups: editingGroups,
       editingUnassignedMembers: editingUnassignedMembers,
       onToggleDiscussionGroupEdit: toggleDiscussionGroupEdit,
-      onSaveDiscussionGroupChanges: () => saveDiscussionGroupChanges(widget.meetingId),
+      onSaveDiscussionGroupChanges: () =>
+          saveDiscussionGroupChanges(widget.meetingId),
       onMoveMemberToGroup: moveMemberToGroup,
       onRemoveMemberFromGroup: removeMemberFromGroup,
       onCreateNewGroup: createNewGroup,
@@ -188,8 +188,10 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       isBookQuestionLoading: isBookQuestionLoading,
       bookQuestionErrorMessage: bookQuestionErrorMessage,
       bookQuestionList: bookQuestionList,
-      currentUserId: Provider.of<AuthProvider>(context, listen: false).userId ?? 0,
-      onRefreshBookQuestionData: () => refreshBookQuestionData(widget.meetingId),
+      currentUserId:
+          Provider.of<AuthProvider>(context, listen: false).userId ?? 0,
+      onRefreshBookQuestionData: () =>
+          refreshBookQuestionData(widget.meetingId),
       onBookQuestionTap: _handleBookQuestionTap,
     );
   }
@@ -197,11 +199,11 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
   /// QR 표시 화면으로 이동 (운영진용)
   void _navigateToQrDisplay() {
     if (meetingDetail == null) return;
-    
+
     if (AppConfig.debugMode) {
       print('📱 [QR 표시] 화면 이동: meetingId=${widget.meetingId}');
     }
-    
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => MeetingQrDisplayScreen(
@@ -217,12 +219,10 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
     if (AppConfig.debugMode) {
       print('👥 [사용자 화면] 이동: meetingId=${widget.meetingId}');
     }
-    
+
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => MeetingDetailScreen(
-          meetingId: widget.meetingId,
-        ),
+        builder: (context) => MeetingDetailScreen(meetingId: widget.meetingId),
       ),
     );
   }
@@ -232,14 +232,16 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     await _homeService.handleLogout(context, authProvider);
   }
-  
+
   /// 발제문 탭 처리
   void _handleBookQuestionTap(BookQuestionModel bookQuestion) {
     if (AppConfig.debugMode) {
       print('📝 [발제문 탭] ID: ${bookQuestion.bookQuestionId}');
-      print('   - 내용: ${bookQuestion.content.length > 50 ? bookQuestion.content.substring(0, 50) + "..." : bookQuestion.content}');
+      print(
+        '   - 내용: ${bookQuestion.content.length > 50 ? "${bookQuestion.content.substring(0, 50)}..." : bookQuestion.content}',
+      );
     }
-    
+
     // 현재는 발제문 내용을 다이얼로그로 표시
     showDialog(
       context: context,
@@ -251,38 +253,13 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 8),
-            const Expanded(
-              child: Text(
-                '발제문',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            // 내 발제문인지 표시
-            if (bookQuestion.writerMemberId == (Provider.of<AuthProvider>(context, listen: false).userId ?? 0))
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '내 발제문',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
+            const Expanded(child: Text('발제문', style: TextStyle(fontSize: 18))),
           ],
         ),
         content: SingleChildScrollView(
           child: SelectableText(
             bookQuestion.content,
-            style: const TextStyle(
-              fontSize: 14,
-              height: 1.5,
-            ),
+            style: const TextStyle(fontSize: 14, height: 1.5),
           ),
         ),
         actions: [

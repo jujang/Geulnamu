@@ -8,7 +8,7 @@ import '../../../../../core/colors.dart';
 /// - 포스트잇 모양 디자인 (그림자, 둥근 모서리)
 /// - 드래그 가능 (Draggable 위젯 사용)
 /// - 발제문 내용 표시
-/// - 작성자 구분 (본인/타인)
+/// - 🔥 모든 발제문을 노란색으로 통일 표시
 class PostItBookQuestionWidget extends StatefulWidget {
   final BookQuestionModel bookQuestion;
   final bool isMyQuestion;
@@ -208,16 +208,8 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
                 
                 const SizedBox(height: 8),
                 
-                // 본인 발제문 표시
-                if (widget.isMyQuestion)
-                  Container(
-                    alignment: Alignment.bottomRight,
-                    child: Icon(
-                      Icons.edit,
-                      size: 12,
-                      color: textColor.withOpacity(0.6),
-                    ),
-                  ),
+                // 🔥 본인 발제문 표시 아이콘 제거 (구분하지 않음)
+                // 모든 발제문을 동일하게 표시
               ],
             ),
           ),
@@ -226,30 +218,16 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
     );
   }
 
-  /// 포스트잇 색상 가져오기 (본인/타인 구분)
+  /// 포스트잇 색상 가져오기 (모두 노란색으로 통일!)
   Color _getPostItColor(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    if (widget.isMyQuestion) {
-      // 본인 발제문: 민트색 포스트잇 (브랜드 컬러)
-      return GeulnamuColors.primaryLight.withOpacity(0.8);
-    } else {
-      // 타인 발제문: 연한 노란색 포스트잇 (전통적인 포스트잇 색상)
-      return const Color(0xFFFFF59D).withOpacity(0.9);
-    }
+    // 🔥 모든 발제문을 노란색 포스트잇으로 통일 표시!
+    return const Color(0xFFFFF59D).withOpacity(0.9);
   }
 
-  /// 텍스트 색상 가져오기
+  /// 텍스트 색상 가져오기 (모두 동일)
   Color _getTextColor(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    if (widget.isMyQuestion) {
-      // 본인 발제문: 어두운 텍스트 (민트색 배경에 대비)
-      return Colors.black87;
-    } else {
-      // 타인 발제문: 어두운 텍스트 (노란색 배경에 대비)
-      return Colors.black87;
-    }
+    // 🔥 모든 발제문의 텍스트를 동일하게 (노란색 배경에 대비)
+    return Colors.black87;
   }
 }
 

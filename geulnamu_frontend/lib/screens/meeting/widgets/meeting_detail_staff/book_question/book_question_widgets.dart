@@ -255,24 +255,7 @@ class BookQuestionWidgets {
               fontWeight: FontWeight.w500,
             ),
           ),
-          if (myCount > 0) ...[
-            const SizedBox(width: 8),
-            Container(
-              width: 4,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.onPrimaryContainer.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '내 발제문 ${myCount}개',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
-              ),
-            ),
-          ],
+          // 🔥 본인 발제문 개수 표시 제거 (모두 동일하게 표시)
         ],
       ),
     );
@@ -344,7 +327,7 @@ class BookQuestionWidgets {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '💡 포스트잇을 드래그해서 위치를 이동할 수 있습니다. 민트색은 내 발제문, 노란색은 다른 사람의 발제문입니다.',
+              '💡 포스트잇을 드래그해서 위치를 이동할 수 있습니다. 모든 발제문이 노란색 포스트잏로 표시됩니다.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
                 fontSize: 11,
