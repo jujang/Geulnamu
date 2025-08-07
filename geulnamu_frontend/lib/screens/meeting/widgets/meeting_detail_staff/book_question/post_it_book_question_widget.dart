@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../../models/book_question/book_question_model.dart';
-import '../../../../../core/theme.dart';
+import '../../../../../core/colors.dart';
 
 /// 포스트잇 스타일의 발제문 위젯
-///
+/// 
 /// 기능:
 /// - 포스트잇 모양 디자인 (그림자, 둥근 모서리)
 /// - 드래그 가능 (Draggable 위젯 사용)
@@ -26,8 +26,7 @@ class PostItBookQuestionWidget extends StatefulWidget {
   });
 
   @override
-  State<PostItBookQuestionWidget> createState() =>
-      _PostItBookQuestionWidgetState();
+  State<PostItBookQuestionWidget> createState() => _PostItBookQuestionWidgetState();
 }
 
 class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
@@ -35,26 +34,34 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
   late AnimationController _hoverController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _elevationAnimation;
-
+  
   bool _isHovered = false;
   bool _isDragging = false;
 
   @override
   void initState() {
     super.initState();
-
+    
     _hoverController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
-      CurvedAnimation(parent: _hoverController, curve: Curves.easeInOut),
-    );
-
-    _elevationAnimation = Tween<double>(begin: 4.0, end: 8.0).animate(
-      CurvedAnimation(parent: _hoverController, curve: Curves.easeInOut),
-    );
+    
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _hoverController,
+      curve: Curves.easeInOut,
+    ));
+    
+    _elevationAnimation = Tween<double>(
+      begin: 4.0,
+      end: 8.0,
+    ).animate(CurvedAnimation(
+      parent: _hoverController,
+      curve: Curves.easeInOut,
+    ));
   }
 
   @override
@@ -112,9 +119,9 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
   /// 호버 상태 변경
   void _onHover(bool isHovered) {
     if (_isDragging) return;
-
+    
     setState(() => _isHovered = isHovered);
-
+    
     if (isHovered) {
       _hoverController.forward();
     } else {
@@ -132,7 +139,7 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
     final theme = Theme.of(context);
     final postItColor = _getPostItColor(context);
     final textColor = _getTextColor(context);
-
+    
     return Opacity(
       opacity: opacity,
       child: Container(
@@ -156,7 +163,10 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [postItColor, postItColor.withOpacity(0.9)],
+                colors: [
+                  postItColor,
+                  postItColor.withOpacity(0.9),
+                ],
               ),
               // 포스트잇 상단의 약간 어두운 테이프 효과
               boxShadow: [
@@ -181,7 +191,7 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
                   ),
                 ),
                 const SizedBox(height: 8),
-
+                
                 // 발제문 내용
                 Expanded(
                   child: SingleChildScrollView(
@@ -196,9 +206,9 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
                     ),
                   ),
                 ),
-
+                
                 const SizedBox(height: 8),
-
+                
                 // 본인 발제문 표시
                 if (widget.isMyQuestion)
                   Container(
@@ -220,7 +230,7 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
   /// 포스트잇 색상 가져오기 (본인/타인 구분)
   Color _getPostItColor(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
+    
     if (widget.isMyQuestion) {
       // 본인 발제문: 민트색 포스트잇 (브랜드 컬러)
       return GeulnamuColors.primaryLight.withOpacity(0.8);
@@ -233,7 +243,7 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
   /// 텍스트 색상 가져오기
   Color _getTextColor(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
+    
     if (widget.isMyQuestion) {
       // 본인 발제문: 어두운 텍스트 (민트색 배경에 대비)
       return Colors.black87;
@@ -273,17 +283,17 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
     }
 
     return Container(
-      constraints: BoxConstraints(maxHeight: widget.maxHeight ?? 300),
+      constraints: BoxConstraints(
+        maxHeight: widget.maxHeight ?? 300,
+      ),
       child: DragTarget<BookQuestionModel>(
-        onWillAcceptWithDetails: (data) => true,
-        onAcceptWithDetails: (data) {
+        onWillAccept: (data) => true,
+        onAccept: (BookQuestionModel data) {
           // 드래그 완료 처리 (현재는 단순 표시용)
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                  '📝 "${data.content.length > 20 ? "${data.content.substring(0, 20)}..." : data.content}" 위치 이동됨',
-                ),
+                content: Text('📝 "${data.content.length > 20 ? data.content.substring(0, 20) + "..." : data.content}" 위치 이동됨'),
                 duration: const Duration(seconds: 2),
               ),
             );
@@ -310,20 +320,17 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
                 runSpacing: 12,
                 children: widget.bookQuestions
                     .where((question) => question != _draggingQuestion)
-                    .map(
-                      (question) => PostItBookQuestionWidget(
-                        bookQuestion: question,
-                        isMyQuestion:
-                            question.writerMemberId == widget.currentUserId,
-                        onTap: () => widget.onQuestionTap?.call(question),
-                        onDragStarted: (draggingQuestion) {
-                          setState(() => _draggingQuestion = draggingQuestion);
-                        },
-                        onDragEnd: (draggingQuestion) {
-                          setState(() => _draggingQuestion = null);
-                        },
-                      ),
-                    )
+                    .map((question) => PostItBookQuestionWidget(
+                          bookQuestion: question,
+                          isMyQuestion: question.writerMemberId == widget.currentUserId,
+                          onTap: () => widget.onQuestionTap?.call(question),
+                          onDragStarted: (draggingQuestion) {
+                            setState(() => _draggingQuestion = draggingQuestion);
+                          },
+                          onDragEnd: (draggingQuestion) {
+                            setState(() => _draggingQuestion = null);
+                          },
+                        ))
                     .toList(),
               ),
             ),
@@ -336,7 +343,7 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget> {
   /// 빈 상태 위젯
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
-
+    
     return Container(
       height: 150,
       decoration: BoxDecoration(
