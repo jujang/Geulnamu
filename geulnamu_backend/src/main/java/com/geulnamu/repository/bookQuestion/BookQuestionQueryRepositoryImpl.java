@@ -24,6 +24,18 @@ public class BookQuestionQueryRepositoryImpl implements BookQuestionQueryReposit
 
 
     @Override
+    public List<BookQuestionViewResponse> findMyBookQuestion(Long attendanceId) {
+        return queryFactory
+            .select(Projections.constructor(BookQuestionViewResponse.class,
+                bookQuestion.id, attendance.member.id, bookQuestion.content)
+            )
+            .from(attendance)
+            .join(bookQuestion).on(bookQuestion.attendance.id.eq(attendance.id))
+            .where(attendance.id.eq(attendanceId))
+            .fetch();
+    }
+
+    @Override
     public List<BookQuestionViewResponse> findMyDiscussionGroupBookQuestion(Long meetingId, DiscussionGroup discussionGroup) {
         return queryFactory
             .select(Projections.constructor(BookQuestionViewResponse.class,

@@ -7,6 +7,7 @@ import com.geulnamu.domain.attendance.DiscussionGroup;
 import java.util.List;
 
 public interface BookQuestionQueryRepositoryCustom {
+    List<BookQuestionViewResponse> findMyBookQuestion(Long attendanceId);
     List<BookQuestionViewResponse> findMyDiscussionGroupBookQuestion(Long meetingId, DiscussionGroup discussionGroup);
     List<BookQuestionWithGroup> findMeetingBookQuestion(Long meetingId);
 }

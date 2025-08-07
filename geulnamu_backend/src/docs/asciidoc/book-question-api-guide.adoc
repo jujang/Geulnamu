@@ -46,6 +46,32 @@ include::{snippets}/book-questions/create/response-fields.adoc[]
 
 == GET
 
+=== 발제문 리스트 조회 - 본인
+* 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
+* 특정 모임에 대한 본인이 작성한 발제문 목록 조회를 위한 용도의 API
+* 모임원 본인이 작성한 발제문만 조회 가능
+
+==== request
+include::{snippets}/book-questions/me/view/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/book-questions/me/view/request-headers.adoc[]
+
+==== query-parameters
+include::{snippets}/book-questions/me/view/query-parameters.adoc[]
+
+==== response
+include::{snippets}/book-questions/me/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/book-questions/me/view/response-fields.adoc[]
+
+==== Error case
+
+
+---
+
+
 === 발제문 리스트 조회 - 그룹 단위
 * 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
 * 그룹 토론 시간에 발제 시간에 발제문을 취합 및 발제문을 통한 대화를 위한 용도의 API
@@ -123,7 +149,6 @@ include::{snippets}/book-questions/modify/response-fields.adoc[]
 ==== Error case
 
 
----
 
 == DELETE
 
