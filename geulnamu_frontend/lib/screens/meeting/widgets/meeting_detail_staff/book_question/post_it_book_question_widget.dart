@@ -279,9 +279,9 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
   }
 }
 
-/// 🚀 정확한 위치 기반 + 빈 공간 드롭 지원 시스템
-/// GlobalKey를 사용해 포스트잇의 실제 크기와 위치를 정확히 계산
-/// 포스트잇 사이의 빈 공간에도 드롭 가능
+/// 🚀 옵션 B: 빈 공간 전체 드롭 + 스마트 삽입 위치 계산 시스템
+/// 포스트잇 사이의 모든 빈 공간에서 드롭 가능
+/// 마우스 위치에 따라 가장 가까운 삽입 지점을 자동 계산
 class PostItCollectionWidget extends StatefulWidget {
   final List<BookQuestionModel> bookQuestions;
   final int currentUserId;
@@ -305,12 +305,13 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
   
   // 🆕 포스트잇 위치 추적을 위한 GlobalKey들
   final Map<int, GlobalKey> _postItKeys = {}; // questionId -> GlobalKey
-  final List<GlobalKey> _dropZoneKeys = []; // 빈 공간 드롭존 키들
+  final GlobalKey _containerKey = GlobalKey(); // 전체 컨테이너 키
   
-  // 🆕 드롭 표시를 위한 상태 변수들
+  // 🆕 스마트 드롭 시스템을 위한 상태 변수들
   int? _hoveredPostItIndex; // 호버 중인 포스트잇 인덱스
-  int? _hoveredDropZoneIndex; // 호버 중인 빈 공간 드롭존 인덱스
   bool _isLeftSide = false; // 마우스가 포스트잇의 왼쪽에 있는지
+  int? _predictedInsertIndex; // 예상 삽입 위치 인덱스
+  Offset? _currentDragPosition; // 현재 드래그 위치
   
   // 애니메이션 관련
   late AnimationController _reorderController;
@@ -364,13 +365,7 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
       }
     }
     
-    // 드롭존 키들 재생성 (발제문 수 + 1개)
-    _dropZoneKeys.clear();
-    for (int i = 0; i <= _orderedQuestions.length; i++) {
-      _dropZoneKeys.add(GlobalKey());
-    }
-    
-    print('🔑 [키 초기화] 포스트잇 키: ${_postItKeys.length}개, 드롭존 키: ${_dropZoneKeys.length}개');
+    print('🔑 [키 초기화] 포스트잇 키: ${_postItKeys.length}개');
   }
 
   @override
@@ -382,6 +377,7 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
     }
 
     return Container(
+      key: _containerKey, // 전체 컨테이너에 키 추가
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
@@ -398,65 +394,73 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
       child: AnimatedBuilder(
         animation: _reorderAnimation,
         builder: (context, child) {
-          return _buildPostItGrid(context);
+          return Stack(
+            children: [
+              // 메인 포스트잇 그리드
+              _buildPostItGrid(context),
+              
+              // 🆕 전체 영역 드래그 타겟 (투명한 오버레이)
+              if (_draggingQuestion != null)
+                _buildSmartDropOverlay(context),
+              
+              // 🆕 예상 삽입 위치 표시기
+              if (_predictedInsertIndex != null && _draggingQuestion != null)
+                _buildInsertionIndicator(context),
+            ],
+          );
         },
       ),
     );
   }
   
-  /// 🚀 정확한 위치 계산 기반 드래그 타겟 그리드 + 빈 공간 드롭존
+  /// 🚀 옵션 B: 간단한 포스트잇 그리드 (드롭존 제거)
   Widget _buildPostItGrid(BuildContext context) {
     final theme = Theme.of(context);
     final children = <Widget>[];
-    
-    // 첫 번째 드롭존 (맨 앞)
-    children.add(_buildDropZone(context, 0));
     
     for (int i = 0; i < _orderedQuestions.length; i++) {
       final question = _orderedQuestions[i];
       final isDragging = _draggingQuestion?.bookQuestionId == question.bookQuestionId;
       final isHovered = _hoveredPostItIndex == i;
       
-      // 포스트잇 위젯
+      // 포스트잇 위젯 (기존 드롭존 제거, 간단한 구조)
       children.add(
         Container(
           key: _postItKeys[question.bookQuestionId], // GlobalKey 적용
           margin: const EdgeInsets.all(8),
           child: Stack(
             children: [
-              // 🎯 정확한 크기 기반 드래그 타겟
+              // 🎯 포스트잇별 개별 드래그 타겟 (정확한 크기 기반)
               DragTarget<BookQuestionModel>(
                 onWillAccept: (data) {
                   if (data == null || _draggingQuestion == null) {
-                    print('❌ [포스트잇 드롭 체크] 데이터 없음');
                     return false;
                   }
                   
                   // 자기 자신에게는 드롭 불가
                   final isSelf = data.bookQuestionId == question.bookQuestionId;
                   if (isSelf) {
-                    print('❌ [포스트잇 드롭 체크] 자기 자신에게 드롭 불가: ${data.bookQuestionId}');
                     return false;
                   }
                   
-                  print('✅ [포스트잇 드롭 체크] 드롭 허용: ${data.bookQuestionId} → 포스트잇 $i');
                   return true;
                 },
                 onAccept: (data) {
-                  print('🎉 [포스트잇 드롭 성공] ${data.bookQuestionId} → 포스트잇 $i (왼쪽: $_isLeftSide)');
+                  print('🎉 [포스트잇 드롭] ${data.bookQuestionId} → 포스트잇 $i');
                   _handlePostItDrop(data, i, _isLeftSide);
                 },
                 onMove: (details) {
-                  // 🎯 핵심 로직: 실제 포스트잇 크기 기반 정확한 위치 계산
+                  // 🎯 정확한 크기 기반 위치 계산
                   final isLeftSide = _calculateIsLeftSide(question.bookQuestionId, details.offset);
                   
-                  if (_hoveredPostItIndex != i || _isLeftSide != isLeftSide || _hoveredDropZoneIndex != null) {
+                  if (_hoveredPostItIndex != i || _isLeftSide != isLeftSide) {
                     setState(() {
                       _hoveredPostItIndex = i;
-                      _hoveredDropZoneIndex = null; // 포스트잇 호버 시 드롭존 해제
                       _isLeftSide = isLeftSide;
+                      // 전체 드롭 시스템과 동기화
+                      _currentDragPosition = details.offset;
+                      _updatePredictedInsertIndex();
                     });
-                    print('🎯 [포스트잇 호버] 포스트잇 $i, 왼쪽: $isLeftSide');
                   }
                 },
                 onLeave: (data) {
@@ -464,8 +468,8 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
                     setState(() {
                       _hoveredPostItIndex = null;
                       _isLeftSide = false;
+                      _currentDragPosition = null;
                     });
-                    print('🚪 [포스트잇 호버 종료] 포스트잇 $i');
                   }
                 },
                 builder: (context, candidateData, rejectedData) {
@@ -526,9 +530,6 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
           ),
         ),
       );
-      
-      // 포스트잇 뒤에 드롭존 추가 (마지막 포스트잇 뒤까지)
-      children.add(_buildDropZone(context, i + 1));
     }
     
     return Wrap(
@@ -562,87 +563,205 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
     }
   }
   
-  /// 🌟 빈 공간 드롭존 위젯
-  Widget _buildDropZone(BuildContext context, int insertIndex) {
-    if (insertIndex >= _dropZoneKeys.length) {
-      print('❌ [드롭존] 인덱스 초과: $insertIndex >= ${_dropZoneKeys.length}');
-      return const SizedBox.shrink();
+  /// 🌟 스마트 드롭 오버레이 (전체 영역 드롭 가능)
+  Widget _buildSmartDropOverlay(BuildContext context) {
+    return Positioned.fill(
+      child: DragTarget<BookQuestionModel>(
+        onWillAccept: (data) {
+          if (data == null || _draggingQuestion == null) {
+            return false;
+          }
+          return true;
+        },
+        onAccept: (data) {
+          print('🎉 [스마트 드롭] ${data.bookQuestionId} → 예상 위치: $_predictedInsertIndex');
+          if (_predictedInsertIndex != null) {
+            _handleSmartDrop(data, _predictedInsertIndex!);
+          }
+        },
+        onMove: (details) {
+          // 글로벌 좌표를 로컬 좌표로 변환
+          final RenderBox? containerRenderBox = _containerKey.currentContext?.findRenderObject() as RenderBox?;
+          if (containerRenderBox != null) {
+            final localPosition = containerRenderBox.globalToLocal(details.globalPosition);
+            setState(() {
+              _currentDragPosition = localPosition;
+              _updatePredictedInsertIndex();
+            });
+            print('🎯 [스마트 드롭] 드래그 위치: $localPosition, 예상 삽입: $_predictedInsertIndex');
+          }
+        },
+        onLeave: (data) {
+          setState(() {
+            _predictedInsertIndex = null;
+            _currentDragPosition = null;
+          });
+        },
+        builder: (context, candidateData, rejectedData) {
+          return Container(
+            color: Colors.transparent, // 투명한 오버레이
+          );
+        },
+      ),
+    );
+  }
+  
+  /// 🧠 스마트 삽입 위치 계산
+  void _updatePredictedInsertIndex() {
+    if (_currentDragPosition == null || _orderedQuestions.isEmpty) {
+      _predictedInsertIndex = null;
+      return;
     }
     
-    final theme = Theme.of(context);
-    final isHovered = _hoveredDropZoneIndex == insertIndex;
-    final isActive = _draggingQuestion != null;
+    final dragX = _currentDragPosition!.dx;
+    final dragY = _currentDragPosition!.dy;
     
-    return DragTarget<BookQuestionModel>(
-      key: _dropZoneKeys[insertIndex],
-      onWillAccept: (data) {
-        if (data == null || _draggingQuestion == null) {
-          return false;
+    double closestDistance = double.infinity;
+    int? bestInsertIndex;
+    
+    // 각 포스트잇과의 거리를 계산해서 가장 가까운 삽입 위치 찾기
+    for (int i = 0; i < _orderedQuestions.length; i++) {
+      final question = _orderedQuestions[i];
+      final key = _postItKeys[question.bookQuestionId];
+      
+      if (key?.currentContext != null) {
+        try {
+          final RenderBox renderBox = key!.currentContext!.findRenderObject() as RenderBox;
+          final position = renderBox.localToGlobal(Offset.zero);
+          final size = renderBox.size;
+          
+          // 컨테이너 기준으로 다시 변환
+          final RenderBox? containerRenderBox = _containerKey.currentContext?.findRenderObject() as RenderBox?;
+          if (containerRenderBox != null) {
+            final localPos = containerRenderBox.globalToLocal(position);
+            final centerX = localPos.dx + size.width / 2;
+            final centerY = localPos.dy + size.height / 2;
+            
+            // 앞쪽 삽입 위치 (포스트잇 왼쪽)
+            final frontDistance = (dragX - (localPos.dx - 10)).abs() + (dragY - centerY).abs();
+            if (frontDistance < closestDistance) {
+              closestDistance = frontDistance;
+              bestInsertIndex = i;
+            }
+            
+            // 뒤쪽 삽입 위치 (포스트잇 오른쪽)
+            final backDistance = (dragX - (localPos.dx + size.width + 10)).abs() + (dragY - centerY).abs();
+            if (backDistance < closestDistance) {
+              closestDistance = backDistance;
+              bestInsertIndex = i + 1;
+            }
+          }
+        } catch (e) {
+          print('⚠️ [삽입 위치 계산] 오류: $e');
         }
-        print('✅ [드롭존 체크] 드롭 허용: ${data.bookQuestionId} → 드롭존 $insertIndex');
-        return true;
-      },
-      onAccept: (data) {
-        print('🎉 [드롭존 드롭 성공] ${data.bookQuestionId} → 인덱스 $insertIndex');
-        _handleDropZoneDrop(data, insertIndex);
-      },
-      onMove: (details) {
-        if (_hoveredDropZoneIndex != insertIndex || _hoveredPostItIndex != null) {
-          setState(() {
-            _hoveredDropZoneIndex = insertIndex;
-            _hoveredPostItIndex = null; // 드롭존 호버 시 포스트잇 해제
-            _isLeftSide = false;
-          });
-          print('🎯 [드롭존 호버] 드롭존 $insertIndex');
-        }
-      },
-      onLeave: (data) {
-        if (_hoveredDropZoneIndex == insertIndex) {
-          setState(() {
-            _hoveredDropZoneIndex = null;
-          });
-          print('🚪 [드롭존 호버 종료] 드롭존 $insertIndex');
-        }
-      },
-      builder: (context, candidateData, rejectedData) {
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: isActive ? (isHovered ? 80 : 40) : 20,
-          height: isActive ? (isHovered ? 120 : 80) : 40,
-          margin: const EdgeInsets.symmetric(horizontal: 4),
+      }
+    }
+    
+    // 맨 앞/맨 뒤도 고려
+    if (bestInsertIndex == null) {
+      // 기본값: 가장 가까운 위치
+      bestInsertIndex = dragX < 200 ? 0 : _orderedQuestions.length;
+    }
+    
+    if (_predictedInsertIndex != bestInsertIndex) {
+      setState(() {
+        _predictedInsertIndex = bestInsertIndex;
+      });
+    }
+  }
+  
+  /// 🎯 예상 삽입 위치 표시기
+  Widget _buildInsertionIndicator(BuildContext context) {
+    if (_predictedInsertIndex == null) return const SizedBox.shrink();
+    
+    final theme = Theme.of(context);
+    
+    // 삽입 위치에 따른 표시기 위치 계산
+    Widget? indicator;
+    
+    if (_predictedInsertIndex == 0) {
+      // 맨 앞에 삽입
+      indicator = Positioned(
+        left: 0,
+        top: 0,
+        bottom: 0,
+        child: Container(
+          width: 4,
           decoration: BoxDecoration(
-            color: isHovered 
-                ? theme.colorScheme.primary.withOpacity(0.3)
-                : (isActive 
-                    ? theme.colorScheme.primary.withOpacity(0.1)
-                    : Colors.transparent),
-            borderRadius: BorderRadius.circular(8),
-            border: isActive ? Border.all(
-              color: isHovered 
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.primary.withOpacity(0.3),
-              width: isHovered ? 2 : 1,
-            ) : null,
-          ),
-          child: isHovered ? Center(
-            child: Icon(
-              Icons.add_circle,
-              color: theme.colorScheme.primary,
-              size: 24,
-            ),
-          ) : (isActive ? Center(
-            child: Container(
-              width: 3,
-              height: 40,
-              decoration: BoxDecoration(
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(2),
+            boxShadow: [
+              BoxShadow(
                 color: theme.colorScheme.primary.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(1.5),
+                blurRadius: 12,
+                offset: const Offset(0, 0),
               ),
-            ),
-          ) : null),
-        );
-      },
-    );
+            ],
+          ),
+        ),
+      );
+    } else if (_predictedInsertIndex == _orderedQuestions.length) {
+      // 맨 뒤에 삽입
+      indicator = Positioned(
+        right: 0,
+        top: 0,
+        bottom: 0,
+        child: Container(
+          width: 4,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(2),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withOpacity(0.5),
+                blurRadius: 12,
+                offset: const Offset(0, 0),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      // 중간에 삽입 - 해당 포스트잇 앞에 표시
+      final targetQuestion = _orderedQuestions[_predictedInsertIndex!];
+      final key = _postItKeys[targetQuestion.bookQuestionId];
+      
+      if (key?.currentContext != null) {
+        try {
+          final RenderBox renderBox = key!.currentContext!.findRenderObject() as RenderBox;
+          final position = renderBox.localToGlobal(Offset.zero);
+          final RenderBox? containerRenderBox = _containerKey.currentContext?.findRenderObject() as RenderBox?;
+          
+          if (containerRenderBox != null) {
+            final localPos = containerRenderBox.globalToLocal(position);
+            
+            indicator = Positioned(
+              left: localPos.dx - 20,
+              top: localPos.dy,
+              child: Container(
+                width: 4,
+                height: renderBox.size.height,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withOpacity(0.5),
+                      blurRadius: 12,
+                      offset: const Offset(0, 0),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+        } catch (e) {
+          print('⚠️ [삽입 표시기] 위치 계산 오류: $e');
+        }
+      }
+    }
+    
+    return indicator ?? const SizedBox.shrink();
   }
   
   /// 드롭 위치 표시기 위젯
@@ -667,8 +786,9 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
   /// 모든 호버 상태 클리어
   void _clearHoverStates() {
     _hoveredPostItIndex = null;
-    _hoveredDropZoneIndex = null;
     _isLeftSide = false;
+    _predictedInsertIndex = null;
+    _currentDragPosition = null;
   }
 
   /// 🎯 포스트잇 드롭 처리 (정확한 크기 기반)
@@ -704,14 +824,14 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
     _performReorder(draggedQuestion, currentIndex, insertIndex, '포스트잇 ${isLeftSide ? "앞" : "뒤"}쪽');
   }
   
-  /// 🌟 드롭존 드롭 처리 (빈 공간에 정확히 삽입)
-  void _handleDropZoneDrop(BookQuestionModel draggedQuestion, int insertIndex) {
-    print('🚀 [드롭존 드롭] 시작');
+  /// 🌟 스마트 드롭 처리 (빈 공간 전체 대응)
+  void _handleSmartDrop(BookQuestionModel draggedQuestion, int insertIndex) {
+    print('🚀 [스마트 드롭] 시작');
     print('   - 드래그된 질문: ${draggedQuestion.bookQuestionId}');
-    print('   - 삽입 인덱스: $insertIndex');
+    print('   - 예상 삽입 인덱스: $insertIndex');
     
     if (!mounted) {
-      print('❌ [드롭존 드롭] mounted = false, 중단');
+      print('❌ [스마트 드롭] mounted = false, 중단');
       return;
     }
 
@@ -719,11 +839,11 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
         (q) => q.bookQuestionId == draggedQuestion.bookQuestionId);
     
     if (currentIndex == -1) {
-      print('❌ [드롭존 드롭] 현재 인덱스를 찾을 수 없음');
+      print('❌ [스마트 드롭] 현재 인덱스를 찾을 수 없음');
       return;
     }
     
-    _performReorder(draggedQuestion, currentIndex, insertIndex, '${insertIndex + 1}번째 위치');
+    _performReorder(draggedQuestion, currentIndex, insertIndex, '${insertIndex + 1}번째 위치 (스마트 삽입)');
   }
   
   /// 🔄 실제 순서 변경 수행 (공통 로직)

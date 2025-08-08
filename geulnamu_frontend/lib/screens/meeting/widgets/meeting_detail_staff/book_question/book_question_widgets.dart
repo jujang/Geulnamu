@@ -312,14 +312,14 @@ class BookQuestionWidgets {
       child: Row(
         children: [
           Icon(
-            Icons.swap_horiz, // 🆕 드래그 방향 아이콘으로 변경
+            Icons.all_inclusive, // 🆕 전체 영역 드롭 아이콘
             size: 16,
             color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '✨ 포스트잇을 드래그해서 순서를 변경할 수 있습니다. 포스트잇 위나 빈 공간에 드롭하세요! 드래그 중에는 정확한 드롭 위치가 표시됩니다.',
+              '✨ 포스트잇을 드래그해서 어디든 드롭하세요! 가장 가까운 위치로 자동 삽입되며, 드래그 중에는 예상 삽입 위치가 파란색 선으로 표시됩니다.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
                 fontSize: 11,
