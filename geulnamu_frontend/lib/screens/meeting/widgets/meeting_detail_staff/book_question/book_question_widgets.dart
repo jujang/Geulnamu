@@ -24,8 +24,8 @@ class BookQuestionWidgets {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 섹션 헤더
-            _buildSectionHeader(context, onRefresh),
+            // 섹션 헤더 (총 갯수 포함)
+            _buildSectionHeader(context, onRefresh, bookQuestionList: bookQuestionList ?? []),
             const SizedBox(height: 16),
 
             // 내용
@@ -48,21 +48,38 @@ class BookQuestionWidgets {
     );
   }
 
-  /// 섹션 헤더
+  /// 섹션 헤더 (다른 섹션들과 통일된 스타일)
   static Widget _buildSectionHeader(
     BuildContext context,
-    VoidCallback onRefresh,
-  ) {
+    VoidCallback onRefresh, {
+    required List<BookQuestionModel> bookQuestionList,
+  }) {
     final theme = Theme.of(context);
+    final totalCount = bookQuestionList.length;
 
     return Row(
       children: [
-        Icon(Icons.sticky_note_2, color: theme.colorScheme.primary, size: 24),
-        const SizedBox(width: 8),
         Text(
-          '발제문',
-          style: theme.textTheme.headlineSmall?.copyWith(
+          '📝 발제문', // 이모지 + 제목으로 다른 섹션과 통일
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(width: 12),
+        // 🆕 총 갯수를 섹션 타이틀 우측으로 이동
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            '총 ${totalCount}개',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
         const Spacer(),
@@ -192,10 +209,7 @@ class BookQuestionWidgets {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 통계 정보
-        _buildStatistics(context, bookQuestionList, currentUserId),
-        const SizedBox(height: 16),
-
+        // 🆕 통계 정보 제거 (섹션 헤더로 이동함)
         // 포스트잇 발제문 컬렉션 (🆕 정확한 드롭 기능!)
         PostItCollectionWidget(
           bookQuestions: bookQuestionList,
@@ -211,46 +225,7 @@ class BookQuestionWidgets {
     );
   }
 
-  /// 통계 정보
-  static Widget _buildStatistics(
-    BuildContext context,
-    List<BookQuestionModel> bookQuestionList,
-    int currentUserId,
-  ) {
-    final theme = Theme.of(context);
-    final totalCount = bookQuestionList.length;
-    final myCount = bookQuestionList
-        .where((q) => q.writerMemberId == currentUserId)
-        .length;
-    final othersCount = totalCount - myCount;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.analytics_outlined,
-            size: 16,
-            color: theme.colorScheme.onPrimaryContainer,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            '총 $totalCount개',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          // 🔥 본인 발제문 개수 표시 제거 (모두 동일하게 표시)
-        ],
-      ),
-    );
-  }
+  // 🆕 통계 정보 함수 제거 (섹션 헤더로 통합됨)
 
   /// 빈 상태
   static Widget _buildEmptyState(BuildContext context) {
@@ -311,14 +286,14 @@ class BookQuestionWidgets {
       child: Row(
         children: [
           Icon(
-            Icons.all_inclusive, // 🆕 전체 영역 드롭 아이콘
+            Icons.touch_app, // 🎯 단순한 터치 아이콘
             size: 16,
             color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '✨ 포스트잇을 드래그해서 어디든 드롭하세요! 가장 가까운 위치로 자동 삽입되며, 드래그 중에는 예상 삽입 위치가 파란색 선으로 표시됩니다.',
+              '🎯 포스트잇을 드래그해서 다른 포스트잇 앞이나 뒤에 드롭하면 순서가 바뀝니다. 파란색 선이 삽입 위치를 표시해줍니다.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
                 fontSize: 11,
