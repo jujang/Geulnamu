@@ -286,52 +286,28 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
           child: DragTarget<BookQuestionModel>(
             onWillAccept: (data) {
               if (data == null || _draggingQuestion == null) {
-                if (AppConfig.debugMode) {
-                  print('❌ [드롭 거부] 데이터 또는 드래그 질문이 null');
-                }
                 return false;
               }
               
               // 자기 자신에게는 드롭 불가
               final isSelf = data.bookQuestionId == question.bookQuestionId;
-              if (isSelf) {
-                if (AppConfig.debugMode) {
-                  print('❌ [드롭 거부] 자기 자신에게 드롭 시도');
-                }
-                return false;
-              }
-              
-              if (AppConfig.debugMode) {
-                print('✅ [드롭 허용] 포스트잇 $i에 드롭 가능');
-              }
-              return true;
+              return !isSelf;
             },
             onAccept: (data) {
-              if (AppConfig.debugMode) {
-                print('🎯 [단순 드롭] ${data.bookQuestionId} → 포스트잇 $i (${_isLeftSide ? "왼쪽" : "오른쪽"})');
-              }
               _handleSimpleDrop(data, i, _isLeftSide);
             },
             onMove: (details) {
               // 드래그 중이 아니면 무시
               if (_draggingQuestion == null) return;
               
-              // 🆕 민감도 조정: 1/4 지점에서 인식 (200px 포스트잇 기준)
+              // 민감도 조정: 1/4 지점에서 인식 (200px 포스트잇 기준)
               final isLeftSide = details.offset.dx < 50; // 1/4 지점 (200px * 0.25 = 50px)
-              
-              if (AppConfig.debugMode) {
-                print('🎯 [드롭 호버] 포스트잇 $i에 마우스 위치: ${details.offset.dx.toInt()}, 왼쪽: $isLeftSide (임계값: 50px)');
-              }
               
               if (_hoveredIndex != i || _isLeftSide != isLeftSide) {
                 setState(() {
                   _hoveredIndex = i;
                   _isLeftSide = isLeftSide;
                 });
-                
-                if (AppConfig.debugMode) {
-                  print('📍 [드롭 표시기] 표시: 포스트잇 $i ${isLeftSide ? "왼쪽" : "오른쪽"}');
-                }
               }
             },
             onLeave: (data) {
@@ -343,7 +319,7 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
               }
             },
             builder: (context, candidateData, rejectedData) {
-              // 🎯 드래그 중일 때만 표시기 보이도록 단순화
+              // 드래그 중일 때만 표시기 보이도록 단순화
               final shouldShowLeftIndicator = _draggingQuestion != null && 
                                              _hoveredIndex == i && 
                                              _isLeftSide &&
@@ -353,10 +329,6 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
                                               _hoveredIndex == i && 
                                               !_isLeftSide &&
                                               !isDragging; // 드래그되는 포스트잇 자체는 제외
-              
-              if (AppConfig.debugMode && (shouldShowLeftIndicator || shouldShowRightIndicator)) {
-                print('📍 [표시기 표시] 포스트잇 $i: ${shouldShowLeftIndicator ? "왼쪽" : shouldShowRightIndicator ? "오른쪽" : ""} 표시기 활성');
-              }
               
               return Stack(
                 children: [
@@ -387,25 +359,14 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
                       isMyQuestion: question.writerMemberId == widget.currentUserId,
                       onTap: () => widget.onQuestionTap?.call(question),
                       onDragStarted: (draggingQuestion) {
-                        if (AppConfig.debugMode) {
-                          print('🚀 [단순 드래그] 시작: ${draggingQuestion.bookQuestionId}');
-                        }
                         setState(() {
                           _draggingQuestion = draggingQuestion;
-                          _draggingOriginalIndex = i; // 원래 위치 기록
-                          // 드래그 시작 시 상태 초기화
+                          _draggingOriginalIndex = i;
                           _hoveredIndex = null;
                           _isLeftSide = false;
                         });
-                        
-                        if (AppConfig.debugMode) {
-                          print('🎯 [드롭 준비] 드래그 시작, 드롭 표시기 준비 완료');
-                        }
                       },
                       onDragEnd: (draggingQuestion) {
-                        if (AppConfig.debugMode) {
-                          print('🏁 [단순 드래그] 종료: ${draggingQuestion.bookQuestionId}');
-                        }
                         setState(() {
                           _draggingQuestion = null;
                           _draggingOriginalIndex = null;
@@ -528,14 +489,11 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
 
     // 조정 후에도 같은 위치인지 체크
     if (currentIndex == insertIndex) {
-      if (AppConfig.debugMode) {
-        print('🚫 [원위치 드롭] 조정 후에도 동일 위치, 변경 안 함');
-      }
       return;
     }
 
     if (AppConfig.debugMode) {
-      print('🎯 [단순 순서 변경] $currentIndex → $insertIndex ($direction)');
+      print('🗒️ [순서 변경] $currentIndex → $insertIndex ($direction)');
     }
 
     // 애니메이션 시작
@@ -580,7 +538,7 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
         onAcceptWithDetails: (data) {
           if (_predictedInsertIndex != null) {
             if (AppConfig.debugMode) {
-              print('🎆 [전체 영역 드롭] ${data.data.bookQuestionId} → 인덱스 $_predictedInsertIndex');
+            print('🚀 [신속 드롭] ${_predictedInsertIndex != null ? "배치 위치 $_predictedInsertIndex" : "배치 위치 없음"}');
             }
             _handleFullAreaDrop(data.data, _predictedInsertIndex!);
           }
@@ -595,20 +553,12 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
             setState(() {
               _predictedInsertIndex = insertIndex;
             });
-            
-            if (AppConfig.debugMode) {
-              print('🎯 [삽입 인덱스 예측] $insertIndex번째 위치');
-            }
           }
         },
         onLeave: (data) {
           setState(() {
             _predictedInsertIndex = null;
           });
-          
-          if (AppConfig.debugMode) {
-            print('🚻 [전체 영역] 드래그 어웨이, 예측 인덱스 제거');
-          }
         },
         builder: (context, candidateData, rejectedData) {
           return Container(
@@ -643,30 +593,21 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
             final postItY = localPos.dy;
             final postItHeight = renderBox.size.height;
             
-            // 🎯 Y축 범위 체크: 마우스가 포스트잇과 비슷한 높이에 있는지 확인
+            // Y축 범위 체크: 마우스가 포스트잇과 비슷한 높이에 있는지 확인
             // 포스트잇 높이의 50% 여유를 둠 (같은 행으로 간주)
             final tolerance = postItHeight * 0.5;
             if (mouseY >= postItY - tolerance && mouseY <= postItY + postItHeight + tolerance) {
               candidateIndices.add(i);
-              
-              if (AppConfig.debugMode) {
-                print('🎯 [후보 선정] 포스트잇 $i: Y범위 ${postItY.toInt()}~${(postItY + postItHeight).toInt()}, 마우스Y: ${mouseY.toInt()}');
-              }
             }
           }
         } catch (e) {
-          if (AppConfig.debugMode) {
-            print('⚠️ [후보 선정] 포스트잇 $i 오류: $e');
-          }
+          // 오류 발생 시 해당 포스트잇은 후보에서 제외
         }
       }
     }
     
-    // 🎯 2단계: 후보가 없으면 전체에서 가장 가까운 것 선택
+    // 후보가 없으면 전체에서 가장 가까운 것 선택
     if (candidateIndices.isEmpty) {
-      if (AppConfig.debugMode) {
-        print('⚠️ [삽입 인덱스] 같은 행 후보 없음, 전체에서 계산');
-      }
       return _calculateInsertIndexFallback(mousePosition);
     }
     
@@ -697,29 +638,19 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
             if (xDistance < minDistance) {
               minDistance = xDistance;
               
-              // 🆕 1/4 지점 기준으로 앞/뒤 결정
+              // 1/4 지점 기준으로 앞/뒤 결정
               final postItLeftQuarter = localPos.dx + (renderBox.size.width * 0.25);
               bestIndex = mousePosition.dx < postItLeftQuarter ? candidateIndex : candidateIndex + 1;
-              
-              if (AppConfig.debugMode) {
-                print('🎯 [최적 위치] 포스트잇 $candidateIndex: X거리=${xDistance.toInt()}, 1/4지점=${postItLeftQuarter.toInt()}, 삽입인덱스=$bestIndex');
-              }
             }
           }
         } catch (e) {
-          if (AppConfig.debugMode) {
-            print('⚠️ [최적 위치 계산] 포스트잇 $candidateIndex 오류: $e');
-          }
+          // 오류 발생 시 해당 포스트잇은 계산에서 제외
         }
       }
     }
     
     // 경계 검사
     bestIndex = bestIndex.clamp(0, _orderedQuestions.length);
-    
-    if (AppConfig.debugMode) {
-      print('🎯 [최종 삽입 인덱스] $bestIndex (후보: ${candidateIndices.length}개)');
-    }
     
     return bestIndex;
   }
@@ -755,9 +686,7 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
             }
           }
         } catch (e) {
-          if (AppConfig.debugMode) {
-            print('⚠️ [폴백 계산] 포스트잇 $i 오류: $e');
-          }
+          // 오류 발생 시 해당 포스트잇은 계산에서 제외
         }
       }
     }
@@ -812,9 +741,7 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
             );
           }
         } catch (e) {
-          if (AppConfig.debugMode) {
-            print('⚠️ [삽입 표시기] 위치 계산 오류: $e');
-          }
+          // 오류 발생 시 해당 포스트잇은 계산에서 제외
         }
       }
     }
@@ -848,7 +775,6 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
     );
   }
 
-  /// 🆕 전체 영역 드롭 처리
   void _handleFullAreaDrop(BookQuestionModel draggedQuestion, int insertIndex) {
     if (!mounted) return;
 
@@ -856,12 +782,7 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
       (q) => q.bookQuestionId == draggedQuestion.bookQuestionId,
     );
 
-    if (currentIndex == -1) {
-      if (AppConfig.debugMode) {
-        print('❌ [전체 영역 드롭] 현재 인덱스를 찾을 수 없음');
-      }
-      return;
-    }
+    if (currentIndex == -1) return;
 
     _performSimpleReorder(
       draggedQuestion,
