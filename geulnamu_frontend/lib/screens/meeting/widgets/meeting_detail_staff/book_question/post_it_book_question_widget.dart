@@ -569,13 +569,12 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
     );
   }
 
-  /// 🆕 마우스 위치에 따른 삽입 인덱스 계산 (Y축 고려 개선)
+  /// 🎯 마우스 위치에 따른 삽입 인덱스 계산 (스마트 행 감지)
   int _calculateInsertIndex(Offset mousePosition) {
     if (_orderedQuestions.isEmpty) return 0;
     
-    // 🎯 1단계: 마우스 Y 좌표와 비슷한 높이의 포스트잇들만 필터링
-    final List<int> candidateIndices = [];
-    final double mouseY = mousePosition.dy;
+    // 🔍 1단계: 모든 포스트잇의 Y 위치 정보 수집
+    final List<MapEntry<int, double>> postItYPositions = [];
     
     for (int i = 0; i < _orderedQuestions.length; i++) {
       final question = _orderedQuestions[i];
@@ -586,33 +585,46 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
           final RenderBox renderBox = key!.currentContext!.findRenderObject() as RenderBox;
           final globalPos = renderBox.localToGlobal(Offset.zero);
           
-          // 컨테이너 기준 로컬 좌표로 변환
           final containerRenderBox = _containerKey.currentContext?.findRenderObject() as RenderBox?;
           if (containerRenderBox != null) {
             final localPos = containerRenderBox.globalToLocal(globalPos);
-            final postItY = localPos.dy;
-            final postItHeight = renderBox.size.height;
-            
-            // Y축 범위 체크: 마우스가 포스트잇과 비슷한 높이에 있는지 확인
-            // 포스트잇 높이의 50% 여유를 둠 (같은 행으로 간주)
-            final tolerance = postItHeight * 0.5;
-            if (mouseY >= postItY - tolerance && mouseY <= postItY + postItHeight + tolerance) {
-              candidateIndices.add(i);
-            }
+            final centerY = localPos.dy + renderBox.size.height / 2;
+            postItYPositions.add(MapEntry(i, centerY));
           }
         } catch (e) {
-          // 오류 발생 시 해당 포스트잇은 후보에서 제외
+          // 오류 발생 시 해당 포스트잇은 제외
         }
       }
     }
     
-    // 후보가 없으면 전체에서 가장 가까운 것 선택
-    if (candidateIndices.isEmpty) {
-      return _calculateInsertIndexFallback(mousePosition);
+    if (postItYPositions.isEmpty) {
+      return 0;
     }
     
-    // 🎯 3단계: 후보들 중에서 가장 적절한 삽입 위치 계산
-    double minDistance = double.infinity;
+    // 🎯 2단계: 마우스 Y와 가장 가까운 행(들) 찾기
+    final double mouseY = mousePosition.dy;
+    
+    // 각 포스트잇과 마우스 간의 Y축 거리 계산
+    final List<MapEntry<int, double>> yDistances = postItYPositions
+        .map((entry) => MapEntry(entry.key, (mouseY - entry.value).abs()))
+        .toList();
+    
+    // Y축 거리로 정렬
+    yDistances.sort((a, b) => a.value.compareTo(b.value));
+    
+    // 가장 가까운 Y 거리
+    final double closestYDistance = yDistances.first.value;
+    
+    // 🏆 3단계: 가장 가까운 행에 속하는 포스트잇들만 후보로 선정
+    // 허용 오차: 가장 가까운 거리 + 포스트잇 높이의 30%
+    final double tolerance = 36.0; // 대략 포스트잇 높이 120px의 30%
+    final List<int> candidateIndices = yDistances
+        .where((entry) => entry.value <= closestYDistance + tolerance)
+        .map((entry) => entry.key)
+        .toList();
+    
+    // 🎯 4단계: 후보들 중에서 X축 거리 기반으로 최적 삽입 위치 계산
+    double minXDistance = double.infinity;
     int bestIndex = 0;
     
     for (final candidateIndex in candidateIndices) {
@@ -627,16 +639,12 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
           final containerRenderBox = _containerKey.currentContext?.findRenderObject() as RenderBox?;
           if (containerRenderBox != null) {
             final localPos = containerRenderBox.globalToLocal(globalPos);
-            final postItCenter = Offset(
-              localPos.dx + renderBox.size.width / 2,
-              localPos.dy + renderBox.size.height / 2,
-            );
             
-            // 🎯 X축 거리만 계산 (같은 행이므로 Y축은 고려하지 않음)
-            final xDistance = (mousePosition.dx - postItCenter.dx).abs();
+            // X축 거리만 계산 (같은 행이므로)
+            final xDistance = (mousePosition.dx - (localPos.dx + renderBox.size.width / 2)).abs();
             
-            if (xDistance < minDistance) {
-              minDistance = xDistance;
+            if (xDistance < minXDistance) {
+              minXDistance = xDistance;
               
               // 1/4 지점 기준으로 앞/뒤 결정
               final postItLeftQuarter = localPos.dx + (renderBox.size.width * 0.25);
@@ -651,6 +659,10 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
     
     // 경계 검사
     bestIndex = bestIndex.clamp(0, _orderedQuestions.length);
+    
+    if (AppConfig.debugMode) {
+      print('🎯 [스마트 행 감지] 후보: ${candidateIndices.length}개, 삽입 위치: $bestIndex');
+    }
     
     return bestIndex;
   }
