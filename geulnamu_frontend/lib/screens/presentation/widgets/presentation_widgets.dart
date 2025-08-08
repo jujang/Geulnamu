@@ -3,11 +3,11 @@ import '../../../core/theme.dart';
 import '../../../models/presentation/presentation_model.dart';
 import '../../../models/presentation/presentation_filter_model.dart';
 
-/// 발제문 관련 UI 위젯들 (책 모양 디자인)
+/// 발제문 관련 UI 위젯들 (실제 책 모양 디자인)
 ///
 /// Static Methods로 구현하여 재사용성 극대화
 class PresentationWidgets {
-  /// 📖 책 모양 발제문 카드
+  /// 📖 실제 책 모양 발제문 카드
   static Widget buildBookCard(
     BuildContext context,
     PresentationInfo presentation, {
@@ -16,66 +16,85 @@ class PresentationWidgets {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 160, // 책 너비 고정
-        height: 220, // 책 높이 고정
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 8,
-              offset: const Offset(2, 4),
-            ),
-          ],
-        ),
+        width: 160, // 책 너비 확대 (140 → 160)
+        height: 200, // 책 높이 확대 (180 → 200)
+        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         child: Stack(
           children: [
-            // 📚 메인 책 표지
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                gradient: _getBookGradient(
-                  context,
-                  presentation.presentationType,
+            // 📖 책 본체 (입체감)
+            Positioned(
+              left: 8,
+              top: 0,
+              right: 0,
+              bottom: 8,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: _getBookColor(context, presentation.presentationType), // 단색으로 변경
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 8,
+                      offset: const Offset(3, 3),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    // 📚 책 표지 효과
+                    _buildBookCover(context),
+                    
+                    // 📄 책 내용
+                    _buildBookContent(context, presentation),
+                  ],
                 ),
               ),
-              child: Stack(
-                children: [
-                  // 📖 책 텍스처 효과
-                  _buildBookTexture(context),
-
-                  // 📄 책 내용
-                  _buildBookContent(context, presentation),
-                ],
-              ),
             ),
-
-            // 📖 책 옆면/등 효과 (3D 느낌)
+            
+            // 📖 책 옆면/등 (진짜 책처럼)
             Positioned(
-              right: 0,
+              left: 0,
               top: 4,
-              bottom: 4,
+              bottom: 12,
+              width: 12,
               child: Container(
-                width: 6,
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
+                    topLeft: Radius.circular(4),
+                    bottomLeft: Radius.circular(4),
                   ),
                   gradient: LinearGradient(
                     colors: [
-                      _getBookColor(
-                        context,
-                        presentation.presentationType,
-                      ).withValues(alpha: 0.7),
-                      _getBookColor(
-                        context,
-                        presentation.presentationType,
-                      ).withValues(alpha: 0.4),
+                      _getDarkerBookColor(context, presentation.presentationType),
+                      _getDarkerBookColor(context, presentation.presentationType).withValues(alpha: 0.8),
                     ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: const Offset(2, 2),
+                    ),
+                  ],
+                ),
+                // 📄 책 등 선들
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    Container(
+                      height: 1,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      color: Colors.black.withValues(alpha: 0.2),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      height: 1,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      color: Colors.black.withValues(alpha: 0.2),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -85,115 +104,99 @@ class PresentationWidgets {
     );
   }
 
-  /// 📚 책 텍스처 효과
-  static Widget _buildBookTexture(BuildContext context) {
+  /// 📚 책 표지 효과
+  static Widget _buildBookCover(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
         gradient: LinearGradient(
           colors: [
-            Colors.white.withValues(alpha: 0.1),
+            Colors.white.withValues(alpha: 0.15),
             Colors.transparent,
-            Colors.black.withValues(alpha: 0.05),
+            Colors.black.withValues(alpha: 0.08),
           ],
-          stops: const [0.0, 0.5, 1.0],
+          stops: const [0.0, 0.3, 1.0],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
+      ),
+      // 📄 책 표지 선들
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            color: Colors.white.withValues(alpha: 0.3),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            color: Colors.white.withValues(alpha: 0.2),
+          ),
+        ],
       ),
     );
   }
 
   /// 📄 책 내용 (제목, 정보들)
-  static Widget _buildBookContent(
-    BuildContext context,
-    PresentationInfo presentation,
-  ) {
+  static Widget _buildBookContent(BuildContext context, PresentationInfo presentation) {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12), // 패딩 증가 (10 → 12)
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 📖 책 제목 (세로 레이아웃에 맞게 조정)
-          Row(
-            children: [
-              Icon(
-                Icons.menu_book_rounded,
-                size: 16,
-                color: Colors.white.withValues(alpha: 0.9),
-              ),
-              const SizedBox(width: 4),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          // 📖 발제문 제목 (세로 레이아웃에 맞게)
+          const SizedBox(height: 16), // 상단 여백 줄임 (20 → 16)
+          
+          // 📖 발제문 제목 (실제 책 제목처럼)
           Expanded(
-            child: Text(
-              presentation.bookTitle,
-              style: context.textStyles.titleSmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                height: 1.3,
+            flex: 3, // 제목 영역 비율 증가
+            child: Center(
+              child: Text(
+                presentation.bookTitle,
+                style: context.textStyles.titleSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  height: 1.3, // 줄간격 증가 (1.2 → 1.3)
+                  fontSize: 14, // 폰트 크기 증가 (13 → 14)
+                ),
+                maxLines: 5, // 최대 줄 수 증가 (4 → 5)
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
-
-          const Spacer(),
-
-          // 📅 모임 날짜 (세로 레이아웃용)
+          
+          const SizedBox(height: 8), // 간격 조정
+          
+          // 📅 모임 날짜 (하단)
           Text(
             presentation.displayMeetingDate,
             style: context.textStyles.bodySmall?.copyWith(
               color: Colors.white.withValues(alpha: 0.9),
               fontWeight: FontWeight.w500,
+              fontSize: 11, // 폰트 크기 증가 (10 → 11)
             ),
           ),
-
-          const SizedBox(height: 4),
-
-          // 🏷️ 발제문 유형
+          
+          const SizedBox(height: 4), // 간격 증가 (2 → 4)
+          
+          // 🏷️ 발제문 유형 + 작성자
           Row(
             children: [
               Icon(
                 _getPresentationTypeIcon(presentation.presentationType),
-                size: 12,
+                size: 12, // 아이콘 크기 증가 (10 → 12)
                 color: Colors.white.withValues(alpha: 0.8),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 4), // 간격 증가 (2 → 4)
               Expanded(
                 child: Text(
-                  presentation.presentationTypeDisplayName,
+                  '${presentation.presentationTypeDisplayName} · ${presentation.meetingCreatorName}',
                   style: context.textStyles.bodySmall?.copyWith(
                     color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 11,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 4),
-
-          // 👤 작성자
-          Row(
-            children: [
-              Icon(
-                Icons.person,
-                size: 12,
-                color: Colors.white.withValues(alpha: 0.8),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  presentation.meetingCreatorName,
-                  style: context.textStyles.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 11,
+                    fontSize: 11, // 폰트 크기 증가 (9 → 11)
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -218,20 +221,31 @@ class PresentationWidgets {
     }
   }
 
-  /// 📚 발제문 유형별 책 그라데이션
-  static LinearGradient _getBookGradient(
-    BuildContext context,
-    PresentationType type,
-  ) {
-    final baseColor = _getBookColor(context, type);
+  /// 📚 발제문 유형별 어두운 책 색상 (책등용)
+  static Color _getDarkerBookColor(BuildContext context, PresentationType type) {
+    switch (type) {
+      case PresentationType.regular:
+        return const Color(0xFF5AB59F); // 어두운 민트색
+      case PresentationType.flash:
+        return const Color(0xFFB8935D); // 어두운 베이지
+      case PresentationType.special:
+        return const Color(0xFF8FA373); // 어두운 초록
+    }
+  }
 
+  /// 📚 발제문 유형별 책 그라디언트 (민트+베이지 조합)
+  static LinearGradient _getBookGradient(BuildContext context, PresentationType type) {
+    final baseColor = _getBookColor(context, type);
+    
+    // 실제 책처럼 자연스러운 그라디언트
     return LinearGradient(
       colors: [
         baseColor,
-        baseColor.withValues(alpha: 0.8),
+        baseColor.withValues(alpha: 0.95),
+        const Color(0xFFF5F1E8).withValues(alpha: 0.1), // 베이지 특색 살짝
         baseColor.withValues(alpha: 0.9),
       ],
-      stops: const [0.0, 0.6, 1.0],
+      stops: const [0.0, 0.3, 0.7, 1.0],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     );
@@ -277,15 +291,15 @@ class PresentationWidgets {
               ),
             ],
           ),
-
+          
           const SizedBox(height: 16),
-
+          
           // 임시 필터 UI (향후 구현)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: context.colors.surfaceContainerHighest.withOpacity(0.5),
+              color: context.colors.surfaceVariant.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -304,7 +318,7 @@ class PresentationWidgets {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '발제문 유형, 날짜, 출석상태별 필터링',
+                  '발제문 유형, 날짜별 필터링',
                   style: context.textStyles.bodySmall?.copyWith(
                     color: context.colors.onSurfaceVariant,
                   ),
@@ -313,9 +327,9 @@ class PresentationWidgets {
               ],
             ),
           ),
-
+          
           const SizedBox(height: 24),
-
+          
           // 확인 버튼
           SizedBox(
             width: double.infinity,
@@ -324,7 +338,7 @@ class PresentationWidgets {
               child: const Text('확인'),
             ),
           ),
-
+          
           // 하단 안전 영역
           const SizedBox(height: 16),
         ],

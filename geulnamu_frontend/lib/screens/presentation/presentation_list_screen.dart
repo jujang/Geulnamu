@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../widgets/common/loading_widgets.dart';
 import '../../core/theme.dart';
+import '../../core/config/app_config.dart'; // AppConfig import 추가
 import '../../models/presentation/presentation_model.dart';
 import '../../services/home/home_service.dart';
 import '../../services/home/home_route_service.dart'; // RouteObserver
@@ -202,30 +203,78 @@ class _PresentationListScreenState extends State<PresentationListScreen>
           color: context.colors.outline.withOpacity(0.2),
         ),
 
-        // 발제문 목록 (책 형태 - 그리드)
+        // 발제문 목록 (실제 책장 모양 - 반응형 그리드)
         Expanded(
           child: RefreshIndicator(
             onRefresh: refreshPresentationList,
-            child: GridView.builder(
-              padding: const EdgeInsets.only(
-                top: 8,
-                left: 8,
-                right: 8,
-                bottom: 80, // FAB 공간 확보
-              ),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // 한 행에 2개씩 (책장처럼)
-                childAspectRatio: 160 / 220, // 책 비율 (160x220)
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemCount: presentationList.length,
-              itemBuilder: (context, index) {
-                final presentation = presentationList[index];
-                return PresentationWidgets.buildBookCard(
-                  context,
-                  presentation,
-                  onTap: () => _handlePresentationTap(presentation),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // 📱 반응형 그리드 설정
+                int crossAxisCount;
+                if (constraints.maxWidth < 600) {
+                  crossAxisCount = 2; // 모바일: 2개
+                } else if (constraints.maxWidth < 900) {
+                  crossAxisCount = 3; // 태블릿: 3개
+                } else {
+                  crossAxisCount = 4; // 데스크탑: 4개+
+                }
+                
+                return Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8B4513).withValues(alpha: 0.1), // 갈색 책장 배경
+                  ),
+                  child: GridView.builder(
+                    padding: const EdgeInsets.only(
+                      top: 16,
+                      left: 12,
+                      right: 12,
+                      bottom: 80, // FAB 공간 확보
+                    ),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      childAspectRatio: 160 / 200, // 책 비율 수정 (160x200)
+                      crossAxisSpacing: 6, // 간격 줄임 (8 → 6)
+                      mainAxisSpacing: 12, // 선반 간격 줄임 (16 → 12)
+                    ),
+                    itemCount: presentationList.length,
+                    itemBuilder: (context, index) {
+                      final presentation = presentationList[index];
+                      final row = index ~/ crossAxisCount;
+                      
+                      return Stack(
+                        children: [
+                          // 📚 책장 선반 구분선 (각 행 상단)
+                          if (row > 0)
+                            Positioned(
+                              top: -8,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                height: 3,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF8B4513), // 갈색 선반
+                                  borderRadius: BorderRadius.circular(1.5),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.2),
+                                      blurRadius: 2,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          
+                          // 📖 책 (클릭 연결 해제)
+                          PresentationWidgets.buildBookCard(
+                            context,
+                            presentation,
+                            onTap: null, // 🚫 클릭 연결 해제
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -266,8 +315,13 @@ class _PresentationListScreenState extends State<PresentationListScreen>
     await _homeService.handleLogout(context, authProvider);
   }
 
-  /// 발제문 카드 탭 처리 - 상세 페이지로 이동
+  /// 발제문 카드 탭 처리 - 비활성화 (향후 다른 연결 페이지 예정)
   void _handlePresentationTap(PresentationInfo presentation) {
-    handlePresentationTap(presentation);
+    // 현재 비활성화 - 나중에 발제문 전용 페이지로 연결 예정
+    // handlePresentationTap(presentation);
+    
+    if (AppConfig.debugMode) {
+      print('📖 [발제문] 클릭 비활성화: ${presentation.bookTitle}');
+    }
   }
 }
