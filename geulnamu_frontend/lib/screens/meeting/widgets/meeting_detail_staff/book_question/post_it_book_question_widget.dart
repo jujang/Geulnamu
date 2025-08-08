@@ -103,7 +103,7 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
             onDragStarted: () {
               print(
                 '🚀 [드래그 시작] PostIt: ${widget.bookQuestion.bookQuestionId}',
-              );
+            );
               setState(() => _isDragging = true);
               widget.onDragStarted?.call(widget.bookQuestion);
             },
@@ -268,8 +268,8 @@ class _PostItBookQuestionWidgetState extends State<PostItBookQuestionWidget>
           ),
         ),
       ),
-    );
-  }
+      );
+}
 
   /// 포스트잇 색상 가져오기 (모두 노란색으로 통일!)
   Color _getPostItColor(BuildContext context) {
@@ -638,7 +638,7 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
     );
   }
 
-  /// 🧠 스마트 삽입 위치 계산
+  /// 🧠 스마트 삽입 위치 계산 (Y축 가중치 개선)
   void _updatePredictedInsertIndex() {
     if (_currentDragPosition == null || _orderedQuestions.isEmpty) {
       _predictedInsertIndex = null;
@@ -648,10 +648,14 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
     final dragX = _currentDragPosition!.dx;
     final dragY = _currentDragPosition!.dy;
 
-    double closestDistance = double.infinity;
-    int? bestInsertIndex;
+    if (AppConfig.debugMode) {
+      print('🎯 [삽입 위치 계산] 드래그 위치: ($dragX, $dragY)');
+    }
 
-    // 각 포스트잇과의 거리를 계산해서 가장 가까운 삽입 위치 찾기
+    // 🆕 1단계: 포스트잇들을 행별로 그룹핑
+    final Map<int, List<_PostItPosition>> rowGroups = {};
+    final List<_PostItPosition> allPositions = [];
+
     for (int i = 0; i < _orderedQuestions.length; i++) {
       final question = _orderedQuestions[i];
       final key = _postItKeys[question.bookQuestionId];
@@ -668,36 +672,157 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
               _containerKey.currentContext?.findRenderObject() as RenderBox?;
           if (containerRenderBox != null) {
             final localPos = containerRenderBox.globalToLocal(position);
-            final centerX = localPos.dx + size.width / 2;
-            final centerY = localPos.dy + size.height / 2;
-
-            // 앞쪽 삽입 위치 (포스트잇 왼쪽)
-            final frontDistance =
-                (dragX - (localPos.dx - 10)).abs() + (dragY - centerY).abs();
-            if (frontDistance < closestDistance) {
-              closestDistance = frontDistance;
-              bestInsertIndex = i;
-            }
-
-            // 뒤쪽 삽입 위치 (포스트잇 오른쪽)
-            final backDistance =
-                (dragX - (localPos.dx + size.width + 10)).abs() +
-                (dragY - centerY).abs();
-            if (backDistance < closestDistance) {
-              closestDistance = backDistance;
-              bestInsertIndex = i + 1;
-            }
+            
+            final postItPos = _PostItPosition(
+              index: i,
+              question: question,
+              x: localPos.dx,
+              y: localPos.dy,
+              width: size.width,
+              height: size.height,
+            );
+            
+            allPositions.add(postItPos);
+            
+            // Y축 기준으로 행 분류 (25px 허용 오차로 더 세밀하게)
+            final rowKey = (localPos.dy / 25).round();
+            rowGroups[rowKey] ??= [];
+            rowGroups[rowKey]!.add(postItPos);
           }
         } catch (e) {
           if (AppConfig.debugMode) {
-            print('⚠️ [삽입 위치 계산] 오류: $e');
+            print('⚠️ [위치 계산] 포스트잇 ${i} 오류: $e');
           }
         }
       }
     }
 
-    // 맨 앞/맨 뒤도 고려
-    bestInsertIndex ??= dragX < 200 ? 0 : _orderedQuestions.length;
+    if (allPositions.isEmpty) {
+      _predictedInsertIndex = 0;
+      return;
+    }
+
+    // 🆕 2단계: 드래그 위치에 가장 가까운 행 찾기
+    int? targetRowKey;
+    double minRowDistance = double.infinity;
+    
+    for (final entry in rowGroups.entries) {
+      final rowKey = entry.key;
+      final rowPositions = entry.value;
+      
+      if (rowPositions.isNotEmpty) {
+        final avgRowY = rowPositions.map((p) => p.y + p.height / 2).reduce((a, b) => a + b) / rowPositions.length;
+        final rowDistance = (dragY - avgRowY).abs();
+        
+        if (rowDistance < minRowDistance) {
+          minRowDistance = rowDistance;
+          targetRowKey = rowKey;
+        }
+      }
+    }
+
+    // 🆕 3단계: 타겟 행 내에서 X축 기준으로 최적 삽입 위치 찾기
+    int? bestInsertIndex;
+    
+    if (targetRowKey != null && rowGroups[targetRowKey] != null) {
+      final targetRowPositions = rowGroups[targetRowKey]!;
+      
+      // 해당 행 내의 포스트잇들을 X축 기준으로 정렬
+      targetRowPositions.sort((a, b) => a.x.compareTo(b.x));
+      
+      if (AppConfig.debugMode) {
+        print('🎯 [삽입 위치] 타겟 행: $targetRowKey (${targetRowPositions.length}개 포스트잇)');
+        print('   - 행 내 포스트잇들: ${targetRowPositions.map((p) => 'idx:${p.index} x:${p.x.toInt()}').join(", ")}');
+      }
+      
+      double minDistance = double.infinity;
+      
+      // 각 포스트잇에 대해 앞/뒤 삽입 위치 검사
+      for (final postIt in targetRowPositions) {
+        // 앞쪽 삽입 위치 (포스트잇 왼쪽)
+        final frontX = postIt.x - 10;
+        final frontY = postIt.y + postIt.height / 2;
+        final frontDistance = (dragX - frontX).abs() + (dragY - frontY).abs() * 0.5; // Y축 가중치 낮춤
+        
+        if (frontDistance < minDistance) {
+          minDistance = frontDistance;
+          bestInsertIndex = postIt.index;
+        }
+        
+        // 뒤쪽 삽입 위치 (포스트잇 오른쪽)
+        final backX = postIt.x + postIt.width + 10;
+        final backY = postIt.y + postIt.height / 2;
+        final backDistance = (dragX - backX).abs() + (dragY - backY).abs() * 0.5; // Y축 가중치 낮춤
+        
+        if (backDistance < minDistance) {
+          minDistance = backDistance;
+          bestInsertIndex = postIt.index + 1;
+        }
+      }
+      
+      // 행의 맨 앞쪽도 검사 (첫 번째 포스트잇보다 왼쪽)
+      if (targetRowPositions.isNotEmpty) {
+        final firstPostIt = targetRowPositions.first;
+        final beforeFirstDistance = (dragX - (firstPostIt.x - 30)).abs();
+        if (beforeFirstDistance < minDistance && dragX < firstPostIt.x) {
+          bestInsertIndex = firstPostIt.index;
+        }
+        
+        // 행의 맨 뒤쪽도 검사 (마지막 포스트잇보다 오른쪽)
+        final lastPostIt = targetRowPositions.last;
+        final afterLastDistance = (dragX - (lastPostIt.x + lastPostIt.width + 30)).abs();
+        if (afterLastDistance < minDistance && dragX > (lastPostIt.x + lastPostIt.width)) {
+          bestInsertIndex = lastPostIt.index + 1;
+        }
+      }
+    }
+    
+    // 🆕 4단계: 전체 영역을 벗어난 경우 처리
+    if (bestInsertIndex == null) {
+      // 🔥 모든 포스트잇보다 위쪽 → 맨 앞에 삽입 (20px 마진으로 감소)
+      final minY = allPositions.map((p) => p.y).reduce((a, b) => a < b ? a : b);
+      if (dragY < minY - 20) {  // 🔥 50px → 20px로 감소
+        bestInsertIndex = 0;
+        if (AppConfig.debugMode) {
+          print('🎯 [삽입 위치] 전체 영역 위쪽 → 맨 앞 삽입 (0) [dragY: ${dragY.toInt()}, minY: ${minY.toInt()}]');
+        }
+      }
+      // 🔥 모든 포스트잇보다 아래쪽 → 맨 뒤에 삽입 (20px 마진으로 감소)
+      else {
+        final maxY = allPositions.map((p) => p.y + p.height).reduce((a, b) => a > b ? a : b);
+        if (dragY > maxY + 20) {  // 🔥 50px → 20px로 감소
+          bestInsertIndex = _orderedQuestions.length;
+          if (AppConfig.debugMode) {
+            print('🎯 [삽입 위치] 전체 영역 아래쪽 → 맨 뒤 삽입 (${_orderedQuestions.length}) [dragY: ${dragY.toInt()}, maxY: ${maxY.toInt()}]');
+          }
+        } 
+        // 🆕 상단 근처 영역 처리 (첫 번째 행 위쪽 절반)
+        else if (dragY < minY + 30) {  // 🔥 첫 번째 행 상단 30px 영역
+          bestInsertIndex = 0;
+          if (AppConfig.debugMode) {
+            print('🎯 [삽입 위치] 상단 근처 영역 → 맨 앞 삽입 (0) [dragY: ${dragY.toInt()}, 임계값: ${(minY + 30).toInt()}]');
+          }
+        }
+        // 🆕 하단 근처 영역 처리 (마지막 행 아래쪽 절반)
+        else if (dragY > maxY - 30) {  // 🔥 마지막 행 하단 30px 영역
+          bestInsertIndex = _orderedQuestions.length;
+          if (AppConfig.debugMode) {
+            print('🎯 [삽입 위치] 하단 근처 영역 → 맨 뒤 삽입 (${_orderedQuestions.length}) [dragY: ${dragY.toInt()}, 임계값: ${(maxY - 30).toInt()}]');
+          }
+        }
+        else {
+          // 좌우 끝쪽 처리 (기존 로직 유지)
+          bestInsertIndex = dragX < 200 ? 0 : _orderedQuestions.length;
+          if (AppConfig.debugMode) {
+            print('🎯 [삽입 위치] 좌우 끝쪽 → ${dragX < 200 ? "맨 앞" : "맨 뒤"} 삽입 ($bestInsertIndex)');
+          }
+        }
+      }
+    }
+
+    if (AppConfig.debugMode) {
+      print('🎯 [삽입 위치] 최종 결정: $bestInsertIndex');
+    }
 
     if (_predictedInsertIndex != bestInsertIndex) {
       setState(() {
@@ -1030,5 +1155,43 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
         ),
       ),
     );
+  }
+}
+
+/// 🎯 포스트잇 위치 정보를 담는 헬퍼 클래스
+/// 
+/// Y축 가중치 개선을 위한 포스트잇 위치 및 크기 정보
+class _PostItPosition {
+  final int index;                    // 원본 리스트에서의 인덱스
+  final BookQuestionModel question;   // 발제문 데이터
+  final double x;                     // X 위치
+  final double y;                     // Y 위치  
+  final double width;                 // 너비
+  final double height;                // 높이
+  
+  const _PostItPosition({
+    required this.index,
+    required this.question,
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+  });
+  
+  /// 포스트잇의 중심점 X 좌표
+  double get centerX => x + width / 2;
+  
+  /// 포스트잇의 중심점 Y 좌표
+  double get centerY => y + height / 2;
+  
+  /// 포스트잇의 오른쪽 끝 X 좌표
+  double get rightX => x + width;
+  
+  /// 포스트잇의 아래쪽 끝 Y 좌표
+  double get bottomY => y + height;
+  
+  @override
+  String toString() {
+    return '_PostItPosition(idx:$index, x:${x.toInt()}, y:${y.toInt()}, w:${width.toInt()}, h:${height.toInt()})';
   }
 }
