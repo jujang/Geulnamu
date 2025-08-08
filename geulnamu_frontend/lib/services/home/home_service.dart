@@ -284,7 +284,7 @@ class HomeService extends ChangeNotifier {
         Navigator.pushNamed(context, '/qr-scanner');
         break;
       case '발제문 목록':
-        _showSnackBar(context, '발제문 목록 기능은 개발 중입니다.');
+        Navigator.pushNamed(context, '/presentation-list');
         break;
       case '도움말':
         _showSnackBar(context, '도움말 기능은 개발 중입니다.');
