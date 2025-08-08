@@ -27,12 +27,14 @@ import 'screens/meeting/meeting_detail_screen.dart'; // 🆕 모임 상세 화�
 import 'screens/meeting/meeting_detail_staff_screen.dart'; // 🆕 운영진용 모임 상세 화면
 import 'screens/meeting/meeting_qr_scanner_screen.dart'; // 🆕 QR 스캐너 화면
 import 'screens/attendance/attendance_status_screen.dart'; // 🆕 출석 현황 화면
+import 'screens/presentation/presentation_list_screen.dart'; // 🆕 발제문 목록 화면
 import 'screens/settings_screen.dart'; // 설정 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 import 'services/meeting/meeting_service.dart'; // 🆕 모임 서비스
 import 'services/attendance/attendance_service.dart'; // 🆕 출석 서비스
 import 'services/member/member_service.dart'; // 🆕 모임원 서비스
 import 'services/profile/profile_service.dart'; // 🆕 프로필 서비스
+import 'services/presentation/presentation_service.dart'; // 🆕 발제문 서비스
 
 // 🎯 Global Navigator Key - 전역에서 접근 가능
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -53,6 +55,7 @@ void main() async {
     AttendanceService(); // Singleton 인스턴스 생성
     MemberService(); // Singleton 인스턴스 생성
     ProfileService(); // Singleton 인스턴스 생성
+    PresentationService(); // Singleton 인스턴스 생성
 
     // 앱 설정 정보 출력 (디버그용)
     AppConfig.printConfig();
@@ -211,6 +214,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
             '/member-list': (context) => const MemberListScreen(),
             '/meeting-create': (context) => const MeetingCreateScreen(), // 🆕 모임 만들기
             '/qr-scanner': (context) => const MeetingQrScannerScreen(), // 🆕 QR 스캐너
+            '/presentation-list': (context) => const PresentationListScreen(), // 🆕 발제문 목록
             '/settings': (context) => const SettingsScreen(),
           };
           
