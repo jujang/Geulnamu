@@ -5,6 +5,7 @@ import '../../widgets/common/main_layout.dart';
 import '../../services/home/home_service.dart';
 import '../../services/home/home_route_service.dart';
 import '../../core/config/app_config.dart';
+import '../../models/book_question/book_question_model.dart';
 import 'mixins/meeting_detail_logic_mixin.dart';
 import 'widgets/meeting_detail_widgets.dart';
 import 'meeting_qr_display_screen.dart'; // 🆕 QR 표시 화면
@@ -140,18 +141,26 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
 
     // 정상 콘텐츠
     return MeetingDetailWidgets.buildMainContent(
-      context,
-      meetingDetail!,
-      isEditing: isEditing,
-      onEditToggle: toggleEditMode,
-      onNoteSave: saveNote,
-      onEditCancel: cancelEdit,
-      onToggleDiscussion: toggleDiscussionParticipation, // 🆕 토론 상태 토글 콜백 연결
-      canToggleDiscussion: canChangeDiscussionParticipation, // 🆕 토론 상태 변경 가능 여부
-      discussionTimeRemaining: discussionChangeTimeRemaining, // 🆕 남은 시간 정보 연결
-      onQrDisplayTap: () => _navigateToQrDisplay(), // 🆕 QR 표시 화면 이동
-      onQrScanTap: () => _navigateToQrScanner(), // 🆕 QR 스캔 화면 이동
-      isStaffOrAbove: isStaffOrAbove, // 🆕 권한 정보 전달
+    context,
+    meetingDetail!,
+    isEditing: isEditing,
+    onEditToggle: toggleEditMode,
+    onNoteSave: saveNote,
+    onEditCancel: cancelEdit,
+    onToggleDiscussion: toggleDiscussionParticipation, // 🆕 토론 상태 토글 콜백 연결
+    canToggleDiscussion: canChangeDiscussionParticipation, // 🆕 토론 상태 변경 가능 여부
+    discussionTimeRemaining: discussionChangeTimeRemaining, // 🆕 남은 시간 정보 연결
+    onQrDisplayTap: () => _navigateToQrDisplay(), // 🆕 QR 표시 화면 이동
+    onQrScanTap: () => _navigateToQrScanner(), // 🆕 QR 스캔 화면 이동
+    isStaffOrAbove: isStaffOrAbove, // 🆕 권한 정보 전달
+      // 🆕 발제문 관련 매개변수 연결
+      bookQuestions: myBookQuestions,
+      isBookQuestionLoading: isBookQuestionLoading,
+      onCreateBookQuestion: () => _showCreateBookQuestionDialog(),
+      onEditBookQuestion: (question) => _showEditBookQuestionDialog(question),
+      onDeleteBookQuestion: (questionId) => deleteBookQuestion(questionId),
+      canEditBookQuestions: canEditBookQuestions,
+      bookQuestionEditTimeRemaining: bookQuestionEditTimeRemaining,
     );
   }
 
@@ -198,5 +207,22 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
   Future<void> _handleLogout() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     await _homeService.handleLogout(context, authProvider);
+  }
+  
+  /// 발제문 작성 다이얼로그 표시
+  void _showCreateBookQuestionDialog() {
+    MeetingDetailWidgets.showBookQuestionDialog(
+      context,
+      onSave: (content) => createBookQuestion(content),
+    );
+  }
+  
+  /// 발제문 수정 다이얼로그 표시
+  void _showEditBookQuestionDialog(BookQuestionModel question) {
+    MeetingDetailWidgets.showBookQuestionDialog(
+      context,
+      existingQuestion: question,
+      onSave: (content) => updateBookQuestion(question.bookQuestionId, content),
+    );
   }
 }

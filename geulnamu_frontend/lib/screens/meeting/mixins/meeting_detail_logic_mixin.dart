@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/meeting/meeting_service.dart';
 import '../../../services/attendance/attendance_service.dart';
+import '../../../services/book_question/book_question_service.dart';
+import '../../../models/book_question/book_question_model.dart';
 import '../../../models/meeting/meeting_detail_model.dart';
 import '../../../models/attendance/request/attendance_note_request.dart';
 import '../../../core/config/app_config.dart';
@@ -14,18 +16,27 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
   // 서비스
   final MeetingService _meetingService = MeetingService();
   final AttendanceService _attendanceService = AttendanceService();
+  final BookQuestionService _bookQuestionService = BookQuestionService();
 
   // 상태 관리
   MeetingDetailInfo? _meetingDetail;
   bool _isLoading = false;
   String? _errorMessage;
   bool _isEditing = false; // 비고 편집 모드
+  
+  // 발제문 상태 관리
+  List<BookQuestionModel> _myBookQuestions = [];
+  bool _isBookQuestionLoading = false;
 
   // Getters
   MeetingDetailInfo? get meetingDetail => _meetingDetail;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isEditing => _isEditing;
+  
+  // 발제문 Getters
+  List<BookQuestionModel> get myBookQuestions => _myBookQuestions;
+  bool get isBookQuestionLoading => _isBookQuestionLoading;
 
   /// 초기화 - 모임 상세 정보 로드
   Future<void> initializeMeetingDetail(int meetingId) async {
@@ -63,6 +74,11 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
           _meetingDetail = detail;
           _isLoading = false;
         });
+        
+        // 발제문 로드 (토론 시간이 설정된 경우에만)
+        if (detail.discussionTime != null && detail.attendanceId != null) {
+          await _loadMyBookQuestions(detail.attendanceId!);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -77,6 +93,58 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
   /// 새로고침
   Future<void> refreshMeetingDetail(int meetingId) async {
     await _loadMeetingDetail(meetingId);
+  }
+  
+  /// 본인 발제문 로드
+  Future<void> _loadMyBookQuestions(int attendanceId) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isBookQuestionLoading = true;
+    });
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      if (!authProvider.isAuthenticated) {
+        throw Exception('로그인이 필요합니다.');
+      }
+
+      final accessToken = await authProvider.accessToken;
+      if (accessToken == null) {
+        throw Exception('인증 토큰을 가져올 수 없습니다.');
+      }
+
+      final bookQuestions = await _bookQuestionService.getMyBookQuestions(
+        attendanceId: attendanceId,
+        accessToken: accessToken,
+      );
+
+      if (mounted) {
+        setState(() {
+          _myBookQuestions = bookQuestions;
+          _isBookQuestionLoading = false;
+        });
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [발제문 로드] 실패: $e');
+      }
+      
+      if (mounted) {
+        setState(() {
+          _myBookQuestions = [];
+          _isBookQuestionLoading = false;
+        });
+      }
+    }
+  }
+  
+  /// 발제문 새로고침
+  Future<void> refreshBookQuestions() async {
+    if (_meetingDetail?.attendanceId != null) {
+      await _loadMyBookQuestions(_meetingDetail!.attendanceId!);
+    }
   }
 
   /// 비고 편집 모드 토글
@@ -435,6 +503,42 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
 
     return authProvider.isAdminLevel;
   }
+  
+  /// 발제문 수정/삭제 가능 여부 (토론 시작 후 2시간 이내)
+  bool get canEditBookQuestions {
+    final discussionTime = _meetingDetail?.discussionTime;
+    if (discussionTime == null) return false;
+
+    final now = DateTime.now();
+    final editDeadline = discussionTime.add(const Duration(hours: 2));
+
+    return now.isBefore(editDeadline);
+  }
+  
+  /// 발제문 수정/삭제 마감까지 남은 시간 문자열
+  String? get bookQuestionEditTimeRemaining {
+    final discussionTime = _meetingDetail?.discussionTime;
+    if (discussionTime == null) return null;
+
+    final now = DateTime.now();
+    final editDeadline = discussionTime.add(const Duration(hours: 2));
+    
+    if (now.isAfter(editDeadline)) {
+      return null; // 이미 마감
+    }
+
+    final remaining = editDeadline.difference(now);
+    final hours = remaining.inHours;
+    final minutes = remaining.inMinutes % 60;
+
+    if (hours > 0) {
+      return '수정/삭제 가능 시간: 약 ${hours}시간 ${minutes}분 남음';
+    } else if (minutes > 0) {
+      return '수정/삭제 가능 시간: 약 ${minutes}분 남음';
+    } else {
+      return '수정/삭제 가능 시간: 곧 마감';
+    }
+  }
 
   /// 운영진용 모임 수정 페이지로 이동
   void navigateToMeetingEdit(int meetingId) {
@@ -442,5 +546,240 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
       print('🗺️ [모임 상세] 운영진용 페이지로 이동 시도: /meeting/$meetingId/staff');
     }
     Navigator.pushNamed(context, '/meeting/$meetingId/staff');
+  }
+  
+  /// 발제문 작성
+  Future<void> createBookQuestion(String content) async {
+    if (!mounted) return;
+
+    // 출석 ID가 없으면 작성 불가
+    if (_meetingDetail?.attendanceId == null) {
+      _showSnackBar('출석한 모임에서만 발제문을 작성할 수 있습니다.', isError: true);
+      return;
+    }
+
+    // 내용 유효성 검사
+    if (content.trim().isEmpty) {
+      _showSnackBar('발제문 내용을 입력해주세요.', isError: true);
+      return;
+    }
+
+    try {
+      if (AppConfig.debugMode) {
+        print('📝 [발제문 작성] 시작: 내용 길이 ${content.length}자');
+      }
+
+      setState(() {
+        _isBookQuestionLoading = true;
+      });
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+
+      if (accessToken == null) {
+        throw Exception('인증 토큰을 가져올 수 없습니다.');
+      }
+
+      // 발제문 작성 API 호출
+      final bookQuestionId = await _bookQuestionService.createBookQuestion(
+        attendanceId: _meetingDetail!.attendanceId!,
+        content: content.trim(),
+        accessToken: accessToken,
+      );
+
+      if (AppConfig.debugMode) {
+        print('✅ [발제문 작성] 성공: ID $bookQuestionId');
+      }
+
+      if (mounted) {
+        setState(() {
+          _isBookQuestionLoading = false;
+        });
+      }
+
+      // 성공 메시지 표시
+      _showSnackBar('발제문이 작성되었습니다.');
+
+      // 발제문 목록 새로고침
+      await refreshBookQuestions();
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [발제문 작성] 실패: $e');
+      }
+
+      if (mounted) {
+        setState(() {
+          _isBookQuestionLoading = false;
+        });
+      }
+
+      // 에러 메시지 표시
+      final errorMessage = e
+          .toString()
+          .replaceAll('Exception: ', '')
+          .replaceAll('[발제문 생성] ', '');
+      _showSnackBar(errorMessage, isError: true);
+    }
+  }
+  
+  /// 발제문 수정
+  Future<void> updateBookQuestion(int bookQuestionId, String content) async {
+    if (!mounted) return;
+
+    // 수정 가능 시간 체크
+    if (!canEditBookQuestions) {
+      final remainingTime = bookQuestionEditTimeRemaining;
+      if (remainingTime != null) {
+        _showSnackBar('토론 시작 후 2시간 이내에만 수정할 수 있습니다.', isError: true);
+      } else {
+        _showSnackBar('수정 가능 시간이 지났습니다.', isError: true);
+      }
+      return;
+    }
+
+    // 내용 유효성 검사
+    if (content.trim().isEmpty) {
+      _showSnackBar('발제문 내용을 입력해주세요.', isError: true);
+      return;
+    }
+
+    try {
+      if (AppConfig.debugMode) {
+        print('✏️ [발제문 수정] 시작: ID $bookQuestionId');
+      }
+
+      setState(() {
+        _isBookQuestionLoading = true;
+      });
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+
+      if (accessToken == null) {
+        throw Exception('인증 토큰을 가져올 수 없습니다.');
+      }
+
+      // 발제문 수정 API 호출
+      await _bookQuestionService.updateBookQuestion(
+        bookQuestionId: bookQuestionId,
+        content: content.trim(),
+        accessToken: accessToken,
+      );
+
+      if (AppConfig.debugMode) {
+        print('✅ [발제문 수정] 성공');
+      }
+
+      if (mounted) {
+        setState(() {
+          _isBookQuestionLoading = false;
+        });
+      }
+
+      // 성공 메시지 표시
+      _showSnackBar('발제문이 수정되었습니다.');
+
+      // 발제문 목록 새로고침
+      await refreshBookQuestions();
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [발제문 수정] 실패: $e');
+      }
+
+      if (mounted) {
+        setState(() {
+          _isBookQuestionLoading = false;
+        });
+      }
+
+      // 에러 메시지 표시
+      final errorMessage = e
+          .toString()
+          .replaceAll('Exception: ', '')
+          .replaceAll('[발제문 수정] ', '');
+      _showSnackBar(errorMessage, isError: true);
+    }
+  }
+  
+  /// 발제문 삭제
+  Future<void> deleteBookQuestion(int bookQuestionId) async {
+    if (!mounted) return;
+
+    // 삭제 가능 시간 체크
+    if (!canEditBookQuestions) {
+      final remainingTime = bookQuestionEditTimeRemaining;
+      if (remainingTime != null) {
+        _showSnackBar('토론 시작 후 2시간 이내에만 삭제할 수 있습니다.', isError: true);
+      } else {
+        _showSnackBar('삭제 가능 시간이 지났습니다.', isError: true);
+      }
+      return;
+    }
+
+    // 확인 다이얼로그 표시
+    final confirmed = await _showConfirmDialog(
+      title: '발제문 삭제',
+      message: '정말로 삭제하시겠습니까?\n삭제된 발제문은 복구할 수 없습니다.',
+      confirmText: '삭제',
+      cancelText: '취소',
+    );
+
+    if (!confirmed) return;
+
+    try {
+      if (AppConfig.debugMode) {
+        print('🗑️ [발제문 삭제] 시작: ID $bookQuestionId');
+      }
+
+      setState(() {
+        _isBookQuestionLoading = true;
+      });
+
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+
+      if (accessToken == null) {
+        throw Exception('인증 토큰을 가져올 수 없습니다.');
+      }
+
+      // 발제문 삭제 API 호출
+      await _bookQuestionService.deleteBookQuestion(
+        bookQuestionId: bookQuestionId,
+        accessToken: accessToken,
+      );
+
+      if (AppConfig.debugMode) {
+        print('✅ [발제문 삭제] 성공');
+      }
+
+      if (mounted) {
+        setState(() {
+          _isBookQuestionLoading = false;
+        });
+      }
+
+      // 성공 메시지 표시
+      _showSnackBar('발제문이 삭제되었습니다.');
+
+      // 발제문 목록 새로고침
+      await refreshBookQuestions();
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [발제문 삭제] 실패: $e');
+      }
+
+      if (mounted) {
+        setState(() {
+          _isBookQuestionLoading = false;
+        });
+      }
+
+      // 에러 메시지 표시
+      final errorMessage = e
+          .toString()
+          .replaceAll('Exception: ', '')
+          .replaceAll('[발제문 삭제] ', '');
+      _showSnackBar(errorMessage, isError: true);
+    }
   }
 }

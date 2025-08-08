@@ -16,7 +16,69 @@ class BookQuestionService {
 
   final Dio _dio = Dio();
 
-  /// 본인 토론 그룹의 발제문 조회
+  /// 본인 발제문 조회
+  /// 
+  /// 백엔드 API: GET /book-questions/me?attendanceId={attendanceId}
+  /// 권한: MEMBER 이상
+  Future<List<BookQuestionModel>> getMyBookQuestions({
+    required int attendanceId,
+    required String accessToken,
+    bool forceRefresh = false,
+  }) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [발제문 조회] 본인 발제문 조회 시작...');
+        print('   - attendanceId: $attendanceId');
+        print('   - forceRefresh: $forceRefresh');
+      }
+
+      // API 호출
+      final response = await _dio.get(
+        AppConfig.getApiEndpoint('book-questions/me'),
+        queryParameters: {
+          'attendanceId': attendanceId,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        // ✅ ApiUtils를 사용한 백엔드 응답 처리
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '본인 발제문 조회',
+        );
+
+        // 성공한 경우 데이터 파싱
+        final List<dynamic> dataList = processedResponse['data'] as List<dynamic>;
+        final bookQuestions = dataList
+            .map((json) => BookQuestionModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+
+        if (AppConfig.debugMode) {
+          print('✅ [발제문 조회] 성공 - 총 ${bookQuestions.length}개의 발제문');
+          for (final question in bookQuestions) {
+            print('   📝 발제문 ${question.bookQuestionId}: ${question.content.length > 50 ? question.content.substring(0, 50) + "..." : question.content}');
+          }
+        }
+
+        return bookQuestions;
+      } else {
+        throw Exception('[발제문 조회] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      // ✅ ApiUtils를 사용한 에러 처리
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '본인 발제문 조회');
+      }
+      rethrow;
+    }
+  }
+
+  /// 본인 토론 그룹의 발제문 조회 (운영진용)
   /// 
   /// 백엔드 API: GET /book-questions/my-group?meetingId={meetingId}
   /// 권한: STAFF 이상
