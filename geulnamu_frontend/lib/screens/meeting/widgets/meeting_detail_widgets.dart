@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
 import '../../../models/meeting/meeting_detail_model.dart';
 import '../../../models/meeting/group_member_model.dart';
+import '../../../models/book_question/book_question_model.dart';
 import '../../../widgets/common/loading_widgets.dart';
 
 /// 모임 상세 화면 UI 위젯들 (Static Methods)
@@ -70,6 +71,14 @@ class MeetingDetailWidgets {
     VoidCallback? onQrDisplayTap, // 🆕 QR 표시 콜백 (운영진용)
     VoidCallback? onQrScanTap, // 🆕 QR 스캔 콜백 (일반 사용자용)
     bool isStaffOrAbove = false, // 🆕 운영진 이상 권한 여부
+    // 🆕 발제문 관련 매개변수 추가
+    List<BookQuestionModel>? bookQuestions,
+    bool isBookQuestionLoading = false,
+    VoidCallback? onCreateBookQuestion,
+    Function(BookQuestionModel)? onEditBookQuestion,
+    Function(int)? onDeleteBookQuestion,
+    bool canEditBookQuestions = false,
+    String? bookQuestionEditTimeRemaining,
   }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -112,6 +121,23 @@ class MeetingDetailWidgets {
             canToggle: canToggleDiscussion, // 🆕 토글 가능 여부 전달
             timeRemaining: discussionTimeRemaining, // 🆕 남은 시간 정보 전달
           ),
+
+          // 🆕 발제문 섹션 (토론 시간이 설정된 경우에만 표시)
+          if (meeting.discussionTime != null) ...[
+            const SizedBox(height: 16),
+            _buildBookQuestionCard(
+              context,
+              meeting,
+              bookQuestions: bookQuestions ?? [],
+              isLoading: isBookQuestionLoading,
+              onCreateBookQuestion: onCreateBookQuestion,
+              onEditBookQuestion: onEditBookQuestion,
+              onDeleteBookQuestion: onDeleteBookQuestion,
+              canEdit: canEditBookQuestions,
+              timeRemaining: bookQuestionEditTimeRemaining,
+            ),
+          ],
+
           const SizedBox(height: 80), // FAB 공간 확보
         ],
       ),
@@ -829,5 +855,556 @@ class MeetingDetailWidgets {
       default:
         return Colors.grey;
     }
+  }
+
+  /// 발제문 섹션 카드 (📝 포스트잇 스타일)
+  static Widget _buildBookQuestionCard(
+    BuildContext context,
+    MeetingDetailInfo meeting, {
+    required List<BookQuestionModel> bookQuestions,
+    required bool isLoading,
+    VoidCallback? onCreateBookQuestion,
+    Function(BookQuestionModel)? onEditBookQuestion,
+    Function(int)? onDeleteBookQuestion,
+    bool canEdit = false,
+    String? timeRemaining,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 제목
+            Row(
+              children: [
+                Icon(
+                  Icons.article_outlined,
+                  color: context.colors.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '발제문',
+                  style: context.textStyles.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: context.colors.primary,
+                  ),
+                ),
+                const Spacer(),
+                // 발제문 작성 버튼 (출석한 경우에만 표시)
+                if (meeting.attendanceId != null &&
+                    onCreateBookQuestion != null)
+                  TextButton.icon(
+                    onPressed: onCreateBookQuestion,
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('작성', style: TextStyle(fontSize: 14)),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // 시간 제한 안내 (있을 경우에만)
+            if (timeRemaining != null) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: context.colors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: context.colors.primary.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.schedule,
+                      size: 16,
+                      color: context.colors.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        timeRemaining,
+                        style: context.textStyles.bodySmall?.copyWith(
+                          fontSize: 12,
+                          color: context.colors.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // 발제문 내용
+            if (isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (bookQuestions.isEmpty)
+              _buildEmptyBookQuestionsState(
+                context,
+                meeting.attendanceId != null,
+              )
+            else
+              _buildBookQuestionGrid(
+                context,
+                bookQuestions,
+                onEditBookQuestion,
+                onDeleteBookQuestion,
+                canEdit,
+              ),
+
+            // 📋 발제문 섹션 하단 안내 문구 (출석한 경우에만 표시)
+            if (meeting.attendanceId != null) ...[
+              const SizedBox(height: 16),
+              _buildBookQuestionNotice(context),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 발제문이 없을 때 상태
+  static Widget _buildEmptyBookQuestionsState(
+    BuildContext context,
+    bool canCreate,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          Icon(
+            Icons.article_outlined,
+            size: 48,
+            color: context.colors.onSurfaceVariant.withOpacity(0.5),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            canCreate ? '아직 작성한 발제문이 없습니다.' : '발제문을 보려면 출석이 필요합니다.',
+            style: context.textStyles.bodyLarge?.copyWith(
+              color: context.colors.onSurfaceVariant,
+              fontSize: 16,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          if (canCreate) ...[
+            const SizedBox(height: 8),
+            Text(
+              '위의 "작성" 버튼을 눌러 발제문을 작성해보세요!',
+              style: context.textStyles.bodyMedium?.copyWith(
+                color: context.colors.onSurfaceVariant.withOpacity(0.7),
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// 발제문 그리드 (포스트잇 스타일)
+  static Widget _buildBookQuestionGrid(
+    BuildContext context,
+    List<BookQuestionModel> bookQuestions,
+    Function(BookQuestionModel)? onEditBookQuestion,
+    Function(int)? onDeleteBookQuestion,
+    bool canEdit,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 모바일 고려: 열 개수 결정
+        final crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
+        final childAspectRatio = constraints.maxWidth > 600 ? 1.2 : 1.0;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemCount: bookQuestions.length,
+          itemBuilder: (context, index) {
+            final question = bookQuestions[index];
+            return _buildPostItNote(
+              context,
+              question,
+              onEdit: onEditBookQuestion != null
+                  ? () => onEditBookQuestion(question)
+                  : null,
+              onDelete: onDeleteBookQuestion != null
+                  ? () => onDeleteBookQuestion(question.bookQuestionId)
+                  : null,
+              canEdit: canEdit,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// 포스트잇 노트 위젯 (📝 노란색 포스트잇 스타일)
+  static Widget _buildPostItNote(
+    BuildContext context,
+    BookQuestionModel question, {
+    VoidCallback? onEdit,
+    VoidCallback? onDelete,
+    bool canEdit = false,
+  }) {
+    // 포스트잇 노란색 (라이트/다크 모드 무관) - 더 부드럽게 개선
+    const postItColor = Color(0xFFFFF59D); // 부드러운 파스텔 노란색
+    const shadowColor = Color(0xFFE6CC3A); // 조화로운 그림자 색상
+
+    return GestureDetector(
+      onTap: canEdit && onEdit != null ? onEdit : null,
+      child: Container(
+        decoration: BoxDecoration(
+          color: postItColor,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: shadowColor.withOpacity(0.3),
+              offset: const Offset(2, 4),
+              blurRadius: 6,
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // 메인 콘텐츠
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 액션 버튼 공간 확보
+                  if (canEdit && (onEdit != null || onDelete != null))
+                    const SizedBox(height: 24),
+
+                  // 발제문 내용
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Text(
+                        question.content,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87, // 포스트잇에는 검은색 텅스트
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 액션 버튼들 (오른쪽 상단)
+            if (canEdit && (onEdit != null || onDelete != null))
+              Positioned(
+                top: 4,
+                right: 4,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (onEdit != null)
+                      GestureDetector(
+                        onTap: onEdit,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.edit,
+                            size: 16,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    if (onEdit != null && onDelete != null)
+                      const SizedBox(width: 4),
+                    if (onDelete != null)
+                      GestureDetector(
+                        onTap: onDelete,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.delete,
+                            size: 16,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+            // 포스트잇 접착 테이프 효과 (왼쪽 상단)
+            Positioned(
+              top: 0,
+              left: 16,
+              child: Container(
+                width: 24,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(4),
+                    bottomRight: Radius.circular(4),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 발제문 작성/수정 다이얼로그 (🆕 포스트잇 스타일)
+  static Future<void> showBookQuestionDialog(
+    BuildContext context, {
+    BookQuestionModel? existingQuestion, // null이면 작성, 있으면 수정
+    required Function(String) onSave,
+  }) async {
+    final isEditing = existingQuestion != null;
+    final TextEditingController controller = TextEditingController(
+      text: existingQuestion?.content ?? '',
+    );
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.6,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF59D), // 포스트잇 노란색 - 부드러운 파스텔
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFE6CC3A).withOpacity(0.5), // 조화로운 그림자
+                  offset: const Offset(4, 8),
+                  blurRadius: 12,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // 메인 콘텐츠
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 제목
+                      Row(
+                        children: [
+                          Icon(
+                            isEditing ? Icons.edit : Icons.add,
+                            color: Colors.black87,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            isEditing ? '발제문 수정' : '발제문 작성',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // 입력 필드
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.black.withOpacity(0.1),
+                              width: 1,
+                            ),
+                          ),
+                          child: TextField(
+                            controller: controller,
+                            maxLines: null,
+                            expands: true,
+                            textAlignVertical: TextAlignVertical.top,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                              height: 1.5,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText:
+                                  '발제문 내용을 입력하세요...\n\n토론하고 싶은 주제나 질문을 자유롭게 작성해보세요!',
+                              hintStyle: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // 버튼들
+                      Row(
+                        children: [
+                          const Spacer(),
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.black87,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                            ),
+                            child: const Text(
+                              '취소',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            onPressed: () {
+                              final content = controller.text.trim();
+                              if (content.isNotEmpty) {
+                                onSave(content);
+                                Navigator.of(dialogContext).pop();
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black87,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                            ),
+                            child: Text(
+                              isEditing ? '수정' : '작성',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 포스트잇 접착 테이프 효과들
+                Positioned(
+                  top: 0,
+                  left: 30,
+                  child: Container(
+                    width: 40,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.7),
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(6),
+                        bottomRight: Radius.circular(6),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  right: 50,
+                  child: Container(
+                    width: 30,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.6),
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(5),
+                        bottomRight: Radius.circular(5),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 발제문 섹션 하단 안내 문구 (📋 시간 제한 안내)
+  static Widget _buildBookQuestionNotice(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: context.colors.surfaceContainerHighest.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: context.colors.outline.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            size: 16,
+            color: context.colors.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '토론 시작 2시간 이후에는 작성한 발제문 수정/삭제가 불가능합니다.',
+              style: context.textStyles.bodySmall?.copyWith(
+                fontSize: 13,
+                color: context.colors.onSurfaceVariant,
+                height: 1.3,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
