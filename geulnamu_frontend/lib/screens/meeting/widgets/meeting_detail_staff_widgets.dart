@@ -4,9 +4,11 @@ import '../../../widgets/common/loading_widgets.dart';
 import 'meeting_detail_staff/basic_info_widgets.dart';
 import 'meeting_detail_staff/discussion_widgets.dart';
 import 'meeting_detail_staff/management_widgets.dart';
+import 'meeting_detail_staff/book_question/book_question_widgets.dart';
 import '../../../models/discussion/attendance_id_and_name_model.dart';
 import '../../../models/discussion/discussion_group_model.dart';
 import '../../../models/attendance/attendance_status_model.dart';
+import '../../../models/book_question/book_question_model.dart';
 
 /// 운영진용 모임 상세 화면 메인 위젯들
 ///
@@ -91,6 +93,13 @@ class MeetingDetailStaffWidgets {
     required bool canAddMembers,
     required List<AttendanceStatus> availableMembersToAdd,
     required void Function(AttendanceStatus) onAddMember,
+    // 🆕 발제문 관련 콜백들
+    required bool isBookQuestionLoading,
+    required String? bookQuestionErrorMessage,
+    required List<BookQuestionModel>? bookQuestionList,
+    required int currentUserId,
+    required VoidCallback onRefreshBookQuestionData,
+    Function(BookQuestionModel)? onBookQuestionTap,
   }) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -175,6 +184,20 @@ class MeetingDetailStaffWidgets {
             meetingDetail,
             onQrDisplayTap: onQrDisplayTap,
             onViewAsUserTap: onViewAsUserTap,
+          ),
+
+          const SizedBox(height: 16),
+
+          // 📝 발제문 섹션 (토론 시간이 설정된 경우에만 표시)
+          BookQuestionWidgets.buildBookQuestionSection(
+            context,
+            isLoading: isBookQuestionLoading,
+            errorMessage: bookQuestionErrorMessage,
+            bookQuestionList: bookQuestionList,
+            currentUserId: currentUserId,
+            hasDiscussionTime: meetingDetail.discussionTime != null,
+            onRefresh: onRefreshBookQuestionData,
+            onQuestionTap: onBookQuestionTap,
           ),
 
           const SizedBox(height: 16),
