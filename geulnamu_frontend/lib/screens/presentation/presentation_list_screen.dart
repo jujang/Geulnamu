@@ -8,6 +8,7 @@ import '../../core/config/app_config.dart'; // AppConfig import 추가
 import '../../models/presentation/presentation_model.dart';
 import '../../services/home/home_service.dart';
 import '../../services/home/home_route_service.dart'; // RouteObserver
+import '../book_question/book_question_detail_screen.dart'; // 발제문 상세 페이지 import
 import 'mixins/presentation_logic_mixin.dart';
 import 'widgets/presentation_widgets.dart';
 import 'widgets/presentation_list_widgets.dart';
@@ -265,11 +266,11 @@ class _PresentationListScreenState extends State<PresentationListScreen>
                               ),
                             ),
                           
-                          // 📖 책 (클릭 연결 해제)
+                          // 📖 책 (클릭 연결 활성화)
                           PresentationWidgets.buildBookCard(
                             context,
                             presentation,
-                            onTap: null, // 🚫 클릭 연결 해제
+                            onTap: () => _handlePresentationTap(presentation), // 클릭 연결
                           ),
                         ],
                       );
@@ -315,13 +316,21 @@ class _PresentationListScreenState extends State<PresentationListScreen>
     await _homeService.handleLogout(context, authProvider);
   }
 
-  /// 발제문 카드 탭 처리 - 비활성화 (향후 다른 연결 페이지 예정)
+  /// 발제문 카드 탭 처리 - 상세 페이지로 이동
   void _handlePresentationTap(PresentationInfo presentation) {
-    // 현재 비활성화 - 나중에 발제문 전용 페이지로 연결 예정
-    // handlePresentationTap(presentation);
-    
     if (AppConfig.debugMode) {
-      print('📖 [발제문] 클릭 비활성화: ${presentation.bookTitle}');
+      print('📖 [발제문] 클릭: ${presentation.bookTitle} (meetingId: ${presentation.meetingId})');
     }
+    
+    // 발제문 상세 페이지로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BookQuestionDetailScreen(
+          meetingId: presentation.meetingId,
+          meetingTitle: presentation.bookTitle,
+        ),
+      ),
+    );
   }
 }

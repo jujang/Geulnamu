@@ -170,9 +170,9 @@ class PresentationWidgets {
           
           const SizedBox(height: 8), // 간격 조정
           
-          // 📅 모임 날짜 (하단)
+          // 📅 모임 종류 & 모임일자 (첫 번째 줄)
           Text(
-            presentation.displayMeetingDate,
+            '${presentation.presentationTypeDisplayName} · ${presentation.displayMeetingDate}',
             style: context.textStyles.bodySmall?.copyWith(
               color: Colors.white.withValues(alpha: 0.9),
               fontWeight: FontWeight.w500,
@@ -182,18 +182,18 @@ class PresentationWidgets {
           
           const SizedBox(height: 4), // 간격 증가 (2 → 4)
           
-          // 🏷️ 발제문 유형 + 작성자
+          // 🏷️ #모임번호 & 모임 생성자 (두 번째 줄)
           Row(
             children: [
               Icon(
-                _getPresentationTypeIcon(presentation.presentationType),
+                Icons.tag,
                 size: 12, // 아이콘 크기 증가 (10 → 12)
                 color: Colors.white.withValues(alpha: 0.8),
               ),
               const SizedBox(width: 4), // 간격 증가 (2 → 4)
               Expanded(
                 child: Text(
-                  '${presentation.presentationTypeDisplayName} · ${presentation.meetingCreatorName}',
+                  '${presentation.meetingId} · ${presentation.meetingCreatorName}',
                   style: context.textStyles.bodySmall?.copyWith(
                     color: Colors.white.withValues(alpha: 0.8),
                     fontSize: 11, // 폰트 크기 증가 (9 → 11)
