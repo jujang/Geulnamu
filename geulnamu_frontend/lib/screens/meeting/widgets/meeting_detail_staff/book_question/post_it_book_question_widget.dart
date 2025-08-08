@@ -615,13 +615,17 @@ class _PostItCollectionWidgetState extends State<PostItCollectionWidget>
     // 가장 가까운 Y 거리
     final double closestYDistance = yDistances.first.value;
     
-    // 🏆 3단계: 가장 가까운 행에 속하는 포스트잇들만 후보로 선정
-    // 허용 오차: 가장 가까운 거리 + 포스트잇 높이의 30%
-    final double tolerance = 36.0; // 대략 포스트잇 높이 120px의 30%
+    // 🏆 3단계: 가장 가까운 행만 선택 (정확한 행 식별)
+    // tolerance 없이 가장 가까운 Y 거리의 포스트잇들만 선택
     final List<int> candidateIndices = yDistances
-        .where((entry) => entry.value <= closestYDistance + tolerance)
+        .where((entry) => entry.value == closestYDistance)
         .map((entry) => entry.key)
         .toList();
+    
+    // 만약 완전히 동일한 거리가 없다면, 가장 가까운 하나만 선택
+    if (candidateIndices.isEmpty) {
+      candidateIndices.add(yDistances.first.key);
+    }
     
     // 🎯 4단계: 후보들 중에서 X축 거리 기반으로 최적 삽입 위치 계산
     double minXDistance = double.infinity;
