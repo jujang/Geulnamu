@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 /// - 일관된 디자인 시스템 적용
 /// - 글나무 테마 색상 활용
 class ContactWidgets {
-  
   /// 메인 헤더 위젯
   static Widget buildHeader(BuildContext context) {
     return Container(
@@ -33,7 +32,9 @@ class ContactWidgets {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surface.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -49,16 +50,19 @@ class ContactWidgets {
                     children: [
                       Text(
                         '문의하기',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '모임원의 소리',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimary.withOpacity(0.9),
                         ),
                       ),
                     ],
@@ -97,12 +101,12 @@ class ContactWidgets {
             iconColor: Colors.red,
             title: '에러 보고',
             subtitle: '앱에 문제가 발생했나요?',
-            description: '버그, 오류, 예상과 다른 동작 등을\n신속하게 신고해 주세요.',
+            description: '버그, 오류, 예상과 다른 동작 등을\n 신고해 주세요.',
             onTap: onErrorReportTap,
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // 기능 요청 카드
           _buildSelectionCard(
             context: context,
@@ -131,9 +135,7 @@ class ContactWidgets {
     return Card(
       elevation: 2,
       shadowColor: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
@@ -149,15 +151,11 @@ class ContactWidgets {
                   color: iconColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(
-                  icon,
-                  size: 28,
-                  color: iconColor,
-                ),
+                child: Icon(icon, size: 28, color: iconColor),
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // 텍스트 영역
               Expanded(
                 child: Column(
@@ -167,7 +165,9 @@ class ContactWidgets {
                       title,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface, // 🆕 다크모드 가독성 개선
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface, // 🆕 다크모드 가독성 개선
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -189,7 +189,7 @@ class ContactWidgets {
                   ],
                 ),
               ),
-              
+
               // 화살표 아이콘
               Icon(
                 Icons.arrow_forward_ios,
@@ -209,7 +209,9 @@ class ContactWidgets {
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
@@ -236,9 +238,8 @@ class ContactWidgets {
           ),
           const SizedBox(height: 12),
           Text(
-            '• 에러 보고: 24시간 내 확인 후 빠른 수정\n'
+            '• 에러 보고: 빠른 시간 내 확인 후 수정 조치 예정\n'
             '• 기능 요청: 검토 후 개발 계획에 반영\n'
-            '• 모든 문의는 익명으로 처리됩니다\n'
             '• 답변이 필요한 경우 별도 연락드립니다',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,

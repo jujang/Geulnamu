@@ -2,6 +2,9 @@ import 'package:dio/dio.dart';
 import '../../core/config/app_config.dart';
 import '../../core/utils/api_utils.dart';
 import '../../models/contact/contact_request.dart';
+import '../../providers/auth_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
 
 /// 문의하기 (VoC) 관련 비즈니스 로직을 담당하는 Singleton Service
 ///
@@ -20,12 +23,21 @@ class ContactService {
   /// 에러 보고 API 호출
   /// 
   /// [content] 에러 내용
+  /// [context] BuildContext (토큰 접근용)
   /// Returns: API 성공 여부
-  Future<bool> reportError(String content) async {
+  Future<bool> reportError(String content, BuildContext context) async {
     try {
       if (AppConfig.debugMode) {
         print('🚀 [에러 보고] API 요청 시작...');
         print('📝 [에러 보고] 내용: ${content.length > 50 ? '${content.substring(0, 50)}...' : content}');
+      }
+
+      // 🔑 액세스 토큰 가져오기
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+      
+      if (accessToken == null) {
+        throw Exception('[에러 보고] 액세스 토큰을 찾을 수 없습니다.');
       }
 
       final request = ContactRequest(content: content);
@@ -36,6 +48,7 @@ class ContactService {
         options: Options(
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': 'Bearer $accessToken', // 🔑 토큰 추가
           },
         ),
       );
@@ -71,12 +84,21 @@ class ContactService {
   /// 기능 요청 API 호출
   /// 
   /// [content] 기능 요청 내용
+  /// [context] BuildContext (토큰 접근용)
   /// Returns: API 성공 여부
-  Future<bool> requestFeature(String content) async {
+  Future<bool> requestFeature(String content, BuildContext context) async {
     try {
       if (AppConfig.debugMode) {
         print('🚀 [기능 요청] API 요청 시작...');
         print('📝 [기능 요청] 내용: ${content.length > 50 ? '${content.substring(0, 50)}...' : content}');
+      }
+
+      // 🔑 액세스 토큰 가져오기
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final accessToken = await authProvider.accessToken;
+      
+      if (accessToken == null) {
+        throw Exception('[기능 요청] 액세스 토큰을 찾을 수 없습니다.');
       }
 
       final request = ContactRequest(content: content);
@@ -87,6 +109,7 @@ class ContactService {
         options: Options(
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': 'Bearer $accessToken', // 🔑 토큰 추가
           },
         ),
       );

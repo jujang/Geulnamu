@@ -289,9 +289,6 @@ class HomeService extends ChangeNotifier {
       case '문의하기':
         Navigator.pushNamed(context, '/contact');
         break;
-      case '도움말':
-        _showSnackBar(context, '도움말 기능은 개발 중입니다.');
-        break;
       case '앱 정보':
         _showSnackBar(context, '앱 정보 기능은 개발 중입니다.');
         break;

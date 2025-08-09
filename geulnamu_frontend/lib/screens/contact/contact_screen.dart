@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../services/home/home_service.dart';
 import '../../widgets/common/main_layout.dart';
 import 'mixins/contact_logic_mixin.dart';
 import 'widgets/contact_widgets.dart';
@@ -22,32 +25,39 @@ class _ContactScreenState extends State<ContactScreen>
 
   @override
   Widget build(BuildContext context) {
-    return MainLayout(
-      isHomePage: false, // 뒤로가기 버튼 표시
-      title: '문의하기',
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // 메인 헤더
-            ContactWidgets.buildHeader(context),
-            
-            const SizedBox(height: 20),
-            
-            // 선택 카드들
-            ContactWidgets.buildSelectionCards(
-              context,
-              onErrorReportTap: showErrorReportBottomSheet,
-              onFeatureRequestTap: showFeatureRequestBottomSheet,
+    return Consumer2<AuthProvider, HomeService>(
+      builder: (context, authProvider, homeService, child) {
+        return MainLayout(
+          isHomePage: false, // 뒤로가기 버튼 표시
+          title: '문의하기',
+          onLogoutTap: authProvider.isAuthenticated
+              ? () => homeService.handleLogout(context, authProvider) // 🔑 로그아웃 기능 연결
+              : null,
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                // 메인 헤더
+                ContactWidgets.buildHeader(context),
+                
+                const SizedBox(height: 20),
+                
+                // 선택 카드들
+                ContactWidgets.buildSelectionCards(
+                  context,
+                  onErrorReportTap: showErrorReportBottomSheet,
+                  onFeatureRequestTap: showFeatureRequestBottomSheet,
+                ),
+                
+                // 하단 정보
+                ContactWidgets.buildFooterInfo(context),
+                
+                // 하단 여백
+                const SizedBox(height: 20),
+              ],
             ),
-            
-            // 하단 정보
-            ContactWidgets.buildFooterInfo(context),
-            
-            // 하단 여백
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
