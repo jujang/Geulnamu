@@ -192,35 +192,6 @@ class MainLayout extends StatelessWidget {
         ),
         const PopupMenuDivider(),
         PopupMenuItem(
-          value: 'help',
-          child: Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.help_outline,
-                  size: 18,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '도움말',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-        ),
-        PopupMenuItem(
           value: 'logout',
           enabled: !isProcessing, // 로딩 중 비활성화
           child: Row(
@@ -306,12 +277,6 @@ class MainLayout extends StatelessWidget {
         break;
       case 'settings':
         Navigator.pushNamed(context, '/settings');
-        break;
-      case 'help':
-        // TODO: 도움말 화면 구현 후 연결
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('도움말 화면은 준비 중입니다.')));
         break;
       case 'logout':
         onLogoutTap?.call();

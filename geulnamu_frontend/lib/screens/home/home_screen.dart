@@ -144,35 +144,6 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         const PopupMenuDivider(),
         PopupMenuItem(
-          value: 'help',
-          child: Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.help_outline,
-                  size: 18,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '도움말',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-        ),
-        PopupMenuItem(
           value: 'logout',
           enabled: !Provider.of<HomeService>(
             context,

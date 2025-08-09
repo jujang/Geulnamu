@@ -112,14 +112,16 @@ class AppDrawer extends StatelessWidget {
                       ]),
                     ],
 
-                    // ⚙️ 기타 섹션 (중복 메뉴 제거)
+                    // ⚙️ 기타 섹션
                     _buildMenuSection(context, '기타', [
-                      _DrawerMenuItem(
-                        icon: Icons.help_outline,
-                        title: '도움말',
-                        subtitle: '사용법 및 FAQ',
-                        onTap: () => _handleMenuTap(context, '도움말'),
-                      ),
+                      // 🔒 로그인 후에만 문의하기 표시
+                      if (authProvider.isAuthenticated)
+                        _DrawerMenuItem(
+                          icon: Icons.feedback_outlined,
+                          title: '문의하기',
+                          subtitle: '모임원의 소리',
+                          onTap: () => _handleMenuTap(context, '문의하기'),
+                        ),
                       _DrawerMenuItem(
                         icon: Icons.info_outline,
                         title: '앱 정보',
