@@ -28,6 +28,7 @@ import 'screens/meeting/meeting_detail_staff_screen.dart'; // 🆕 운영진용 
 import 'screens/meeting/meeting_qr_scanner_screen.dart'; // 🆕 QR 스캐너 화면
 import 'screens/attendance/attendance_status_screen.dart'; // 🆕 출석 현황 화면
 import 'screens/presentation/presentation_list_screen.dart'; // 🆕 발제문 목록 화면
+import 'screens/contact/contact_screen.dart'; // 🆕 문의하기 화면
 import 'screens/settings_screen.dart'; // 설정 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 import 'services/meeting/meeting_service.dart'; // 🆕 모임 서비스
@@ -215,6 +216,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
             '/meeting-create': (context) => const MeetingCreateScreen(), // 🆕 모임 만들기
             '/qr-scanner': (context) => const MeetingQrScannerScreen(), // 🆕 QR 스캐너
             '/presentation-list': (context) => const PresentationListScreen(), // 🆕 발제문 목록
+            '/contact': (context) => const ContactScreen(), // 🆕 문의하기
             '/settings': (context) => const SettingsScreen(),
           };
           
