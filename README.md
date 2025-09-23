@@ -496,7 +496,3 @@ chore: CI 설정 정리        # 범위가 따로 없을 때는 생략 가능
 - **API 관련 문의**는 [API 문서](./geulnamu-backend/build/docs/asciidoc/index.html)를 먼저 확인해 주세요
 
 ---
-
-## 📎 기타
-
-- 프론트는 범용성 및 향후 개발 스텍을 고려해 플러터를 사용해서, 서버는 사용량을 고려하여 firebase를 사용해서, 웹앱의 형태로 제작 예정입니다.
