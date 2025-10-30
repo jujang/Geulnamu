@@ -4,7 +4,7 @@ import '../../../core/utils/date_utils.dart' as app_date_utils;
 import '../../../widgets/common/loading_widgets.dart';
 
 /// 프로필 화면 UI 위젯들 (Static Methods)
-/// 
+///
 /// 제공 위젯:
 /// - 프로필 이미지
 /// - 기본 정보 섹션 (이름, 성별, 생년월일)
@@ -14,7 +14,7 @@ class ProfileWidgets {
   ProfileWidgets._(); // private constructor - static class
 
   /// 프로필 이미지 위젯
-  /// 
+  ///
   /// 기본 아이콘 사용, 추후 이미지 업로드 기능 확장 가능
   static Widget buildProfileImage(
     BuildContext context, {
@@ -54,7 +54,7 @@ class ProfileWidgets {
   }
 
   /// 기본 정보 섹션 (조회 모드)
-  /// 
+  ///
   /// 이름, 성별, 생년월일 표시 (수정 가능한 필드들)
   static Widget buildBasicInfoSection(
     BuildContext context,
@@ -80,7 +80,9 @@ class ProfileWidgets {
                   '기본 정보',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface, // 🎯 다크모드 대비 개선
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface, // 🎯 다크모드 대비 개선
                   ),
                 ),
               ],
@@ -91,7 +93,7 @@ class ProfileWidgets {
             _buildInfoRow(
               context,
               label: '이름',
-              value: profile.displayName,  // null 안전 getter 사용
+              value: profile.displayName, // null 안전 getter 사용
               icon: Icons.badge,
             ),
 
@@ -111,13 +113,15 @@ class ProfileWidgets {
             _buildInfoRow(
               context,
               label: '생년월일',
-              value: profile.hasBirthDate 
-                ? app_date_utils.DateUtils.formatDisplayDate(profile.birthDate!)
-                : '생년월일 미입력',
+              value: profile.hasBirthDate
+                  ? app_date_utils.DateUtils.formatDisplayDate(
+                      profile.birthDate!,
+                    )
+                  : '생년월일 미입력',
               icon: Icons.cake,
-              subtitle: profile.hasBirthDate 
-                ? '(만 ${app_date_utils.DateUtils.calculateAge(profile.birthDate!)}세)'
-                : null,
+              subtitle: profile.hasBirthDate
+                  ? '(만 ${app_date_utils.DateUtils.calculateAge(profile.birthDate!)}세)'
+                  : null,
             ),
           ],
         ),
@@ -161,7 +165,9 @@ class ProfileWidgets {
                       errorText = '이름을 입력해주세요.';
                     } else if (value.length < 2) {
                       errorText = '이름은 2자 이상이어야 합니다.';
-                    } else if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+                    } else if (RegExp(
+                      r'[!@#$%^&*(),.?":{}|<>]',
+                    ).hasMatch(value)) {
                       errorText = '특수문자를 사용할 수 없습니다.';
                     } else {
                       errorText = null;
@@ -194,9 +200,9 @@ class ProfileWidgets {
     String currentRole,
   ) async {
     String selectedRole = currentRole;
-    
+
     final roleOptions = [
-      {'value': 'MEMBER', 'label': '일반 회원'},
+      {'value': 'MEMBER', 'label': '모임원'},
       {'value': 'VICE_STAFF', 'label': '준운영진'},
       {'value': 'STAFF', 'label': '운영진'},
       {'value': 'ADMIN', 'label': '관리자'},
@@ -214,21 +220,25 @@ class ProfileWidgets {
             children: [
               const Text('새로운 권한을 선택해주세요.'),
               const SizedBox(height: 16),
-              ...roleOptions.map((role) => RadioListTile<String>(
-                title: Text(role['label']!),
-                value: role['value']!,
-                groupValue: selectedRole,
-                onChanged: (value) {
-                  setState(() {
-                    selectedRole = value!;
-                  });
-                },
-              )),
+              ...roleOptions.map(
+                (role) => RadioListTile<String>(
+                  title: Text(role['label']!),
+                  value: role['value']!,
+                  groupValue: selectedRole,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedRole = value!;
+                    });
+                  },
+                ),
+              ),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -296,8 +306,12 @@ class ProfileWidgets {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: newStatus
-                    ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
-                    : Theme.of(context).colorScheme.errorContainer.withOpacity(0.3),
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer.withOpacity(0.3)
+                    : Theme.of(
+                        context,
+                      ).colorScheme.errorContainer.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -348,7 +362,7 @@ class ProfileWidgets {
   }
 
   /// 계정 정보 섹션 (읽기 전용)
-  /// 
+  ///
   /// 닉네임, 권한 표시 (수정 불가능한 필드들)
   static Widget buildAccountInfoSection(
     BuildContext context,
@@ -374,7 +388,9 @@ class ProfileWidgets {
                   '계정 정보',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface, // 🎯 다크모드 대비 개선
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface, // 🎯 다크모드 대비 개선
                   ),
                 ),
               ],
@@ -422,9 +438,9 @@ class ProfileWidgets {
         Icon(
           icon,
           size: 18,
-          color: isReadOnly 
-            ? Theme.of(context).colorScheme.outline
-            : Theme.of(context).colorScheme.primary,
+          color: isReadOnly
+              ? Theme.of(context).colorScheme.outline
+              : Theme.of(context).colorScheme.primary,
         ),
         const SizedBox(width: 12),
 
@@ -450,9 +466,9 @@ class ProfileWidgets {
               Text(
                 value,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: isReadOnly 
-                    ? Theme.of(context).colorScheme.onSurfaceVariant
-                    : Theme.of(context).colorScheme.onSurface,
+                  color: isReadOnly
+                      ? Theme.of(context).colorScheme.onSurfaceVariant
+                      : Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               if (subtitle != null) ...[
@@ -480,7 +496,7 @@ class ProfileWidgets {
   }
 
   /// 기본 정보 수정 폼
-  /// 
+  ///
   /// 이름, 성별, 생년월일 입력 위젯들
   static Widget buildEditForm(
     BuildContext context, {
@@ -513,7 +529,9 @@ class ProfileWidgets {
                   '정보 수정',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface, // 🎯 다크모드 대비 개선
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface, // 🎯 다크모드 대비 개선
                   ),
                 ),
               ],
@@ -529,7 +547,9 @@ class ProfileWidgets {
                 helperText: '2-10자, 특수문자 제외',
                 border: const OutlineInputBorder(),
               ),
-              controller: nameController ?? TextEditingController(text: name), // 🎯 Controller 사용
+              controller:
+                  nameController ??
+                  TextEditingController(text: name), // 🎯 Controller 사용
               onChanged: onNameChanged,
               maxLength: 10,
             ),
@@ -587,7 +607,8 @@ class ProfileWidgets {
 
             // 생년월일 선택
             InkWell(
-              onTap: () => _showDatePicker(context, birthDate, onBirthDateChanged),
+              onTap: () =>
+                  _showDatePicker(context, birthDate, onBirthDateChanged),
               child: InputDecorator(
                 decoration: InputDecoration(
                   labelText: '생년월일',
@@ -598,7 +619,8 @@ class ProfileWidgets {
                 child: Text(
                   birthDate != null
                       ? app_date_utils.DateUtils.formatDisplayDate(
-                          birthDate.toIso8601String().split('T')[0])
+                          birthDate.toIso8601String().split('T')[0],
+                        )
                       : '날짜를 선택해주세요',
                   style: birthDate != null
                       ? Theme.of(context).textTheme.bodyLarge
@@ -732,7 +754,7 @@ class ProfileWidgets {
   // 🎯 관리자 모드 전용 위젯들
 
   /// 관리자용 계정 정보 섹션
-  /// 
+  ///
   /// 비활성화 계정 표시 및 인라인 수정 버튼 포함
   static Widget buildAdminAccountInfoSection(
     BuildContext context,
@@ -866,9 +888,9 @@ class ProfileWidgets {
             _buildAdminInfoRow(
               context,
               label: '생년월일',
-              value: profile.hasBirthDate 
-                ? '${profile.displayBirthDate} (만 ${DateTime.now().year - int.parse(profile.birthDate!.substring(0, 4))}세)'
-                : '생년월일 미입력',
+              value: profile.hasBirthDate
+                  ? '${profile.displayBirthDate} (만 ${DateTime.now().year - int.parse(profile.birthDate!.substring(0, 4))}세)'
+                  : '생년월일 미입력',
               icon: Icons.cake,
               isReadOnly: true,
             ),
@@ -895,9 +917,9 @@ class ProfileWidgets {
         Icon(
           icon,
           size: 18,
-          color: isReadOnly 
-            ? Theme.of(context).colorScheme.outline
-            : Theme.of(context).colorScheme.primary,
+          color: isReadOnly
+              ? Theme.of(context).colorScheme.outline
+              : Theme.of(context).colorScheme.primary,
         ),
         const SizedBox(width: 12),
 
@@ -920,9 +942,9 @@ class ProfileWidgets {
           child: Text(
             value,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: isReadOnly 
-                ? Theme.of(context).colorScheme.onSurfaceVariant
-                : Theme.of(context).colorScheme.onSurface,
+              color: isReadOnly
+                  ? Theme.of(context).colorScheme.onSurfaceVariant
+                  : Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
@@ -957,19 +979,19 @@ class ProfileWidgets {
     bool isProcessing = false,
   }) {
     final isActive = profile.isActive;
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isActive 
-          ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
-          : Theme.of(context).colorScheme.errorContainer.withOpacity(0.3),
+        color: isActive
+            ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
+            : Theme.of(context).colorScheme.errorContainer.withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isActive 
-            ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
-            : Theme.of(context).colorScheme.error.withOpacity(0.3),
+          color: isActive
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+              : Theme.of(context).colorScheme.error.withOpacity(0.3),
         ),
       ),
       child: Column(
@@ -980,9 +1002,9 @@ class ProfileWidgets {
             children: [
               Icon(
                 isActive ? Icons.check_circle : Icons.warning,
-                color: isActive 
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.error,
+                color: isActive
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.error,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -990,14 +1012,14 @@ class ProfileWidgets {
                 isActive ? '활성 계정' : '비활성 계정',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: isActive 
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.error,
+                  color: isActive
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.error,
                 ),
               ),
             ],
           ),
-          
+
           if (!isActive) ...[
             const SizedBox(height: 8),
             Text(
@@ -1007,9 +1029,9 @@ class ProfileWidgets {
               ),
             ),
           ],
-          
+
           const SizedBox(height: 12),
-          
+
           // 토글 버튼
           SizedBox(
             width: double.infinity,
@@ -1024,12 +1046,12 @@ class ProfileWidgets {
                   : Icon(isActive ? Icons.block : Icons.check_circle),
               label: Text(isActive ? '비활성화' : '활성화'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isActive 
-                  ? Theme.of(context).colorScheme.error
-                  : Theme.of(context).colorScheme.primary,
-                foregroundColor: isActive 
-                  ? Theme.of(context).colorScheme.onError
-                  : Theme.of(context).colorScheme.onPrimary,
+                backgroundColor: isActive
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.primary,
+                foregroundColor: isActive
+                    ? Theme.of(context).colorScheme.onError
+                    : Theme.of(context).colorScheme.onPrimary,
               ),
             ),
           ),
@@ -1101,9 +1123,9 @@ class ProfileWidgets {
                 ),
               ),
             ),
-            
+
             const SizedBox(width: 16),
-            
+
             // 저장 버튼
             Expanded(
               flex: 2,

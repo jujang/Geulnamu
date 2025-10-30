@@ -263,7 +263,7 @@ class AuthProvider with ChangeNotifier {
       case 'VICE_STAFF':
         return '준운영진';
       case 'MEMBER':
-        return '일반 회원';
+        return '모임원';
       default:
         return '알 수 없음';
     }
