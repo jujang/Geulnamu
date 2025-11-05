@@ -146,7 +146,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,  // 🎯 start → stretch로 변경 (가로 전체 사용)
         children: [
           // 🎨 외관 설정 섹션
           SettingsWidgets.buildSectionHeader(
