@@ -10,7 +10,10 @@ import '../../services/home/home_route_service.dart'; // RouteObserver
 import 'mixins/meeting_logic_mixin.dart';
 import 'widgets/meeting_widgets.dart';
 import 'widgets/meeting_list_widgets.dart';
+import 'widgets/meeting_speed_dial.dart'; // 🆕 SpeedDial 위젯
 import 'meeting_qr_scanner_screen.dart'; // 🆕 QR 스캔 화면
+import '../../core/enums/permission_level.dart';
+import '../../core/constants/permission_constants.dart';
 
 /// 모임 목록 화면
 ///
@@ -119,13 +122,21 @@ class _MeetingListScreenState extends State<MeetingListScreen>
                 // 메인 콘텐츠
                 _buildMainContent(),
 
-                // 플로팅 필터 버튼
+                // 플로팅 필터 버튼 (좌측 하단)
                 Positioned(
                   bottom: 16,
                   left: 16,
                   child: MeetingListWidgets.buildFilterFab(
                     context,
                     _showFilterBottomSheet,
+                  ),
+                ),
+
+                // SpeedDial (우측 하단 - 전체 화면 오버레이 가능)
+                Positioned.fill(
+                  child: MeetingSpeedDial(
+                    canCreateMeeting: _canCreateMeeting(),
+                    onCreateMeeting: _handleCreateMeeting,
                   ),
                 ),
               ],
@@ -248,5 +259,26 @@ class _MeetingListScreenState extends State<MeetingListScreen>
   /// 출석현황 확인 버튼 처리 (MeetingLogicMixin에서 처리)
   void _handleAttendanceCheck(int meetingId) {
     handleAttendanceCheck(meetingId);
+  }
+
+  /// 🆕 모임 만들기 권한 체크
+  bool _canCreateMeeting() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userRole = authProvider.userRole;
+
+    // 권한 확인
+    final permissionLevel = PermissionConstants.convertRoleToPermissionLevel(
+      userRole,
+    );
+    final requiredLevel = PermissionConstants.getRequiredPermissionLevel(
+      '모임 만들기',
+    );
+
+    return permissionLevel.hasPermission(requiredLevel);
+  }
+
+  /// 🆕 모임 만들기 버튼 처리
+  void _handleCreateMeeting() {
+    Navigator.pushNamed(context, '/meeting-create'); // 정확한 라우트로 수정
   }
 }
