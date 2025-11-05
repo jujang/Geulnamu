@@ -328,10 +328,12 @@ class AttendanceStatusWidgets {
               ),
               const SizedBox(width: 16),
 
-              // 이름
+              // 🎯 이름 부분 (개선 - 남은 공간 모두 사용)
               Expanded(
                 child: Text(
                   attendance.name,
+                  maxLines: 2,  // 최대 2줄까지 표시
+                  // 🎯 overflow 제거 - 자연스럽게 줄바꿈
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: context.colors.onSurface,
@@ -339,20 +341,38 @@ class AttendanceStatusWidgets {
                 ),
               ),
 
-              // 출석 시간 (기본 색상)
-              Text(
-                _formatDateTime(attendance.attendanceTime),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: context.colors.onSurface,
-                  fontWeight: FontWeight.w500,
+              const SizedBox(width: 8),  // 🎯 12 → 8로 줄임
+
+              // 🎯 출석 시간 부분 (고정 너비 - 필요한 만큼만 차지)
+              SizedBox(
+                width: 80,  // 🎯 고정 너비 ("2025.08.07" + "00:37" 표시 가능)
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _formatDate(attendance.attendanceTime),  // 날짜
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: context.colors.onSurface.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      _formatTime(attendance.attendanceTime),  // 시간
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: context.colors.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),  // 🎯 12 → 8로 줄임
 
               // 출석/지각 상태 표시
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),  // 🎯 padding 축소
                 decoration: BoxDecoration(
                   color: (attendance.isLate ? Colors.orange : Colors.green)
                       .withValues(alpha: 0.1),
@@ -363,54 +383,57 @@ class AttendanceStatusWidgets {
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: attendance.isLate ? Colors.orange : Colors.green,
                     fontWeight: FontWeight.w600,
+                    fontSize: 11,  // 🎯 폰트 크기 약간 축소
                   ),
                 ),
               ),
 
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),  // 🎯 8 → 4로 줄임
 
               // 더보기 메뉴 버튼 (관리자급에게만 표시)
-              if (showAdminActions) ...[
-                PopupMenuButton<String>(
-                  icon: Icon(
-                    Icons.more_vert,
-                    color: context.colors.onSurface.withValues(alpha: 0.6),
-                    size: 20,
-                  ),
-                  onSelected: (value) {
-                    _handleAttendanceMenuAction(
-                      context,
-                      attendance,
-                      value,
-                      onDeleteAttendance,
-                    );
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem<String>(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.delete_outline,
-                            color: Colors.red,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '출석 삭제',
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyMedium?.copyWith(color: Colors.red),
-                          ),
-                        ],
-                      ),
+              if (showAdminActions)
+                SizedBox(
+                  width: 28,  // 🎯 버튼 영역 크기 제한
+                  height: 28,
+                  child: PopupMenuButton<String>(
+                    padding: EdgeInsets.zero,  // 🎯 내부 패딩 제거
+                    iconSize: 18,  // 🎯 아이콘 크기 축소
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: context.colors.onSurface.withValues(alpha: 0.6),
+                      size: 18,  // 🎯 20 → 18로 축소
                     ),
-                  ],
+                    onSelected: (value) {
+                      _handleAttendanceMenuAction(
+                        context,
+                        attendance,
+                        value,
+                        onDeleteAttendance,
+                      );
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem<String>(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_outline,
+                              color: Colors.red,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '출석 삭제',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ] else ...[
-                // 관리자가 아니면 빈 공간으로 레이아웃 유지
-                const SizedBox(width: 28),
-              ],
             ],
           ),
         ),
@@ -647,5 +670,15 @@ class AttendanceStatusWidgets {
   /// DateTime을 "yyyy.MM.dd HH:mm" 형식으로 포맷
   static String _formatDateTime(DateTime dateTime) {
     return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  /// 날짜만 포맷 (yyyy.MM.dd)
+  static String _formatDate(DateTime dateTime) {
+    return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}';
+  }
+
+  /// 시간만 포맷 (HH:mm)
+  static String _formatTime(DateTime dateTime) {
+    return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }
