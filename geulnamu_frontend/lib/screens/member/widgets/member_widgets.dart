@@ -59,12 +59,15 @@ class MemberWidgets {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Text(
-                          '(${member.nickname})',
-                          style: context.textStyles.bodySmall?.copyWith(
-                            color: isActive
-                                ? context.colors.onSurfaceVariant
-                                : context.colors.onSurfaceVariant.withOpacity(0.5),
+                        Flexible(  // 🎯 추가: 닉네임을 Flexible로 감싸기
+                          child: Text(
+                            '(${member.nickname})',
+                            overflow: TextOverflow.ellipsis,  // 🎯 추가: 넘치면 ...
+                            style: context.textStyles.bodySmall?.copyWith(
+                              color: isActive
+                                  ? context.colors.onSurfaceVariant
+                                  : context.colors.onSurfaceVariant.withOpacity(0.5),
+                            ),
                           ),
                         ),
                       ],
