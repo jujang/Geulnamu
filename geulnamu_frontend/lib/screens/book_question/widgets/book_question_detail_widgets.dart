@@ -4,14 +4,13 @@ import '../../../models/book_question/book_question_model.dart';
 import 'post_it_widgets.dart';
 
 /// 발제문 상세 페이지 관련 위젯들
-/// 
+///
 /// 기능:
 /// - 탭바 및 탭뷰 구성
 /// - 로딩/에러 상태 처리
 /// - 그룹별 발제문 표시
 /// - 헤더 정보 표시
 class BookQuestionDetailWidgets {
-
   /// 📊 헤더 정보 카드 (모임 정보 + 전체 통계)
   static Widget buildHeaderInfo(
     BuildContext context, {
@@ -54,9 +53,9 @@ class BookQuestionDetailWidgets {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // 통계 정보
           Row(
             children: [
@@ -65,23 +64,23 @@ class BookQuestionDetailWidgets {
                 context,
                 icon: Icons.groups,
                 label: '전체 그룹',
-                value: '${totalGroups}개',
+                value: '$totalGroups개',
               ),
-              
+
               const SizedBox(width: 24),
-              
+
               // 전체 발제문 수
               _buildStatItem(
                 context,
                 icon: Icons.sticky_note_2,
                 label: '전체 발제문',
-                value: '${totalQuestions}개',
+                value: '$totalQuestions개',
               ),
             ],
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // 현재 선택된 그룹 정보
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -101,7 +100,7 @@ class BookQuestionDetailWidgets {
       ),
     );
   }
-  
+
   /// 📈 통계 아이템 (아이콘 + 라벨 + 값)
   static Widget _buildStatItem(
     BuildContext context, {
@@ -112,11 +111,7 @@ class BookQuestionDetailWidgets {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: context.colors.onSurface.withOpacity(0.7),
-        ),
+        Icon(icon, size: 16, color: context.colors.onSurface.withOpacity(0.7)),
         const SizedBox(width: 4),
         Text(
           label,
@@ -146,7 +141,7 @@ class BookQuestionDetailWidgets {
     if (groupCount == 0) {
       return const SizedBox.shrink();
     }
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -199,7 +194,7 @@ class BookQuestionDetailWidgets {
     if (bookQuestionResponse.groups.isEmpty) {
       return buildEmptyAllGroups(context);
     }
-    
+
     return TabBarView(
       controller: tabController,
       children: bookQuestionResponse.groups.map((group) {
@@ -245,11 +240,7 @@ class BookQuestionDetailWidgets {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: context.colors.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: context.colors.error),
             const SizedBox(height: 16),
             Text(
               message,
@@ -299,7 +290,7 @@ class BookQuestionDetailWidgets {
             ),
             const SizedBox(height: 8),
             Text(
-              '토론 참여자들이 발제문을 작성하면\\n여기에 그룹별로 표시됩니다',
+              '토론 참여자들이 발제문을 작성하면\n여기에 그룹별로 표시됩니다',
               textAlign: TextAlign.center,
               style: context.textStyles.bodyMedium?.copyWith(
                 color: context.colors.onSurfaceVariant.withOpacity(0.7),
@@ -319,11 +310,7 @@ class BookQuestionDetailWidgets {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.lock_outline,
-              size: 64,
-              color: context.colors.outline,
-            ),
+            Icon(Icons.lock_outline, size: 64, color: context.colors.outline),
             const SizedBox(height: 16),
             Text(
               '접근 권한이 없습니다',
@@ -366,15 +353,9 @@ class BookQuestionDetailWidgets {
       SnackBar(
         content: Row(
           children: [
-            Icon(
-              Icons.info_outline,
-              color: context.colors.onPrimary,
-              size: 20,
-            ),
+            Icon(Icons.info_outline, color: context.colors.onPrimary, size: 20),
             const SizedBox(width: 8),
-            const Expanded(
-              child: Text('관리자급만 발제문을 수정/삭제할 수 있습니다.'),
-            ),
+            const Expanded(child: Text('관리자급만 발제문을 수정/삭제할 수 있습니다.')),
           ],
         ),
         backgroundColor: context.colors.primary,
