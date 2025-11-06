@@ -79,6 +79,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
   late PrivacyStatusOption selectedPrivacyStatus; // 운영진용
   late SortByOption selectedSort;
   late bool isAscending;
+  late PageSizeOption selectedPageSize; // 🆕 페이지당 항목 수
 
   @override
   void initState() {
@@ -89,6 +90,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
     selectedPrivacyStatus = widget.currentFilter.privacyStatus;
     selectedSort = widget.currentFilter.sortBy;
     isAscending = widget.currentFilter.isAsc;
+    selectedPageSize = PageSizeOption.fromValue(widget.currentFilter.size); // 🆕 초기화
   }
 
   @override
@@ -118,6 +120,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                     selectedPrivacyStatus = PrivacyStatusOption.all;
                     selectedSort = SortByOption.meetingDate;
                     isAscending = false;
+                    selectedPageSize = PageSizeOption.medium; // 🆕 초기화
                   });
                 },
                 child: Text(
@@ -324,6 +327,33 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             ),
           ),
 
+          const SizedBox(height: 16),
+
+          // 🆕 페이지당 항목 수 (모든 모드에서 공통)
+          MeetingFilterWidgets.buildFilterSection(
+            context,
+            title: '한 페이지에 보이는 모임 개수',
+            child: Wrap(
+              spacing: 8,
+              children: PageSizeOption.values.map((option) {
+                final isSelected = selectedPageSize == option;
+                return ChoiceChip(
+                  label: Text(option.displayName),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() {
+                        selectedPageSize = option;
+                      });
+                    }
+                  },
+                  selectedColor: context.colors.primary.withOpacity(0.2),
+                  backgroundColor: context.colors.surfaceContainerHighest,
+                );
+              }).toList(),
+            ),
+          ),
+
           const SizedBox(height: 24),
 
           // 적용 버튼
@@ -338,6 +368,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                   privacyStatus: selectedPrivacyStatus,
                   sortBy: selectedSort,
                   isAsc: isAscending,
+                  size: selectedPageSize.value, // 🆕 페이지 크기 적용
                 );
 
                 Navigator.pop(context);

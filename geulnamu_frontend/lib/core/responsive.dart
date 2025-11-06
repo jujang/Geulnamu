@@ -73,4 +73,10 @@ class ResponsiveHelper {
   static double getPWAIconSize(BuildContext context) {
     return getScreenWidth(context) >= Breakpoints.tablet ? 36.0 : 32.0;
   }
+
+  // 🆕 모임 목록 페이지 크기 (반응형)
+  static int getDefaultPageSize(BuildContext context) {
+    // 모바일: 5개, PC: 10개
+    return isMobile(context) ? 5 : 10;
+  }
 }
