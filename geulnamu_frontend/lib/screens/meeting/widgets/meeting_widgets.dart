@@ -107,7 +107,7 @@ class MeetingWidgets {
                     ),
                     secondIcon: Icons.tag,
                     secondLabel: '모임번호',
-                    secondValue: '#${meeting.meetingId}',
+                    secondValue: '${meeting.meetingId}', // # 기호 제거
                   ),
                 ],
               ),
