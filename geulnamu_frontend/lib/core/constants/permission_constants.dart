@@ -43,13 +43,13 @@ class PermissionConstants {
     '출석 체크': PermissionLevel.MEMBER,
     '발제 작성': PermissionLevel.MEMBER,
     '발제문 목록': PermissionLevel.MEMBER, // 🆕 발제문 목록
-    '모임 만들기': PermissionLevel.MEMBER,
     '모임 참여': PermissionLevel.MEMBER,
     '개인 대시보드': PermissionLevel.MEMBER,
 
     // STAFF: 운영진 이상 (모임 관리 관련)
     '모임원 목록': PermissionLevel.STAFF, // 🆕 모임원 목록
     '모임 목록 (운영진용)': PermissionLevel.STAFF, // 🆕 운영진용 모임 목록
+    '모임 만들기': PermissionLevel.STAFF, // 🔥 STAFF로 변경
     '모임 관리': PermissionLevel.STAFF,
     '모임 수정': PermissionLevel.STAFF,
     '모임 삭제': PermissionLevel.STAFF,
