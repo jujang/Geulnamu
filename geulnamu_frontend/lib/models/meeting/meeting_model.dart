@@ -81,6 +81,32 @@ class MeetingInfo {
     return DateFormat('yyyy.MM.dd HH:mm').format(meetingDateTime);
   }
 
+  /// 📱 반응형 모임 개최일자 표시 (화면 크기에 따라 다른 포맷)
+  /// 
+  /// - 매우 작은 화면 (~360px): "08.09 01:00"
+  /// - 작은 화면 (360~600px): "08.09 01:00 (금)"
+  /// - 큰 화면 (600px+): "2025.08.09 01:00 (금)"
+  String getResponsiveMeetingDateTime(double screenWidth) {
+    final weekday = _getWeekdayKorean(meetingDateTime.weekday);
+    
+    if (screenWidth < 360) {
+      // 매우 작은 화면: 년도, 요일 제거
+      return DateFormat('MM.dd HH:mm').format(meetingDateTime);
+    } else if (screenWidth < 600) {
+      // 작은~중간 화면: 년도 제거, 요일 포함
+      return '${DateFormat('MM.dd HH:mm').format(meetingDateTime)} ($weekday)';
+    } else {
+      // 큰 화면: 전체 표시
+      return '${DateFormat('yyyy.MM.dd HH:mm').format(meetingDateTime)} ($weekday)';
+    }
+  }
+
+  /// 요일을 한글로 변환
+  String _getWeekdayKorean(int weekday) {
+    const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    return weekdays[weekday - 1];
+  }
+
   /// 모임 개최 날짜만 (yyyy.MM.dd)
   String get displayMeetingDate {
     return DateFormat('yyyy.MM.dd').format(meetingDateTime);
@@ -96,6 +122,29 @@ class MeetingInfo {
     if (discussionTime == null) return '-';
     // 원본 데이터가 시간만 이라면 그대로 사용
     return DateFormat('HH:mm').format(discussionTime!);
+  }
+
+  /// 📱 반응형 토론 시간 표시 (화면 크기에 따라 다른 포맷)
+  /// 
+  /// 개최일시와 동일한 포맷으로 통일
+  /// - 매우 작은 화면 (~360px): "08.09 12:00"
+  /// - 작은 화면 (360~600px): "08.09 12:00 (금)"
+  /// - 큰 화면 (600px+): "2025.08.09 12:00 (금)"
+  String getResponsiveDiscussionTime(double screenWidth) {
+    if (discussionTime == null) return '-';
+    
+    final weekday = _getWeekdayKorean(discussionTime!.weekday);
+    
+    if (screenWidth < 360) {
+      // 매우 작은 화면: 년도, 요일 제거
+      return DateFormat('MM.dd HH:mm').format(discussionTime!);
+    } else if (screenWidth < 600) {
+      // 작은~중간 화면: 년도 제거, 요일 포함
+      return '${DateFormat('MM.dd HH:mm').format(discussionTime!)} ($weekday)';
+    } else {
+      // 큰 화면: 전체 표시
+      return '${DateFormat('yyyy.MM.dd HH:mm').format(discussionTime!)} ($weekday)';
+    }
   }
 
   /// 출석 상태 표시명

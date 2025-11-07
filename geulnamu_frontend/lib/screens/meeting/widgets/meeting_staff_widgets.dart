@@ -66,7 +66,9 @@ class MeetingStaffWidgets {
                     context,
                     icon: Icons.schedule,
                     label: '개최일시',
-                    value: meeting.displayMeetingDateTime,
+                    value: meeting.getResponsiveMeetingDateTime(
+                      MediaQuery.of(context).size.width,
+                    ),
                     secondIcon: Icons.location_on_outlined,
                     secondLabel: '장소',
                     secondValue: meeting.meetingPlace,
@@ -79,7 +81,9 @@ class MeetingStaffWidgets {
                     context,
                     icon: Icons.chat_bubble_outline,
                     label: '토론시간',
-                    value: meeting.displayDiscussionTime,
+                    value: meeting.getResponsiveDiscussionTime(
+                      MediaQuery.of(context).size.width,
+                    ),
                     secondIcon: Icons.person_outline,
                     secondLabel: '개설자',
                     secondValue: meeting.meetingCreatorName,
@@ -228,6 +232,8 @@ class MeetingStaffWidgets {
   }
 
   /// 정보 행 위젯 (2개 정보를 한 행에 표시)
+  /// 
+  /// 반응형: 모바일(~600px)에서는 레이블 숨김, 아이콘+데이터만 표시
   static Widget _buildInfoRow(
     BuildContext context, {
     required IconData icon,
@@ -239,6 +245,10 @@ class MeetingStaffWidgets {
     String? secondValue,
     Color? secondValueColor,
   }) {
+    // 📱 반응형: 화면 크기 감지
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600; // 모바일 기준: 600px 미만
+
     return Row(
       children: [
         // 첫 번째 정보
@@ -251,16 +261,18 @@ class MeetingStaffWidgets {
                 color: context.colors.onSurface.withOpacity(0.65),
               ),
               const SizedBox(width: 6),
-              Text(
-                '$label: ',
-                style: context.textStyles.bodySmall?.copyWith(
-                  color: context.colors.onSurface.withOpacity(0.55),
-                  fontSize: 14,
-                  fontWeight: Theme.of(context).brightness == Brightness.light
-                      ? FontWeight.w600
-                      : FontWeight.w500,
+              // 📱 모바일에서는 레이블 숨김
+              if (!isMobile)
+                Text(
+                  '$label: ',
+                  style: context.textStyles.bodySmall?.copyWith(
+                    color: context.colors.onSurface.withOpacity(0.55),
+                    fontSize: 14,
+                    fontWeight: Theme.of(context).brightness == Brightness.light
+                        ? FontWeight.w600
+                        : FontWeight.w500,
+                  ),
                 ),
-              ),
               Expanded(
                 child: Text(
                   value,
@@ -292,16 +304,18 @@ class MeetingStaffWidgets {
                   color: context.colors.onSurface.withOpacity(0.65),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  '$secondLabel: ',
-                  style: context.textStyles.bodySmall?.copyWith(
-                    color: context.colors.onSurface.withOpacity(0.55),
-                    fontSize: 14,
-                    fontWeight: Theme.of(context).brightness == Brightness.light
-                        ? FontWeight.w600
-                        : FontWeight.w500,
+                // 📱 모바일에서는 레이블 숨김
+                if (!isMobile)
+                  Text(
+                    '$secondLabel: ',
+                    style: context.textStyles.bodySmall?.copyWith(
+                      color: context.colors.onSurface.withOpacity(0.55),
+                      fontSize: 14,
+                      fontWeight: Theme.of(context).brightness == Brightness.light
+                          ? FontWeight.w600
+                          : FontWeight.w500,
+                    ),
                   ),
-                ),
                 Expanded(
                   child: Text(
                     secondValue,
