@@ -111,7 +111,7 @@ class MemberListItem {
       case 'VICE_STAFF':
         return '준운영진';
       case 'MEMBER':
-        return '일반 회원';
+        return '모임원';
       default:
         return '알 수 없음';
     }
@@ -130,7 +130,7 @@ class MemberListItem {
     if (birthDate == null) {
       return '생년월일 미입력';
     }
-    
+
     // 2022-01-01 형식을 22.01.01 형식으로 변경
     try {
       final parts = birthDate!.split('-');
@@ -296,7 +296,7 @@ enum RoleOption {
   admin('ADMIN', '관리자'),
   staff('STAFF', '운영진'),
   viceStaff('VICE_STAFF', '준운영진'),
-  member('MEMBER', '일반 회원');
+  member('MEMBER', '모임원');
 
   const RoleOption(this.value, this.displayName);
 

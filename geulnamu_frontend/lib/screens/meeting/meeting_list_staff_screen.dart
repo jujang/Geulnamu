@@ -7,9 +7,12 @@ import '../../core/theme.dart';
 import '../../models/meeting/meeting_model.dart';
 import '../../services/home/home_service.dart';
 import '../../services/home/home_route_service.dart'; // RouteObserver 추가
+import '../../core/enums/permission_level.dart'; // 🆕 권한 시스템 import
+import '../../core/constants/permission_constants.dart'; // 🆕 권한 상수 import
 import 'mixins/meeting_logic_mixin.dart';
 import 'widgets/meeting_widgets.dart';
 import 'widgets/meeting_list_widgets.dart';
+import 'widgets/meeting_speed_dial.dart'; // 🆕 SpeedDial 위젯 import
 
 /// 🆕 모임 목록 조회 (운영진용) 화면
 ///
@@ -124,26 +127,29 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
               ),
             ],
             body: Stack(
-            children: [
-            // 메인 콘텐츠
-            _buildMainContent(),
+              children: [
+                // 메인 콘텐츠
+                _buildMainContent(),
 
-            // 플로팅 버튼들 (맨 아래)
-            Positioned(
-            bottom: 16,
-            left: 16,
-                child: MeetingListWidgets.buildFilterFab(
+                // 플로팅 필터 버튼 (좌측 하단)
+                Positioned(
+                  bottom: 16,
+                  left: 16,
+                  child: MeetingListWidgets.buildFilterFab(
                     context,
-                      _showStaffFilterBottomSheet,
-                    ),
+                    _showStaffFilterBottomSheet,
                   ),
-            Positioned(
-            bottom: 16,
-              right: 16,
-            child: _buildCreateMeetingFab(), // 모임 만들기 FAB
+                ),
+
+                // 🆕 SpeedDial (우측 하단 - 전체 화면 오버레이 가능)
+                Positioned.fill(
+                  child: MeetingSpeedDial(
+                    canCreateMeeting: _canCreateMeeting(),
+                    onCreateMeeting: _handleCreateMeeting,
+                  ),
+                ),
+              ],
             ),
-                ],
-              ),
           ),
         );
       },
@@ -238,44 +244,6 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
     );
   }
 
-  /// 모임 만들기 플로팅 버튼 빌드
-  Widget _buildCreateMeetingFab() {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
-        // 운영진 권한 체크
-        if (!authProvider.isStaffLevel) {
-          return const SizedBox.shrink();
-        }
-
-        return FloatingActionButton.extended(
-          onPressed: () {
-            // 모임 만들기 페이지로 이동
-            Navigator.pushNamed(
-              context,
-              '/meeting-create',  // 라우트 이름 수정
-            ).then((result) {
-              // 모임 생성 후 목록 새로고침
-              if (result == true && mounted) {
-                refreshMeetingList();
-              }
-            });
-          },
-          label: const Text('모임 만들기'),
-          icon: const Icon(Icons.add),
-          backgroundColor: context.colors.primary,
-          foregroundColor: context.colors.onPrimary,
-          elevation: 4,
-        );
-      },
-    );
-  }
-
-  /// 로그아웃 처리 (HomeService 활용)
-  Future<void> _handleLogout() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await _homeService.handleLogout(context, authProvider);
-  }
-
   /// 모임 카드 탭 처리 (운영진용 상세보기 기능)
   void _handleMeetingTap(MeetingInfo meeting) {
     Navigator.pushNamed(context, '/meeting/${meeting.meetingId}/staff').then((result) {
@@ -284,5 +252,38 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
         refreshMeetingList();
       }
     });
+  }
+
+  /// 🆕 모임 만들기 권한 체크
+  bool _canCreateMeeting() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userRole = authProvider.userRole;
+
+    // 권한 확인
+    final permissionLevel =
+        PermissionConstants.convertRoleToPermissionLevel(userRole);
+    final requiredLevel =
+        PermissionConstants.getRequiredPermissionLevel('모임 만들기');
+
+    return permissionLevel.hasPermission(requiredLevel);
+  }
+
+  /// 🆕 모임 만들기 버튼 처리
+  void _handleCreateMeeting() {
+    Navigator.pushNamed(
+      context,
+      '/meeting-create',
+    ).then((result) {
+      // 모임 생성 후 목록 새로고침
+      if (result == true && mounted) {
+        refreshMeetingList();
+      }
+    });
+  }
+
+  /// 로그아웃 처리 (HomeService 활용)
+  Future<void> _handleLogout() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await _homeService.handleLogout(context, authProvider);
   }
 }

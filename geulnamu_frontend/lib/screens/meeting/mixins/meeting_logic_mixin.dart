@@ -5,6 +5,7 @@ import '../../../services/meeting/meeting_service.dart';
 import '../../../models/meeting/meeting_model.dart';
 import '../../../models/meeting/meeting_filter_model.dart';
 import '../../../core/config/app_config.dart'; // AppConfig import 추가
+import '../../../core/responsive.dart'; // 🆕 반응형 헬퍼 import
 
 /// 모임 목록 화면 로직 Mixin
 ///
@@ -51,9 +52,16 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
   Future<void> initializeMeetingList({MeetingListFilter? initialFilter}) async {
     // 🎯 MeetingService는 Singleton이므로 이미 초기화됨
 
+    // 🆕 반응형 기본 페이지 크기 설정
+    final defaultPageSize = ResponsiveHelper.getDefaultPageSize(context);
+
     // 🎯 초기 필터 설정 (제공된 경우)
     if (initialFilter != null) {
-      _currentFilter = initialFilter;
+      // 🆕 페이지 크기를 반영형 기본값으로 설정
+      _currentFilter = initialFilter.copyWith(size: defaultPageSize);
+    } else {
+      // 🆕 기본 필터에 반응형 크기 적용
+      _currentFilter = MeetingListFilter(size: defaultPageSize);
     }
 
     await loadMeetingList(isInitial: true);

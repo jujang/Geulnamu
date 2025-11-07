@@ -183,3 +183,22 @@ enum PrivacyStatusOption {
     );
   }
 }
+
+/// 🆕 페이지당 항목 수 옵션
+enum PageSizeOption {
+  small(5, '5개'),
+  medium(10, '10개');
+
+  const PageSizeOption(this.value, this.displayName);
+
+  final int value;
+  final String displayName;
+
+  static PageSizeOption fromValue(int? value) {
+    if (value == null) return PageSizeOption.medium;
+    return PageSizeOption.values.firstWhere(
+      (option) => option.value == value,
+      orElse: () => PageSizeOption.medium,
+    );
+  }
+}

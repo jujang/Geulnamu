@@ -318,7 +318,7 @@ class IntroductionScreen extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          '당일 취소 자제 부탁드리고 노쇼 2번은 강퇴입니다\n본위기를 흐리거나 다른 목적으로 가입하신 분들, 운영진 회의 하에 강퇴입니다 (무통보 강제퇴장)',
+                          '당일 취소 자제 부탁드리고 노쇼 2번은 강퇴입니다\n분위기를 흐리거나 다른 목적으로 가입하신 분들, 운영진 회의 하에 강퇴입니다 (무통보 강제퇴장)',
                           style: context.textStyles.bodySmall?.copyWith(
                             color: context.warningColor,
                             height: 1.4,

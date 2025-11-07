@@ -247,7 +247,7 @@ class SettingsWidgets {
   /// 설정 완료 메시지 카드
   static Widget buildCompletionCard(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),  // 🎯 다른 카드들과 동일한 마진 적용
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
