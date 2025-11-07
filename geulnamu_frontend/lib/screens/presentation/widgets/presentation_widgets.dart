@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
 import '../../../models/presentation/presentation_model.dart';
 import '../../../models/presentation/presentation_filter_model.dart';
+import 'presentation_filter_widgets.dart';
 
 /// 발제문 관련 UI 위젯들 (실제 책 모양 디자인)
 ///
@@ -269,80 +270,11 @@ class PresentationWidgets {
     required PresentationListFilter currentFilter,
     required Function(PresentationListFilter) onFilterChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 헤더
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '발제문 필터',
-                style: context.textStyles.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // 임시 필터 UI (향후 구현)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: context.colors.surfaceVariant.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.tune,
-                  size: 48,
-                  color: context.colors.onSurfaceVariant,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '필터 기능 구현 예정',
-                  style: context.textStyles.bodyLarge?.copyWith(
-                    color: context.colors.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '발제문 유형, 날짜별 필터링',
-                  style: context.textStyles.bodySmall?.copyWith(
-                    color: context.colors.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // 확인 버튼
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('확인'),
-            ),
-          ),
-          
-          // 하단 안전 영역
-          const SizedBox(height: 16),
-        ],
-      ),
+    // 🎯 실제 필터 위젯 사용 (PresentationFilterWidgets)
+    return PresentationFilterWidgets.buildFilterBottomSheet(
+      context,
+      currentFilter: currentFilter,
+      onFilterChanged: onFilterChanged,
     );
   }
 }

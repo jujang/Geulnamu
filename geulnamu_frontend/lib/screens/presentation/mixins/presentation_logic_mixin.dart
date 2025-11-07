@@ -5,6 +5,7 @@ import '../../../services/presentation/presentation_service.dart';
 import '../../../models/presentation/presentation_model.dart';
 import '../../../models/presentation/presentation_filter_model.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/responsive.dart'; // 🆕 반응형 헬퍼 import
 
 /// 발제문 목록 화면 로직 Mixin
 ///
@@ -48,9 +49,16 @@ mixin PresentationLogicMixin<T extends StatefulWidget> on State<T> {
   Future<void> initializePresentationList({PresentationListFilter? initialFilter}) async {
     // 🎯 PresentationService는 Singleton이므로 이미 초기화됨
 
+    // 🆕 반응형 기본 페이지 크기 설정 (발제문 전용)
+    final defaultPageSize = ResponsiveHelper.getPresentationDefaultPageSize(context);
+
     // 🎯 초기 필터 설정 (제공된 경우)
     if (initialFilter != null) {
-      _currentFilter = initialFilter;
+      // 🆕 페이지 크기를 반응형 기본값으로 설정
+      _currentFilter = initialFilter.copyWith(size: defaultPageSize);
+    } else {
+      // 🆕 기본 필터에 반응형 크기 적용
+      _currentFilter = PresentationListFilter(size: defaultPageSize);
     }
 
     await loadPresentationList(isInitial: true);
