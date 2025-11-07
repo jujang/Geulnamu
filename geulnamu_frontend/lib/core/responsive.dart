@@ -79,4 +79,10 @@ class ResponsiveHelper {
     // 모바일: 5개, PC: 10개
     return isMobile(context) ? 5 : 10;
   }
+
+  // 🆕 발제문 목록 페이지 크기 (반응형)
+  static int getPresentationDefaultPageSize(BuildContext context) {
+    // 모바일: 6개, PC: 12개
+    return isMobile(context) ? 6 : 12;
+  }
 }

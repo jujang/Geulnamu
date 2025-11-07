@@ -6,7 +6,7 @@ import '../../../models/presentation/presentation_filter_model.dart';
 ///
 /// Static Methods로 구현하여 재사용성 극대화
 class PresentationListWidgets {
-  /// 페이지네이션 위젯
+  /// 페이지네이션 위젯 (🆕 반응형 개선)
   static Widget buildPagination(
     BuildContext context, {
     required int currentPage,
@@ -17,45 +17,162 @@ class PresentationListWidgets {
       return const SizedBox.shrink();
     }
 
+    // 🆕 화면 크기에 따른 반응형 처리
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600; // 모바일 화면
+
     return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // 첫 페이지
-          IconButton(
-            onPressed: currentPage > 1 ? () => onPageChanged(1) : null,
-            icon: const Icon(Icons.first_page),
-          ),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: isSmallScreen 
+        ? _buildCompactPagination(context, currentPage, totalPages, onPageChanged)
+        : _buildFullPagination(context, currentPage, totalPages, onPageChanged),
+    );
+  }
 
-          // 이전 페이지
-          IconButton(
-            onPressed: currentPage > 1
-                ? () => onPageChanged(currentPage - 1)
-                : null,
-            icon: const Icon(Icons.chevron_left),
+  /// 📱 컴팩트 페이지네이션 (모바일용 - 3개 페이지 번호)
+  static Widget _buildCompactPagination(
+    BuildContext context,
+    int currentPage,
+    int totalPages,
+    Function(int) onPageChanged,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // 첫 페이지 버튼
+        IconButton(
+          onPressed: currentPage > 1 ? () => onPageChanged(1) : null,
+          icon: const Icon(Icons.first_page),
+          iconSize: 20,
+          padding: const EdgeInsets.all(8),
+          constraints: const BoxConstraints(
+            minWidth: 32,
+            minHeight: 32,
           ),
+        ),
 
-          // 페이지 번호들
-          ...buildPageNumbers(context, currentPage, totalPages, onPageChanged),
+        // 🆕 3개 페이지 번호 버튼
+        ...buildCompactPageNumbers(context, currentPage, totalPages, onPageChanged),
 
-          // 다음 페이지
-          IconButton(
-            onPressed: currentPage < totalPages
-                ? () => onPageChanged(currentPage + 1)
-                : null,
-            icon: const Icon(Icons.chevron_right),
+        // 마지막 페이지 버튼
+        IconButton(
+          onPressed: currentPage < totalPages ? () => onPageChanged(totalPages) : null,
+          icon: const Icon(Icons.last_page),
+          iconSize: 20,
+          padding: const EdgeInsets.all(8),
+          constraints: const BoxConstraints(
+            minWidth: 32,
+            minHeight: 32,
           ),
+        ),
+      ],
+    );
+  }
 
-          // 마지막 페이지
-          IconButton(
-            onPressed: currentPage < totalPages
-                ? () => onPageChanged(totalPages)
-                : null,
-            icon: const Icon(Icons.last_page),
+  /// 🆕 컴팩트 페이지 번호 버튼들 생성 (3개)
+  static List<Widget> buildCompactPageNumbers(
+    BuildContext context,
+    int currentPage,
+    int totalPages,
+    Function(int) onPageChanged,
+  ) {
+    final List<Widget> pageButtons = [];
+
+    // 🎯 현재 페이지를 중심으로 3개 표시 (currentPage - 1, currentPage, currentPage + 1)
+    int startPage = (currentPage - 1).clamp(1, totalPages);
+    int endPage = (startPage + 2).clamp(1, totalPages);
+
+    // 🎯 경계 처리: endPage가 마지막에 도달했을 때 startPage 조정
+    if (endPage == totalPages && totalPages >= 3) {
+      startPage = (totalPages - 2).clamp(1, totalPages);
+    }
+
+    // 🎯 총 페이지가 3개 미만이면 모두 표시
+    if (totalPages < 3) {
+      startPage = 1;
+      endPage = totalPages;
+    }
+
+    for (int i = startPage; i <= endPage; i++) {
+      pageButtons.add(
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          child: Material(
+            borderRadius: BorderRadius.circular(8),
+            color: i == currentPage
+                ? context.colors.primary
+                : Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: i != currentPage ? () => onPageChanged(i) : null,
+              child: Container(
+                width: 36, // 모바일용 작은 크기
+                height: 36,
+                alignment: Alignment.center,
+                child: Text(
+                  '$i',
+                  style: context.textStyles.bodyMedium?.copyWith(
+                    color: i == currentPage
+                        ? context.colors.onPrimary
+                        : context.colors.onSurface,
+                    fontWeight: i == currentPage
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+              ),
+            ),
           ),
-        ],
-      ),
+        ),
+      );
+    }
+
+    return pageButtons;
+  }
+
+  /// 🖥️ 풀 페이지네이션 (PC용)
+  static Widget _buildFullPagination(
+    BuildContext context,
+    int currentPage,
+    int totalPages,
+    Function(int) onPageChanged,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // 첫 페이지
+        IconButton(
+          onPressed: currentPage > 1 ? () => onPageChanged(1) : null,
+          icon: const Icon(Icons.first_page),
+        ),
+
+        // 이전 페이지
+        IconButton(
+          onPressed: currentPage > 1
+              ? () => onPageChanged(currentPage - 1)
+              : null,
+          icon: const Icon(Icons.chevron_left),
+        ),
+
+        // 페이지 번호들
+        ...buildPageNumbers(context, currentPage, totalPages, onPageChanged),
+
+        // 다음 페이지
+        IconButton(
+          onPressed: currentPage < totalPages
+              ? () => onPageChanged(currentPage + 1)
+              : null,
+          icon: const Icon(Icons.chevron_right),
+        ),
+
+        // 마지막 페이지
+        IconButton(
+          onPressed: currentPage < totalPages
+              ? () => onPageChanged(totalPages)
+              : null,
+          icon: const Icon(Icons.last_page),
+        ),
+      ],
     );
   }
 

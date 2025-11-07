@@ -14,7 +14,7 @@ class PresentationListFilter {
 
   const PresentationListFilter({
     this.page = 1,
-    this.size = 10,
+    this.size = 12, // 🎯 기본값 12개 (모바일은 ResponsiveHelper가 6개로 설정)
     this.presentationType = PresentationTypeOption.all,
     this.isTodayMeeting,
     this.attendanceStatus = AttendanceStatusOption.all,
@@ -88,7 +88,7 @@ class PresentationListFilter {
   /// 필터가 기본값인지 확인
   bool get isDefault {
     return page == 1 &&
-        size == 10 &&
+        size == 12 &&
         presentationType == PresentationTypeOption.all &&
         isTodayMeeting == null &&
         attendanceStatus == AttendanceStatusOption.all &&
