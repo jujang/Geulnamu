@@ -72,7 +72,7 @@ class ContactWidgets {
             ),
             const SizedBox(height: 16),
             Text(
-              '앱 사용 중 불편한 점이나 새로운 아이디어가 있으시면\n언제든지 말씀해 주세요!',
+              '앱 사용 중 불편한 점이나 새로운 아이디어가 있으시면 언제든지 말씀해 주세요!',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                 height: 1.4,
@@ -101,7 +101,7 @@ class ContactWidgets {
             iconColor: Colors.red,
             title: '에러 보고',
             subtitle: '앱에 문제가 발생했나요?',
-            description: '버그, 오류, 예상과 다른 동작 등을\n 신고해 주세요.',
+            description: '버그, 오류, 예상과 다른 동작 등을 신고해 주세요.',
             onTap: onErrorReportTap,
           ),
 
@@ -114,7 +114,7 @@ class ContactWidgets {
             iconColor: Colors.amber,
             title: '기능 요청',
             subtitle: '새로운 아이디어를 제안해주세요!',
-            description: '더 나은 글나무를 위한\n여러분의 창의적인 아이디어를 기다립니다.',
+            description: '더 나은 글나무를 위한 여러분의 창의적인 아이디어를 기다립니다.',
             onTap: onFeatureRequestTap,
           ),
         ],
