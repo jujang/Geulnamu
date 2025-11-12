@@ -157,7 +157,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
 
               // 🎯 정확한 라우트 매칭 시스템
               switch (path) {
-                // 🆕 운영진용 모임 목록 화면 (정확한 매칭)
+                // 운영진용 모임 목록 화면 (정확한 매칭)
                 case '/meeting-list-staff':
                   final filterType = queryParams['filter'];
                   return MaterialPageRoute(

@@ -29,10 +29,10 @@ class ApiUtils {
       ),
     );
 
-    // 🆕 글로벌 캐시 무효화 인터셉터 추가
+    // 글로벌 캐시 무효화 인터셉터
     dio.interceptors.add(_CacheControlInterceptor());
 
-    // 🆕 디버그 모드에서 요청/응답 로깅 인터셉터 추가
+    // 디버그 모드에서 요청/응답 로깅 인터셉터
     if (AppConfig.debugMode) {
       dio.interceptors.add(_DebugLoggingInterceptor());
     }
@@ -267,12 +267,12 @@ class _CacheControlInterceptor extends Interceptor {
         'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
         'Pragma': 'no-cache',
         'Expires': '0',
-        // 🆕 HTTP/1.1 및 HTTP/1.0 호환성을 위한 추가 헤더
+        // HTTP/1.1 및 HTTP/1.0 호환성을 위한 추가 헤더
         'If-Modified-Since': 'Thu, 01 Jan 1970 00:00:00 GMT',
         'If-None-Match': '*', // ETag 캐시 무효화
       });
-      
-      // 🆕 Flutter Web에서 타임스탬프 쿼리 파라미터 추가 (필요시)
+
+      // Flutter Web에서 타임스탬프 쿼리 파라미터 추가 (필요시)
       if (kIsWeb) {
         final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
         options.queryParameters['_nocache'] = timestamp;
