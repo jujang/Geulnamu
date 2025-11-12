@@ -11,12 +11,12 @@ import '../utils/api_utils.dart';
 import '../../widgets/common/error_dialog.dart';
 
 /// 🔐 글나무 인증 서비스
-/// 
+///
 /// 백엔드 API와 완전 호환되는 카카오 OAuth 로그인 시스템
 /// - 웹/모바일 환경 자동 감지 및 처리
 /// - ApiUtils 통합 사용으로 일관된 에러 처리
 /// - 자동 토큰 갱신 및 인터셉터 설정
-/// 
+///
 /// 사용법:
 /// ```dart
 /// final authService = AuthService();
@@ -30,7 +30,7 @@ class AuthService {
   }
 
   late final Dio _dio;
-  
+
   // 🔑 로컬 저장소 키
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
@@ -41,9 +41,7 @@ class AuthService {
     // ⏰ ApiUtils의 타임아웃 설정을 사용하여 Dio 인스턴스 생성
     _dio = ApiUtils.createDioWithTimeout(
       baseUrl: AppConfig.apiBaseUrl,
-      headers: {
-        'User-Agent': 'GeulnamuApp/${AppConfig.appVersion}',
-      },
+      headers: {'User-Agent': 'GeulnamuApp/${AppConfig.appVersion}'},
     );
 
     // 쿠키 포함 요청 활성화
@@ -76,16 +74,16 @@ class AuthService {
           handler.next(response);
         },
         onError: (error, handler) async {
-
           // 401 에러 시 자동 토큰 갱신 시도
-          if (error.response?.statusCode == 401 && 
+          if (error.response?.statusCode == 401 &&
               _needsAuthentication(error.requestOptions.path)) {
             final refreshed = await _attemptTokenRefresh();
-            
+
             if (refreshed) {
               // 토큰 갱신 성공 시 원래 요청 재시도
               final accessToken = await getAccessToken();
-              error.requestOptions.headers['Authorization'] = 'Bearer $accessToken';
+              error.requestOptions.headers['Authorization'] =
+                  'Bearer $accessToken';
 
               try {
                 final response = await _dio.fetch(error.requestOptions);
@@ -109,22 +107,22 @@ class AuthService {
     if (path.contains('/login/oauth/') || path.contains('/login/re-issue/')) {
       return false;
     }
-    
+
     // 로그아웃은 인증 필요
     if (path.contains('/login/logout')) {
       return true;
     }
-    
+
     // /api/ 경로는 인증 필요
     if (path.contains('/api/')) {
       return true;
     }
-    
+
     return false;
   }
 
   /// 🥕 카카오 OAuth 로그인 - 메인 진입점
-  /// 
+  ///
   /// 웹/모바일 환경을 자동 감지하여 적절한 OAuth 플로우 실행
   Future<Map<String, dynamic>> loginWithKakao({BuildContext? context}) async {
     try {
@@ -161,13 +159,8 @@ class AuthService {
         'width=500,height=600,scrollbars=yes,resizable=yes',
       );
 
-      if (popup == null) {
-        throw Exception('팝업이 차단되었습니다. 브라우저 팝업 차단을 해제해주세요.');
-      }
-
       // Authorization Code 대기
       final authCode = await _waitForAuthCode(popup);
-
 
       // 백엔드로 코드 전송 및 토큰 교환
       return await _processAuthCode(authCode, context);
@@ -198,8 +191,6 @@ class AuthService {
         ),
       );
 
-
-
       // Authorization Code 추출
       final uri = Uri.parse(result);
       final code = uri.queryParameters['code'];
@@ -207,8 +198,6 @@ class AuthService {
       if (code == null || code.isEmpty) {
         throw Exception('카카오 OAuth에서 인증 코드를 받지 못했습니다.');
       }
-
-
 
       // 백엔드로 코드 전송 및 토큰 교환
       return await _processAuthCode(code, context);
@@ -225,7 +214,7 @@ class AuthService {
     final clientId = kIsWeb
         ? AppConfig.kakaoJavaScriptAppKey
         : AppConfig.kakaoNativeAppKey;
-    
+
     final redirectUri = AppConfig.kakaoRedirectUri;
     final state = DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -238,7 +227,10 @@ class AuthService {
     };
 
     final queryString = params.entries
-        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .map(
+          (e) =>
+              '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+        )
         .join('&');
 
     return 'https://kauth.kakao.com/oauth/authorize?$queryString';
@@ -250,17 +242,19 @@ class AuthService {
     late StreamSubscription messageSubscription;
     late Timer popupCheckTimer;
     late Timer timeoutTimer;
-    
+
     // PostMessage 리스너 등록
     messageSubscription = html.window.onMessage.listen((event) {
-
-
       if (event.data is String) {
         final data = event.data as String;
         if (data.startsWith('KAKAO_AUTH_CODE:')) {
           final code = data.replaceFirst('KAKAO_AUTH_CODE:', '');
           if (code.isNotEmpty && !completer.isCompleted) {
-            _cleanupListeners(messageSubscription, popupCheckTimer, timeoutTimer);
+            _cleanupListeners(
+              messageSubscription,
+              popupCheckTimer,
+              timeoutTimer,
+            );
             _closePopup(popup);
             completer.complete(code);
           }
@@ -275,9 +269,7 @@ class AuthService {
           _cleanupListeners(messageSubscription, timer, timeoutTimer);
           completer.completeError(Exception('사용자가 로그인을 취소했습니다.'));
         }
-      } catch (e) {
-
-      }
+      } catch (e) {}
     });
 
     // 타임아웃 설정 (5분)
@@ -293,33 +285,35 @@ class AuthService {
   }
 
   /// 🧹 리스너 정리 헬퍼
-  void _cleanupListeners(StreamSubscription messageSubscription, 
-                        Timer popupCheckTimer, Timer timeoutTimer) {
+  void _cleanupListeners(
+    StreamSubscription messageSubscription,
+    Timer popupCheckTimer,
+    Timer timeoutTimer,
+  ) {
     try {
       messageSubscription.cancel();
       popupCheckTimer.cancel();
       timeoutTimer.cancel();
-    } catch (e) {
-
-    }
+    } catch (e) {}
   }
 
   /// 🪟 팝업 닫기 헬퍼
   void _closePopup(dynamic popup) {
     try {
       popup?.close();
-    } catch (e) {
-
-    }
+    } catch (e) {}
   }
 
   /// 📱 콜백 스킴 결정
   String _getCallbackScheme() {
-    return kIsWeb ? 'http' : 'geulnamu';  // 웹에서 HTTP 사용 (개발용)
+    return kIsWeb ? 'http' : 'geulnamu'; // 웹에서 HTTP 사용 (개발용)
   }
 
   /// 🔄 Authorization Code 처리 및 토큰 교환
-  Future<Map<String, dynamic>> _processAuthCode(String code, BuildContext? context) async {
+  Future<Map<String, dynamic>> _processAuthCode(
+    String code,
+    BuildContext? context,
+  ) async {
     try {
       if (AppConfig.debugMode) {
         print('🔄 백엔드로 인증 코드 전송 중...');
@@ -328,40 +322,37 @@ class AuthService {
       // ✅ POST + RequestBody로 변경
       final response = await _dio.post(
         AppConfig.getApiEndpoint('login/oauth/kakao'),
-        data: {
-          'code': code,
-        },
+        data: {'code': code},
         options: Options(
           headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json',  // JSON 형태로 전송
+            'Content-Type': 'application/json', // JSON 형태로 전송
             'User-Agent': 'GeulnamuApp/${AppConfig.appVersion}',
           },
           followRedirects: false,
           extra: {
-            'withCredentials': true,  // 쿠키 포함 요청
+            'withCredentials': true, // 쿠키 포함 요청
           },
         ),
       );
 
-
-
       if (response.statusCode == 200) {
         // ✅ ApiUtils 통합 응답 처리
         final processedResponse = ApiUtils.processBackendResponse(
-          response, 
-          '카카오 로그인'
+          response,
+          '카카오 로그인',
         );
 
         // ✅ ApiUtils 통합 토큰 추출
         final refreshToken = ApiUtils.extractRefreshToken(response);
-        
+
         final authData = {
           'accessToken': processedResponse['data']['accessToken'],
           'refreshToken': refreshToken ?? '',
           'userInfo': {
             'memberId': processedResponse['data']['memberId'],
-            'memberName': processedResponse['data']['memberName'], // null일 수 있음 (정보 미등록 상태)
+            'memberName':
+                processedResponse['data']['memberName'], // null일 수 있음 (정보 미등록 상태)
             'role': processedResponse['data']['role'],
             'newMember': processedResponse['data']['newMember'],
           },
@@ -373,7 +364,9 @@ class AuthService {
         if (AppConfig.debugMode) {
           print('✅ 카카오 OAuth 로그인 완료');
           print('👤 멤버 ID: ${authData['userInfo']['memberId']}');
-          print('📝 사용자 이름: ${authData['userInfo']['memberName'] ?? '미등록'}'); // null 처리
+          print(
+            '📝 사용자 이름: ${authData['userInfo']['memberName'] ?? '미등록'}',
+          ); // null 처리
           print('🎭 역할: ${authData['userInfo']['role']}');
           print('🆕 신규 회원: ${authData['userInfo']['newMember']}');
         }
@@ -387,21 +380,21 @@ class AuthService {
       if (e is DioException) {
         // ✅ ApiUtils 통합 에러 처리 (에러 다이얼로그 표시)
         throw ApiUtils.processDioException(
-          e, 
+          e,
           '카카오 로그인',
           context: context,
-          showDialog: context != null,  // context가 있을 때만 다이얼로그 표시
+          showDialog: context != null, // context가 있을 때만 다이얼로그 표시
         );
       } else {
         // 🎯 processBackendResponse에서 발생한 Exception 처리 (460 에러 등)
         final errorMessage = e.toString();
-        
+
         // 460 에러 감지 시 특별 처리
         if (errorMessage.contains('460') || errorMessage.contains('비활성화된 계정')) {
           if (AppConfig.debugMode) {
             print('🚫 [카카오 로그인] 460 에러 감지 - 메인으로 리다이렉트');
           }
-          
+
           // 🏠 메인 화면으로 리다이렉트 후 다이얼로그 표시
           if (context != null) {
             Future.microtask(() {
@@ -411,7 +404,7 @@ class AuthService {
                 '/home',
                 (route) => false,
               );
-              
+
               // 짧은 딜레이 후 다이얼로그 표시 (화면 전환 완료 대기)
               Future.delayed(const Duration(milliseconds: 300), () {
                 ErrorDialog.showAccountDeactivatedError(context);
@@ -419,16 +412,19 @@ class AuthService {
             });
           }
         }
-        
+
         rethrow;
       }
     }
   }
 
   /// 웹 환경에서 OAuth 코드 처리 (콜백 화면용)
-  /// 
+  ///
   /// 카카오 OAuth 콜백 페이지에서 직접 호출하는 메서드
-  Future<Map<String, dynamic>> processOAuthCode(String code, {BuildContext? context}) async {
+  Future<Map<String, dynamic>> processOAuthCode(
+    String code, {
+    BuildContext? context,
+  }) async {
     try {
       if (AppConfig.debugMode) {
         print('🔄 웹 OAuth 코드 직접 처리 시작...');
@@ -472,8 +468,8 @@ class AuthService {
       if (response.statusCode == 200) {
         // ✅ ApiUtils 통합 응답 처리
         final processedResponse = ApiUtils.processBackendResponse(
-          response, 
-          '토큰 갱신'
+          response,
+          '토큰 갱신',
         );
 
         // ✅ ApiUtils 통합 토큰 추출
@@ -507,7 +503,7 @@ class AuthService {
           // 리프레시 토큰도 만료된 경우 로그아웃 처리
           await _clearAuthData();
         }
-        
+
         // ✅ ApiUtils 통합 에러 처리 (로그만 출력, null 반환)
         final processedException = ApiUtils.processDioException(e, '토큰 갱신');
         if (AppConfig.debugMode) {
@@ -534,15 +530,17 @@ class AuthService {
             AppConfig.getApiEndpoint('login/logout'),
             options: Options(
               headers: {
-                'Authorization': 'Bearer $accessToken',  // Bearer 접두사 추가
+                'Authorization': 'Bearer $accessToken', // Bearer 접두사 추가
                 'Accept': 'application/json',
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
             ),
           );
-          
+
           if (AppConfig.debugMode) {
-            print('🔑 로그아웃 Authorization 헤더: Bearer ${accessToken.substring(0, 20)}...');
+            print(
+              '🔑 로그아웃 Authorization 헤더: Bearer ${accessToken.substring(0, 20)}...',
+            );
           }
 
           if (response.statusCode == 200) {
@@ -558,13 +556,13 @@ class AuthService {
         if (AppConfig.debugMode) {
           print('⚠️ 백엔드 로그아웃 오류 (계속 진행): $e');
         }
-        
+
         // ✅ ApiUtils 통합 에러 처리 (로그아웃은 자체 처리)
         if (e is DioException) {
           final processedException = ApiUtils.processDioException(
-            e, 
+            e,
             '로그아웃',
-            showDialog: false,  // 로그아웃은 사용자 의도이므로 다이얼로그 표시 안함
+            showDialog: false, // 로그아웃은 사용자 의도이므로 다이얼로그 표시 안함
           );
           if (AppConfig.debugMode) {
             print('⚠️ 로그아웃 세부 오류: $processedException');
@@ -594,9 +592,7 @@ class AuthService {
       final accessToken = await getAccessToken();
       final userInfo = await getUserInfo();
 
-      return accessToken != null && 
-             accessToken.isNotEmpty && 
-             userInfo != null;
+      return accessToken != null && accessToken.isNotEmpty && userInfo != null;
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ 로그인 상태 확인 오류: $e');
@@ -618,7 +614,7 @@ class AuthService {
   /// 💾 인증 데이터 저장
   Future<void> _saveAuthData(Map<String, dynamic> authData) async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     await prefs.setString(_accessTokenKey, authData['accessToken'] ?? '');
     await prefs.setString(_refreshTokenKey, authData['refreshToken'] ?? '');
     await prefs.setString(_userInfoKey, jsonEncode(authData['userInfo'] ?? {}));
@@ -631,7 +627,7 @@ class AuthService {
   /// 🗑️ 인증 데이터 삭제
   Future<void> _clearAuthData() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     await prefs.remove(_accessTokenKey);
     await prefs.remove(_refreshTokenKey);
     await prefs.remove(_userInfoKey);
@@ -658,7 +654,7 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final userInfoString = prefs.getString(_userInfoKey);
-      
+
       if (userInfoString != null && userInfoString.isNotEmpty) {
         return jsonDecode(userInfoString);
       }
@@ -672,7 +668,7 @@ class AuthService {
   }
 
   /// 🔄 백엔드에서 최신 사용자 정보 가져오기 및 로컬 업데이트
-  /// 
+  ///
   /// AuthProvider.updateUserInfo()에서 호출
   Future<Map<String, dynamic>?> fetchAndUpdateUserInfo() async {
     try {
@@ -724,10 +720,10 @@ class AuthService {
 
         if (processedResponse['success']) {
           final profileData = processedResponse['data'];
-          
+
           // 기존 사용자 정보 가져오기
           final existingUserInfo = await getUserInfo() ?? {};
-          
+
           // 새로운 사용자 정보 생성 (프로필 데이터로 업데이트)
           final updatedUserInfo = {
             ...existingUserInfo,
@@ -740,7 +736,9 @@ class AuthService {
           await prefs.setString(_userInfoKey, jsonEncode(updatedUserInfo));
 
           if (AppConfig.debugMode) {
-            print('✅ [AuthService] 사용자 정보 업데이트 완료: ${updatedUserInfo['memberName']}');
+            print(
+              '✅ [AuthService] 사용자 정보 업데이트 완료: ${updatedUserInfo['memberName']}',
+            );
           }
 
           return updatedUserInfo;
@@ -775,7 +773,7 @@ class AuthService {
     return userInfo?['memberId'];
   }
 
-  /// 🆕 신규 회원 여부 확인
+  /// 신규 회원 여부 확인
   Future<bool> isNewMember() async {
     final userInfo = await getUserInfo();
     return userInfo?['newMember'] ?? false;
@@ -788,7 +786,7 @@ class AuthService {
   }
 
   /// 🗑️ 로컬 인증 데이터만 삭제 (백엔드 API 호출 없이)
-  /// 
+  ///
   /// 강제 로그아웃 시 사용 - 토큰이 이미 만료된 상황에서 로컬 데이터만 정리
   Future<void> clearLocalAuthData() async {
     try {

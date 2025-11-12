@@ -85,13 +85,13 @@ class MeetingService {
   Future<MeetingListResponse> getMeetingList({
     required MeetingListFilter filter,
     required String accessToken,
-    bool isStaffMode = false, // 🆕 운영진용 모드 여부
+    bool isStaffMode = false, // 운영진용 모드 여부
   }) async {
     try {
       if (AppConfig.debugMode) {
         print('🚀 [모임 목록 조회] API 요청 시작... (${isStaffMode ? "운영진용" : "일반용"})');
       }
-      
+
       // 🔥 강제 캐시 버스트 추가
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final queryParams = filter.toQueryParameters(isStaffMode: isStaffMode);
@@ -100,7 +100,9 @@ class MeetingService {
       queryParams['_refresh'] = 'true';
 
       if (AppConfig.debugMode) {
-        print('📅 [캐시 무효화] GET /meetings/list?${queryParams.entries.map((e) => '${e.key}=${e.value}').join('&')}');
+        print(
+          '📅 [캐시 무효화] GET /meetings/list?${queryParams.entries.map((e) => '${e.key}=${e.value}').join('&')}',
+        );
       }
 
       final response = await _dio.get(
@@ -131,7 +133,9 @@ class MeetingService {
         );
 
         if (AppConfig.debugMode) {
-          print('✅ [모임 목록 조회] 성공 - 총 ${meetingListResponse.meetingList.length}개 모임, 페이지: ${meetingListResponse.pagingResponse.pageNumber}/${meetingListResponse.pagingResponse.totalPages}');
+          print(
+            '✅ [모임 목록 조회] 성공 - 총 ${meetingListResponse.meetingList.length}개 모임, 페이지: ${meetingListResponse.pagingResponse.pageNumber}/${meetingListResponse.pagingResponse.totalPages}',
+          );
         }
 
         return meetingListResponse;
@@ -188,27 +192,27 @@ class MeetingService {
   }
 
   /// 운영진용 모임 상세 조회
-  /// 
+  ///
   /// API: GET /meetings/{meetingId}/staff
   /// 권한: STAFF 이상
   Future<MeetingDetailStaffInfo> getMeetingDetailForStaff({
-  required int meetingId,
-  required String accessToken,
+    required int meetingId,
+    required String accessToken,
     bool forceRefresh = false, // 강제 새로고침 옵션
   }) async {
-  try {
-  if (AppConfig.debugMode) {
-    print('🚀 [운영진용 모임 상세 조회] API 요청 시작...');
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [운영진용 모임 상세 조회] API 요청 시작...');
         if (forceRefresh) {
-      print('📅 [캐시 무효화] GET /meetings/$meetingId/staff');
-  }
-  }
+          print('📅 [캐시 무효화] GET /meetings/$meetingId/staff');
+        }
+      }
 
-  // 강제 새로고침 시 캐시 버스트 매개변수 추가
-  final Map<String, dynamic> queryParams = {};
-  if (forceRefresh) {
-  final timestamp = DateTime.now().millisecondsSinceEpoch;
-    queryParams['_cache_bust'] = timestamp.toString();
+      // 강제 새로고침 시 캐시 버스트 매개변수 추가
+      final Map<String, dynamic> queryParams = {};
+      if (forceRefresh) {
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        queryParams['_cache_bust'] = timestamp.toString();
         queryParams['_t'] = timestamp.toString();
         queryParams['_refresh'] = 'true';
       }

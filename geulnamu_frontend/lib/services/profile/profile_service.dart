@@ -4,7 +4,7 @@ import '../../core/utils/api_utils.dart';
 import '../../models/profile/profile_model.dart';
 
 /// 프로필 관련 API 서비스 (Singleton)
-/// 
+///
 /// 제공 기능:
 /// - 본인 프로필 조회 (GET /members/me/profile)
 /// - 개인 정보 수정 (PATCH /members/me/profile)
@@ -15,18 +15,16 @@ class ProfileService {
   factory ProfileService() => _instance;
   ProfileService._internal() {
     // 🔧 생성자에서 즉시 Dio 초기화
-    _dio = ApiUtils.createDioWithTimeout(
-      baseUrl: AppConfig.apiBaseUrl,
-    );
+    _dio = ApiUtils.createDioWithTimeout(baseUrl: AppConfig.apiBaseUrl);
   }
 
   late final Dio _dio;
 
   /// 본인 프로필 정보 조회
-  /// 
+  ///
   /// API: GET /members/me/profile
   /// 권한: MEMBER 이상
-  /// 🆕 글로벌 캐시 무효화 인터셉터 적용
+  /// 글로벌 캐시 무효화 인터셉터 적용
   Future<ProfileModel> getMyProfile(String accessToken) async {
     try {
       if (AppConfig.debugMode) {
@@ -53,11 +51,11 @@ class ProfileService {
         if (processedResponse['success']) {
           final profileData = processedResponse['data'];
           final profile = ProfileModel.fromJson(profileData);
-          
+
           if (AppConfig.debugMode) {
             print('✅ [ProfileService] 프로필 조회 성공: ${profile.displayName}');
           }
-          
+
           return profile;
         } else {
           throw Exception('[프로필 조회] ${processedResponse['message']}');
@@ -75,7 +73,7 @@ class ProfileService {
   }
 
   /// 개인 정보 수정
-  /// 
+  ///
   /// API: PATCH /members/me/profile
   /// 권한: MEMBER 이상
   /// 수정 가능 필드: name, gender, birthDate
@@ -129,10 +127,13 @@ class ProfileService {
   }
 
   /// 🎯 관리자를 위한 모임원 정보 조회
-  /// 
+  ///
   /// API: GET /api/members/{memberId}
   /// 권한: ADMIN 이상
-  Future<ProfileModel> getMemberProfile(String accessToken, int memberId) async {
+  Future<ProfileModel> getMemberProfile(
+    String accessToken,
+    int memberId,
+  ) async {
     try {
       if (AppConfig.debugMode) {
         print('🚀 [ProfileService] 모임원 정보 조회 시작... (ID: $memberId)');
@@ -158,11 +159,11 @@ class ProfileService {
         if (processedResponse['success']) {
           final profileData = processedResponse['data'];
           final profile = ProfileModel.fromJson(profileData);
-          
+
           if (AppConfig.debugMode) {
             print('✅ [ProfileService] 모임원 정보 조회 성공: ${profile.displayName}');
           }
-          
+
           return profile;
         } else {
           throw Exception('[모임원 정보 조회] ${processedResponse['message']}');
@@ -180,7 +181,7 @@ class ProfileService {
   }
 
   /// 프로필 수정 데이터 유효성 검증
-  /// 
+  ///
   /// 백엔드 제약조건에 맞춰 검증:
   /// - 이름: 특수문자 제외 2-10자
   /// - 성별: 'MALE' 또는 'FEMALE'
@@ -214,9 +215,9 @@ class ProfileService {
         final year = int.parse(birthDate.substring(0, 4));
         final month = int.parse(birthDate.substring(4, 6));
         final day = int.parse(birthDate.substring(6, 8));
-        
+
         final date = DateTime(year, month, day);
-        
+
         // 유효한 날짜인지 확인
         if (date.year != year || date.month != month || date.day != day) {
           errors['birthDate'] = '존재하지 않는 날짜입니다.';

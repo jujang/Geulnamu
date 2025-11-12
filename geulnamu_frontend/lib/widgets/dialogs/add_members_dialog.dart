@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme.dart';
 import '../../models/attendance/attendance_status_model.dart';
 
-/// 🆕 토론 그룹에 인원 추가 다이얼로그
-/// 
+/// 토론 그룹에 인원 추가 다이얼로그
+///
 /// 기능:
 /// - 출석자 중 토론 미참여자 목록 표시
 /// - 이름 검색 기능 (선택사항)
@@ -70,9 +70,7 @@ class _AddMembersDialogState extends State<AddMembersDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
           Icon(
@@ -118,7 +116,9 @@ class _AddMembersDialogState extends State<AddMembersDialog> {
                     ? IconButton(
                         icon: Icon(
                           Icons.clear,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.5),
                         ),
                         onPressed: () {
                           _searchController.clear();
@@ -126,20 +126,23 @@ class _AddMembersDialogState extends State<AddMembersDialog> {
                       )
                     : null,
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                fillColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
             const SizedBox(height: 16),
 
             // 인원 목록
-            Expanded(
-              child: _buildMembersList(),
-            ),
+            Expanded(child: _buildMembersList()),
           ],
         ),
       ),
@@ -185,14 +188,14 @@ class _AddMembersDialogState extends State<AddMembersDialog> {
         ),
         title: Text(
           member.name,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
           '출석 시간: ${_formatAttendanceTime(member.attendanceTime)}${member.isLate ? ' (지각)' : ''}',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: member.isLate 
+            color: member.isLate
                 ? Theme.of(context).colorScheme.error
                 : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
           ),
@@ -218,7 +221,7 @@ class _AddMembersDialogState extends State<AddMembersDialog> {
 
   Widget _buildEmptyState() {
     final isEmpty = widget.availableMembers.isEmpty;
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -230,9 +233,7 @@ class _AddMembersDialogState extends State<AddMembersDialog> {
           ),
           const SizedBox(height: 16),
           Text(
-            isEmpty 
-                ? '추가할 수 있는 인원이 없습니다.'
-                : '검색 결과가 없습니다.',
+            isEmpty ? '추가할 수 있는 인원이 없습니다.' : '검색 결과가 없습니다.',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               fontWeight: FontWeight.w600,

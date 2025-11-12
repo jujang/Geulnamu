@@ -3,25 +3,25 @@ import 'breakpoints.dart';
 
 class ResponsiveHelper {
   // 화면 크기 판단
-  static bool isDesktop(BuildContext context) => 
+  static bool isDesktop(BuildContext context) =>
       MediaQuery.of(context).size.width >= Breakpoints.desktop;
-  
-  static bool isTablet(BuildContext context) => 
+
+  static bool isTablet(BuildContext context) =>
       MediaQuery.of(context).size.width >= Breakpoints.tablet &&
       MediaQuery.of(context).size.width < Breakpoints.desktop;
-  
-  static bool isMobile(BuildContext context) => 
+
+  static bool isMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < Breakpoints.tablet;
-  
-  static bool isLargeMobile(BuildContext context) => 
+
+  static bool isLargeMobile(BuildContext context) =>
       MediaQuery.of(context).size.width >= Breakpoints.mobile &&
       MediaQuery.of(context).size.width < Breakpoints.tablet;
-  
-  static bool isSmallMobile(BuildContext context) => 
+
+  static bool isSmallMobile(BuildContext context) =>
       MediaQuery.of(context).size.width < Breakpoints.mobile;
 
   // 동적 크기 계산
-  static double getScreenWidth(BuildContext context) => 
+  static double getScreenWidth(BuildContext context) =>
       MediaQuery.of(context).size.width;
 
   // 아이콘 크기 (예전 로직 그대로)
@@ -74,13 +74,13 @@ class ResponsiveHelper {
     return getScreenWidth(context) >= Breakpoints.tablet ? 36.0 : 32.0;
   }
 
-  // 🆕 모임 목록 페이지 크기 (반응형)
+  // 모임 목록 페이지 크기 (반응형)
   static int getDefaultPageSize(BuildContext context) {
     // 모바일: 5개, PC: 10개
     return isMobile(context) ? 5 : 10;
   }
 
-  // 🆕 발제문 목록 페이지 크기 (반응형)
+  // 발제문 목록 페이지 크기 (반응형)
   static int getPresentationDefaultPageSize(BuildContext context) {
     // 모바일: 6개, PC: 12개
     return isMobile(context) ? 6 : 12;

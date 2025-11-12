@@ -305,7 +305,7 @@ class HomeService extends ChangeNotifier {
 
   /// 역할 권한 체크
   bool hasRolePermission(String featureName, AuthProvider authProvider) {
-    // 🆕 권한 상수를 사용한 통합 권한 체크 시스템
+    // 권한 상수를 사용한 통합 권한 체크 시스템
     return authProvider.hasMenuPermission(featureName);
   }
 
