@@ -93,6 +93,7 @@ class ContactWidgets {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 에러 보고 카드
           _buildSelectionCard(
@@ -101,7 +102,7 @@ class ContactWidgets {
             iconColor: Colors.red,
             title: '에러 보고',
             subtitle: '앱에 문제가 발생했나요?',
-            description: '버그, 오류, 예상과 다른 동작 등을 신고해 주세요.',
+            description: '버그, 오류, 예상과 다른 동작 등을 발견하면 알려주세요.',
             onTap: onErrorReportTap,
           ),
 
@@ -218,6 +219,7 @@ class ContactWidgets {
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -241,6 +243,7 @@ class ContactWidgets {
             '• 에러 보고: 빠른 시간 내 확인 후 수정 조치 예정\n'
             '• 기능 요청: 검토 후 개발 계획에 반영\n'
             '• 답변이 필요한 경우 별도 연락드립니다',
+            textAlign: TextAlign.start,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.5,
