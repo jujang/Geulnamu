@@ -122,6 +122,14 @@ class AppDrawer extends StatelessWidget {
                           subtitle: '모임원의 소리',
                           onTap: () => _handleMenuTap(context, '문의하기'),
                         ),
+                      // 🔒 관리자만 문의함 관리 표시
+                      if (authProvider.isAdminLevel)
+                        _DrawerMenuItem(
+                          icon: Icons.folder_outlined,
+                          title: '문의함 관리',
+                          subtitle: '모임원의 소리 보기 (관리자용)',
+                          onTap: () => _handleMenuTap(context, '문의함 관리'),
+                        ),
                       _DrawerMenuItem(
                         icon: Icons.info_outline,
                         title: '앱 정보',
