@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html show window, sessionStorage, indexedDB, navigator;
+import 'dart:html' as html show window, sessionStorage, indexedDB, navigator, IFrameElement, document;
 import '../config/app_config.dart';
 import '../utils/api_utils.dart';
 import '../../widgets/common/error_dialog.dart';
@@ -124,16 +124,28 @@ class AuthService {
   /// 🥕 카카오 OAuth 로그인 - 메인 진입점
   ///
   /// 웹/모바일 환경을 자동 감지하여 적절한 OAuth 플로우 실행
-  Future<Map<String, dynamic>> loginWithKakao({BuildContext? context}) async {
+  /// 
+  /// [forceAccountSelection]: true로 설정하면 카카오 로그아웃 후 계정 선택 (다른 계정으로 로그인 시 사용)
+  Future<Map<String, dynamic>> loginWithKakao({
+    BuildContext? context,
+    bool forceAccountSelection = false,
+  }) async {
     try {
       if (AppConfig.debugMode) {
         print('🥕 카카오 로그인 시작 (${kIsWeb ? "웹" : "모바일"})...');
       }
 
+      // 🔄 다른 계정으로 로그인 시 카카오 로그아웃 먼저 수행
+      if (forceAccountSelection && kIsWeb) {
+        await _logoutFromKakao();
+        // 잠깐 대기 (로그아웃 완료 보장)
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
       if (kIsWeb) {
-        return await _webLoginFlow(context);
+        return await _webLoginFlow(context, forceAccountSelection);
       } else {
-        return await _mobileLoginFlow(context);
+        return await _mobileLoginFlow(context, forceAccountSelection);
       }
     } catch (error) {
       if (AppConfig.debugMode) {
@@ -144,8 +156,13 @@ class AuthService {
   }
 
   /// 🌐 웹 환경 OAuth 플로우
-  Future<Map<String, dynamic>> _webLoginFlow(BuildContext? context) async {
-    final kakaoAuthUrl = _buildKakaoAuthUrl();
+  Future<Map<String, dynamic>> _webLoginFlow(
+    BuildContext? context,
+    bool forceAccountSelection,
+  ) async {
+    final kakaoAuthUrl = _buildKakaoAuthUrl(
+      forceAccountSelection: forceAccountSelection,
+    );
 
     if (AppConfig.debugMode) {
       print('🌐 웹 OAuth 진행 중...');
@@ -173,8 +190,13 @@ class AuthService {
   }
 
   /// 📱 모바일 환경 OAuth 플로우
-  Future<Map<String, dynamic>> _mobileLoginFlow(BuildContext? context) async {
-    final kakaoAuthUrl = _buildKakaoAuthUrl();
+  Future<Map<String, dynamic>> _mobileLoginFlow(
+    BuildContext? context,
+    bool forceAccountSelection,
+  ) async {
+    final kakaoAuthUrl = _buildKakaoAuthUrl(
+      forceAccountSelection: forceAccountSelection,
+    );
 
     if (AppConfig.debugMode) {
       print('📱 모바일 OAuth 진행 중...');
@@ -210,7 +232,7 @@ class AuthService {
   }
 
   /// 🔗 카카오 인증 URL 생성
-  String _buildKakaoAuthUrl() {
+  String _buildKakaoAuthUrl({bool forceAccountSelection = false}) {
     final clientId = kIsWeb
         ? AppConfig.kakaoJavaScriptAppKey
         : AppConfig.kakaoNativeAppKey;
@@ -224,6 +246,7 @@ class AuthService {
       'response_type': 'code',
       'scope': 'profile_nickname',
       'state': state,
+      if (forceAccountSelection) 'prompt': 'select_account', // 🔄 계정 선택 강제
     };
 
     final queryString = params.entries
@@ -234,6 +257,47 @@ class AuthService {
         .join('&');
 
     return 'https://kauth.kakao.com/oauth/authorize?$queryString';
+  }
+
+  /// 🚪 카카오 계정 로그아웃 (다른 계정으로 로그인 시 사용)
+  Future<void> _logoutFromKakao() async {
+    if (!kIsWeb) return;
+
+    try {
+      if (AppConfig.debugMode) {
+        print('🚪 카카오 계정 로그아웃 시작...');
+      }
+
+      final clientId = AppConfig.kakaoJavaScriptAppKey;
+      final logoutRedirectUri = AppConfig.kakaoRedirectUri;
+
+      // 카카오 로그아웃 URL
+      final logoutUrl = 'https://kauth.kakao.com/oauth/logout'
+          '?client_id=$clientId'
+          '&logout_redirect_uri=$logoutRedirectUri';
+
+      // iframe으로 조용히 로그아웃 (사용자에게 보이지 않게)
+      final iframe = html.IFrameElement()
+        ..src = logoutUrl
+        ..style.display = 'none';
+
+      html.document.body?.append(iframe);
+
+      // 로그아웃 완료 대기 (1초)
+      await Future.delayed(const Duration(seconds: 1));
+
+      // iframe 제거
+      iframe.remove();
+
+      if (AppConfig.debugMode) {
+        print('✅ 카카오 계정 로그아웃 완료');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('⚠️ 카카오 로그아웃 오류 (무시): $e');
+      }
+      // 로그아웃 실패해도 계속 진행
+    }
   }
 
   /// 🕒 웹 팝업에서 Authorization Code 대기

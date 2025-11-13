@@ -160,6 +160,44 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// 🔄 다른 계정으로 로그인 (카카오 로그아웃 후 로그인)
+  Future<bool> loginWithDifferentAccount({BuildContext? context}) async {
+    try {
+      _setStatus(AuthStatus.loading);
+      _clearError();
+
+      if (AppConfig.debugMode) {
+        print('🔄 다른 계정으로 로그인 시작...');
+      }
+
+      final authResponse = await _authService.loginWithKakao(
+        context: context,
+        forceAccountSelection: true, // 🔑 계정 선택 강제
+      );
+
+      // 사용자 정보 설정
+      _userInfo = authResponse['userInfo'];
+      _setStatus(AuthStatus.authenticated);
+
+      if (AppConfig.debugMode) {
+        print('✅ 다른 계정 로그인 성공!');
+        print('👤 사용자: ${_userInfo?['memberName'] ?? '이름 미등록'}');
+      }
+
+      // 개인정보 상태 확인
+      await _checkProfileStatusSilent();
+
+      return true;
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ 다른 계정 로그인 실패: $e');
+      }
+      _setError(_getErrorMessage(e));
+      _setStatus(AuthStatus.unauthenticated);
+      return false;
+    }
+  }
+
   /// 로그아웃
   Future<void> logout({BuildContext? context}) async {
     try {
