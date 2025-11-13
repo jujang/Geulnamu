@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../core/config/app_config.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +21,10 @@ class _LoginScreenState extends State<LoginScreen>
   // 🎯 카카오 버튼 호버/클릭 상태 관리
   bool _isHovering = false;
   bool _isPressed = false;
+  
+  // 🔄 다른 계정 버튼 호버/클릭 상태 관리
+  bool _isDifferentAccountHovering = false;
+  bool _isDifferentAccountPressed = false;
 
   @override
   void initState() {
@@ -239,6 +244,11 @@ class _LoginScreenState extends State<LoginScreen>
             
             const SizedBox(height: 16),
             
+            // 🔄 다른 계정으로 로그인 버튼
+            _buildDifferentAccountButton(authProvider),
+            
+            const SizedBox(height: 16),
+            
             // 🎯 로딩 상태 중복 표시 제거 - 버튼 안의 로딩만 유지
           ],
         );
@@ -363,6 +373,68 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+  Widget _buildDifferentAccountButton(AuthProvider authProvider) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: authProvider.isLoading
+          ? const SizedBox.shrink() // 로딩 중에는 숨김
+          : GestureDetector(
+              onTapDown: (_) => setState(() => _isDifferentAccountPressed = true),
+              onTapUp: (_) => setState(() => _isDifferentAccountPressed = false),
+              onTapCancel: () => setState(() => _isDifferentAccountPressed = false),
+              onTap: () => _handleDifferentAccountLogin(),
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                onEnter: (_) => setState(() => _isDifferentAccountHovering = true),
+                onExit: (_) => setState(() => _isDifferentAccountHovering = false),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeInOut,
+                  width: double.infinity,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF7DD3C0),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF7DD3C0).withOpacity(
+                          _isDifferentAccountPressed ? 0.1 : (_isDifferentAccountHovering ? 0.3 : 0.15),
+                        ),
+                        blurRadius: _isDifferentAccountPressed ? 2 : (_isDifferentAccountHovering ? 8 : 4),
+                        offset: Offset(0, _isDifferentAccountPressed ? 1 : (_isDifferentAccountHovering ? 4 : 2)),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.swap_horiz_rounded,
+                        color: const Color(0xFF7DD3C0),
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '다른 계정으로 로그인',
+                        style: GoogleFonts.notoSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF7DD3C0),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+    );
+  }
+
   void _handleKakaoLogin() async {
     // 🎯 클릭 후 상태 초기화
     setState(() => _isPressed = false);
@@ -370,6 +442,25 @@ class _LoginScreenState extends State<LoginScreen>
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
     final success = await authProvider.loginWithKakao(context: context);
+    
+    if (success && mounted) {
+      // 로그인 성공 시 현재 화면을 닫고 홈 화면으로 돌아가기
+      Navigator.of(context).pop();
+    }
+    // 실패 시에는 AuthProvider의 errorMessage가 자동으로 표시됩니다
+  }
+
+  void _handleDifferentAccountLogin() async {
+    // 🎯 클릭 후 상태 초기화
+    setState(() => _isDifferentAccountPressed = false);
+    
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    if (AppConfig.debugMode) {
+      print('🔄 [다른 계정 로그인] 버튼 클릭');
+    }
+    
+    final success = await authProvider.loginWithDifferentAccount(context: context);
     
     if (success && mounted) {
       // 로그인 성공 시 현재 화면을 닫고 홈 화면으로 돌아가기
