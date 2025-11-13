@@ -137,28 +137,13 @@ class _LoginScreenState extends State<LoginScreen>
     
     return Column(
       children: [
-        // 로고 이미지 (책갈피 디자인 컨셉)
+        // 로고 이미지 (책갈피 디자인 컨셉) - 동그라미 없이 직접 표시
         Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: colorScheme.primary,
-            borderRadius: BorderRadius.circular(60),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.primary.withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(20),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(40),
-            child: Image.asset(
-              'assets/logo/app_logo.png',
-              fit: BoxFit.contain,
-            ),
+          width: 160,
+          height: 160,
+          child: Image.asset(
+            'assets/logo/app_logo.png',
+            fit: BoxFit.contain,
           ),
         ),
 
