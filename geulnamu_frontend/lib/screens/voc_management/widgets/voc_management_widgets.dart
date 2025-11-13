@@ -172,6 +172,20 @@ class VoCManagementWidgets {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
+                // 이슈 ID
+                SizedBox(
+                  width: 40,
+                  child: Text(
+                    '#${issue.vocId}',
+                    style: context.textStyles.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: context.colors.primary,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
                 // 유형 아이콘
                 Container(
                   width: 40,
@@ -187,13 +201,13 @@ class VoCManagementWidgets {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
 
                 // 작성자 ID
                 SizedBox(
                   width: 45,
                   child: Text(
-                    '#${issue.memberId}',
+                    '👤${issue.memberId}',
                     style: context.textStyles.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: context.colors.onSurface,
