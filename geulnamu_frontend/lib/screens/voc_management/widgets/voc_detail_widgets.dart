@@ -113,6 +113,7 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
                           widget.issue.voCType.displayName,
                           style: context.textStyles.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: context.colors.onSurface, // 🔥 다크모드 대응
                           ),
                         ),
                         Text(
@@ -170,6 +171,7 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
                 '이슈 내용',
                 style: context.textStyles.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: context.colors.onSurface, // 🔥 다크모드 대응
                 ),
               ),
               const SizedBox(height: 12),
@@ -193,6 +195,7 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
                 '관리자 코멘트',
                 style: context.textStyles.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: context.colors.onSurface, // 🔥 다크모드 대응
                 ),
               ),
               const SizedBox(height: 12),
@@ -216,6 +219,7 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
                 '이슈 상태',
                 style: context.textStyles.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: context.colors.onSurface, // 🔥 다크모드 대응
                 ),
               ),
               const SizedBox(height: 12),
@@ -318,6 +322,7 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
           value,
           style: context.textStyles.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
+            color: context.colors.onSurface, // 🔥 다크모드 대응
           ),
         ),
       ],
