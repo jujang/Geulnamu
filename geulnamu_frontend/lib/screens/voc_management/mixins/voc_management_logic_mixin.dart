@@ -5,6 +5,7 @@ import '../../../services/voc/voc_service.dart';
 import '../../../models/voc/voc_model.dart';
 import '../../../models/voc/voc_filter_model.dart';
 import '../../../core/config/app_config.dart';
+import '../../../core/responsive.dart'; // 🆕 반응형 헬퍼 import
 
 /// 문의함 관리 화면 로직 Mixin
 mixin VoCManagementLogicMixin<T extends StatefulWidget> on State<T> {
@@ -21,6 +22,9 @@ mixin VoCManagementLogicMixin<T extends StatefulWidget> on State<T> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 🆕 반응형 페이지 크기 설정
+      final defaultPageSize = ResponsiveHelper.getVoCDefaultPageSize(context);
+      currentFilter = currentFilter.copyWith(size: defaultPageSize);
       loadIssueList();
     });
   }

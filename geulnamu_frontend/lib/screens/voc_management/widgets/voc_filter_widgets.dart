@@ -70,12 +70,14 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
               ),
               TextButton(
                 onPressed: () {
+                  // 🆕 반응형 기본값 사용
+                  final defaultSize = widget.currentFilter.size; // 현재 반응형 크기 유지
                   setState(() {
                     selectedIssueStatus = null;
                     selectedVoCType = null;
                     selectedSortBy = VoCSortBy.id;
                     isAscending = false;
-                    pageSize = 10;
+                    pageSize = defaultSize;
                   });
                 },
                 child: Text(
@@ -243,7 +245,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             title: '한 페이지에 보이는 이슈 개수',
             child: Wrap(
               spacing: 8,
-              children: [10, 20, 30].map((size) {
+              children: [8, 10].map((size) {
                 final isSelected = pageSize == size;
                 return ChoiceChip(
                   label: Text('$size개'),
