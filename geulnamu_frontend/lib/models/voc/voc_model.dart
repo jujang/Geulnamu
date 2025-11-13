@@ -10,7 +10,7 @@ class VoCIssue {
   final IssueStatus issueStatus;
   final String? adminComment;
   final DateTime createdAt;
-  final DateTime lastModifiedAt;
+  final DateTime? lastModifiedAt; // 🔥 null 가능하게 변경!
 
   VoCIssue({
     required this.vocId,
@@ -20,7 +20,7 @@ class VoCIssue {
     required this.issueStatus,
     this.adminComment,
     required this.createdAt,
-    required this.lastModifiedAt,
+    this.lastModifiedAt, // 🔥 required 제거
   });
 
   factory VoCIssue.fromJson(Map<String, dynamic> json) {
@@ -33,7 +33,9 @@ class VoCIssue {
         issueStatus: IssueStatus.fromString(json['issueStatus'] as String),
         adminComment: json['adminComment'] as String?,
         createdAt: _parseCustomDateTime(json['createdAt'] as String),
-        lastModifiedAt: _parseCustomDateTime(json['lastModifiedAt'] as String),
+        lastModifiedAt: json['lastModifiedAt'] != null
+            ? _parseCustomDateTime(json['lastModifiedAt'] as String)
+            : null, // 🔥 null 처리
       );
     } catch (e) {
       print('❌ [VoCIssue.fromJson] 파싱 오류: $e');
@@ -65,7 +67,7 @@ class VoCIssue {
       'issueStatus': issueStatus.value,
       'adminComment': adminComment,
       'createdAt': createdAt.toIso8601String(),
-      'lastModifiedAt': lastModifiedAt.toIso8601String(),
+      'lastModifiedAt': lastModifiedAt?.toIso8601String(), // 🔥 null-aware 연산자
     };
   }
 }
