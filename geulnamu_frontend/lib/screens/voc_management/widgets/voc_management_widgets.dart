@@ -191,7 +191,7 @@ class VoCManagementWidgets {
 
                 // 작성자 ID
                 SizedBox(
-                  width: 60,
+                  width: 45,
                   child: Text(
                     '#${issue.memberId}',
                     style: context.textStyles.bodyMedium?.copyWith(
@@ -219,7 +219,7 @@ class VoCManagementWidgets {
 
                 // 작성일
                 SizedBox(
-                  width: 80,
+                  width: 55,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisSize: MainAxisSize.min,

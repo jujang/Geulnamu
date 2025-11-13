@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../services/home/home_service.dart';
+import '../../widgets/common/main_layout.dart';
 import 'mixins/voc_management_logic_mixin.dart';
 import 'widgets/voc_management_widgets.dart';
 import 'widgets/voc_filter_widgets.dart';
@@ -20,15 +24,34 @@ class VoCManagementScreen extends StatefulWidget {
 
 class _VoCManagementScreenState extends State<VoCManagementScreen>
     with VoCManagementLogicMixin {
+  final HomeService _homeService = HomeService();
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('문의함 관리'),
-        centerTitle: true,
-      ),
-      body: _buildBody(context),
-      floatingActionButton: _buildFilterFab(context),
+    return Consumer2<AuthProvider, HomeService>(
+      builder: (context, authProvider, homeService, child) {
+        return MainLayout(
+          isHomePage: true, // 🍔 햄버거 메뉴 표시
+          title: '문의함 관리',
+          onMenuTap: (menu) => _homeService.handleMenuTap(context, menu), // 🔥 메뉴 탭 처리 추가
+          onLogoutTap: authProvider.isAuthenticated
+              ? () => homeService.handleLogout(context, authProvider)
+              : null,
+          body: Stack(
+            children: [
+              // 메인 콘텐츠
+              _buildBody(context),
+              
+              // 필터 FAB (좌측 하단)
+              Positioned(
+                bottom: 16,
+                left: 16,
+                child: _buildFilterFab(context),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
