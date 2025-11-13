@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html show window;
+import 'dart:html' as html show window, sessionStorage, indexedDB, navigator;
 import '../config/app_config.dart';
 import '../utils/api_utils.dart';
 import '../../widgets/common/error_dialog.dart';
@@ -515,7 +515,7 @@ class AuthService {
     }
   }
 
-  /// 👋 로그아웃
+  /// 👋 로그아웃 (선택적 캐시 정리 포함)
   Future<void> logout({BuildContext? context}) async {
     try {
       if (AppConfig.debugMode) {
@@ -570,18 +570,18 @@ class AuthService {
         }
       }
 
-      // 로컬 데이터 삭제
-      await _clearAuthData();
+      // 🧹 선택적 스토리지 정리 (사용자 데이터만)
+      await _clearAllUserData();
 
       if (AppConfig.debugMode) {
-        print('✅ 로그아웃 완료');
+        print('✅ 로그아웃 완료 (사용자 데이터 모두 삭제)');
       }
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ 로그아웃 오류: $e');
       }
       // 오류가 발생해도 로컬 데이터는 삭제
-      await _clearAuthData();
+      await _clearAllUserData();
       rethrow;
     }
   }
@@ -624,7 +624,7 @@ class AuthService {
     }
   }
 
-  /// 🗑️ 인증 데이터 삭제
+  /// 🗑️ 인증 데이터 삭제 (SharedPreferences만)
   Future<void> _clearAuthData() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -633,7 +633,93 @@ class AuthService {
     await prefs.remove(_userInfoKey);
 
     if (AppConfig.debugMode) {
-      print('🗑️ 인증 데이터 삭제 완료');
+      print('🗑️ SharedPreferences 인증 데이터 삭제 완료');
+    }
+  }
+
+  /// 🧹 모든 사용자 데이터 삭제 (선택적 캐시 정리)
+  /// 
+  /// 삭제 항목:
+  /// - ✅ SharedPreferences (토큰, 사용자 정보)
+  /// - ✅ IndexedDB (Flutter 앱 데이터)
+  /// - ✅ Session Storage (세션 데이터)
+  /// - ❌ Cache Storage (Flutter 프레임워크 유지)
+  Future<void> _clearAllUserData() async {
+    try {
+      // 1️⃣ SharedPreferences 삭제
+      await _clearAuthData();
+
+      // 2️⃣ 웹 환경에서만 추가 정리
+      if (kIsWeb) {
+        if (AppConfig.debugMode) {
+          print('🧹 [웹] 브라우저 스토리지 정리 시작...');
+        }
+
+        // 3️⃣ Session Storage 전체 삭제
+        try {
+          html.window.sessionStorage.clear();
+          if (AppConfig.debugMode) {
+            print('✅ Session Storage 삭제 완료');
+          }
+        } catch (e) {
+          if (AppConfig.debugMode) {
+            print('⚠️ Session Storage 삭제 실패: $e');
+          }
+        }
+
+        // 4️⃣ IndexedDB 삭제 (사용자 관련 데이터만)
+        try {
+          // Flutter가 사용하는 주요 IndexedDB들
+          final dbNames = [
+            'geulnamu_user_data',
+            'flutter_cache',
+            'flutter_settings',
+          ];
+
+          for (final dbName in dbNames) {
+            try {
+              html.window.indexedDB?.deleteDatabase(dbName);
+            } catch (e) {
+              // 개별 DB 삭제 실패는 무시 (존재하지 않을 수 있음)
+            }
+          }
+
+          if (AppConfig.debugMode) {
+            print('✅ IndexedDB 사용자 데이터 삭제 완료');
+          }
+        } catch (e) {
+          if (AppConfig.debugMode) {
+            print('⚠️ IndexedDB 삭제 실패: $e');
+          }
+        }
+
+        // 5️⃣ Service Worker에 캐시 정리 메시지 전송
+        try {
+          if (html.window.navigator.serviceWorker != null) {
+            final registration = await html.window.navigator.serviceWorker?.ready;
+            registration?.active?.postMessage({
+              'type': 'CLEAR_USER_CACHE',
+            });
+
+            if (AppConfig.debugMode) {
+              print('✅ Service Worker 캐시 정리 요청 전송');
+            }
+          }
+        } catch (e) {
+          if (AppConfig.debugMode) {
+            print('⚠️ Service Worker 메시지 전송 실패: $e');
+          }
+        }
+
+        if (AppConfig.debugMode) {
+          print('✅ [웹] 브라우저 스토리지 정리 완료');
+        }
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ 사용자 데이터 삭제 중 오류: $e');
+      }
+      // 오류가 발생해도 최소한 SharedPreferences는 삭제됨
     }
   }
 
