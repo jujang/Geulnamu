@@ -231,33 +231,6 @@ class VoCManagementWidgets {
 
                 const SizedBox(width: 8),
 
-                // 작성일
-                SizedBox(
-                  width: 55,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _formatDate(issue.createdAt),
-                        style: context.textStyles.bodySmall?.copyWith(
-                          color: context.colors.onSurface.withValues(alpha: 0.7),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        _formatTime(issue.createdAt),
-                        style: context.textStyles.bodySmall?.copyWith(
-                          color: context.colors.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: 8),
-
                 // 상태 칩
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
