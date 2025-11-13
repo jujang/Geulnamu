@@ -86,13 +86,13 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 로고 이미지 (책갈피 디자인 컨셉)
+                // 로고 이미지 (책갈피 디자인 컨셉) - 둥근 사각형 배경
                 Container(
-                  width: 160,
-                  height: 160,
+                  width: 230,
+                  height: 230,
                   decoration: BoxDecoration(
                     color: colorScheme.primary,
-                    borderRadius: BorderRadius.circular(80),
+                    borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
                         color: colorScheme.primary.withOpacity(0.3),
@@ -101,13 +101,10 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ],
                   ),
-                  padding: const EdgeInsets.all(24),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(56),
-                    child: Image.asset(
-                      'assets/logo/app_logo.png',
-                      fit: BoxFit.contain,
-                    ),
+                  padding: const EdgeInsets.all(15),
+                  child: Image.asset(
+                    'assets/logo/app_logo.png',
+                    fit: BoxFit.contain,
                   ),
                 ),
 
