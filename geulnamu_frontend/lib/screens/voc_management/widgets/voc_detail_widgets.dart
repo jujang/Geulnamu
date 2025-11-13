@@ -154,17 +154,8 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
 
               const SizedBox(height: 12),
 
-              // 최종 수정일
-              _buildInfoRow(
-                context,
-                Icons.update,
-                '최종 수정',
-                _formatDateTime(widget.issue.lastModifiedAt),
-              ),
-
-              const SizedBox(height: 24),
               const Divider(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
 
               // 이슈 내용
               Text(
@@ -174,10 +165,15 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
                   color: context.colors.onSurface, // 🔥 다크모드 대응
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.only(
+                  left: 12,
+                  right: 12,
+                  bottom: 12,
+                  top: 8,
+                ),
                 decoration: BoxDecoration(
                   color: context.colors.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
