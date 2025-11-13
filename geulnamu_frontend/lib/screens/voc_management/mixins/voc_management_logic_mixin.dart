@@ -98,7 +98,7 @@ mixin VoCManagementLogicMixin<T extends StatefulWidget> on State<T> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text('이슈 상태를 업데이트하고 있습니다...'),
+                const Text('이슈를 업데이트하고 있습니다...'), // 🔥 로딩 메시지도 통일
               ],
             ),
             duration: const Duration(seconds: 10),
@@ -121,7 +121,7 @@ mixin VoCManagementLogicMixin<T extends StatefulWidget> on State<T> {
               children: [
                 Icon(Icons.check_circle, color: Colors.white, size: 20),
                 const SizedBox(width: 8),
-                Text('이슈 상태가 "${newStatus.displayName}"(으)로 변경되었습니다.'),
+                Text('이슈가 업데이트되었습니다.'), // 🔥 간단한 통합 메시지
               ],
             ),
             backgroundColor: Colors.green,

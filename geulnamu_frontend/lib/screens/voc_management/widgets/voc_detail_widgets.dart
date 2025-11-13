@@ -59,15 +59,24 @@ class _IssueDetailContent extends StatefulWidget {
 
 class _IssueDetailContentState extends State<_IssueDetailContent> {
   late IssueStatus selectedStatus;
+  late IssueStatus initialStatus; // 🆕 초기 상태 저장
   late TextEditingController commentController;
+  late String initialComment; // 🆕 초기 코멘트 저장
 
   @override
   void initState() {
     super.initState();
     selectedStatus = widget.issue.issueStatus;
-    commentController = TextEditingController(
-      text: widget.issue.adminComment ?? '',
-    );
+    initialStatus = widget.issue.issueStatus; // 🆕 초기 상태 저장
+    
+    final comment = widget.issue.adminComment ?? '';
+    commentController = TextEditingController(text: comment);
+    initialComment = comment; // 🆕 초기 코멘트 저장
+    
+    // 글자수 변경 시 업데이트
+    commentController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -78,6 +87,9 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
 
   @override
   Widget build(BuildContext context) {
+    // 🆕 변경사항 체크
+    final hasChanges = _hasChanges();
+    
     return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -198,6 +210,7 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
               TextField(
                 controller: commentController,
                 maxLines: 3,
+                maxLength: 255,
                 decoration: InputDecoration(
                   hintText: '이슈에 대한 관리자 코멘트를 입력하세요',
                   border: OutlineInputBorder(
@@ -205,6 +218,23 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
                   ),
                   filled: true,
                   fillColor: context.colors.surfaceContainerHighest,
+                  counterText: '', // 기본 카운터 숨김
+                ),
+              ),
+              
+              // 커스텀 글자수 카운터
+              Padding(
+                padding: const EdgeInsets.only(top: 4, right: 4),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${commentController.text.length}/255',
+                    style: context.textStyles.bodySmall?.copyWith(
+                      color: commentController.text.length > 255
+                          ? context.colors.error
+                          : context.colors.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
                 ),
               ),
 
@@ -274,14 +304,14 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: hasChanges ? () {
                         final comment = commentController.text.trim();
                         Navigator.pop(context);
                         widget.onSave(
                           selectedStatus,
                           comment.isEmpty ? null : comment,
                         );
-                      },
+                      } : null, // 🔥 변경사항 없으면 비활성화
                       child: const Text('저장'),
                     ),
                   ),
@@ -337,5 +367,17 @@ class _IssueDetailContentState extends State<_IssueDetailContent> {
   String _formatDateTime(DateTime? dateTime) {
     if (dateTime == null) return '수정 이력 없음';
     return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+  
+  /// 🆕 변경사항 여부 체크
+  bool _hasChanges() {
+    // 상태 변경 체크
+    final statusChanged = selectedStatus != initialStatus;
+    
+    // 코멘트 변경 체크 (trim해서 비교)
+    final currentComment = commentController.text.trim();
+    final commentChanged = currentComment != initialComment.trim();
+    
+    return statusChanged || commentChanged;
   }
 }
