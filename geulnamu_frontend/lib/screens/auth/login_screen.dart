@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/config/app_config.dart';
+import '../../core/theme.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -68,14 +69,16 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF2C3E50)),
+          icon: Icon(Icons.arrow_back_ios, color: colorScheme.onBackground),
         ),
       ),
       body: SafeArea(
@@ -130,27 +133,32 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _buildLogoSection() {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Column(
       children: [
-        // 캐릭터 (책갈피의 귀여운 캐릭터 영감)
+        // 로고 이미지 (책갈피 디자인 컨셉)
         Container(
           width: 120,
           height: 120,
           decoration: BoxDecoration(
-            color: const Color(0xFF7DD3C0), // 터퀴즈 색상
+            color: colorScheme.primary,
             borderRadius: BorderRadius.circular(60),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF7DD3C0).withOpacity(0.3),
+                color: colorScheme.primary.withOpacity(0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
             ],
           ),
-          child: const Icon(
-            Icons.auto_stories_rounded,
-            size: 60,
-            color: Colors.white,
+          padding: const EdgeInsets.all(20),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(40),
+            child: Image.asset(
+              'assets/logo/app_logo.png',
+              fit: BoxFit.contain,
+            ),
           ),
         ),
 
@@ -162,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen>
           style: GoogleFonts.notoSans(
             fontSize: 32,
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF2C3E50),
+            color: colorScheme.onBackground,
             letterSpacing: 2.0,
           ),
         ),
@@ -175,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen>
           style: GoogleFonts.roboto(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF7DD3C0),
+            color: colorScheme.primary,
             letterSpacing: 1.5,
           ),
         ),
@@ -188,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen>
           textAlign: TextAlign.center,
           style: GoogleFonts.notoSans(
             fontSize: 16,
-            color: const Color(0xFF7F8C8D),
+            color: colorScheme.onSurfaceVariant,
             height: 1.5,
           ),
         ),
@@ -355,29 +363,16 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _buildFooterSection() {
-    return Column(
-      children: [
-        Text(
-          '로그인하면 서비스 이용약관 및 개인정보처리방침에 동의하게 됩니다.',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.notoSans(
-            fontSize: 12,
-            color: const Color(0xFFBDC3C7),
-            height: 1.4,
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // 버전 정보
-        Text(
-          'v1.0.0',
-          style: GoogleFonts.roboto(
-            fontSize: 11,
-            color: const Color(0xFFECF0F1),
-          ),
-        ),
-      ],
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return Text(
+      '로그인하면 서비스 이용약관 및 개인정보처리방침에 동의하게 됩니다.',
+      textAlign: TextAlign.center,
+      style: GoogleFonts.notoSans(
+        fontSize: 12,
+        color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+        height: 1.4,
+      ),
     );
   }
 
@@ -401,25 +396,28 @@ class _LoginScreenState extends State<LoginScreen>
                     setState(() => _isDifferentAccountHovering = true),
                 onExit: (_) =>
                     setState(() => _isDifferentAccountHovering = false),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  curve: Curves.easeInOut,
-                  width: double.infinity,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFF7DD3C0),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF7DD3C0).withOpacity(
-                          _isDifferentAccountPressed
-                              ? 0.1
-                              : (_isDifferentAccountHovering ? 0.3 : 0.15),
+                child: Builder(
+                  builder: (context) {
+                    final colorScheme = Theme.of(context).colorScheme;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      curve: Curves.easeInOut,
+                      width: double.infinity,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colorScheme.primary,
+                          width: 2,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withOpacity(
+                              _isDifferentAccountPressed
+                                  ? 0.1
+                                  : (_isDifferentAccountHovering ? 0.3 : 0.15),
+                            ),
                         blurRadius: _isDifferentAccountPressed
                             ? 2
                             : (_isDifferentAccountHovering ? 8 : 4),
@@ -432,25 +430,27 @@ class _LoginScreenState extends State<LoginScreen>
                       ),
                     ],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.swap_horiz_rounded,
-                        color: const Color(0xFF7DD3C0),
-                        size: 24,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.swap_horiz_rounded,
+                            color: colorScheme.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '다른 계정으로 로그인',
+                            style: GoogleFonts.notoSans(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '다른 계정으로 로그인',
-                        style: GoogleFonts.notoSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF7DD3C0),
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  }
                 ),
               ),
             ),
