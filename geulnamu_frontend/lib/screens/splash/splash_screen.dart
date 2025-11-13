@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../providers/auth_provider.dart';
+import '../../core/theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -73,8 +74,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.background,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -83,25 +86,28 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 로고 아이콘 (책갈피 디자인 컨셉)
+                // 로고 이미지 (책갈피 디자인 컨셉)
                 Container(
-                  width: 120,
-                  height: 120,
+                  width: 160,
+                  height: 160,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7DD3C0),
-                    borderRadius: BorderRadius.circular(60),
+                    color: colorScheme.primary,
+                    borderRadius: BorderRadius.circular(80),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF7DD3C0).withOpacity(0.3),
+                        color: colorScheme.primary.withOpacity(0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.auto_stories_rounded,
-                    size: 60,
-                    color: Colors.white,
+                  padding: const EdgeInsets.all(24),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(56),
+                    child: Image.asset(
+                      'assets/logo/app_logo.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
 
@@ -113,7 +119,7 @@ class _SplashScreenState extends State<SplashScreen>
                   style: GoogleFonts.notoSans(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF2C3E50),
+                    color: colorScheme.onBackground,
                     letterSpacing: 2.0,
                   ),
                 ),
@@ -126,7 +132,7 @@ class _SplashScreenState extends State<SplashScreen>
                   style: GoogleFonts.roboto(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF7DD3C0),
+                    color: colorScheme.primary,
                     letterSpacing: 1.5,
                   ),
                 ),
@@ -139,7 +145,7 @@ class _SplashScreenState extends State<SplashScreen>
                   textAlign: TextAlign.center,
                   style: GoogleFonts.notoSans(
                     fontSize: 16,
-                    color: const Color(0xFF7F8C8D),
+                    color: colorScheme.onSurfaceVariant,
                     height: 1.5,
                   ),
                 ),
@@ -147,12 +153,12 @@ class _SplashScreenState extends State<SplashScreen>
                 const SizedBox(height: 40),
 
                 // 로딩 인디케이터
-                const SizedBox(
+                SizedBox(
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Color(0xFF7DD3C0),
+                      colorScheme.primary,
                     ),
                     strokeWidth: 2.5,
                   ),
@@ -165,7 +171,7 @@ class _SplashScreenState extends State<SplashScreen>
                   '앱을 시작하는 중...',
                   style: GoogleFonts.notoSans(
                     fontSize: 14,
-                    color: const Color(0xFF95A5A6),
+                    color: colorScheme.onSurfaceVariant.withOpacity(0.7),
                   ),
                 ),
               ],
