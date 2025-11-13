@@ -22,14 +22,16 @@ class ContactScreen extends StatefulWidget {
 
 class _ContactScreenState extends State<ContactScreen> 
     with ContactLogicMixin {
+  final HomeService _homeService = HomeService();
 
   @override
   Widget build(BuildContext context) {
     return Consumer2<AuthProvider, HomeService>(
       builder: (context, authProvider, homeService, child) {
         return MainLayout(
-          isHomePage: false, // 뒤로가기 버튼 표시
+          isHomePage: true, // 🍔 햄버거 메뉴 표시
           title: '문의하기',
+          onMenuTap: (menu) => _homeService.handleMenuTap(context, menu), // 🔥 메뉴 탭 처리 추가
           onLogoutTap: authProvider.isAuthenticated
               ? () => homeService.handleLogout(context, authProvider) // 🔑 로그아웃 기능 연결
               : null,

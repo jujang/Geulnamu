@@ -286,6 +286,9 @@ class HomeService extends ChangeNotifier {
       case '발제문 목록':
         Navigator.pushNamed(context, '/presentation-list');
         break;
+      case '문의함 관리':
+        Navigator.pushNamed(context, '/voc-management');
+        break;
       case '문의하기':
         Navigator.pushNamed(context, '/contact');
         break;

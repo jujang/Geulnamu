@@ -27,11 +27,6 @@ class ContactService {
   /// Returns: API 성공 여부
   Future<bool> reportError(String content, BuildContext context) async {
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [에러 보고] API 요청 시작...');
-        print('📝 [에러 보고] 내용: ${content.length > 50 ? '${content.substring(0, 50)}...' : content}');
-      }
-
       // 🔑 액세스 토큰 가져오기
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
@@ -62,9 +57,6 @@ class ContactService {
         );
 
         if (processedResponse['success']) {
-          if (AppConfig.debugMode) {
-            print('✅ [에러 보고] 성공적으로 전송되었습니다.');
-          }
           return true;
         } else {
           throw Exception('[에러 보고] 백엔드 오류: ${processedResponse['message']}');
@@ -88,11 +80,6 @@ class ContactService {
   /// Returns: API 성공 여부
   Future<bool> requestFeature(String content, BuildContext context) async {
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [기능 요청] API 요청 시작...');
-        print('📝 [기능 요청] 내용: ${content.length > 50 ? '${content.substring(0, 50)}...' : content}');
-      }
-
       // 🔑 액세스 토큰 가져오기
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
@@ -123,9 +110,6 @@ class ContactService {
         );
 
         if (processedResponse['success']) {
-          if (AppConfig.debugMode) {
-            print('✅ [기능 요청] 성공적으로 전송되었습니다.');
-          }
           return true;
         } else {
           throw Exception('[기능 요청] 백엔드 오류: ${processedResponse['message']}');
