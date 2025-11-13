@@ -254,7 +254,7 @@ class _LoginScreenState extends State<LoginScreen>
               height: 56,
               decoration: BoxDecoration(
                 color: const Color(0xFFFEE500).withOpacity(0.6),
-                borderRadius: BorderRadius.circular(12), // 🎯 카카오 공식 가이드: 12px
+                borderRadius: BorderRadius.circular(12),
               ),
               child: const Center(
                 child: SizedBox(
@@ -275,71 +275,53 @@ class _LoginScreenState extends State<LoginScreen>
               onTapCancel: () => setState(() => _isPressed = false),
               onTap: () => _handleKakaoLogin(),
               child: MouseRegion(
-                cursor: SystemMouseCursors.click, // 👆 웹에서 마우스 커서를 포인터(손가락)로 변경
+                cursor: SystemMouseCursors.click,
                 onEnter: (_) => setState(() => _isHovering = true),
                 onExit: (_) => setState(() => _isHovering = false),
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150), // 🎯 부드러운 애니메이션
+                  duration: const Duration(milliseconds: 150),
                   curve: Curves.easeInOut,
                   width: double.infinity,
                   height: 56,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      12,
-                    ), // 🎯 카카오 공식 가이드: 12px
+                    color: const Color(0xFFFEE500), // 카카오 노란색
+                    borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
                         color: const Color(0xFFFEE500).withOpacity(
-                          _isPressed
-                              ? 0.2
-                              : (_isHovering ? 0.5 : 0.3), // 🎯 눠남에 따른 음영 강도
+                          _isPressed ? 0.2 : (_isHovering ? 0.5 : 0.3),
                         ),
-                        blurRadius: _isPressed
-                            ? 2
-                            : (_isHovering ? 8 : 4), // 🎯 눠남에 따른 블러 강도
+                        blurRadius: _isPressed ? 2 : (_isHovering ? 8 : 4),
                         offset: Offset(
                           0,
                           _isPressed ? 1 : (_isHovering ? 4 : 2),
-                        ), // 🎯 눠남에 따른 오프셋
+                        ),
                       ),
                     ],
                   ),
-                  child: ColorFiltered(
-                    colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(
-                        _isPressed
-                            ? 0.15
-                            : (_isHovering ? 0.05 : 0.0), // 🎯 눠남에 따른 어두워지는 정도
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // 카카오 로고
+                      Image.asset(
+                        'assets/images/kakao_image.png',
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.high,  // 🎨 이미지 품질 향상
                       ),
-                      BlendMode.darken,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        'assets/images/kakao_login_large_wide.png',
-                        width: double.infinity,
-                        height: 56,
-                        fit: BoxFit.contain, // 🎯 이미지 전체가 보이도록 변경 (잘리지 않음)
-                        errorBuilder: (context, error, stackTrace) {
-                          // 🎯 이미지 로드 실패 시 간단한 폴백
-                          debugPrint('❌ 카카오 로그인 이미지 로드 실패: $error');
-                          return Container(
-                            width: double.infinity,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFEE500),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.error_outline,
-                                color: Color(0xFF3C1E1E),
-                              ),
-                            ),
-                          );
-                        },
+                      const SizedBox(width: 8),
+                      // 텍스트
+                      Text(
+                        '카카오 로그인',
+                        style: GoogleFonts.notoSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF3C1E1E),
+                          letterSpacing: -0.5,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),
