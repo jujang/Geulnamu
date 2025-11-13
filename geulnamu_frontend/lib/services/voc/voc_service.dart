@@ -21,11 +21,6 @@ class VoCService {
     required VoCFilter filter,
   }) async {
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [이슈 목록 조회] API 요청 시작...');
-        print('📄 페이지: $page, 필터: ${filter.toQueryParams(page)}');
-      }
-
       final response = await _dio.get(
         AppConfig.getApiEndpoint('voc/list'),
         queryParameters: filter.toQueryParams(page),
@@ -39,10 +34,6 @@ class VoCService {
           response,
           '이슈 목록 조회',
         );
-
-        if (AppConfig.debugMode) {
-          print('📄 [processedResponse] 데이터: ${processedResponse['data']}');
-        }
 
         return VoCListResponse.fromJson(
           processedResponse['data'] as Map<String, dynamic>,
@@ -66,11 +57,6 @@ class VoCService {
     String? adminComment,
   }) async {
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [이슈 상태 변경] API 요청 시작...');
-        print('📝 vocId: $vocId, 새 상태: ${newStatus.value}');
-      }
-
       final requestBody = <String, dynamic>{
         'issueStatus': newStatus.value,
       };
@@ -93,10 +79,6 @@ class VoCService {
           '이슈 상태 변경',
           expectData: false,
         );
-
-        if (AppConfig.debugMode) {
-          print('✅ [이슈 상태 변경] 성공');
-        }
       } else {
         throw Exception('[이슈 상태 변경] HTTP 오류: ${response.statusCode}');
       }

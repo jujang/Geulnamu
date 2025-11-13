@@ -58,10 +58,6 @@ mixin VoCManagementLogicMixin<T extends StatefulWidget> on State<T> {
         });
       }
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [이슈 목록 로드] 오류: $e');
-      }
-
       if (mounted) {
         setState(() {
           errorMessage = _getErrorMessage(e);
@@ -132,10 +128,6 @@ mixin VoCManagementLogicMixin<T extends StatefulWidget> on State<T> {
         await loadIssueList();
       }
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [이슈 상태 업데이트] 오류: $e');
-      }
-
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -179,13 +171,9 @@ mixin VoCManagementLogicMixin<T extends StatefulWidget> on State<T> {
   /// 액세스 토큰 가져오기
   Future<String?> _getAccessToken() async {
     try {
-      // AuthProvider에서 토큰 가져오기
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       return await authProvider.accessToken;
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [토큰 가져오기] 오류: $e');
-      }
       return null;
     }
   }

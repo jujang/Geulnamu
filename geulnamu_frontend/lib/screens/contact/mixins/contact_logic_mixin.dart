@@ -39,11 +39,6 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 에러 보고 BottomSheet 표시
   void showErrorReportBottomSheet() {
-    if (AppConfig.debugMode) {
-      print('🐛 [ContactLogicMixin] 에러 보고 BottomSheet 표시');
-      print('💾 [ContactLogicMixin] 기존 저장된 내용: "${_savedErrorReportContent.isEmpty ? '없음' : '${_savedErrorReportContent.substring(0, _savedErrorReportContent.length > 20 ? 20 : _savedErrorReportContent.length)}...'}"');
-    }
-
     _showContactBottomSheet(
       type: 'error',
       title: '🐛 에러 보고',
@@ -57,11 +52,6 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 기능 요청 BottomSheet 표시
   void showFeatureRequestBottomSheet() {
-    if (AppConfig.debugMode) {
-      print('💡 [ContactLogicMixin] 기능 요청 BottomSheet 표시');
-      print('💾 [ContactLogicMixin] 기존 저장된 내용: "${_savedFeatureRequestContent.isEmpty ? '없음' : '${_savedFeatureRequestContent.substring(0, _savedFeatureRequestContent.length > 20 ? 20 : _savedFeatureRequestContent.length)}...'}"');
-    }
-
     _showContactBottomSheet(
       type: 'feature',
       title: '💡 기능 요청',
@@ -95,9 +85,6 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
       _activeControllers.add(contentController);
       _activeFocusNodes.add(contentFocusNode);
     } catch (e) {
-      if (AppConfig.debugMode) {
-        print('⚠️ [ContactLogicMixin] 컨트롤러 생성 실패: $e');
-      }
       return;
     }
     
@@ -119,9 +106,7 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
           contentFocusNode!.requestFocus();
         }
       } catch (e) {
-        if (AppConfig.debugMode) {
-          print('⚠️ [ContactLogicMixin] 포커스 설정 실패: $e');
-        }
+        // 포커스 설정 실패 무시
       }
     }
 
@@ -200,12 +185,8 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
                     maxLines: 6,
                     maxLength: 1000,
                     onChanged: (value) {
-                      if (isDisposed) return; // 🚀 dispose 체크
-                      // 실시간 로컬 저장
+                      if (isDisposed) return;
                       onContentChanged?.call(value);
-                      if (AppConfig.debugMode) {
-                        print('💾 [ContactLogicMixin] 내용 저장: "${value.length > 20 ? '${value.substring(0, 20)}...' : value}"');
-                      }
                     },
                     decoration: InputDecoration(
                       hintText: hintText,
@@ -230,13 +211,10 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: _isSubmitting ? null : () {
-                            // 🚀 안전한 닫기
                             try {
                               Navigator.of(context).pop();
                             } catch (e) {
-                              if (AppConfig.debugMode) {
-                                print('⚠️ [ContactLogicMixin] BottomSheet 닫기 실패: $e');
-                              }
+                              // 닫기 실패 무시
                             }
                           },
                           child: const Text('취소'),
@@ -288,9 +266,6 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
                                     }
                                   } catch (e) {
                                     // 에러는 onSubmit 내부에서 처리됨
-                                    if (AppConfig.debugMode) {
-                                      print('⚠️ [ContactLogicMixin] 전송 오류: $e');
-                                    }
                                   } finally {
                                     // 🚀 안전한 로딩 상태 해제
                                     if (!isDisposed) {
@@ -301,9 +276,7 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
                                           _currentSubmissionType = null;
                                         });
                                       } catch (e) {
-                                        if (AppConfig.debugMode) {
-                                          print('⚠️ [ContactLogicMixin] 상태 업데이트 실패: $e');
-                                        }
+                                        // 상태 업데이트 실패 무시
                                       }
                                     }
                                   }
@@ -337,12 +310,7 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
       final success = await _contactService.reportError(content, context); // context 전달
       
       if (success) {
-        // 전송 성공 시 저장된 내용 삭제
         _savedErrorReportContent = '';
-        if (AppConfig.debugMode) {
-          print('🎉 [ContactLogicMixin] 에러 보고 전송 성공 - 저장된 내용 삭제');
-        }
-        // 성공 메시지는 BottomSheet 닫힘 후 표시
         Future.delayed(const Duration(milliseconds: 200), () {
           if (mounted) {
             _showSnackBar('에러 보고가 전송되었습니다. 빠른 시일 내에 확인하겠습니다.');
@@ -360,12 +328,7 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
       final success = await _contactService.requestFeature(content, context); // context 전달
       
       if (success) {
-        // 전송 성공 시 저장된 내용 삭제
         _savedFeatureRequestContent = '';
-        if (AppConfig.debugMode) {
-          print('🎉 [ContactLogicMixin] 기능 요청 전송 성공 - 저장된 내용 삭제');
-        }
-        // 성공 메시지는 BottomSheet 닫힘 후 표시
         Future.delayed(const Duration(milliseconds: 200), () {
           if (mounted) {
             _showSnackBar('기능 요청이 전송되었습니다. 검토 후 답변드리겠습니다.');
@@ -405,9 +368,7 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
           controller.dispose();
         }
       } catch (e) {
-        if (AppConfig.debugMode) {
-          print('⚠️ [ContactLogicMixin] Controller dispose 에러: $e');
-        }
+        // Controller dispose 에러 무시
       }
       
       try {
@@ -420,9 +381,7 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
           focusNode.dispose();
         }
       } catch (e) {
-        if (AppConfig.debugMode) {
-          print('⚠️ [ContactLogicMixin] FocusNode dispose 에러: $e');
-        }
+        // FocusNode dispose 에러 무시
       }
       
       // 🚀 상태 정리 (안전하게)
@@ -433,22 +392,14 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
             _currentSubmissionType = null;
           });
         } catch (e) {
-          if (AppConfig.debugMode) {
-            print('⚠️ [ContactLogicMixin] 상태 정리 에러: $e');
-          }
+          // 상태 정리 에러 무시
         }
       }
     });
   }
   
-  /// 🚀 모든 액티브 컨트롤러 안전한 정리 (위젯 생명주기 끝에 사용)
   @override
   void dispose() {
-    if (AppConfig.debugMode) {
-      print('🧹 [ContactLogicMixin] dispose 시작 - 활성 컨트롤러: ${_activeControllers.length}, 활성 포커스노드: ${_activeFocusNodes.length}');
-    }
-    
-    // 🚀 안전한 컨트롤러 정리
     final controllersToDispose = _activeControllers.toList();
     _activeControllers.clear();
     
@@ -459,9 +410,7 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
           controller.dispose();
         }
       } catch (e) {
-        if (AppConfig.debugMode) {
-          print('⚠️ [ContactLogicMixin] Controller dispose 에러: $e');
-        }
+        // Controller dispose 에러 무시
       }
     }
     
@@ -479,19 +428,12 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
           focusNode.dispose();
         }
       } catch (e) {
-        if (AppConfig.debugMode) {
-          print('⚠️ [ContactLogicMixin] FocusNode dispose 에러: $e');
-        }
+        // FocusNode dispose 에러 무시
       }
     }
     
-    // 🚀 dispose 상태 추적 Set 정리
     _disposedControllers.clear();
     _disposedFocusNodes.clear();
-    
-    if (AppConfig.debugMode) {
-      print('✅ [ContactLogicMixin] dispose 완료');
-    }
     
     super.dispose();
   }
