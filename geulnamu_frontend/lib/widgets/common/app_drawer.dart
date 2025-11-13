@@ -195,7 +195,7 @@ class AppDrawer extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'BOOK COMMUNITY',
+                        'BOOK CLUB',
                         style: context.textStyles.bodySmall?.copyWith(
                           color: context.colors.onPrimary.withOpacity(0.8),
                           letterSpacing: 1.2,

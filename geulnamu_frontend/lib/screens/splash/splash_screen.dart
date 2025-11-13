@@ -29,27 +29,19 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-    
+
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.elasticOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
+    );
 
     // 애니메이션 시작
     _fadeController.forward();
@@ -61,12 +53,12 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _navigateToHome() async {
     // 스플래시 화면 표시 시간
     await Future.delayed(const Duration(seconds: 2));
-    
+
     if (mounted) {
       // 백그라운드에서 로그인 상태 확인 (UI에 영향 없음)
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       authProvider.checkAuthStatus();
-      
+
       // 항상 메인 화면으로 이동
       Navigator.pushReplacementNamed(context, '/home');
     }
@@ -112,9 +104,9 @@ class _SplashScreenState extends State<SplashScreen>
                     color: Colors.white,
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // 앱 이름
                 Text(
                   '글나무',
@@ -125,12 +117,12 @@ class _SplashScreenState extends State<SplashScreen>
                     letterSpacing: 2.0,
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // 서브 타이틀
                 Text(
-                  'BOOK COMMUNITY',
+                  'BOOK CLUB',
                   style: GoogleFonts.roboto(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -138,9 +130,9 @@ class _SplashScreenState extends State<SplashScreen>
                     letterSpacing: 1.5,
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // 설명 텍스트
                 Text(
                   '독서 토론의 새로운 시작\n함께 읽고, 함께 성장해요',
@@ -151,21 +143,23 @@ class _SplashScreenState extends State<SplashScreen>
                     height: 1.5,
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // 로딩 인디케이터
                 const SizedBox(
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7DD3C0)),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF7DD3C0),
+                    ),
                     strokeWidth: 2.5,
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // 로딩 텍스트
                 Text(
                   '앱을 시작하는 중...',
