@@ -26,7 +26,7 @@ class IntroductionScreen extends StatelessWidget {
               centerTitle: false, // 🎯 제목을 왼쪽 정렬로 변경
               titlePadding: const EdgeInsets.only(
                 left: 44,
-                bottom: 16,
+                bottom: 16,  // 원래대로 복구
               ), // 🎯 뒤로가기 버튼 간격 고려
               title: Text(
                 '글나무 소개',
@@ -92,6 +92,7 @@ class IntroductionScreen extends StatelessWidget {
                               ],
                             ),
                           ),
+                          const SizedBox(height: 20),  // 🎯 텍스트 아래 여백 추가
                         ],
                       ),
                     ),
