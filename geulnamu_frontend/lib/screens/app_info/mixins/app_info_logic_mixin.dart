@@ -1,12 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 /// 앱 정보 화면 로직 Mixin
 ///
 /// 주요 기능:
+/// - 버전 정보 자동 로드 (pubspec.yaml 기반)
 /// - 캐시 삭제 (SharedPreferences만, 로그인 토큰 유지)
 mixin AppInfoLogicMixin<T extends StatefulWidget> on State<T> {
   
+  // 🎯 버전 정보 상태
+  String _version = '';
+  String _buildNumber = '';
+  bool _isLoadingVersion = true;
+  
+  // 버전 정보 getter
+  String get version => _version;
+  String get buildNumber => _buildNumber;
+  bool get isLoadingVersion => _isLoadingVersion;
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadVersionInfo();
+  }
+  
+  /// 버전 정보 로드
+  Future<void> _loadVersionInfo() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      
+      setState(() {
+        _version = packageInfo.version;        // pubspec.yaml의 version (1.0.0)
+        _buildNumber = packageInfo.buildNumber; // pubspec.yaml의 +1
+        _isLoadingVersion = false;
+      });
+      
+      debugPrint('✅ [AppInfo] 버전 정보 로드 완료: v$_version (빌드 $_buildNumber)');
+    } catch (e) {
+      debugPrint('❌ [AppInfo] 버전 정보 로드 실패: $e');
+      setState(() {
+        _version = '알 수 없음';
+        _buildNumber = '0';
+        _isLoadingVersion = false;
+      });
+    }
+  }
+
   /// 캐시 전체 삭제 처리
   Future<void> handleClearCache(BuildContext context) async {
     // 확인 다이얼로그 표시

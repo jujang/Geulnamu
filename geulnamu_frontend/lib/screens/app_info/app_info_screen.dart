@@ -121,24 +121,26 @@ class _AppInfoScreenState extends State<AppInfoScreen> with AppInfoLogicMixin {
     );
   }
 
-  /// 버전 정보
+  /// 버전 정보 (🎯 pubspec.yaml에서 자동 로드)
   Widget _buildVersionInfo(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          '버전 1.0.0 (빌드 1)',
-          style: context.textStyles.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+    // 로딩 중일 때
+    if (isLoadingVersion) {
+      return SizedBox(
+        height: 24,
+        width: 24,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: context.colors.primary,
         ),
-        const SizedBox(height: 4),
-        Text(
-          '업데이트: 2025.01.16',
-          style: context.textStyles.bodyMedium?.copyWith(
-            color: context.colors.onSurfaceVariant,
-          ),
-        ),
-      ],
+      );
+    }
+    
+    // 버전 정보 표시
+    return Text(
+      '버전 $version (빌드 $buildNumber)',
+      style: context.textStyles.bodyLarge?.copyWith(
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 
