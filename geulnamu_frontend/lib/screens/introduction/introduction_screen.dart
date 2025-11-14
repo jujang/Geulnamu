@@ -26,7 +26,7 @@ class IntroductionScreen extends StatelessWidget {
               centerTitle: false, // 🎯 제목을 왼쪽 정렬로 변경
               titlePadding: const EdgeInsets.only(
                 left: 44,
-                bottom: 16,
+                bottom: 16,  // 원래대로 복구
               ), // 🎯 뒤로가기 버튼 간격 고려
               title: Text(
                 '글나무 소개',
@@ -64,27 +64,18 @@ class IntroductionScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // 📖 중앙 아이콘
+                    // 📖 중앙 로고 이미지
                     Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const SizedBox(height: 40),
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
-                                width: 2,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.groups_rounded,
-                              size: 50,
-                              color: Colors.white,
-                            ),
+                          // 로고 이미지 (Container 제거)
+                          Image.asset(
+                            'assets/logo/app_logo.png',
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.contain,
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -101,6 +92,7 @@ class IntroductionScreen extends StatelessWidget {
                               ],
                             ),
                           ),
+                          const SizedBox(height: 20),  // 🎯 텍스트 아래 여백 추가
                         ],
                       ),
                     ),

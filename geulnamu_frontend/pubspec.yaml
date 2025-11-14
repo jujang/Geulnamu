@@ -1,8 +1,8 @@
 name: geulnamu_frontend
 description: "글나무 - 독서 토론 모임 관리 서비스. 모임 출석, 발제문 작성, 토론 참여를 간편하게 관리하는 PWA 앱입니다."
-publish_to: 'none'
+publish_to: "none"
 
-version: 1.0.0+1
+version: 1.0.1+1
 
 environment:
   sdk: ^3.8.1
@@ -13,41 +13,42 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   cupertino_icons: ^1.0.8
-  
+
   # PWA and Web support
   flutter_web_plugins:
     sdk: flutter
-  
+
   # UI and Design
   google_fonts: ^6.2.1
-  
+
   # HTTP and API
   dio: ^5.6.0
-  
+
   # Local Storage
   shared_preferences: ^2.3.2
-  
+
   # 환경변수 관리
   flutter_dotenv: ^5.1.0
-  
+
   # 카카오 로그인
   kakao_flutter_sdk: ^1.9.1+2
-  
+
   # 웹 OAuth 처리
   flutter_web_auth_2: ^3.1.1
-  
+
   # 상태 관리
   provider: ^6.1.2
-  
+
   # Utilities
   url_launcher: ^6.3.0
-  intl: ^0.20.2  # 🎯 버전 업데이트 (flutter_localizations 호환성)
+  intl: ^0.20.2 # 🎯 버전 업데이트 (flutter_localizations 호환성)
   flutter_localizations:
-    sdk: flutter  # 🎯 한국어 지원을 위해 이 위치로 이동
-  
+    sdk: flutter # 🎯 한국어 지원을 위해 이 위치로 이동
+  package_info_plus: ^8.1.2 # 🎯 앱 버전 정보 자동 로드
+
   # QR Code
-  qr_flutter: ^4.1.0        # QR 코드 생성
-  mobile_scanner: ^4.0.1    # QR 코드 스캔
+  qr_flutter: ^4.1.0 # QR 코드 생성
+  mobile_scanner: ^4.0.1 # QR 코드 스캔
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +63,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/logo/
-    - .env  # 환경변수 파일 추가
+    - .env # 환경변수 파일 추가
+
 
   # 추후 필요시 폰트 추가
