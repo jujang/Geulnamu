@@ -98,8 +98,8 @@ class _LoginScreenState extends State<LoginScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // 상단 여백
-                    const Spacer(flex: 2),
+                    // 상단 여백 (줄임)
+                    const Spacer(flex: 1),
 
                     // 로고 및 캐릭터 영역
                     FadeTransition(
@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen>
                       ),
                     ),
 
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 40),
 
                     // 로그인 버튼 영역
                     FadeTransition(
@@ -137,23 +137,23 @@ class _LoginScreenState extends State<LoginScreen>
     
     return Column(
       children: [
-        // 로고 이미지 (책갈피 디자인 컨셉) - 동그라미 없이 직접 표시
+        // 로고 이미지 (책갈피 디자인 컨셉) - 크기 줄임
         Container(
-          width: 160,
-          height: 160,
+          width: 140,
+          height: 140,
           child: Image.asset(
             'assets/logo/app_logo.png',
             fit: BoxFit.contain,
           ),
         ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
 
         // 글나무 로고 텍스트
         Text(
           '글나무',
           style: GoogleFonts.notoSans(
-            fontSize: 32,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
             color: colorScheme.onBackground,
             letterSpacing: 2.0,
@@ -173,14 +173,14 @@ class _LoginScreenState extends State<LoginScreen>
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
 
         // 설명 텍스트
         Text(
           '독서 토론의 새로운 시작\n함께 읽고, 함께 성장해요',
           textAlign: TextAlign.center,
           style: GoogleFonts.notoSans(
-            fontSize: 16,
+            fontSize: 14,
             color: colorScheme.onSurfaceVariant,
             height: 1.5,
           ),
