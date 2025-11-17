@@ -99,23 +99,27 @@ class _AppInfoScreenState extends State<AppInfoScreen> with AppInfoLogicMixin {
     );
   }
 
-  /// 📚 앱 이미지
+  /// 📚 앱 이미지 (Long Press 로 Health Check)
   Widget _buildAppIcon(BuildContext context) {
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: context.colors.primary.withOpacity(0.3),
-          width: 2,
+    return GestureDetector(
+      onLongPressStart: (_) => handleLogoLongPressStart(),
+      onLongPressEnd: (_) => handleLogoLongPressEnd(),
+      child: Container(
+        width: 120,
+        height: 120,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: context.colors.primary.withOpacity(0.3),
+            width: 2,
+          ),
         ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
-        child: Image.asset(
-          'assets/logo/app_logo.png', // 여기에 이미지 경로 지정
-          fit: BoxFit.cover,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Image.asset(
+            'assets/logo/app_logo.png', // 여기에 이미지 경로 지정
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

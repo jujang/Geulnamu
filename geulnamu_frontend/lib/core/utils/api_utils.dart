@@ -17,6 +17,7 @@ class ApiUtils {
   static Dio createDioWithTimeout({
     String? baseUrl,
     Map<String, String>? headers,
+    bool enableInterceptorLogging = true, // 인터셉터 로깅 제어
   }) {
     final dio = Dio(
       BaseOptions(
@@ -32,8 +33,8 @@ class ApiUtils {
     // 글로벌 캐시 무효화 인터셉터
     dio.interceptors.add(_CacheControlInterceptor());
 
-    // 디버그 모드에서 요청/응답 로깅 인터셉터
-    if (AppConfig.debugMode) {
+    // 디버그 모드에서 요청/응답 로깅 인터셉터 (제어 가능)
+    if (AppConfig.debugMode && enableInterceptorLogging) {
       dio.interceptors.add(_DebugLoggingInterceptor());
     }
 
@@ -279,9 +280,12 @@ class _CacheControlInterceptor extends Interceptor {
       }
 
       if (AppConfig.debugMode) {
-        print('📅 [캐시 무효화] ${options.method} ${options.path}');
-        if (kIsWeb) {
-          print('🌐 [Flutter Web] 타임스탬프 캐시버스터 추가');
+        // Health Check API는 로그 출력 제외
+        if (!options.path.contains('health-check')) {
+          print('📅 [캐시 무효화] ${options.method} ${options.path}');
+          if (kIsWeb) {
+            print('🌐 [Flutter Web] 타임스탬프 캐시버스터 추가');
+          }
         }
       }
     }
