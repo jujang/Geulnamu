@@ -74,35 +74,21 @@ dependencies {
 }
 
 // QueryDSL 설정
-def querydslDir = 'build/generated/sources/annotationProcessor/java/main'
-
-// Q 파일 생성용 별도 태스크 생성
-tasks.register('generateQuerydsl', JavaCompile) {
-	source = sourceSets.main.java
-	classpath = configurations.compileClasspath + configurations.annotationProcessor
-	destinationDirectory = file('build/tmp/querydsl')
-	options.annotationProcessorPath = configurations.annotationProcessor
-	options.compilerArgs = [
-		"-proc:only",
-		"-processor", "com.querydsl.apt.jpa.JPAAnnotationProcessor"
-	]
-	doFirst {
-		file(querydslDir).mkdirs()
-	}
-}
+def querydslDir = 'src/main/generated'
 
 // sourceSets에 생성된 Q 파일 경로 추가
 sourceSets {
 	main.java.srcDirs += [querydslDir]
 }
 
-// compileJava가 generateQuerydsl 이후에 실행되도록 의존성 설정
-compileJava.dependsOn generateQuerydsl
+// compileJava 태스크 설정
+tasks.withType(JavaCompile).configureEach {
+	options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
+}
 
 // clean 시 생성된 파일들 삭제
 clean {
 	delete file(querydslDir)
-	delete file('build/tmp/querydsl')
 }
 
 // RestDocs 설정 (단순화)
@@ -130,4 +116,8 @@ bootJar {
 tasks.named('test') {
 	outputs.dir snippetsDir
 	useJUnitPlatform()
+
+	// UTF-8 인코딩 설정 (REST Docs 한글 처리)
+	systemProperty 'file.encoding', 'UTF-8'
+	jvmArgs '-Dfile.encoding=UTF-8'
 }
