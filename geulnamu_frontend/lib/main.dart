@@ -258,7 +258,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
   }
 }
 
-// 🎯 에러 앱도 테마 시스템 사용 - 색상 설정 없음!
+// 🎯 에러 앱 - 다크 모드 텍스트 명확히 표시
 class ErrorApp extends StatelessWidget {
   const ErrorApp({super.key});
 
@@ -266,44 +266,52 @@ class ErrorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '글나무 - 오류',
-      theme: GeulnamuTheme.lightTheme, // 🎯 통일된 테마 사용
-      darkTheme: GeulnamuTheme.darkTheme, // 🎯 다크모드도 지원
-      themeMode: ThemeMode.system, // 🎯 시스템 설정 따라감
-      home: Scaffold(
-        // 🎯 backgroundColor 없음! 테마가 자동으로 처리
-        body: Center(
-          child: Card(
-            // 🎯 색상 없음! 테마의 surface 색상 자동 사용
-            margin: const EdgeInsets.all(32),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    // 🎯 색상 없음! 테마의 primary 색상 자동 사용
+      theme: GeulnamuTheme.lightTheme,
+      darkTheme: GeulnamuTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      home: Builder(
+        builder: (context) {
+          final colorScheme = Theme.of(context).colorScheme;
+          
+          return Scaffold(
+            backgroundColor: colorScheme.background,
+            body: Center(
+              child: Card(
+                color: colorScheme.surface,
+                margin: const EdgeInsets.all(32),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: colorScheme.error, // 🎯 명시적 색상 설정
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '앱 초기화 중 오류가 발생했습니다.',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: colorScheme.onSurface, // 🎯 명시적 색상 설정
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '.env 파일과 카카오 키 설정을 확인해주세요.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface, // 🎯 명시적 색상 설정
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '앱 초기화 중 오류가 발생했습니다.',
-                    // 🎯 테마의 headlineMedium 스타일 자동 사용
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '.env 파일과 카카오 키 설정을 확인해주세요.',
-                    // 🎯 테마의 bodyMedium 스타일 자동 사용
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
