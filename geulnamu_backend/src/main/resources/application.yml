@@ -1,17 +1,14 @@
 spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/geulnamu_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: ${MYSQL_SERVER_PASSWORD} # 여기에 실제 설정한 MySQL 비밀번호 입력
+  application:
+    name: geulnamu-api
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE}
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
-    hibernate:
-      # 스키마 생성·변경 전략(create, create-drop, update, validate 등)
-      ddl-auto: validate  # 이미 테이블이 생성되어 있으므로 validate 사용
-    show-sql: false
     properties:
-      hibernate.format_sql: true
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        default_batch_fetch_size: 100
   jwt:
     accessTokenKey: ${JWT_ACCESS_TOKEN_KEY}
     refreshTokenKey: ${JWT_REFRESH_TOKEN_KEY}
@@ -27,13 +24,17 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metics,hikaricp
+  metrics:
+    enable:
+      hikari: true
 
 logging:
   level:
     org.hibernate.SQL: DEBUG
 
 server:
+  port: 8080
   servlet:
     encoding:
       charset: UTF-8
