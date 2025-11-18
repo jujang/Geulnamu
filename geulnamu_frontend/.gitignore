@@ -54,9 +54,10 @@ app.*.map.json
 
 # 🔐 환경변수 및 민감한 정보 파일들
 .env
-.env.local
+.env.local  # 로컬 개발용 (Git 제외) - 개발자별로 값이 다를 수 있기에 개인 작업공간에서만 갖고 있을 것
+**/dist/**/.env.local
 .env.dev
-.env.prod
+# .env.prod  # 프로덕션용 (Git 포함 - 민감하지 않은 정보만)
 .env.old
 lib/core/config/keys.dart
 # app_config.dart는 템플릿이므로 커밋 허용
