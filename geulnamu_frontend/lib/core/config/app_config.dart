@@ -8,17 +8,43 @@ class AppConfig {
   factory AppConfig() => _instance;
   AppConfig._internal();
 
-  /// 환경변수 초기화
+  /// 환경변수 초기화 - 자동 환경 감지
   static Future<void> initialize() async {
     try {
-      await dotenv.load(fileName: ".env");
-      if (debugMode) {
-        print('✅ 환경변수 로드 완료');
-      }
+      // 🎯 환경별 파일 자동 선택
+      String envFile = await _detectEnvironmentFile();
+      
+      await dotenv.load(fileName: envFile);
+      
+      print('✅ 환경변수 로드 완료: $envFile');
+      
     } catch (e) {
       print('❌ 환경변수 로드 실패: $e');
       print('💡 .env 파일이 있는지 확인하세요!');
       rethrow;
+    }
+  }
+  
+  /// 🔍 환경 감지 및 적절한 .env 파일 선택
+  static Future<String> _detectEnvironmentFile() async {
+    // 1. kIsWeb으로 웹 환경 감지
+    const bool isWeb = identical(0, 0.0); // 컴파일 타임 상수로 웹 감지
+    
+    if (isWeb) {
+      // 웹 환경: URL 호스트로 판단
+      final String hostname = Uri.base.host;
+      
+      if (hostname == 'localhost' || hostname == '127.0.0.1') {
+        print('🏠 로컬 환경 감지 (웹): .env.local 사용');
+        return '.env.local';
+      } else {
+        print('🌐 배포 환경 감지 (웹): .env.prod 사용');
+        return '.env.prod';
+      }
+    } else {
+      // 모바일/데스크톱 환경: 기본적으로 로컬로 간주
+      print('📱 로컬 환경 감지 (모바일/데스크톱): .env.local 사용');
+      return '.env.local';
     }
   }
 
