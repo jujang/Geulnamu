@@ -63,7 +63,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/logo/
-    - .env # 환경변수 파일 추가
-
+    - .env.local # 환경변수 파일 추가
+    - .env.prod
 
   # 추후 필요시 폰트 추가
