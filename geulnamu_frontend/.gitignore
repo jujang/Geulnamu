@@ -33,6 +33,9 @@ migrate_working_dir/
 .pub/
 /build/
 
+# 🚀 Vercel 배포용 빌드 결과물 (GitHub Actions에서 생성, Git 추적 불필요)
+/dist/
+
 # Flutter 플랫폼별 자동 생성 파일들
 **/generated_plugin_registrant.cc
 **/generated_plugins.cmake
