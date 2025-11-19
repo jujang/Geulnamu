@@ -41,7 +41,7 @@ jobs:
         working-directory: geulnamu_frontend
         run: |
           echo "🔨 Flutter 웹 빌드 시작..."
-          flutter build web --release --web-renderer canvaskit
+          flutter build web --release
           echo "✅ 빌드 완료!"
       
       # 5️⃣ 빌드 결과물을 dist 폴더로 복사
