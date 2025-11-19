@@ -7,6 +7,7 @@ import com.geulnamu.infrastructure.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,9 +15,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -87,15 +88,31 @@ public class SecurityConfig {
     // CORS 설정
     @Bean
     public CorsConfigurationSource configurationSource() {
-        return request -> {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedHeaders(Collections.singletonList("*"));
-            config.setAllowedMethods(Collections.singletonList("*"));
-            config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3030", "https://localhost:3030"));
-            config.setAllowCredentials(true);
-//            config.addExposedHeader("Content-Disposition"); // 첨부파일 파일명 조회 위한 커스텀 헤더 접근 허용 설정
-            return config;
-        };
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedOriginPatterns(Arrays.asList(
+            "http://localhost:3030",
+            "https://geulnamu-five.vercel.app"
+        ));
+        config.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+        ));
+        config.setAllowedHeaders(Arrays.asList(
+            "Origin", "Content-Type", "Accept", "Authorization",
+            "If-None-Match", "If-Modified-Since", "Cache-Control",
+            "X-Requested-With", "Pragma", "Expires"
+        ));
+        config.setExposedHeaders(Arrays.asList(
+            "Content-Disposition", // 파일 다운로드용
+            "Authorization",
+            "ETag"
+        ));
+
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
 
@@ -109,6 +126,7 @@ public class SecurityConfig {
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
             )
             .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(AUTH_ALL).hasAnyRole("MEMBER", "VICE_STAFF", "STAFF", "VICE_LEADER", "LEADER", "ADMIN")
                 .requestMatchers(AUTH_FOR_STAFF).hasAnyRole("VICE_STAFF", "STAFF", "VICE_LEADER", "LEADER", "ADMIN")
                 .requestMatchers(AUTH_FOR_ADMIN).hasAnyRole("VICE_LEADER", "LEADER", "ADMIN")
