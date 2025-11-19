@@ -91,7 +91,7 @@ public class SecurityConfig {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedHeaders(Collections.singletonList("*"));
             config.setAllowedMethods(Collections.singletonList("*"));
-            config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3030", "https://localhost:3030"));
+            config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3030", "https://geulnamu-five.vercel.app"));
             config.setAllowCredentials(true);
 //            config.addExposedHeader("Content-Disposition"); // 첨부파일 파일명 조회 위한 커스텀 헤더 접근 허용 설정
             return config;
