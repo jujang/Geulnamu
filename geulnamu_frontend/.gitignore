@@ -57,7 +57,7 @@ app.*.map.json
 
 # 🔐 환경변수 및 민감한 정보 파일들
 **/.env
-**/.env.local
+# **/.env.local # 로컬개발용 (Git 포함)
 **/.env.dev
 # **/.env.prod  # 프로덕션용 (Git 포함)
 **/.env.old
