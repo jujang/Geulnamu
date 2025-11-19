@@ -2,7 +2,7 @@ name: geulnamu_frontend
 description: "글나무 - 독서 토론 모임 관리 서비스. 모임 출석, 발제문 작성, 토론 참여를 간편하게 관리하는 PWA 앱입니다."
 publish_to: "none"
 
-version: 1.0.0+5
+version: 1.0.0+6
 
 environment:
   sdk: ^3.8.1
