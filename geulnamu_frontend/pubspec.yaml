@@ -60,10 +60,11 @@ flutter:
 
   # Assets for 글나무 app
   assets:
-    - assets/images/
-    - assets/icons/
-    - assets/logo/
-    - .env.local # 환경변수 파일 추가
-    - .env.prod
+    - assets/images/ # 카카오 이미지 등
+    - assets/logo/ # app_logo.png (스플래시, 로그인 화면에서 사용 중)
+    # - assets/icons/ # 현재 비어있어서 제외
+    - .env.local # 로컬 전용 파일
+    - .env.prod # 프로덕션 환경변수
+
 
   # 추후 필요시 폰트 추가
