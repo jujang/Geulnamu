@@ -15,7 +15,7 @@ import 'services/home/home_service.dart';
 // Screen imports
 import 'screens/splash/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
-// import 'screens/auth/oauth_callback_screen.dart'; // HTML에서 처리
+import 'screens/auth/oauth_callback_screen.dart'; // OAuth 콜백 처리
 import 'screens/home/home_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/introduction/introduction_screen.dart'; // 글나무 소개 화면
@@ -221,6 +221,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
               final routeMap = {
                 '/splash': (context) => const SplashScreen(),
                 '/login': (context) => const LoginScreen(),
+                '/auth/callback': (context) => const OAuthCallbackScreen(), // 🎯 OAuth 콜백
                 '/home': (context) => const HomeScreen(),
                 '/introduction': (context) => const IntroductionScreen(),
                 '/member-list': (context) => const MemberListScreen(),
