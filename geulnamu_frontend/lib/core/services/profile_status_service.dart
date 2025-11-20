@@ -86,8 +86,8 @@ class ProfileStatusService {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
             'Expires': '0',
-            // 🔄 매번 다른 요청으로 인식하도록 타임스탬프 추가
-            'X-Request-Time': DateTime.now().millisecondsSinceEpoch.toString(),
+            // ℹ️ X-Request-Time 헤더는 CORS 문제로 제거
+            // 캐시 버스팅은 쿼리 파라미터 '_t'로 충분히 처리됨
           },
         ),
         // 🚫 쿼리 파라미터로도 캐싱 방지
