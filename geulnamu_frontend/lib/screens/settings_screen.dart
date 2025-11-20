@@ -188,6 +188,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showSuccessSnackBar(String message) {
     if (!mounted) return;
     
+    // 🎯 이전 스낵바 즉시 제거 후 새 스낵바 표시
+    ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -211,6 +213,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
     
+    // 🎯 이전 스낵바 즉시 제거 후 새 스낵바 표시
+    ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
