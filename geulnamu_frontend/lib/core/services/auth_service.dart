@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html show window, sessionStorage, indexedDB, navigator, IFrameElement, document;
+import 'dart:html'
+    as html
+    show window, sessionStorage, indexedDB, navigator, IFrameElement, document;
 import '../config/app_config.dart';
 import '../utils/api_utils.dart';
 import '../../widgets/common/error_dialog.dart';
@@ -124,7 +126,7 @@ class AuthService {
   /// 🥕 카카오 OAuth 로그인 - 메인 진입점
   ///
   /// 웹/모바일 환경을 자동 감지하여 적절한 OAuth 플로우 실행
-  /// 
+  ///
   /// [forceAccountSelection]: true로 설정하면 카카오 로그아웃 후 계정 선택 (다른 계정으로 로그인 시 사용)
   Future<Map<String, dynamic>> loginWithKakao({
     BuildContext? context,
@@ -272,7 +274,8 @@ class AuthService {
       final logoutRedirectUri = AppConfig.kakaoRedirectUri;
 
       // 카카오 로그아웃 URL
-      final logoutUrl = 'https://kauth.kakao.com/oauth/logout'
+      final logoutUrl =
+          'https://kauth.kakao.com/oauth/logout'
           '?client_id=$clientId'
           '&logout_redirect_uri=$logoutRedirectUri';
 
@@ -702,7 +705,7 @@ class AuthService {
   }
 
   /// 🧹 모든 사용자 데이터 삭제 (선택적 캐시 정리)
-  /// 
+  ///
   /// 삭제 항목:
   /// - ✅ SharedPreferences (토큰, 사용자 정보)
   /// - ✅ IndexedDB (Flutter 앱 데이터)
@@ -760,10 +763,9 @@ class AuthService {
         // 5️⃣ Service Worker에 캐시 정리 메시지 전송
         try {
           if (html.window.navigator.serviceWorker != null) {
-            final registration = await html.window.navigator.serviceWorker?.ready;
-            registration?.active?.postMessage({
-              'type': 'CLEAR_USER_CACHE',
-            });
+            final registration =
+                await html.window.navigator.serviceWorker?.ready;
+            registration?.active?.postMessage({'type': 'CLEAR_USER_CACHE'});
 
             if (AppConfig.debugMode) {
               print('✅ Service Worker 캐시 정리 요청 전송');
@@ -853,8 +855,6 @@ class AuthService {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
             'Expires': '0',
-            // 🔄 매번 다른 요청으로 인식하도록 타임스탬프 추가
-            'X-Request-Time': DateTime.now().millisecondsSinceEpoch.toString(),
           },
         ),
         // 🚫 쿼리 파라미터로도 캐싱 방지

@@ -86,8 +86,6 @@ class ProfileStatusService {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
             'Expires': '0',
-            // 🔄 매번 다른 요청으로 인식하도록 타임스탬프 추가
-            'X-Request-Time': DateTime.now().millisecondsSinceEpoch.toString(),
           },
         ),
         // 🚫 쿼리 파라미터로도 캐싱 방지
