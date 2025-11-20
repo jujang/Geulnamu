@@ -145,32 +145,49 @@
   <script>
     // Flutter에서 호출할 함수: 테마 색상 변경
     window.updateThemeColor = function(color, isDark) {
-      console.log('🎨 [Web] 테마 색상 변경:', color, '(다크모드:', isDark, ')');
+      console.log('🎨 [Web] 테마 색상 변경 요청:', color, '(다크모드:', isDark, ')');
       
-      // theme-color 메타 태그 업데이트
-      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-      if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', color);
+      try {
+        // 1️⃣ theme-color 메타 태그 업데이트 (상단바 + 하단바)
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+          metaThemeColor.setAttribute('content', color);
+          console.log('  ✓ theme-color 업데이트:', color);
+        } else {
+          console.warn('  ⚠️ theme-color 메타 태그 없음');
+        }
+        
+        // 2️⃣ msapplication 메타 태그 업데이트 (Windows)
+        const metaMsApplication = document.querySelector('meta[name="msapplication-TileColor"]');
+        if (metaMsApplication) {
+          metaMsApplication.setAttribute('content', color);
+        }
+        
+        const metaNavButton = document.querySelector('meta[name="msapplication-navbutton-color"]');
+        if (metaNavButton) {
+          metaNavButton.setAttribute('content', color);
+        }
+        
+        // 3️⃣ iOS 상태바 스타일 변경
+        const metaAppleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+        if (metaAppleStatusBar) {
+          const iosStyle = isDark ? 'black-translucent' : 'default';
+          metaAppleStatusBar.setAttribute('content', iosStyle);
+          console.log('  ✓ iOS 상태바 스타일:', iosStyle);
+        }
+        
+        // 4️⃣ 🔥 body 배경색도 강제 변경 (더 확실한 반영)
+        document.body.style.backgroundColor = color;
+        console.log('  ✓ body 배경색:', color);
+        
+        // 5️⃣ 🔥 HTML 루트 배경색도 변경
+        document.documentElement.style.backgroundColor = color;
+        console.log('  ✓ html 배경색:', color);
+        
+        console.log('✅ [Web] 테마 색상 변경 완료!');
+      } catch (error) {
+        console.error('❌ [Web] 테마 색상 변경 실패:', error);
       }
-      
-      // msapplication 메타 태그도 업데이트
-      const metaMsApplication = document.querySelector('meta[name="msapplication-TileColor"]');
-      if (metaMsApplication) {
-        metaMsApplication.setAttribute('content', color);
-      }
-      
-      const metaNavButton = document.querySelector('meta[name="msapplication-navbutton-color"]');
-      if (metaNavButton) {
-        metaNavButton.setAttribute('content', color);
-      }
-      
-      // iOS 상태바 스타일 변경
-      const metaAppleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-      if (metaAppleStatusBar) {
-        metaAppleStatusBar.setAttribute('content', isDark ? 'black-translucent' : 'default');
-      }
-      
-      console.log('✅ [Web] 테마 색상 변경 완료');
     };
     
     // 페이지 로드 시 초기 테마 감지
