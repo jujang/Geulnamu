@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
+import '../../../providers/auth_provider.dart';
 import '../../../services/system/health_check_service.dart';
 
 /// 앱 정보 화면 로직 Mixin
 ///
 /// 주요 기능:
 /// - 버전 정보 자동 로드 (pubspec.yaml 기반)
-/// - 캐시 삭제 (SharedPreferences만, 로그인 토큰 유지)
+/// - 캐시 삭제 + 자동 로그아웃 (앱 완전 초기화)
 mixin AppInfoLogicMixin<T extends StatefulWidget> on State<T> {
   
   // 🎯 버전 정보 상태
@@ -59,7 +61,7 @@ mixin AppInfoLogicMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  /// 캐시 전체 삭제 처리
+  /// 캐시 전체 삭제 + 자동 로그아웃 처리
   Future<void> handleClearCache(BuildContext context) async {
     // 확인 다이얼로그 표시
     final confirmed = await _showClearCacheConfirmDialog(context);
@@ -69,38 +71,34 @@ mixin AppInfoLogicMixin<T extends StatefulWidget> on State<T> {
     }
     
     try {
-      // 🎯 SharedPreferences에서 특정 키만 제외하고 삭제
+      debugPrint('🗑️ [AppInfo] 캐시 전체 삭제 시작...');
+      
+      // 🎯 1단계: SharedPreferences 전체 삭제
       final prefs = await SharedPreferences.getInstance();
-      final keys = prefs.getKeys();
-      
-      // 🔐 로그인 관련 키는 유지
-      final authKeys = {
-        'accessToken',
-        'refreshToken',
-        'member_id',
-        'nickname',
-        'email',
-        'permission_level',
-      };
-      
-      // 캐시 키들만 삭제
-      for (final key in keys) {
-        if (!authKeys.contains(key)) {
-          await prefs.remove(key);
-          debugPrint('🗑️ [AppInfo] 캐시 삭제: $key');
-        }
-      }
+      await prefs.clear();
+      debugPrint('✅ [AppInfo] SharedPreferences 전체 삭제 완료');
       
       if (context.mounted) {
+        // 🎯 2단계: AuthProvider를 통한 로그아웃 처리
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        await authProvider.logout();
+        debugPrint('✅ [AppInfo] 로그아웃 완료');
+        
+        // 🎯 3단계: 로그인 화면으로 이동
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login',
+          (route) => false, // 모든 이전 화면 제거
+        );
+        
         // 성공 메시지
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('캐시가 성공적으로 삭제되었습니다.'),
-            duration: Duration(seconds: 2),
+            content: Text('캐시가 삭제되고 로그아웃되었습니다. 다시 로그인해주세요.'),
+            duration: Duration(seconds: 3),
           ),
         );
         
-        debugPrint('✅ [AppInfo] 캐시 삭제 완료 (로그인 정보 유지)');
+        debugPrint('🎉 [AppInfo] 캐시 삭제 및 로그아웃 완료');
       }
     } catch (e) {
       debugPrint('❌ [AppInfo] 캐시 삭제 실패: $e');
@@ -124,8 +122,8 @@ mixin AppInfoLogicMixin<T extends StatefulWidget> on State<T> {
       builder: (context) => AlertDialog(
         title: const Text('캐시 전체 삭제'),
         content: const Text(
-          '앱 설정 및 캐시 데이터가 삭제됩니다.\n'
-          '로그인 정보는 유지됩니다.\n\n'
+          '모든 앱 설정 및 캐시 데이터가 삭제됩니다.\n'
+          '로그아웃되며 다시 로그인해야 합니다.\n\n'
           '정말 삭제하시겠습니까?',
         ),
         actions: [
