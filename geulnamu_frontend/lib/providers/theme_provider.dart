@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart'; // 🎯 SystemChrome import 추가
 import '../core/services/settings_service.dart';
 import 'dart:js' as js show context;
 
@@ -29,12 +30,12 @@ class ThemeProvider extends ChangeNotifier {
       _themeMode = await _settingsService.getThemeMode();
       print('✅ [ThemeProvider] 테마 모드 초기화 완료: $_themeMode');
       
-      // 🎯 초기 로드 시도 웹 theme-color 설정
-      _updateWebThemeColor(_themeMode);
+      // 🎯 초기 로드 시 시스템 UI 설정
+      _updateSystemUI(_themeMode);
     } catch (e) {
       print('❌ [ThemeProvider] 테마 모드 초기화 실패: $e');
       _themeMode = ThemeMode.system; // 실패 시 기본값
-      _updateWebThemeColor(_themeMode);
+      _updateSystemUI(_themeMode);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -65,14 +66,82 @@ class ThemeProvider extends ChangeNotifier {
         print('❌ [ThemeProvider] 테마 모드 저장 실패 - UI는 이미 변경됨');
       }
       
-      // 🎯 웹 환경에서 theme-color 동적 변경
-      _updateWebThemeColor(newThemeMode);
+      // 🎯 웹 + 네이티브 시스템 UI 동적 변경
+      _updateSystemUI(newThemeMode);
     } catch (e) {
       print('❌ [ThemeProvider] 테마 모드 변경 오류: $e');
       // 에러 발생 시 이전 상태로 복원하지 않음 (UI 우선)
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+  
+  /// 🎯 시스템 UI 통합 업데이트 (웹 theme-color + 네이티브 SystemChrome)
+  void _updateSystemUI(ThemeMode mode) {
+    // 1️⃣ 네이티브 앱의 시스템 UI 업데이트
+    _updateNativeSystemUI(mode);
+    
+    // 2️⃣ 웹 환경의 theme-color 업데이트
+    if (kIsWeb) {
+      _updateWebThemeColor(mode);
+    }
+  }
+  
+  /// 🎯 네이티브 앱의 시스템 UI 업데이트 (상단바 + 하단 내비게이션 바)
+  void _updateNativeSystemUI(ThemeMode mode) {
+    try {
+      bool isDark;
+      Color statusBarColor;
+      Color navigationBarColor;
+      Brightness statusBarIconBrightness;
+      Brightness navigationBarIconBrightness;
+      
+      switch (mode) {
+        case ThemeMode.light:
+          isDark = false;
+          statusBarColor = const Color(0xFF7DD3C0); // 라이트 모드: 민트색 AppBar
+          navigationBarColor = Colors.white; // 라이트 모드: 흰색 하단바
+          statusBarIconBrightness = Brightness.light; // 아이콘 밝은색
+          navigationBarIconBrightness = Brightness.dark; // 아이콘 어두운색
+          break;
+        case ThemeMode.dark:
+          isDark = true;
+          statusBarColor = const Color(0xFF1E1E1E); // 다크 모드: 어두운 AppBar
+          navigationBarColor = const Color(0xFF0F0F0F); // 다크 모드: 거의 검정 하단바
+          statusBarIconBrightness = Brightness.light; // 아이콘 밝은색
+          navigationBarIconBrightness = Brightness.light; // 아이콘 밝은색
+          break;
+        case ThemeMode.system:
+          // 🎯 시스템 설정에 따라 자동 결정
+          // 현재 시스템 다크모드 여부를 정확히 알 수 없으므로
+          // 기본값으로 라이트 모드 설정 (화면이 빌드될 때 자동 업데이트됨)
+          isDark = false;
+          statusBarColor = const Color(0xFF7DD3C0);
+          navigationBarColor = Colors.white;
+          statusBarIconBrightness = Brightness.light;
+          navigationBarIconBrightness = Brightness.dark;
+          break;
+      }
+      
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: statusBarColor,
+        statusBarIconBrightness: statusBarIconBrightness,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        
+        // 🎯 핵심: 하단 내비게이션 바 색상 변경
+        systemNavigationBarColor: navigationBarColor,
+        systemNavigationBarIconBrightness: navigationBarIconBrightness,
+        systemNavigationBarDividerColor: isDark 
+            ? const Color(0xFF424242) 
+            : const Color(0xFFE0E0E0),
+      ));
+      
+      print('✅ [ThemeProvider] 네이티브 시스템 UI 업데이트 완료: ${isDark ? "다크" : "라이트"}');
+      print('   - 상단바: $statusBarColor');
+      print('   - 하단바: $navigationBarColor');
+    } catch (e) {
+      print('❌ [ThemeProvider] 네이티브 시스템 UI 업데이트 실패: $e');
     }
   }
   
