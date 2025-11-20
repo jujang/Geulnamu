@@ -53,11 +53,13 @@ class ThemeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 먼저 UI 업데이트
+      // 🎯 먼저 시스템 UI 변경 (동기식)
+      _updateSystemUI(newThemeMode);
+      
+      // 그 다음 테마 모드 변경 + 단일 알림
       _themeMode = newThemeMode;
-      notifyListeners();
 
-      // 설정 저장
+      // 설정 저장 (비동기)
       final success = await _settingsService.setThemeMode(newThemeMode);
       
       if (success) {
@@ -65,15 +67,12 @@ class ThemeProvider extends ChangeNotifier {
       } else {
         print('❌ [ThemeProvider] 테마 모드 저장 실패 - UI는 이미 변경됨');
       }
-      
-      // 🎯 웹 + 네이티브 시스템 UI 동적 변경
-      _updateSystemUI(newThemeMode);
     } catch (e) {
       print('❌ [ThemeProvider] 테마 모드 변경 오류: $e');
       // 에러 발생 시 이전 상태로 복원하지 않음 (UI 우선)
     } finally {
       _isLoading = false;
-      notifyListeners();
+      notifyListeners();  // 🎯 단일 알림 - 깜박임 방지
     }
   }
   

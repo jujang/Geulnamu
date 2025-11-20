@@ -176,13 +176,8 @@
           console.log('  ✓ iOS 상태바 스타일:', iosStyle);
         }
         
-        // 4️⃣ 🔥 body 배경색도 강제 변경 (더 확실한 반영)
-        document.body.style.backgroundColor = color;
-        console.log('  ✓ body 배경색:', color);
-        
-        // 5️⃣ 🔥 HTML 루트 배경색도 변경
-        document.documentElement.style.backgroundColor = color;
-        console.log('  ✓ html 배경색:', color);
+        // 🚫 body/html 배경색 설정 제거 - Flutter Scaffold가 관리
+        // (DOM 직접 조작 시 Flutter 렌더링과 충돌하여 깜박임 발생)
         
         console.log('✅ [Web] 테마 색상 변경 완료!');
       } catch (error) {
