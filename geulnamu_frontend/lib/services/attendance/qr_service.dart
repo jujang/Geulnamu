@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+// import 'package:mobile_scanner/mobile_scanner.dart'; // 웹 지원을 위해 제거
 import '../../models/attendance/qr_data.dart';
 import '../../core/config/app_config.dart';
 
@@ -139,6 +139,14 @@ class QrService {
     );
   }
 
+  /// QR 데이터 파싱 (parseScannedQr의 alias)
+  ///
+  /// [scannedData]: 스캔된 QR 코드 데이터
+  /// Returns: QrData 객체 또는 null (파싱 실패 시)
+  QrData? parseQrData(String scannedData) {
+    return parseScannedQr(scannedData);
+  }
+
   /// QR 스캔 결과 파싱
   ///
   /// [scannedData]: 스캔된 QR 코드 데이터
@@ -193,66 +201,7 @@ class QrService {
     return QrValidationResult(isValid: true, qrData: qrData);
   }
 
-  /// 모바일 스캐너 컨트롤러 생성
-  ///
-  /// Returns: MobileScannerController
-  MobileScannerController createScannerController() {
-    return MobileScannerController(
-      detectionSpeed: DetectionSpeed.noDuplicates,
-      facing: CameraFacing.back,
-      torchEnabled: false,
-    );
-  }
-
-  /// QR 코드 스캔 결과 처리 헬퍼
-  ///
-  /// [capture]: 스캔된 바코드 정보
-  /// Returns: 처리 결과
-  QrScanResult processScanResult(BarcodeCapture capture) {
-    try {
-      final List<Barcode> barcodes = capture.barcodes;
-
-      if (barcodes.isEmpty) {
-        return QrScanResult(success: false, errorMessage: 'QR 코드를 인식할 수 없습니다.');
-      }
-
-      final barcode = barcodes.first;
-      final scannedData = barcode.rawValue;
-
-      if (scannedData == null || scannedData.isEmpty) {
-        return QrScanResult(success: false, errorMessage: 'QR 코드 데이터가 비어있습니다.');
-      }
-
-      // QR 데이터 파싱
-      final qrData = parseScannedQr(scannedData);
-      if (qrData == null) {
-        return QrScanResult(
-          success: false,
-          errorMessage: '글나무 출석용 QR 코드가 아닙니다.',
-        );
-      }
-
-      // QR 데이터 유효성 검증
-      final validationResult = validateQrData(qrData);
-      if (!validationResult.isValid) {
-        return QrScanResult(
-          success: false,
-          errorMessage: validationResult.errorMessage!,
-        );
-      }
-
-      return QrScanResult(success: true, qrData: qrData);
-    } catch (e) {
-      if (AppConfig.debugMode) {
-        print('❌ [QR 스캔 처리] 오류: $e');
-      }
-
-      return QrScanResult(
-        success: false,
-        errorMessage: 'QR 코드 처리 중 오류가 발생했습니다.',
-      );
-    }
-  }
+  // 모바일 스캐너 관련 코드는 ai_barcode_scanner로 대체됨
 }
 
 /// QR 유효성 검증 결과
