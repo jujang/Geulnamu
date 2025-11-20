@@ -148,36 +148,42 @@
       console.log('🎨 [Web] 테마 색상 변경 요청:', color, '(다크모드:', isDark, ')');
       
       try {
-        // 1️⃣ theme-color 메타 태그 업데이트 (상단바 + 하단바)
-        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-        if (metaThemeColor) {
-          metaThemeColor.setAttribute('content', color);
-          console.log('  ✓ theme-color 업데이트:', color);
-        } else {
-          console.warn('  ⚠️ theme-color 메타 태그 없음');
-        }
-        
-        // 2️⃣ msapplication 메타 태그 업데이트 (Windows)
-        const metaMsApplication = document.querySelector('meta[name="msapplication-TileColor"]');
-        if (metaMsApplication) {
-          metaMsApplication.setAttribute('content', color);
-        }
-        
-        const metaNavButton = document.querySelector('meta[name="msapplication-navbutton-color"]');
-        if (metaNavButton) {
-          metaNavButton.setAttribute('content', color);
-        }
-        
-        // 3️⃣ iOS 상태바 스타일 변경
-        const metaAppleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-        if (metaAppleStatusBar) {
-          const iosStyle = isDark ? 'black-translucent' : 'default';
-          metaAppleStatusBar.setAttribute('content', iosStyle);
-          console.log('  ✓ iOS 상태바 스타일:', iosStyle);
-        }
-        
-        // 🚫 body/html 배경색 설정 제거 - Flutter Scaffold가 관리
-        // (DOM 직접 조작 시 Flutter 렌더링과 충돌하여 깜박임 발생)
+        // 🎯 requestAnimationFrame으로 깜박임 방지
+        requestAnimationFrame(() => {
+          // 1️⃣ theme-color 메타 태그 업데이트 (상단바 + 하단바)
+          const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+          if (metaThemeColor) {
+            metaThemeColor.setAttribute('content', color);
+            console.log('  ✓ theme-color 업데이트:', color);
+          } else {
+            console.warn('  ⚠️ theme-color 메타 태그 없음');
+          }
+          
+          // 2️⃣ msapplication 메타 태그 업데이트 (Windows)
+          const metaMsApplication = document.querySelector('meta[name="msapplication-TileColor"]');
+          if (metaMsApplication) {
+            metaMsApplication.setAttribute('content', color);
+          }
+          
+          const metaNavButton = document.querySelector('meta[name="msapplication-navbutton-color"]');
+          if (metaNavButton) {
+            metaNavButton.setAttribute('content', color);
+          }
+          
+          // 3️⃣ iOS 상태바 스타일 변경
+          const metaAppleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+          if (metaAppleStatusBar) {
+            const iosStyle = isDark ? 'black-translucent' : 'default';
+            metaAppleStatusBar.setAttribute('content', iosStyle);
+            console.log('  ✓ iOS 상태바 스타일:', iosStyle);
+          }
+          
+          // 4️⃣ 🎯 body 배경색 변경 (브라우저 네비게이션 바 반영용)
+          // requestAnimationFrame 내에서 변경하면 깜박임 방지
+          document.body.style.backgroundColor = color;
+          document.documentElement.style.backgroundColor = color;
+          console.log('  ✓ body/html 배경색:', color);
+        });
         
         console.log('✅ [Web] 테마 색상 변경 완료!');
       } catch (error) {

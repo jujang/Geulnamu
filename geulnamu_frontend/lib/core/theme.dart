@@ -38,7 +38,7 @@ class GeulnamuTheme {
       colorScheme: colorScheme,
 
       // 🎯 가장 중요: 모든 Scaffold의 배경색 자동 설정
-      scaffoldBackgroundColor: colorScheme.surface,
+      scaffoldBackgroundColor: GeulnamuColors.backgroundLight, // #FAFAFA - 카드(#FFFFFF)와 구분
 
       // 🎯 폰트 테마 - 색상 자동 연동
       textTheme: GoogleFonts.notoSansTextTheme().copyWith(
@@ -241,7 +241,7 @@ class GeulnamuTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: colorScheme.surface,
+      scaffoldBackgroundColor: GeulnamuColors.backgroundDark, // #0F0F0F - 카드(#1E1E1E)와 구분
 
       // 다크 테마용 폰트
       textTheme: GoogleFonts.notoSansTextTheme().copyWith(
