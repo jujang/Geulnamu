@@ -97,6 +97,10 @@ class GeulnamuTheme {
           statusBarColor: colorScheme.primary,
           statusBarIconBrightness: Brightness.light,
           statusBarBrightness: Brightness.dark,
+          // 🎯 하단 내비게이션 바 색상 (라이트 모드)
+          systemNavigationBarColor: Colors.white,
+          systemNavigationBarIconBrightness: Brightness.dark,
+          systemNavigationBarDividerColor: GeulnamuColors.dividerLight,
         ),
       ),
       
@@ -326,6 +330,10 @@ class GeulnamuTheme {
           statusBarColor: colorScheme.surface,
           statusBarIconBrightness: Brightness.light,
           statusBarBrightness: Brightness.dark,
+          // 🎯 하단 내비게이션 바 색상 (다크 모드)
+          systemNavigationBarColor: GeulnamuColors.backgroundDark,
+          systemNavigationBarIconBrightness: Brightness.light,
+          systemNavigationBarDividerColor: GeulnamuColors.dividerDark,
         ),
       ),
       
