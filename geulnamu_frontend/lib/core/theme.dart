@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'colors.dart';
 
@@ -82,7 +81,7 @@ class GeulnamuTheme {
         ),
       ),
       
-      // 🎯 AppBar 테마
+      // 🎯 AppBar 테마 (systemOverlayStyle 제거 - ThemeProvider에서 관리)
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
@@ -92,15 +91,6 @@ class GeulnamuTheme {
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: colorScheme.onPrimary,
-        ),
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: colorScheme.primary,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
-          // 🎯 하단 내비게이션 바 색상 (라이트 모드)
-          systemNavigationBarColor: Colors.white,
-          systemNavigationBarIconBrightness: Brightness.dark,
-          systemNavigationBarDividerColor: GeulnamuColors.dividerLight,
         ),
       ),
       
@@ -315,7 +305,7 @@ class GeulnamuTheme {
         ),
       ),
       
-      // 🎯 다크 모드 AppBar - surface 사용으로 더 자연스럽게
+      // 🎯 다크 모드 AppBar (systemOverlayStyle 제거 - ThemeProvider에서 관리)
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
@@ -325,15 +315,6 @@ class GeulnamuTheme {
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: colorScheme.onSurface,
-        ),
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: colorScheme.surface,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
-          // 🎯 하단 내비게이션 바 색상 (다크 모드)
-          systemNavigationBarColor: GeulnamuColors.backgroundDark,
-          systemNavigationBarIconBrightness: Brightness.light,
-          systemNavigationBarDividerColor: GeulnamuColors.dividerDark,
         ),
       ),
       
