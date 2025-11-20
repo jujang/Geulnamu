@@ -66,6 +66,7 @@ class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
 
   /// 테마 모드 변경
   Future<void> setThemeMode(ThemeMode newThemeMode) async {
