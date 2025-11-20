@@ -303,7 +303,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> with AppInfoLogicMixin {
                 ),
               ),
               subtitle: Text(
-                '앱 설정 및 캐시 데이터 삭제 (로그인 유지)',
+                '앱 완전 초기화 (로그아웃 후 재로그인 필요)',
                 style: context.textStyles.bodySmall?.copyWith(
                   color: context.colors.onSurfaceVariant,
                 ),

@@ -47,6 +47,9 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> 
     with ProfileAdminLogicMixin, RouteAware { // 🎯 RouteAware 추가
   
+  // 🎯 편집 버튼 GlobalKey
+  final GlobalKey _editButtonKey = GlobalKey();
+  
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -156,6 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     if (!isLoading && profile != null && isSelfMode && !isEditMode) {
       actions.add(
         IconButton(
+          key: _editButtonKey, // 🎯 툴팁 가이드를 위한 GlobalKey
           icon: const Icon(Icons.edit),
           onPressed: toggleEditMode,
           tooltip: '편집',
@@ -182,6 +186,12 @@ class _ProfileScreenState extends State<ProfileScreen>
     final homeService = HomeService();
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     homeService.handleLogout(context, authProvider);
+  }
+
+  /// 편집 버튼의 GlobalKey 반환 (툴팁 가이드용)
+  @override
+  GlobalKey? getEditButtonKey() {
+    return _editButtonKey;
   }
 
   /// 로고 탭 핸들러 (모드에 따라 다른 이동)

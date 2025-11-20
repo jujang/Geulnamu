@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/profile/profile_service.dart';
 import '../../../services/member/member_service.dart'; // 🎯 MemberService 추가
@@ -28,7 +29,7 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
   bool _isEditMode = false;
   bool _isLoading = false;
   bool _isSaving = false;
-  
+
   // 🎯 관리자 모드 전용 상태
   bool _isProcessingAdmin = false; // 관리자 작업 진행 중
 
@@ -42,6 +43,10 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
 
   // 🎯 유효성 검증 에러
   Map<String, String?> _errors = {};
+
+  // 🎯 툴팁 가이드 관련
+  OverlayEntry? _tooltipOverlay;
+  static const String _tooltipShownKey = 'profile_edit_tooltip_shown';
 
   // Getters
   ProfileModel? get profile => _profile;
@@ -66,16 +71,16 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(); // 🎯 Controller 초기화
-    
+
     // 🎯 MemberService는 Singleton이므로 이미 초기화됨
-    
+
     // 🛡️ 관리자 모드 권한 검증
     if (isAdminMode) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _checkAdminPermission();
       });
     } else {
-      _loadProfile(); // 🎯 본인 모드는 바로 로드
+      _loadProfile(); // 🎯 본인 모드는 바로 로드 (툴팁은 로드 완료 후 표시)
     }
   }
 
@@ -84,20 +89,16 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
     if (!mounted) return;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     // 권한 검증: 임원진 이상 (STAFF, ADMIN, VICE_LEADER, LEADER)
     if (!authProvider.isStaffLevel) {
       if (AppConfig.debugMode) {
         print('❌ [ProfileAdminLogicMixin] 관리자 모드 접근 권한 없음 - 홈으로 리다이렉트');
       }
-      
+
       // 권한 없음 - 홈으로 리다이렉트
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/home',
-        (route) => false,
-      );
-      
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+
       // 에러 메시지 표시
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -113,26 +114,22 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
           duration: const Duration(seconds: 4),
         ),
       );
-      
+
       return;
     }
-    
+
     // 권한 있음 - 정상 로드 진행
     if (AppConfig.debugMode) {
       print('✅ [ProfileAdminLogicMixin] 관리자 모드 접근 권한 확인 - 데이터 로드 시작');
     }
-    
+
     if (targetMemberId != null) {
       await _loadMemberProfile(targetMemberId!);
     } else {
       // targetMemberId가 null이면 잘못된 접근
       if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (route) => false,
-        );
-        
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('잘못된 접근입니다.'),
@@ -145,7 +142,6 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
 
   /// 화면에 다시 들어올 때 호출되는 메서드
   Future<void> refreshProfileData() async {
-
     if (isAdminMode && targetMemberId != null) {
       await _loadMemberProfile(targetMemberId!);
     } else {
@@ -155,6 +151,8 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
 
   @override
   void dispose() {
+    _tooltipOverlay?.remove(); // 🎯 툴팁 오버레이 제거
+    _tooltipOverlay = null;
     _nameController.dispose(); // 🎯 Controller 리소스 정리
     super.dispose();
   }
@@ -175,12 +173,11 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
         throw Exception('로그인이 필요합니다.');
       }
 
-      final accessToken = await authProvider.accessToken; // accessToken은 async getter
+      final accessToken =
+          await authProvider.accessToken; // accessToken은 async getter
       if (accessToken == null || accessToken.isEmpty) {
         throw Exception('인증 토큰이 없습니다.');
       }
-
-
 
       final profile = await _profileService.getMyProfile(accessToken);
 
@@ -191,15 +188,16 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
           _initializeEditingData(profile);
         });
 
-
+        // 🎯 본인 모드이고 편집 모드가 아닐 때만 툴팁 표시
+        if (isSelfMode && !isEditMode) {
+          _checkAndShowTooltip();
+        }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
-
-
 
         // 에러 다이얼로그 표시
         _showErrorDialog('프로필 정보를 불러올 수 없습니다', e.toString());
@@ -243,8 +241,6 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
         _errors.clear();
       }
     });
-
-
   }
 
   /// 이름 변경 핸들러
@@ -310,7 +306,7 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
 
     // 유효성 검증
     if (!_validateForm()) {
-    return;
+      return;
     }
 
     setState(() {
@@ -324,7 +320,8 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
         throw Exception('로그인이 필요합니다.');
       }
 
-      final accessToken = await authProvider.accessToken; // accessToken은 async getter
+      final accessToken =
+          await authProvider.accessToken; // accessToken은 async getter
       if (accessToken == null || accessToken.isEmpty) {
         throw Exception('인증 토큰이 없습니다.');
       }
@@ -336,8 +333,6 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
         birthDate: app_date_utils.DateUtils.formatApiDate(_editingBirthDate!),
       );
 
-
-
       // API 호출
       final success = await _profileService.updateMyProfile(
         accessToken,
@@ -345,8 +340,6 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
       );
 
       if (success && mounted) {
-
-
         // 성공 - 프로필 다시 로드하여 최신 데이터 반영
         await _loadProfile();
 
@@ -361,10 +354,6 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
           _isSaving = false;
         });
 
-
-
-
-
         // 성공 메시지 표시
         _showSuccessSnackBar('프로필이 성공적으로 저장되었습니다.');
       }
@@ -373,8 +362,6 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
         setState(() {
           _isSaving = false;
         });
-
-
 
         // 에러 다이얼로그 표시
         _showErrorDialog('프로필 저장 실패', e.toString());
@@ -395,8 +382,6 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
         _initializeEditingData(_profile!);
       }
     });
-
-
   }
 
   /// 프로필 새로고침
@@ -466,8 +451,6 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
     });
 
     try {
-
-
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
 
@@ -475,7 +458,10 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
         throw Exception('인증 토큰이 없습니다. 다시 로그인해주세요.');
       }
 
-      final profile = await _profileService.getMemberProfile(accessToken, memberId);
+      final profile = await _profileService.getMemberProfile(
+        accessToken,
+        memberId,
+      );
 
       if (mounted) {
         setState(() {
@@ -486,8 +472,6 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
         });
 
         _initializeEditingData(profile);
-
-
       }
     } catch (e) {
       if (mounted) {
@@ -495,8 +479,6 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
           _profile = null;
           _isLoading = false;
         });
-
-
       }
     }
   }
@@ -505,7 +487,10 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
   Future<void> handleNameEdit(String currentName) async {
     if (!isAdminMode || targetMemberId == null) return;
 
-    final newName = await ProfileWidgets.showNameEditDialog(context, currentName);
+    final newName = await ProfileWidgets.showNameEditDialog(
+      context,
+      currentName,
+    );
     if (newName == null || newName == currentName) return;
 
     await _updateMemberName(targetMemberId!, newName);
@@ -515,7 +500,10 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
   Future<void> handleRoleEdit(String currentRole) async {
     if (!isAdminMode || targetMemberId == null) return;
 
-    final newRole = await ProfileWidgets.showRoleEditDialog(context, currentRole);
+    final newRole = await ProfileWidgets.showRoleEditDialog(
+      context,
+      currentRole,
+    );
     if (newRole == null || newRole == currentRole) return;
 
     await _updateMemberRole(targetMemberId!, newRole);
@@ -549,19 +537,19 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
     });
 
     try {
-
-
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
-      
-      await _memberService.updateMemberName(memberId, newName, accessToken: accessToken);
+
+      await _memberService.updateMemberName(
+        memberId,
+        newName,
+        accessToken: accessToken,
+      );
 
       if (mounted) {
         // 성공 후 프로필 재로드
         await _loadMemberProfile(memberId);
         _showSuccessSnackBar('이름이 성공적으로 변경되었습니다.');
-
-
       }
     } catch (e) {
       _showErrorDialog('이름 변경 실패', e.toString());
@@ -583,19 +571,19 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
     });
 
     try {
-
-
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
-      
-      await _memberService.updateMemberRole(memberId, newRole, accessToken: accessToken);
+
+      await _memberService.updateMemberRole(
+        memberId,
+        newRole,
+        accessToken: accessToken,
+      );
 
       if (mounted) {
         // 성공 후 프로필 재로드
         await _loadMemberProfile(memberId);
         _showSuccessSnackBar('권한이 성공적으로 변경되었습니다.');
-
-
       }
     } catch (e) {
       _showErrorDialog('권한 변경 실패', e.toString());
@@ -617,19 +605,15 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
     });
 
     try {
-
-
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
-      
+
       await _memberService.activateMember(memberId, accessToken: accessToken);
 
       if (mounted) {
         // 성공 후 프로필 재로드
         await _loadMemberProfile(memberId);
         _showSuccessSnackBar('계정이 성공적으로 활성화되었습니다.');
-
-
       }
     } catch (e) {
       _showErrorDialog('활성화 실패', e.toString());
@@ -651,19 +635,15 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
     });
 
     try {
-
-
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final accessToken = await authProvider.accessToken;
-      
+
       await _memberService.deactivateMember(memberId, accessToken: accessToken);
 
       if (mounted) {
         // 성공 후 프로필 재로드
         await _loadMemberProfile(memberId);
         _showSuccessSnackBar('계정이 성공적으로 비활성화되었습니다.');
-
-
       }
     } catch (e) {
       _showErrorDialog('비활성화 실패', e.toString());
@@ -675,4 +655,171 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
       }
     }
   }
+
+  // ==================== 🎯 툴팁 가이드 시스템 ====================
+
+  /// 툴팁 가이드를 보여줄지 체크하고 표시
+  Future<void> _checkAndShowTooltip() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasShown = prefs.getBool(_tooltipShownKey) ?? false;
+
+      if (!hasShown && mounted) {
+        // 화면이 완전히 렌더링된 후 툴팁 표시
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && !_isEditMode) {
+            _showEditButtonTooltip();
+          }
+        });
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [ProfileAdminLogicMixin] 툴팁 체크 오류: $e');
+      }
+    }
+  }
+
+  /// 편집 버튼 위에 툴팁 표시
+  void _showEditButtonTooltip() {
+    if (!mounted) return;
+
+    // 편집 버튼의 GlobalKey를 통해 위치 찾기
+    final editButtonKey = getEditButtonKey();
+    if (editButtonKey == null || editButtonKey.currentContext == null) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [ProfileAdminLogicMixin] 편집 버튼을 찾을 수 없어 툴팁 표시 건너뜀');
+      }
+      return;
+    }
+
+    final renderBox =
+        editButtonKey.currentContext!.findRenderObject() as RenderBox;
+    final buttonPosition = renderBox.localToGlobal(Offset.zero);
+    final buttonSize = renderBox.size;
+
+    // 오버레이 생성
+    _tooltipOverlay = OverlayEntry(
+      builder: (context) => _buildTooltipOverlay(buttonPosition, buttonSize),
+    );
+
+    // 오버레이 삽입
+    Overlay.of(context).insert(_tooltipOverlay!);
+
+    if (AppConfig.debugMode) {
+      print('💡 [ProfileAdminLogicMixin] 편집 버튼 툴팁 표시됨');
+    }
+  }
+
+  /// 툴팁 오버레이 위젯 빌드
+  Widget _buildTooltipOverlay(Offset buttonPosition, Size buttonSize) {
+    return Material(
+      color: Colors.black54, // 반투명 배경
+      child: GestureDetector(
+        onTap: _dismissTooltip, // 배경 탭 시 닫기
+        child: Stack(
+          children: [
+            // 메인 컨텐츠 (툴팁 박스)
+            Positioned(
+              top: buttonPosition.dy + buttonSize.height + 8, // 버튼 아래 8px
+              right: 8, // 화면 우측에서 8px
+              child: GestureDetector(
+                onTap: () {}, // 툴팁 내부 탭 시 전파 방지
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 280),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 툴팁 메시지
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '펜 아이콘을 눌러 프로필을 수정할 수 있어요!',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // 확인 버튼
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: _dismissTooltip,
+                          style: TextButton.styleFrom(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onPrimary,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 8,
+                            ),
+                          ),
+                          child: const Text('확인'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 툴팁 닫기 및 다시 보지 않기 설정
+  Future<void> _dismissTooltip() async {
+    if (!mounted) return;
+
+    // 오버레이 제거
+    _tooltipOverlay?.remove();
+    _tooltipOverlay = null;
+
+    // SharedPreferences에 저장 (다시 보지 않음)
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_tooltipShownKey, true);
+
+      if (AppConfig.debugMode) {
+        print('✅ [ProfileAdminLogicMixin] 툴팁 가이드 완료 - 다시 보지 않음 설정');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [ProfileAdminLogicMixin] 툴팁 설정 저장 오류: $e');
+      }
+    }
+  }
+
+  /// 편집 버튼의 GlobalKey를 반환 (ProfileScreen에서 구현)
+  GlobalKey? getEditButtonKey();
 }

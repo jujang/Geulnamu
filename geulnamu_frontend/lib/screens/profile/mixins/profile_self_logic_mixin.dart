@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/profile/profile_service.dart';
 import '../../../models/profile/profile_model.dart';
@@ -34,6 +35,10 @@ mixin ProfileSelfLogicMixin<T extends StatefulWidget> on State<T> {
   // 🎯 유효성 검증 에러
   Map<String, String?> _errors = {};
 
+  // 🎯 툴팁 가이드 관련
+  OverlayEntry? _tooltipOverlay;
+  static const String _tooltipShownKey = 'profile_edit_tooltip_shown';
+
   // Getters
   ProfileModel? get profile => _profile;
   bool get isEditMode => _isEditMode;
@@ -51,6 +56,7 @@ mixin ProfileSelfLogicMixin<T extends StatefulWidget> on State<T> {
     super.initState();
     _nameController = TextEditingController(); // 🎯 Controller 초기화
     _loadProfile(); // 🎯 초기 데이터 로드
+    _checkAndShowTooltip(); // 🎯 툴팁 가이드 체크
   }
 
   /// 🎯 화면에 다시 들어올 때 호출되는 메서드
@@ -71,6 +77,8 @@ mixin ProfileSelfLogicMixin<T extends StatefulWidget> on State<T> {
 
   @override
   void dispose() {
+    _tooltipOverlay?.remove(); // 🎯 툴팁 오버레이 제거
+    _tooltipOverlay = null;
     _nameController.dispose(); // 🎯 Controller 리소스 정리
     super.dispose();
   }
@@ -386,4 +394,171 @@ mixin ProfileSelfLogicMixin<T extends StatefulWidget> on State<T> {
     authProvider.logout();
     Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
   }
+
+  // ==================== 🎯 툴팁 가이드 시스템 ====================
+
+  /// 툴팁 가이드를 보여줄지 체크하고 표시
+  Future<void> _checkAndShowTooltip() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasShown = prefs.getBool(_tooltipShownKey) ?? false;
+
+      if (!hasShown && mounted) {
+        // 화면이 완전히 렌더링된 후 툴팁 표시
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && !_isEditMode) {
+            _showEditButtonTooltip();
+          }
+        });
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [ProfileSelfLogicMixin] 툴팁 체크 오류: $e');
+      }
+    }
+  }
+
+  /// 편집 버튼 위에 툴팁 표시
+  void _showEditButtonTooltip() {
+    if (!mounted) return;
+
+    // 편집 버튼의 GlobalKey를 통해 위치 찾기
+    final editButtonKey = getEditButtonKey();
+    if (editButtonKey == null || editButtonKey.currentContext == null) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [ProfileSelfLogicMixin] 편집 버튼을 찾을 수 없어 툴팁 표시 건너뜀');
+      }
+      return;
+    }
+
+    final renderBox =
+        editButtonKey.currentContext!.findRenderObject() as RenderBox;
+    final buttonPosition = renderBox.localToGlobal(Offset.zero);
+    final buttonSize = renderBox.size;
+
+    // 오버레이 생성
+    _tooltipOverlay = OverlayEntry(
+      builder: (context) => _buildTooltipOverlay(buttonPosition, buttonSize),
+    );
+
+    // 오버레이 삽입
+    Overlay.of(context).insert(_tooltipOverlay!);
+
+    if (AppConfig.debugMode) {
+      print('💡 [ProfileSelfLogicMixin] 편집 버튼 툴팁 표시됨');
+    }
+  }
+
+  /// 툴팁 오버레이 위젯 빌드
+  Widget _buildTooltipOverlay(Offset buttonPosition, Size buttonSize) {
+    return Material(
+      color: Colors.black54, // 반투명 배경
+      child: GestureDetector(
+        onTap: _dismissTooltip, // 배경 탭 시 닫기
+        child: Stack(
+          children: [
+            // 메인 컨텐츠 (툴팁 박스)
+            Positioned(
+              top: buttonPosition.dy + buttonSize.height + 8, // 버튼 아래 8px
+              right: 8, // 화면 우측에서 8px
+              child: GestureDetector(
+                onTap: () {}, // 툴팁 내부 탭 시 전파 방지
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 280),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 툴팁 메시지
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '펜 아이콘을 눌러 프로필을 수정할 수 있어요!',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // 확인 버튼
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: _dismissTooltip,
+                          style: TextButton.styleFrom(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onPrimary,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 8,
+                            ),
+                          ),
+                          child: const Text('확인'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 툴팁 닫기 및 다시 보지 않기 설정
+  Future<void> _dismissTooltip() async {
+    if (!mounted) return;
+
+    // 오버레이 제거
+    _tooltipOverlay?.remove();
+    _tooltipOverlay = null;
+
+    // SharedPreferences에 저장 (다시 보지 않음)
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_tooltipShownKey, true);
+
+      if (AppConfig.debugMode) {
+        print('✅ [ProfileSelfLogicMixin] 툴팁 가이드 완료 - 다시 보지 않음 설정');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [ProfileSelfLogicMixin] 툴팁 설정 저장 오류: $e');
+      }
+    }
+  }
+
+  /// 편집 버튼의 GlobalKey를 반환 (ProfileScreen에서 구현)
+  GlobalKey? getEditButtonKey();
 }
