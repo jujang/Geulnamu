@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:ai_barcode_scanner/ai_barcode_scanner.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/attendance/qr_service.dart';
 import '../../services/attendance/attendance_service.dart';
@@ -12,7 +12,7 @@ import '../../models/attendance/qr_data.dart';
 /// 일반 사용자용 QR 코드 스캔 화면
 ///
 /// 기능:
-/// - QR 코드 스캔
+/// - QR 코드 스캔 (웹/모바일 모두 지원)
 /// - 출석 처리
 /// - 스캔 결과 피드백
 class MeetingQrScannerScreen extends StatefulWidget {
@@ -26,23 +26,11 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
   final QrService _qrService = QrService();
   final AttendanceService _attendanceService = AttendanceService();
   final HomeService _homeService = HomeService();
-  late MobileScannerController _scannerController;
 
   bool _isProcessing = false;
   String? _statusMessage;
   bool _isSuccess = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _scannerController = _qrService.createScannerController();
-  }
-
-  @override
-  void dispose() {
-    _scannerController.dispose();
-    super.dispose();
-  }
+  bool _scannerActive = true; // 스캐너 활성 상태
 
   /// 테스트용 QR 스캔 시뮬레이션 (개발 모드에서만 사용)
   void _simulateQrScan() async {
@@ -54,6 +42,7 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
     setState(() {
       _isProcessing = true;
       _statusMessage = '테스트 출석 처리 중...';
+      _scannerActive = false; // 스캐너 비활성화
     });
 
     try {
@@ -70,6 +59,7 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
           _statusMessage = '로그인이 필요합니다.';
           _isSuccess = false;
           _isProcessing = false;
+          _scannerActive = true;
         });
         return;
       }
@@ -118,36 +108,50 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
         _statusMessage = errorMessage;
         _isSuccess = false;
         _isProcessing = false;
+        _scannerActive = true;
       });
     }
   }
 
   /// QR 스캔 결과 처리
   void _handleScanResult(BarcodeCapture capture) async {
-    if (_isProcessing) return;
+    if (_isProcessing || !_scannerActive) return;
+
+    // QR 데이터 추출
+    final String? scannedValue = capture.barcodes.firstOrNull?.rawValue;
+    
+    if (scannedValue == null || scannedValue.isEmpty) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [QR 스캔] 빈 데이터');
+      }
+      return;
+    }
+
+    if (AppConfig.debugMode) {
+      print('📱 [QR 스캔] 원본 데이터: $scannedValue');
+    }
 
     setState(() {
       _isProcessing = true;
       _statusMessage = '출석 처리 중...';
+      _scannerActive = false; // 스캐너 비활성화
     });
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-      // QR 스캔 결과 파싱
-      final scanResult = _qrService.processScanResult(capture);
+      // QR 데이터 파싱
+      final QrData? qrData = _qrService.parseQrData(scannedValue);
 
-      if (!scanResult.success) {
+      if (qrData == null) {
         setState(() {
-          _statusMessage = scanResult.errorMessage;
+          _statusMessage = '올바르지 않은 QR 코드입니다.';
           _isSuccess = false;
           _isProcessing = false;
+          _scannerActive = true;
         });
         return;
       }
-
-      // QR 데이터 추출
-      final QrData qrData = scanResult.qrData!;
 
       if (AppConfig.debugMode) {
         print('✅ [QR 스캔] 성공: 모임 ID ${qrData.meetingId}');
@@ -160,6 +164,7 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
           _statusMessage = '로그인이 필요합니다.';
           _isSuccess = false;
           _isProcessing = false;
+          _scannerActive = true;
         });
         return;
       }
@@ -192,22 +197,18 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
       }
 
       String errorMessage = '출석 처리 중 오류가 발생했습니다.';
-      QrData? qrData; // 변수 선언을 try 블록 바깥으로 이동
+      int? meetingId;
 
       // QR 데이터 다시 추출 (에러 핸들링용)
-      final scanResult = _qrService.processScanResult(capture);
-      if (scanResult.success) {
-        qrData = scanResult.qrData;
+      final qrData = _qrService.parseQrData(scannedValue);
+      if (qrData != null) {
+        meetingId = qrData.meetingId;
       }
 
       // 에러 메시지 구체화
       if (e.toString().contains('이미 출석') || e.toString().contains('중복으로 출석')) {
         // 중복 출석 시 상세 다이얼로그 표시
-        if (qrData != null) {
-          _showDuplicateAttendanceDialog(context, qrData.meetingId, e.toString());
-        } else {
-          _showDuplicateAttendanceDialog(context, 0, e.toString());
-        }
+        _showDuplicateAttendanceDialog(context, meetingId ?? 0, e.toString());
         return; // 다이얼로그를 표시하기 때문에 setState는 하지 않음
       } else if (e.toString().contains('권한')) {
         errorMessage = '출석 권한이 없습니다.';
@@ -219,6 +220,7 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
         _statusMessage = errorMessage;
         _isSuccess = false;
         _isProcessing = false;
+        _scannerActive = true;
       });
     }
   }
@@ -234,6 +236,7 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
       _isProcessing = false;
       _statusMessage = null;
       _isSuccess = false;
+      _scannerActive = false; // 다이얼로그 표시 중에는 스캐너 비활성화
     });
 
     showDialog(
@@ -409,6 +412,7 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
       _isProcessing = false;
       _statusMessage = null;
       _isSuccess = false;
+      _scannerActive = true; // 스캐너 재활성화
     });
   }
 
@@ -435,26 +439,18 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
   Widget _buildScannerScreen() {
     return Stack(
       children: [
-        // 카메라 프리뷰
-        MobileScanner(
-          controller: _scannerController,
-          onDetect: _handleScanResult,
-        ),
-
-        // 오버레이
-        Container(
-          color: Colors.black.withOpacity(0.5),
-          child: Center(
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 2),
-                borderRadius: BorderRadius.circular(12),
-              ),
+        // QR 스캐너
+        if (_scannerActive)
+          AiBarcodeScanner(
+            onDetect: _handleScanResult,
+            controller: MobileScannerController(
+              detectionSpeed: DetectionSpeed.noDuplicates,
             ),
+            validator: (value) {
+              // 유효성 검증 (선택적)
+              return value.barcodes.isNotEmpty;
+            },
           ),
-        ),
 
         // 하단 안내 텍스트 + 테스트 버튼
         Positioned(
@@ -471,7 +467,7 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'QR 코드를 네모 안에 맞춰주세요',
+                  'QR 코드를 카메라에 비춰주세요',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
