@@ -132,13 +132,8 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
               color: Theme.of(context).colorScheme.surface,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            // 🚀 안전한 패딩 계산 (오버플로우 방지)
-            padding: EdgeInsets.only(
-              top: 20,
-              left: 20,
-              right: 20,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-            ),
+            // 🔧 고정 패딩 사용 (BottomSheet가 키보드를 자동으로 피함)
+            padding: const EdgeInsets.all(20),
             // 🚀 최대 높이 제한으로 오버플로우 방지
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.8,
