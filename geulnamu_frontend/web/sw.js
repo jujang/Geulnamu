@@ -470,7 +470,7 @@ setInterval(async () => {
 // ===========================================
 // 초기화 완료
 // ===========================================
-console.log('✅ 글나무 서비스 워커 v' + CACHE_VERSION + ' 로드 완료');
+console.log('✅ 글나무 서비스 워커 ' + CACHE_VERSION + ' 로드 완료');
 console.log('📦 캐시 전략: 정적 리소스 우선, API 네트워크 우선');
 console.log('💾 최대 캐시: 정적 50MB, API 10MB');
 console.log('⏰ API 캐시 만료: 1시간');
