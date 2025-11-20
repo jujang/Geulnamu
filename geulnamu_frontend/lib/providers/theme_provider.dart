@@ -79,12 +79,13 @@ class ThemeProvider extends ChangeNotifier {
   
   /// 🎯 시스템 UI 통합 업데이트 (웹 theme-color + 네이티브 SystemChrome)
   void _updateSystemUI(ThemeMode mode) {
-    // 1️⃣ 네이티브 앱의 시스템 UI 업데이트
-    _updateNativeSystemUI(mode);
-    
-    // 2️⃣ 웹 환경의 theme-color 업데이트
+    // 🎯 웹/네이티브 완전 분리 - PWA 깜박임 방지
     if (kIsWeb) {
+      // 웹 환경: theme-color만 업데이트
       _updateWebThemeColor(mode);
+    } else {
+      // 네이티브 환경: SystemChrome만 업데이트
+      _updateNativeSystemUI(mode);
     }
   }
   
