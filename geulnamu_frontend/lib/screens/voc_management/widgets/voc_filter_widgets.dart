@@ -54,10 +54,15 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           // 헤더
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -286,9 +291,11 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             ),
           ),
 
-          // 하단 여백
-          SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-        ],
+              // 하단 여백
+              SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+            ],
+          ),
+        ),
       ),
     );
   }
