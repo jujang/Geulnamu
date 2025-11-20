@@ -25,6 +25,7 @@ const ESSENTIAL_RESOURCES = [
 const CACHE_BLACKLIST = [
   /\/api\/login\//,        // 로그인 API
   /\/api\/logout/,         // 로그아웃 API
+  /\/auth\/callback/,      // OAuth 콜백 (Vercel rewrites 필요)
   /chrome-extension/,      // 크롬 확장 프로그램
   /\.hot-update\./,        // 핫 리로드 파일
 ];
@@ -194,6 +195,29 @@ async function handleApiRequest(request) {
 // ===========================================
 async function handleStaticRequest(request) {
   try {
+    // 🌐 HTML 요청 (SPA 라우팅)
+    if (request.destination === 'document') {
+      // HTML 요청은 항상 네트워크에서 가져와서 Vercel rewrites 가 작동하도록 함
+      try {
+        const networkResponse = await fetch(request);
+        if (networkResponse.ok) {
+          await cacheStaticResource(request, networkResponse.clone());
+          cacheStats.misses++;
+          return networkResponse;
+        }
+      } catch (networkError) {
+        // 네트워크 실패 시 캐시된 index.html 반환 (오프라인 지원)
+        console.log('⚠️ 네트워크 실패, 캐시된 index.html 반환');
+        const cachedIndex = await caches.match('/');
+        if (cachedIndex) {
+          cacheStats.hits++;
+          return cachedIndex;
+        }
+        throw networkError;
+      }
+    }
+    
+    // 📷 정적 리소스 (이미지, CSS, JS 등) - 캐시 우선
     // 1️⃣ 캐시에서 먼저 찾기
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
@@ -204,7 +228,7 @@ async function handleStaticRequest(request) {
     // 2️⃣ 캐시에 없으면 네트워크에서 가져오기
     const response = await fetch(request);
     
-    // 3️⃣ 성공 시 캐시에 저장 (용량 체크 후)
+    // 3️⃣ 성공 시 캐시에 저장
     if (response.ok) {
       await cacheStaticResource(request, response.clone());
     }
@@ -213,12 +237,6 @@ async function handleStaticRequest(request) {
     return response;
   } catch (error) {
     console.log('❌ 리소스 로드 실패:', request.url);
-    
-    // 4️⃣ HTML 요청 실패 시 메인 페이지 반환 (SPA 라우팅)
-    if (request.destination === 'document') {
-      const cachedIndex = await caches.match('/');
-      if (cachedIndex) return cachedIndex;
-    }
     
     return new Response('리소스를 찾을 수 없습니다', {
       status: 404,
