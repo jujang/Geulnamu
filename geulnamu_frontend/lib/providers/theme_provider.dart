@@ -28,7 +28,6 @@ class ThemeProvider extends ChangeNotifier {
 
     try {
       _themeMode = await _settingsService.getThemeMode();
-      print('✅ [ThemeProvider] 테마 모드 초기화 완료: $_themeMode');
       
       // 🎯 초기 로드 시 시스템 UI 설정
       _updateSystemUI(_themeMode);
@@ -45,7 +44,6 @@ class ThemeProvider extends ChangeNotifier {
   /// 테마 모드 변경
   Future<void> setThemeMode(ThemeMode newThemeMode) async {
     if (_themeMode == newThemeMode) {
-      print('🔄 [ThemeProvider] 동일한 테마 모드 - 변경 없음: $newThemeMode');
       return;
     }
 
@@ -62,9 +60,7 @@ class ThemeProvider extends ChangeNotifier {
       // 설정 저장 (비동기)
       final success = await _settingsService.setThemeMode(newThemeMode);
       
-      if (success) {
-        print('✅ [ThemeProvider] 테마 모드 변경 성공: $newThemeMode');
-      } else {
+      if (!success) {
         print('❌ [ThemeProvider] 테마 모드 저장 실패 - UI는 이미 변경됨');
       }
     } catch (e) {
@@ -136,10 +132,6 @@ class ThemeProvider extends ChangeNotifier {
             ? const Color(0xFF424242) 
             : const Color(0xFFE0E0E0),
       ));
-      
-      print('✅ [ThemeProvider] 네이티브 시스템 UI 업데이트 완료: ${isDark ? "다크" : "라이트"}');
-      print('   - 상단바: $statusBarColor');
-      print('   - 하단바: $navigationBarColor');
     } catch (e) {
       print('❌ [ThemeProvider] 네이티브 시스템 UI 업데이트 실패: $e');
     }
@@ -148,7 +140,6 @@ class ThemeProvider extends ChangeNotifier {
   /// 🎯 웹 환경에서 theme-color 동적 변경
   void _updateWebThemeColor(ThemeMode mode) {
     if (!kIsWeb) {
-      print('📱 [ThemeProvider] 네이티브 앱 - theme-color 변경 불필요');
       return;
     }
     
@@ -174,21 +165,15 @@ class ThemeProvider extends ChangeNotifier {
             );
             isDark = prefersDark == true;
             color = isDark ? '#0F0F0F' : '#FAFAFA'; // 🎯 시스템 테마에 맞는 배경색
-            print('🌓 [ThemeProvider] 시스템 테마 감지: ${isDark ? "다크" : "라이트"}');
           } catch (e) {
-            print('⚠️ [ThemeProvider] 시스템 테마 감지 실패: $e - 기본값(라이트) 사용');
             color = '#FAFAFA';
             isDark = false;
           }
           break;
       }
       
-      print('🎨 [ThemeProvider] 웹 theme-color 변경 시도: $color (다크: $isDark)');
-      
       // JavaScript 함수 호출
       js.context.callMethod('updateThemeColor', [color, isDark]);
-      
-      print('✅ [ThemeProvider] 웹 theme-color 변경 완료');
     } catch (e) {
       print('❌ [ThemeProvider] 웹 theme-color 변경 실패: $e');
     }
