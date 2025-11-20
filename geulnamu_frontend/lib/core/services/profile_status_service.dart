@@ -86,8 +86,6 @@ class ProfileStatusService {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
             'Expires': '0',
-            // ℹ️ X-Request-Time 헤더는 CORS 문제로 제거
-            // 캐시 버스팅은 쿼리 파라미터 '_t'로 충분히 처리됨
           },
         ),
         // 🚫 쿼리 파라미터로도 캐싱 방지
