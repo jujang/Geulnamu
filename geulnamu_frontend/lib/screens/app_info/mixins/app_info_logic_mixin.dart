@@ -84,21 +84,21 @@ mixin AppInfoLogicMixin<T extends StatefulWidget> on State<T> {
         await authProvider.logout();
         debugPrint('✅ [AppInfo] 로그아웃 완료');
         
-        // 🎯 3단계: 로그인 화면으로 이동
+        // 🎯 3단계: 스플래시 화면으로 이동 (앱 완전 초기화)
         Navigator.of(context).pushNamedAndRemoveUntil(
-          '/login',
+          '/splash',
           (route) => false, // 모든 이전 화면 제거
         );
         
         // 성공 메시지
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('캐시가 삭제되고 로그아웃되었습니다. 다시 로그인해주세요.'),
+            content: Text('캐시가 삭제되고 앱이 초기화되었습니다.'),
             duration: Duration(seconds: 3),
           ),
         );
         
-        debugPrint('🎉 [AppInfo] 캐시 삭제 및 로그아웃 완료');
+        debugPrint('🎉 [AppInfo] 캐시 삭제 및 앱 초기화 완료');
       }
     } catch (e) {
       debugPrint('❌ [AppInfo] 캐시 삭제 실패: $e');
