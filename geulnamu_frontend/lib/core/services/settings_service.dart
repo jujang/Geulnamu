@@ -55,9 +55,7 @@ class SettingsService {
       
       final success = await prefs.setString(_themeKey, themeString);
       
-      if (success) {
-        print('✅ [SettingsService] 테마 모드 저장 성공: $themeString');
-      } else {
+      if (!success) {
         print('❌ [SettingsService] 테마 모드 저장 실패');
       }
       
@@ -75,7 +73,6 @@ class SettingsService {
       final prefs = await SharedPreferences.getInstance();
       final enabled = prefs.getBool(_notificationKey) ?? true; // 기본값: 켜짐
       
-      print('📱 [SettingsService] 모임 알림 상태: $enabled');
       return enabled;
     } catch (e) {
       print('❌ [SettingsService] 모임 알림 설정 로드 실패: $e');
@@ -89,9 +86,7 @@ class SettingsService {
       final prefs = await SharedPreferences.getInstance();
       final success = await prefs.setBool(_notificationKey, enabled);
       
-      if (success) {
-        print('✅ [SettingsService] 모임 알림 설정 저장 성공: $enabled');
-      } else {
+      if (!success) {
         print('❌ [SettingsService] 모임 알림 설정 저장 실패');
       }
       
@@ -113,12 +108,6 @@ class SettingsService {
       ]);
       
       final success = results.every((result) => result);
-      
-      if (success) {
-        print('✅ [SettingsService] 모든 설정 초기화 성공');
-      } else {
-        print('❌ [SettingsService] 일부 설정 초기화 실패');
-      }
       
       return success;
     } catch (e) {

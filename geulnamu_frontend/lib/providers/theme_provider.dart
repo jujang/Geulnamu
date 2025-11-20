@@ -6,7 +6,8 @@ import 'dart:js' as js show context;
 
 /// 테마 상태 관리 Provider
 /// SettingsService와 연동하여 테마 모드 관리
-class ThemeProvider extends ChangeNotifier {
+/// WidgetsBindingObserver로 시스템 테마 변경 감지
+class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
   final SettingsService _settingsService = SettingsService();
   
   ThemeMode _themeMode = ThemeMode.system; // 기본값: 시스템 설정
@@ -28,10 +29,12 @@ class ThemeProvider extends ChangeNotifier {
 
     try {
       _themeMode = await _settingsService.getThemeMode();
-      print('✅ [ThemeProvider] 테마 모드 초기화 완료: $_themeMode');
       
       // 🎯 초기 로드 시 시스템 UI 설정
       _updateSystemUI(_themeMode);
+      
+      // 🎯 WidgetsBindingObserver 등록 (시스템 테마 변경 감지)
+      WidgetsBinding.instance.addObserver(this);
     } catch (e) {
       print('❌ [ThemeProvider] 테마 모드 초기화 실패: $e');
       _themeMode = ThemeMode.system; // 실패 시 기본값
@@ -41,11 +44,33 @@ class ThemeProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+  
+  /// 🎯 시스템 테마 변경 감지 (WidgetsBindingObserver)
+  /// 시스템 설정 모드일 때 시스템 테마가 변경되면 네비게이션 바도 자동 업데이트
+  @override
+  void didChangePlatformBrightness() {
+    super.didChangePlatformBrightness();
+    
+    // 시스템 설정 모드일 때만 네비게이션 바 업데이트
+    if (_themeMode == ThemeMode.system) {
+      // 현재 시스템 테마에 맞춰서 네비게이션 바 업데이트
+      _updateSystemUI(ThemeMode.system);
+      
+      // UI 재빌드는 필요 없음 (MaterialApp이 자동으로 처리)
+      // notifyListeners(); - 호출하지 않음
+    }
+  }
+  
+  /// Provider dispose 시 observer 제거
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   /// 테마 모드 변경
   Future<void> setThemeMode(ThemeMode newThemeMode) async {
     if (_themeMode == newThemeMode) {
-      print('🔄 [ThemeProvider] 동일한 테마 모드 - 변경 없음: $newThemeMode');
       return;
     }
 
@@ -62,9 +87,7 @@ class ThemeProvider extends ChangeNotifier {
       // 설정 저장 (비동기)
       final success = await _settingsService.setThemeMode(newThemeMode);
       
-      if (success) {
-        print('✅ [ThemeProvider] 테마 모드 변경 성공: $newThemeMode');
-      } else {
+      if (!success) {
         print('❌ [ThemeProvider] 테마 모드 저장 실패 - UI는 이미 변경됨');
       }
     } catch (e) {
@@ -113,14 +136,23 @@ class ThemeProvider extends ChangeNotifier {
           navigationBarIconBrightness = Brightness.light; // 아이콘 밝은색
           break;
         case ThemeMode.system:
-          // 🎯 시스템 설정에 따라 자동 결정
-          // 현재 시스템 다크모드 여부를 정확히 알 수 없으므로
-          // 기본값으로 라이트 모드 설정 (화면이 빌드될 때 자동 업데이트됨)
-          isDark = false;
-          statusBarColor = const Color(0xFF7DD3C0);
-          navigationBarColor = const Color(0xFFFAFAFA);
-          statusBarIconBrightness = Brightness.light;
-          navigationBarIconBrightness = Brightness.dark;
+          // 🎯 실제 시스템 테마 감지
+          final platformBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+          isDark = platformBrightness == Brightness.dark;
+          
+          if (isDark) {
+            // 시스템이 다크 모드
+            statusBarColor = const Color(0xFF1E1E1E);
+            navigationBarColor = const Color(0xFF0F0F0F);
+            statusBarIconBrightness = Brightness.light;
+            navigationBarIconBrightness = Brightness.light;
+          } else {
+            // 시스템이 라이트 모드
+            statusBarColor = const Color(0xFF7DD3C0);
+            navigationBarColor = const Color(0xFFFAFAFA);
+            statusBarIconBrightness = Brightness.light;
+            navigationBarIconBrightness = Brightness.dark;
+          }
           break;
       }
       
@@ -136,10 +168,6 @@ class ThemeProvider extends ChangeNotifier {
             ? const Color(0xFF424242) 
             : const Color(0xFFE0E0E0),
       ));
-      
-      print('✅ [ThemeProvider] 네이티브 시스템 UI 업데이트 완료: ${isDark ? "다크" : "라이트"}');
-      print('   - 상단바: $statusBarColor');
-      print('   - 하단바: $navigationBarColor');
     } catch (e) {
       print('❌ [ThemeProvider] 네이티브 시스템 UI 업데이트 실패: $e');
     }
@@ -148,7 +176,6 @@ class ThemeProvider extends ChangeNotifier {
   /// 🎯 웹 환경에서 theme-color 동적 변경
   void _updateWebThemeColor(ThemeMode mode) {
     if (!kIsWeb) {
-      print('📱 [ThemeProvider] 네이티브 앱 - theme-color 변경 불필요');
       return;
     }
     
@@ -174,21 +201,15 @@ class ThemeProvider extends ChangeNotifier {
             );
             isDark = prefersDark == true;
             color = isDark ? '#0F0F0F' : '#FAFAFA'; // 🎯 시스템 테마에 맞는 배경색
-            print('🌓 [ThemeProvider] 시스템 테마 감지: ${isDark ? "다크" : "라이트"}');
           } catch (e) {
-            print('⚠️ [ThemeProvider] 시스템 테마 감지 실패: $e - 기본값(라이트) 사용');
             color = '#FAFAFA';
             isDark = false;
           }
           break;
       }
       
-      print('🎨 [ThemeProvider] 웹 theme-color 변경 시도: $color (다크: $isDark)');
-      
       // JavaScript 함수 호출
       js.context.callMethod('updateThemeColor', [color, isDark]);
-      
-      print('✅ [ThemeProvider] 웹 theme-color 변경 완료');
     } catch (e) {
       print('❌ [ThemeProvider] 웹 theme-color 변경 실패: $e');
     }

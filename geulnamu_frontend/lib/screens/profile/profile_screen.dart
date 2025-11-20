@@ -231,10 +231,12 @@ class _ProfileScreenState extends State<ProfileScreen>
 
     // 🎯 정상 상태 - 프로필 표시
     return ResponsiveContainer(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 16, right: 16),
       child: SingleChildScrollView(
         child: Column(
           children: [
+            const SizedBox(height: 16),
+            
             // 🎯 프로필 이미지
             ProfileWidgets.buildProfileImage(context),
             
@@ -246,8 +248,9 @@ class _ProfileScreenState extends State<ProfileScreen>
             else
               _buildViewMode(),
 
-            // 추가 여백
-            const SizedBox(height: 32),
+            // 하단 여백 (bottomNavigationBar가 있을 때만)
+            if (isEditMode && profile != null)
+              const SizedBox(height: 16),
           ],
         ),
       ),
