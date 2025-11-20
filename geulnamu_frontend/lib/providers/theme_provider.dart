@@ -101,14 +101,14 @@ class ThemeProvider extends ChangeNotifier {
         case ThemeMode.light:
           isDark = false;
           statusBarColor = const Color(0xFF7DD3C0); // 라이트 모드: 민트색 AppBar
-          navigationBarColor = Colors.white; // 라이트 모드: 흰색 하단바
+          navigationBarColor = const Color(0xFFFAFAFA); // 라이트 모드: 배경색과 동일 (#FAFAFA)
           statusBarIconBrightness = Brightness.light; // 아이콘 밝은색
           navigationBarIconBrightness = Brightness.dark; // 아이콘 어두운색
           break;
         case ThemeMode.dark:
           isDark = true;
           statusBarColor = const Color(0xFF1E1E1E); // 다크 모드: 어두운 AppBar
-          navigationBarColor = const Color(0xFF0F0F0F); // 다크 모드: 거의 검정 하단바
+          navigationBarColor = const Color(0xFF0F0F0F); // 다크 모드: 배경색과 동일 (#0F0F0F)
           statusBarIconBrightness = Brightness.light; // 아이콘 밝은색
           navigationBarIconBrightness = Brightness.light; // 아이콘 밝은색
           break;
@@ -118,7 +118,7 @@ class ThemeProvider extends ChangeNotifier {
           // 기본값으로 라이트 모드 설정 (화면이 빌드될 때 자동 업데이트됨)
           isDark = false;
           statusBarColor = const Color(0xFF7DD3C0);
-          navigationBarColor = Colors.white;
+          navigationBarColor = const Color(0xFFFAFAFA);
           statusBarIconBrightness = Brightness.light;
           navigationBarIconBrightness = Brightness.dark;
           break;
@@ -158,11 +158,11 @@ class ThemeProvider extends ChangeNotifier {
       
       switch (mode) {
         case ThemeMode.light:
-          color = '#FFFFFF'; // 라이트 모드: 흰색
+          color = '#FAFAFA'; // 🎯 라이트 모드: 오프화이트 배경색
           isDark = false;
           break;
         case ThemeMode.dark:
-          color = '#0F0F0F'; // 다크 모드: 거의 검정
+          color = '#0F0F0F'; // 🎯 다크 모드: 거의 검정 배경색
           isDark = true;
           break;
         case ThemeMode.system:
@@ -173,11 +173,11 @@ class ThemeProvider extends ChangeNotifier {
               ['window.matchMedia("(prefers-color-scheme: dark)").matches']
             );
             isDark = prefersDark == true;
-            color = isDark ? '#0F0F0F' : '#FFFFFF';
+            color = isDark ? '#0F0F0F' : '#FAFAFA'; // 🎯 시스템 테마에 맞는 배경색
             print('🌓 [ThemeProvider] 시스템 테마 감지: ${isDark ? "다크" : "라이트"}');
           } catch (e) {
             print('⚠️ [ThemeProvider] 시스템 테마 감지 실패: $e - 기본값(라이트) 사용');
-            color = '#FFFFFF';
+            color = '#FAFAFA';
             isDark = false;
           }
           break;
