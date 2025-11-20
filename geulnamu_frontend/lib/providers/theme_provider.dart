@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../core/services/settings_service.dart';
+import 'dart:js' as js show context;
 
 /// 테마 상태 관리 Provider
 /// SettingsService와 연동하여 테마 모드 관리
@@ -26,9 +28,13 @@ class ThemeProvider extends ChangeNotifier {
     try {
       _themeMode = await _settingsService.getThemeMode();
       print('✅ [ThemeProvider] 테마 모드 초기화 완료: $_themeMode');
+      
+      // 🎯 초기 로드 시도 웹 theme-color 설정
+      _updateWebThemeColor(_themeMode);
     } catch (e) {
       print('❌ [ThemeProvider] 테마 모드 초기화 실패: $e');
       _themeMode = ThemeMode.system; // 실패 시 기본값
+      _updateWebThemeColor(_themeMode);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -58,12 +64,64 @@ class ThemeProvider extends ChangeNotifier {
       } else {
         print('❌ [ThemeProvider] 테마 모드 저장 실패 - UI는 이미 변경됨');
       }
+      
+      // 🎯 웹 환경에서 theme-color 동적 변경
+      _updateWebThemeColor(newThemeMode);
     } catch (e) {
       print('❌ [ThemeProvider] 테마 모드 변경 오류: $e');
       // 에러 발생 시 이전 상태로 복원하지 않음 (UI 우선)
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+  
+  /// 🎯 웹 환경에서 theme-color 동적 변경
+  void _updateWebThemeColor(ThemeMode mode) {
+    if (!kIsWeb) {
+      print('📱 [ThemeProvider] 네이티브 앱 - theme-color 변경 불필요');
+      return;
+    }
+    
+    try {
+      String color;
+      bool isDark;
+      
+      switch (mode) {
+        case ThemeMode.light:
+          color = '#FFFFFF'; // 라이트 모드: 흰색
+          isDark = false;
+          break;
+        case ThemeMode.dark:
+          color = '#0F0F0F'; // 다크 모드: 거의 검정
+          isDark = true;
+          break;
+        case ThemeMode.system:
+          // 🎯 시스템 설정 감지 (JavaScript 통해)
+          try {
+            final prefersDark = js.context.callMethod(
+              'eval',
+              ['window.matchMedia("(prefers-color-scheme: dark)").matches']
+            );
+            isDark = prefersDark == true;
+            color = isDark ? '#0F0F0F' : '#FFFFFF';
+            print('🌓 [ThemeProvider] 시스템 테마 감지: ${isDark ? "다크" : "라이트"}');
+          } catch (e) {
+            print('⚠️ [ThemeProvider] 시스템 테마 감지 실패: $e - 기본값(라이트) 사용');
+            color = '#FFFFFF';
+            isDark = false;
+          }
+          break;
+      }
+      
+      print('🎨 [ThemeProvider] 웹 theme-color 변경 시도: $color (다크: $isDark)');
+      
+      // JavaScript 함수 호출
+      js.context.callMethod('updateThemeColor', [color, isDark]);
+      
+      print('✅ [ThemeProvider] 웹 theme-color 변경 완료');
+    } catch (e) {
+      print('❌ [ThemeProvider] 웹 theme-color 변경 실패: $e');
     }
   }
 

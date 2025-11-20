@@ -141,6 +141,45 @@
     }
   </script>
   
+  <!-- 🎯 테마 색상 동적 변경 스크립트 (Flutter → Web) -->
+  <script>
+    // Flutter에서 호출할 함수: 테마 색상 변경
+    window.updateThemeColor = function(color, isDark) {
+      console.log('🎨 [Web] 테마 색상 변경:', color, '(다크모드:', isDark, ')');
+      
+      // theme-color 메타 태그 업데이트
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', color);
+      }
+      
+      // msapplication 메타 태그도 업데이트
+      const metaMsApplication = document.querySelector('meta[name="msapplication-TileColor"]');
+      if (metaMsApplication) {
+        metaMsApplication.setAttribute('content', color);
+      }
+      
+      const metaNavButton = document.querySelector('meta[name="msapplication-navbutton-color"]');
+      if (metaNavButton) {
+        metaNavButton.setAttribute('content', color);
+      }
+      
+      // iOS 상태바 스타일 변경
+      const metaAppleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+      if (metaAppleStatusBar) {
+        metaAppleStatusBar.setAttribute('content', isDark ? 'black-translucent' : 'default');
+      }
+      
+      console.log('✅ [Web] 테마 색상 변경 완료');
+    };
+    
+    // 페이지 로드 시 초기 테마 감지
+    window.addEventListener('DOMContentLoaded', function() {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      console.log('🌓 [Web] 시스템 테마:', prefersDark ? '다크' : '라이트');
+    });
+  </script>
+  
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
