@@ -16,6 +16,7 @@ class AuthProvider with ChangeNotifier {
   Map<String, dynamic>? _userInfo;
   String? _errorMessage;
   bool? _profileCompleted; // 개인정보 입력 완료 여부
+  bool _isShowingLogoutDialog = false; // 🚨 로그아웃 다이얼로그 표시 중 플래그
 
   // Getters
   AuthStatus get status => _status;
@@ -384,17 +385,41 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// 📢 강제 로그아웃 알림 다이얼로그 표시
+  /// 📢 강제 로그아웃 알림 다이얼로그 표시 (중복 방지 포함)
   ///
   /// Global NavigatorKey를 사용하여 어디서나 다이얼로그 표시 가능
+  /// 이미 다이얼로그가 표시 중이면 추가로 표시하지 않음
   void _showLogoutNotificationDialog() {
+    // 🚨 중복 방지: 이미 다이얼로그가 표시 중이면 무시
+    if (_isShowingLogoutDialog) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [강제 로그아웃] 다이얼로그 이미 표시 중 - 중복 방지');
+      }
+      return;
+    }
+
     // 비동기로 실행하여 강제 로그아웃 프로세스를 블록하지 않음
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 🚨 다시 한번 체크 (비동기 타이밍 이슈 방지)
+      if (_isShowingLogoutDialog) {
+        if (AppConfig.debugMode) {
+          print('⚠️ [강제 로그아웃] 다이얼로그 이미 표시 중 (비동기 체크) - 중복 방지');
+        }
+        return;
+      }
+
       try {
         final context =
             navigatorKey.currentContext; // 🎯 Global Navigator Key 사용
 
         if (context != null) {
+          // 🔥 플래그 설정: 다이얼로그 표시 시작
+          _isShowingLogoutDialog = true;
+
+          if (AppConfig.debugMode) {
+            print('📢 [강제 로그아웃] 다이얼로그 표시 시작');
+          }
+
           showDialog(
             context: context,
             barrierDismissible: false, // 사용자가 배경 탭으로 닫을 수 없도록
@@ -425,6 +450,12 @@ class AuthProvider with ChangeNotifier {
                   TextButton(
                     onPressed: () {
                       Navigator.of(dialogContext).pop();
+                      // 🔥 플래그 초기화: 다이얼로그 닫힘
+                      _isShowingLogoutDialog = false;
+
+                      if (AppConfig.debugMode) {
+                        print('✅ [강제 로그아웃] 다이얼로그 닫힘 - 플래그 초기화');
+                      }
                     },
                     child: Text(
                       '확인',
@@ -437,9 +468,20 @@ class AuthProvider with ChangeNotifier {
                 ],
               );
             },
-          );
+          ).then((_) {
+            // 🔥 안전장치: showDialog의 Future가 완료되면 플래그 초기화
+            // (사용자가 뒤로가기 등으로 닫은 경우 대비)
+            _isShowingLogoutDialog = false;
+
+            if (AppConfig.debugMode) {
+              print('✅ [강제 로그아웃] 다이얼로그 완전 종료 - 플래그 초기화');
+            }
+          });
         }
       } catch (e) {
+        // 🔥 에러 발생 시에도 플래그 초기화
+        _isShowingLogoutDialog = false;
+
         if (AppConfig.debugMode) {
           print('❌ [강제 로그아웃] 다이얼로그 표시 중 오류: $e');
         }
