@@ -4,7 +4,7 @@ import '../../../core/responsive.dart';
 import '../../../models/voc/voc_model.dart';
 import '../../../models/voc/voc_filter_model.dart';
 
-/// 문의함 관리 화면 UI 위젯들
+/// 문의 목록 화면 UI 위젯들
 ///
 /// Static Methods로 구현하여 재사용성 극대화
 class VoCManagementWidgets {
@@ -233,9 +233,14 @@ class VoCManagementWidgets {
 
                 // 상태 칩
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: Color(issue.issueStatus.colorValue).withValues(alpha: 0.1),
+                    color: Color(
+                      issue.issueStatus.colorValue,
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -283,8 +288,18 @@ class VoCManagementWidgets {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       child: isMobile
-          ? _buildCompactPagination(context, currentPage, totalPages, onPageChanged)
-          : _buildFullPagination(context, currentPage, totalPages, onPageChanged),
+          ? _buildCompactPagination(
+              context,
+              currentPage,
+              totalPages,
+              onPageChanged,
+            )
+          : _buildFullPagination(
+              context,
+              currentPage,
+              totalPages,
+              onPageChanged,
+            ),
     );
   }
 
@@ -305,9 +320,16 @@ class VoCManagementWidgets {
           padding: const EdgeInsets.all(8),
           constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
         ),
-        ..._buildCompactPageNumbers(context, currentPage, totalPages, onPageChanged),
+        ..._buildCompactPageNumbers(
+          context,
+          currentPage,
+          totalPages,
+          onPageChanged,
+        ),
         IconButton(
-          onPressed: currentPage < totalPages ? () => onPageChanged(totalPages) : null,
+          onPressed: currentPage < totalPages
+              ? () => onPageChanged(totalPages)
+              : null,
           icon: const Icon(Icons.last_page),
           iconSize: 20,
           padding: const EdgeInsets.all(8),
@@ -332,17 +354,22 @@ class VoCManagementWidgets {
           icon: const Icon(Icons.first_page),
         ),
         IconButton(
-          onPressed: currentPage > 1 ? () => onPageChanged(currentPage - 1) : null,
+          onPressed: currentPage > 1
+              ? () => onPageChanged(currentPage - 1)
+              : null,
           icon: const Icon(Icons.chevron_left),
         ),
         ..._buildPageNumbers(context, currentPage, totalPages, onPageChanged),
         IconButton(
-          onPressed:
-              currentPage < totalPages ? () => onPageChanged(currentPage + 1) : null,
+          onPressed: currentPage < totalPages
+              ? () => onPageChanged(currentPage + 1)
+              : null,
           icon: const Icon(Icons.chevron_right),
         ),
         IconButton(
-          onPressed: currentPage < totalPages ? () => onPageChanged(totalPages) : null,
+          onPressed: currentPage < totalPages
+              ? () => onPageChanged(totalPages)
+              : null,
           icon: const Icon(Icons.last_page),
         ),
       ],
@@ -371,7 +398,9 @@ class VoCManagementWidgets {
     }
 
     for (int i = startPage; i <= endPage; i++) {
-      pageButtons.add(_buildPageButton(context, i, currentPage, onPageChanged, true));
+      pageButtons.add(
+        _buildPageButton(context, i, currentPage, onPageChanged, true),
+      );
     }
 
     return pageButtons;
@@ -394,7 +423,9 @@ class VoCManagementWidgets {
     }
 
     for (int i = startPage; i <= endPage; i++) {
-      pageButtons.add(_buildPageButton(context, i, currentPage, onPageChanged, false));
+      pageButtons.add(
+        _buildPageButton(context, i, currentPage, onPageChanged, false),
+      );
     }
 
     return pageButtons;
@@ -426,7 +457,9 @@ class VoCManagementWidgets {
             child: Text(
               '$pageNumber',
               style: context.textStyles.bodyMedium?.copyWith(
-                color: isSelected ? context.colors.onPrimary : context.colors.onSurface,
+                color: isSelected
+                    ? context.colors.onPrimary
+                    : context.colors.onSurface,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),

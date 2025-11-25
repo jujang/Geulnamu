@@ -14,19 +14,19 @@ import '../../../core/config/app_config.dart';
 /// - 🚀 안전한 메모리 관리 (FocusNode 에러 해결)
 mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
   final ContactService _contactService = ContactService();
-  
+
   // 💾 로컬 저장 변수들
   String _savedErrorReportContent = '';
   String _savedFeatureRequestContent = '';
-  
+
   // 🚀 안전한 컨트롤러 관리
   final Set<TextEditingController> _activeControllers = {};
   final Set<FocusNode> _activeFocusNodes = {};
-  
+
   // 🚀 dispose 상태 추적
   final Set<TextEditingController> _disposedControllers = {};
   final Set<FocusNode> _disposedFocusNodes = {};
-  
+
   // 🔄 로딩 상태 관리
   bool _isSubmitting = false;
   String? _currentSubmissionType;
@@ -56,7 +56,8 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
       type: 'feature',
       title: '💡 기능 요청',
       subtitle: '새로운 아이디어를 제안해주세요',
-      hintText: '어떤 기능이 있으면 좋을까요?\n\n예시:\n- 독서 진도 알림 기능\n- 모임 캘린더 연동\n- 발제문 템플릿 제공',
+      hintText:
+          '어떤 기능이 있으면 좋을까요?\n\n예시:\n- 독서 진도 알림 기능\n- 모임 캘린더 연동\n- 발제문 템플릿 제공',
       initialContent: _savedFeatureRequestContent,
       onSubmit: _handleFeatureRequestSubmit,
       onContentChanged: (content) => _savedFeatureRequestContent = content,
@@ -76,34 +77,35 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
     // 🚀 안전한 컨트롤러 생성
     TextEditingController? contentController;
     FocusNode? contentFocusNode;
-    
+
     try {
       contentController = TextEditingController(text: initialContent);
       contentFocusNode = FocusNode();
-      
+
       // 활성 컨트롤러 등록
       _activeControllers.add(contentController);
       _activeFocusNodes.add(contentFocusNode);
     } catch (e) {
       return;
     }
-    
+
     // 🚀 dispose 상태 추적
     bool isDisposed = false;
     bool localSubmitting = false;
 
     // 🚀 안전한 포커스 설정 함수
     void safeSetFocus() {
-      if (isDisposed || contentController == null || contentFocusNode == null) return;
-      
+      if (isDisposed || contentController == null || contentFocusNode == null)
+        return;
+
       try {
-        if (initialContent.isNotEmpty && contentController!.text.isNotEmpty) {
-          contentController!.selection = TextSelection.fromPosition(
-            TextPosition(offset: contentController!.text.length),
+        if (initialContent.isNotEmpty && contentController.text.isNotEmpty) {
+          contentController.selection = TextSelection.fromPosition(
+            TextPosition(offset: contentController.text.length),
           );
         }
-        if (!contentFocusNode!.hasFocus && contentFocusNode!.canRequestFocus) {
-          contentFocusNode!.requestFocus();
+        if (!contentFocusNode.hasFocus && contentFocusNode.canRequestFocus) {
+          contentFocusNode.requestFocus();
         }
       } catch (e) {
         // 포커스 설정 실패 무시
@@ -123,14 +125,18 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
           // 🚀 안전성 체크
-          if (isDisposed || contentController == null || contentFocusNode == null) {
+          if (isDisposed ||
+              contentController == null ||
+              contentFocusNode == null) {
             return const SizedBox.shrink();
           }
-          
+
           return Container(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
             ),
             // 🔧 고정 패딩 사용 (BottomSheet가 키보드를 자동으로 피함)
             padding: const EdgeInsets.all(20),
@@ -150,7 +156,9 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.4),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -175,8 +183,8 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
 
                   // 입력 필드
                   TextFormField(
-                    controller: contentController!,
-                    focusNode: contentFocusNode!,
+                    controller: contentController,
+                    focusNode: contentFocusNode,
                     maxLines: 6,
                     maxLength: 1000,
                     onChanged: (value) {
@@ -186,14 +194,18 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
                     decoration: InputDecoration(
                       hintText: hintText,
                       hintStyle: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                         height: 1.4,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                      fillColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
                     ),
                     style: const TextStyle(height: 1.4),
                   ),
@@ -205,40 +217,45 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
                       // 취소 버튼
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _isSubmitting ? null : () {
-                            try {
-                              Navigator.of(context).pop();
-                            } catch (e) {
-                              // 닫기 실패 무시
-                            }
-                          },
+                          onPressed: _isSubmitting
+                              ? null
+                              : () {
+                                  try {
+                                    Navigator.of(context).pop();
+                                  } catch (e) {
+                                    // 닫기 실패 무시
+                                  }
+                                },
                           child: const Text('취소'),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      
+
                       // 전송 버튼
                       Expanded(
                         flex: 2,
                         child: ElevatedButton(
-                          onPressed: (_isSubmitting || localSubmitting || isDisposed || contentController == null)
+                          onPressed:
+                              (_isSubmitting || localSubmitting || isDisposed)
                               ? null
                               : () async {
-                                  final content = contentController!.text.trim();
-                                  
+                                  final content = contentController!.text
+                                      .trim();
+
                                   // 빈 내용 방지 로직
                                   if (content.isEmpty) {
                                     _showSnackBar('내용을 입력해주세요.');
                                     return;
                                   }
-                                  
+
                                   if (content.length < 5) {
                                     _showSnackBar('최소 5자 이상 입력해주세요.');
                                     return;
                                   }
-                                  
-                                  final validation = _contactService.validateContent(content);
-                                  
+
+                                  final validation = _contactService
+                                      .validateContent(content);
+
                                   if (!validation['isValid']) {
                                     _showSnackBar(validation['message']);
                                     return;
@@ -276,11 +293,15 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
                                     }
                                   }
                                 },
-                          child: (_isSubmitting || localSubmitting) && _currentSubmissionType == type
+                          child:
+                              (_isSubmitting || localSubmitting) &&
+                                  _currentSubmissionType == type
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : const Text('전송'),
                         ),
@@ -295,15 +316,22 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
       ),
     ).whenComplete(() {
       // 🚀 안전한 정리
-      _safeCleanupControllers(contentController, contentFocusNode, () => isDisposed = true);
+      _safeCleanupControllers(
+        contentController,
+        contentFocusNode,
+        () => isDisposed = true,
+      );
     });
   }
 
   /// 에러 보고 제출 처리
   Future<void> _handleErrorReportSubmit(String content) async {
     try {
-      final success = await _contactService.reportError(content, context); // context 전달
-      
+      final success = await _contactService.reportError(
+        content,
+        context,
+      ); // context 전달
+
       if (success) {
         _savedErrorReportContent = '';
         Future.delayed(const Duration(milliseconds: 200), () {
@@ -320,13 +348,16 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
   /// 기능 요청 제출 처리
   Future<void> _handleFeatureRequestSubmit(String content) async {
     try {
-      final success = await _contactService.requestFeature(content, context); // context 전달
-      
+      final success = await _contactService.requestFeature(
+        content,
+        context,
+      ); // context 전달
+
       if (success) {
         _savedFeatureRequestContent = '';
         Future.delayed(const Duration(milliseconds: 200), () {
           if (mounted) {
-            _showSnackBar('기능 요청이 전송되었습니다. 검토 후 답변드리겠습니다.');
+            _showSnackBar('기능 요청이 전송되었습니다. 검토해 보겠습니다.');
           }
         });
       }
@@ -338,7 +369,7 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
   /// SnackBar 표시 헬퍼
   void _showSnackBar(String message) {
     if (!mounted) return;
-    
+
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -348,12 +379,16 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
       ),
     );
   }
-  
+
   /// 🚀 안전한 컨트롤러 정리 (개선된 방식)
-  void _safeCleanupControllers(TextEditingController? controller, FocusNode? focusNode, VoidCallback? onDispose) {
+  void _safeCleanupControllers(
+    TextEditingController? controller,
+    FocusNode? focusNode,
+    VoidCallback? onDispose,
+  ) {
     // 🚀 dispose 상태 설정
     onDispose?.call();
-    
+
     // 🚀 비동기로 안전한 정리
     Future.microtask(() {
       try {
@@ -365,7 +400,7 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
       } catch (e) {
         // Controller dispose 에러 무시
       }
-      
+
       try {
         if (focusNode != null && !_disposedFocusNodes.contains(focusNode)) {
           _activeFocusNodes.remove(focusNode);
@@ -378,7 +413,7 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
       } catch (e) {
         // FocusNode dispose 에러 무시
       }
-      
+
       // 🚀 상태 정리 (안전하게)
       if (mounted) {
         try {
@@ -392,12 +427,12 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
       }
     });
   }
-  
+
   @override
   void dispose() {
     final controllersToDispose = _activeControllers.toList();
     _activeControllers.clear();
-    
+
     for (final controller in controllersToDispose) {
       try {
         if (!_disposedControllers.contains(controller)) {
@@ -408,11 +443,11 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
         // Controller dispose 에러 무시
       }
     }
-    
+
     // 🚀 안전한 포커스노드 정리
     final focusNodesToDispose = _activeFocusNodes.toList();
     _activeFocusNodes.clear();
-    
+
     for (final focusNode in focusNodesToDispose) {
       try {
         if (!_disposedFocusNodes.contains(focusNode)) {
@@ -426,10 +461,10 @@ mixin ContactLogicMixin<T extends StatefulWidget> on State<T> {
         // FocusNode dispose 에러 무시
       }
     }
-    
+
     _disposedControllers.clear();
     _disposedFocusNodes.clear();
-    
+
     super.dispose();
   }
 }
