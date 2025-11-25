@@ -22,6 +22,71 @@
   <meta name="keywords" content="독서, 토론, 모임, 출석, 발제, 글나무, 책, 커뮤니티">
   <meta name="author" content="글나무 팀">
   
+  <!-- 🎨 기본 배경색 설정 (시스템 테마 대응) -->
+  <style>
+    /* 라이트 모드 기본값 */
+    :root {
+      --app-background: #FAFAFA;
+    }
+    
+    /* 다크 모드 */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --app-background: #0F0F0F;
+      }
+    }
+    
+    /* 초기 로딩 스타일 */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--app-background);
+      /* 페이지 전환 시 깜박임 방지 */
+      transition: background-color 0.1s ease;
+    }
+    
+    /* 로딩 중 표시할 오버레이 (카카오 redirect 시 사용) */
+    #kakao-loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--app-background);
+      z-index: 99999;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    #kakao-loading-overlay.show {
+      display: flex;
+    }
+    
+    /* 로딩 스피너 */
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(125, 211, 192, 0.3);
+      border-top-color: #7DD3C0;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* 로딩 텍스트 */
+    .loading-text {
+      margin-top: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      color: #7DD3C0;
+    }
+  </style>
+  
   <!-- PWA meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-status-bar-style" content="default">
@@ -61,6 +126,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
+  <!-- 🎯 카카오 로그인 redirect 시 표시될 로딩 오버레이 -->
+  <div id="kakao-loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">카카오로 이동 중...</div>
+  </div>
+  
   <!-- OAuth 콜백 처리 스크립트 -->
   <script>
     // 페이지 로드 즉시 OAuth 콜백 처리
@@ -138,6 +209,27 @@
           });
       });
     }
+  </script>
+  
+  <!-- 🎯 카카오 로그인 로딩 오버레이 제어 (Flutter에서 호출) -->
+  <script>
+    // 카카오 로그인 로딩 오버레이 표시
+    window.showKakaoLoading = function() {
+      console.log('🔄 [카카오 로딩] 오버레이 표시');
+      var overlay = document.getElementById('kakao-loading-overlay');
+      if (overlay) {
+        overlay.classList.add('show');
+      }
+    };
+    
+    // 카카오 로그인 로딩 오버레이 숨기기
+    window.hideKakaoLoading = function() {
+      console.log('🔄 [카카오 로딩] 오버레이 숨김');
+      var overlay = document.getElementById('kakao-loading-overlay');
+      if (overlay) {
+        overlay.classList.remove('show');
+      }
+    };
   </script>
   
   <!-- 🎯 테마 색상 동적 변경 스크립트 (Flutter → Web) -->

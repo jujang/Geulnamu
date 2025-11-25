@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:html'
     as html
     show window, sessionStorage, indexedDB, navigator, IFrameElement, document;
+import 'dart:js' as js;  // 🎨 JavaScript 함수 호출용
 import '../config/app_config.dart';
 import '../utils/api_utils.dart';
 import '../../widgets/common/error_dialog.dart';
@@ -266,6 +267,18 @@ class AuthService {
     } catch (e) {
       if (AppConfig.debugMode) {
         print('⚠️ 세션 스토리지 저장 실패 (무시): $e');
+      }
+    }
+    
+    // 🎨 로딩 오버레이 표시 (JavaScript 함수 호출)
+    try {
+      js.context.callMethod('showKakaoLoading');
+      if (AppConfig.debugMode) {
+        print('🎨 로딩 오버레이 표시');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('⚠️ 로딩 오버레이 표시 실패 (무시): $e');
       }
     }
     
