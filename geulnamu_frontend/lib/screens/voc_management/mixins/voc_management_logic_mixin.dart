@@ -21,16 +21,23 @@ mixin VoCManagementLogicMixin<T extends StatefulWidget> on State<T> {
   @override
   void initState() {
     super.initState();
+    print('🟢 [문의 목록] initState 호출됨');
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('🟢 [문의 목록] addPostFrameCallback 실행');
       // 🆕 반응형 페이지 크기 설정
       final defaultPageSize = ResponsiveHelper.getVoCDefaultPageSize(context);
       currentFilter = currentFilter.copyWith(size: defaultPageSize);
+      print('🟢 [문의 목록] loadIssueList() 호출 시작');
       loadIssueList();
     });
   }
 
   /// 이슈 목록 로드
   Future<void> loadIssueList({int? page}) async {
+    if (AppConfig.debugMode) {
+      print('🔄 [문의 목록] 로드 시작...');
+    }
+
     setState(() {
       isLoading = true;
       errorMessage = null;
@@ -42,7 +49,15 @@ mixin VoCManagementLogicMixin<T extends StatefulWidget> on State<T> {
         throw Exception('인증 토큰이 없습니다');
       }
 
+      if (AppConfig.debugMode) {
+        print('🔑 [문의 목록] 액세스 토큰 확보 성공');
+      }
+
       final targetPage = page ?? currentPage;
+
+      if (AppConfig.debugMode) {
+        print('📊 [문의 목록] 요청 페이지: $targetPage');
+      }
 
       final response = await _vocService.getIssueList(
         accessToken: accessToken,
@@ -50,14 +65,28 @@ mixin VoCManagementLogicMixin<T extends StatefulWidget> on State<T> {
         filter: currentFilter,
       );
 
+      if (AppConfig.debugMode) {
+        print('✅ [문의 목록] API 응답 수신 성공');
+        print('📊 이슈 개수: ${response.issues.length}');
+        print('📄 현재 페이지: ${response.pageNumber} / 전체: ${response.totalPages}');
+      }
+
       if (mounted) {
         setState(() {
           currentResponse = response;
           currentPage = targetPage;
           isLoading = false;
         });
+
+        if (AppConfig.debugMode) {
+          print('✅ [문의 목록] 화면 상태 업데이트 완료');
+        }
       }
     } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [문의 목록] 오류 발생: $e');
+      }
+
       if (mounted) {
         setState(() {
           errorMessage = _getErrorMessage(e);
@@ -171,9 +200,14 @@ mixin VoCManagementLogicMixin<T extends StatefulWidget> on State<T> {
   /// 액세스 토큰 가져오기
   Future<String?> _getAccessToken() async {
     try {
+      print('🔑 [문의 목록] AuthProvider 접근 시도...');
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      return await authProvider.accessToken;
+      print('🔑 [문의 목록] authProvider 획득: $authProvider');
+      final token = await authProvider.accessToken;
+      print('🔑 [문의 목록] 토큰 확인: ${token != null ? "토큰 있음 (${token.substring(0, 20)}...)" : "토큰 없음"}');
+      return token;
     } catch (e) {
+      print('❌ [문의 목록] 토큰 가져오기 실패: $e');
       return null;
     }
   }
