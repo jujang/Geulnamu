@@ -86,7 +86,7 @@ class ResponsiveHelper {
     return isMobile(context) ? 6 : 12;
   }
 
-  // 문의함 관리 페이지 크기 (반응형)
+  // 문의 목록 페이지 크기 (반응형)
   static int getVoCDefaultPageSize(BuildContext context) {
     // 모바일: 8개, 데스크톱: 10개
     return isMobile(context) ? 8 : 10;

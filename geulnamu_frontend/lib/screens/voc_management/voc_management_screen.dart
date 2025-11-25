@@ -8,7 +8,7 @@ import 'widgets/voc_management_widgets.dart';
 import 'widgets/voc_filter_widgets.dart';
 import 'widgets/voc_detail_widgets.dart';
 
-/// 문의함 관리 화면 (관리자 전용)
+/// 문의 목록 화면 (관리자 전용)
 ///
 /// 기능:
 /// - 이슈 목록 조회 (페이징)
@@ -32,23 +32,37 @@ class _VoCManagementScreenState extends State<VoCManagementScreen>
       builder: (context, authProvider, homeService, child) {
         return MainLayout(
           isHomePage: true, // 🍔 햄버거 메뉴 표시
-          title: '문의함 관리',
-          onMenuTap: (menu) => _homeService.handleMenuTap(context, menu), // 🔥 메뉴 탭 처리 추가
+          title: '문의 목록',
+          actions: [
+            // 새로고침 버튼
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: isLoading ? null : () => loadIssueList(),
+              tooltip: '새로고침',
+            ),
+          ],
+          onMenuTap: (menu) =>
+              _homeService.handleMenuTap(context, menu), // 🔥 메뉴 탭 처리 추가
           onLogoutTap: authProvider.isAuthenticated
               ? () => homeService.handleLogout(context, authProvider)
               : null,
-          body: Stack(
-            children: [
-              // 메인 콘텐츠
-              _buildBody(context),
-              
-              // 필터 FAB (좌측 하단)
-              Positioned(
-                bottom: 16,
-                left: 16,
-                child: _buildFilterFab(context),
-              ),
-            ],
+          body: RefreshIndicator(
+            onRefresh: () async {
+              await loadIssueList();
+            },
+            child: Stack(
+              children: [
+                // 메인 콘텐츠
+                _buildBody(context),
+
+                // 필터 FAB (좌측 하단)
+                Positioned(
+                  bottom: 16,
+                  left: 16,
+                  child: _buildFilterFab(context),
+                ),
+              ],
+            ),
           ),
         );
       },

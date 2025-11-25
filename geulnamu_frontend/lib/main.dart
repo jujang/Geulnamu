@@ -29,7 +29,7 @@ import 'screens/meeting/meeting_qr_scanner_screen.dart'; // QR 스캐너 화면
 import 'screens/attendance/attendance_status_screen.dart'; // 출석 현황 화면
 import 'screens/presentation/presentation_list_screen.dart'; // 발제문 목록 화면
 import 'screens/contact/contact_screen.dart'; // 문의하기 화면
-import 'screens/voc_management/voc_management_screen.dart'; // 문의함 관리 화면
+import 'screens/voc_management/voc_management_screen.dart'; // 문의 목록 화면
 import 'screens/settings_screen.dart'; // 설정 화면
 import 'screens/app_info/app_info_screen.dart'; // 앱 정보 화면
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
@@ -221,7 +221,8 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
               final routeMap = {
                 '/splash': (context) => const SplashScreen(),
                 '/login': (context) => const LoginScreen(),
-                '/auth/callback': (context) => const OAuthCallbackScreen(), // 🎯 OAuth 콜백
+                '/auth/callback': (context) =>
+                    const OAuthCallbackScreen(), // 🎯 OAuth 콜백
                 '/home': (context) => const HomeScreen(),
                 '/introduction': (context) => const IntroductionScreen(),
                 '/member-list': (context) => const MemberListScreen(),
@@ -233,7 +234,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
                     const PresentationListScreen(), // 발제문 목록
                 '/contact': (context) => const ContactScreen(), // 문의하기
                 '/voc-management': (context) =>
-                    const VoCManagementScreen(), // 문의함 관리
+                    const VoCManagementScreen(), // 문의 목록
                 '/settings': (context) => const SettingsScreen(),
                 '/app-info': (context) => const AppInfoScreen(), // 앱 정보
               };
@@ -273,9 +274,9 @@ class ErrorApp extends StatelessWidget {
       home: Builder(
         builder: (context) {
           final colorScheme = Theme.of(context).colorScheme;
-          
+
           return Scaffold(
-            backgroundColor: colorScheme.background,
+            backgroundColor: colorScheme.surface,
             body: Center(
               child: Card(
                 color: colorScheme.surface,
@@ -293,9 +294,10 @@ class ErrorApp extends StatelessWidget {
                       const SizedBox(height: 16),
                       Text(
                         '앱 초기화 중 오류가 발생했습니다.',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: colorScheme.onSurface, // 🎯 명시적 색상 설정
-                        ),
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
+                              color: colorScheme.onSurface, // 🎯 명시적 색상 설정
+                            ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
