@@ -71,10 +71,20 @@ class _MemberListScreenState extends State<MemberListScreen>
           child: MainLayout(
             title: '모임원 목록',
             isHomePage: true, // 🎯 메인 기능이므로 사이드바 버튼 표시
+            actions: [
+              // 새로고침 버튼
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: isLoading ? null : () => refreshMemberList(),
+                tooltip: '새로고침',
+              ),
+            ],
             // 🎯 HomeService를 통한 메뉴 및 로그아웃 처리
             onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
             onLogoutTap: () => _handleLogout(),
-            body: Stack(
+            body: RefreshIndicator(
+              onRefresh: refreshMemberList,
+              child: Stack(
               children: [
                 // 메인 콘텐츠
                 _buildMainContent(),
@@ -90,6 +100,7 @@ class _MemberListScreenState extends State<MemberListScreen>
                 ),
               ],
             ),
+          ),
           ),
         );
       },
@@ -135,23 +146,20 @@ class _MemberListScreenState extends State<MemberListScreen>
         
         // 모임원 목록
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: refreshMemberList,
-            child: ListView.builder(
-              padding: const EdgeInsets.only(
-                top: 8,
-                bottom: 80, // FAB 공간 확보
-              ),
-              itemCount: memberList.length,
-              itemBuilder: (context, index) {
-                final member = memberList[index];
-                return MemberWidgets.buildMemberCard(
-                  context,
-                  member,
-                  onTap: () => _handleMemberTap(member),
-                );
-              },
+          child: ListView.builder(
+            padding: const EdgeInsets.only(
+              top: 8,
+              bottom: 80, // FAB 공간 확보
             ),
+            itemCount: memberList.length,
+            itemBuilder: (context, index) {
+              final member = memberList[index];
+              return MemberWidgets.buildMemberCard(
+                context,
+                member,
+                onTap: () => _handleMemberTap(member),
+              );
+            },
           ),
         ),
         
