@@ -66,7 +66,14 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
     if (showBackButton) {
       // ← 뒤로가기 버튼 우선
       return IconButton(
-        onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
+        onPressed: onBackPressed ?? () {
+          // 🎯 스택이 비어있는 경우 홈으로 이동 (앱 업데이트 후 빈 화면 방지)
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          } else {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
+        },
         icon: const Icon(Icons.arrow_back_ios),
         tooltip: '뒤로가기',
       );

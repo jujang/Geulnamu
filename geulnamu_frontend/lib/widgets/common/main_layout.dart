@@ -74,7 +74,22 @@ class MainLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<AuthProvider, HomeService>(
       builder: (context, authProvider, homeService, child) {
-        return Scaffold(
+        // 🎯 PopScope: 브라우저/하드웨어 뒤로가기 처리
+        return PopScope(
+          // 홈 화면: 뒤로가기 막음 / 서브 화면: 시스템 기본 동작 허용
+          canPop: !isHomePage && Navigator.of(context).canPop(),
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return; // 이미 pop 되었으면 무시
+            
+            // 🏠 홈 화면: 뒤로가기 무시 (아무 동작 안 함)
+            if (isHomePage) return;
+            
+            // 📱 서브 화면: 스택이 비어있으면 홈으로 이동
+            if (!Navigator.of(context).canPop()) {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
+          },
+          child: Scaffold(
           // 🎯 테마 시스템 사용 - backgroundColor 없음
           appBar: AppHeader(
             title: title,
@@ -113,7 +128,8 @@ class MainLayout extends StatelessWidget {
           // 🎯 FAB 및 하단바
           floatingActionButton: floatingActionButton,
           bottomNavigationBar: bottomNavigationBar,
-        );
+          ),
+        ); // PopScope 닫기
       },
     );
   }
