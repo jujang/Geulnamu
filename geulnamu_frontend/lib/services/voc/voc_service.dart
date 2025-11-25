@@ -21,13 +21,6 @@ class VoCService {
     required VoCFilter filter,
   }) async {
     try {
-      if (AppConfig.debugMode) {
-        print('🚀 [이슈 목록 조회] API 요청 시작...');
-        print('📍 엔드포인트: ${AppConfig.getApiEndpoint('voc/list')}');
-        print('📄 페이지: $page');
-        print('🔍 필터: ${filter.toQueryParams(page)}');
-      }
-
       // 🔥 캐시 방지를 위한 타임스탬프 추가
       final queryParams = filter.toQueryParams(page);
       queryParams['_t'] = DateTime.now().millisecondsSinceEpoch.toString();
@@ -44,10 +37,6 @@ class VoCService {
           },
         ),
       );
-
-      if (AppConfig.debugMode) {
-        print('✅ [이슈 목록 조회] HTTP 응답 수신: ${response.statusCode}');
-      }
 
       if (response.statusCode == 200) {
         final processedResponse = ApiUtils.processBackendResponse(

@@ -37,10 +37,7 @@ class _VoCManagementScreenState extends State<VoCManagementScreen>
             // 새로고침 버튼
             IconButton(
               icon: const Icon(Icons.refresh),
-              onPressed: isLoading ? null : () {
-                print('🔄 [문의 목록] 새로고침 버튼 클릭!');
-                loadIssueList();
-              },
+              onPressed: isLoading ? null : () => loadIssueList(),
               tooltip: '새로고침',
             ),
           ],
