@@ -68,20 +68,15 @@ class _SplashScreenState extends State<SplashScreen>
   /// 🎯 폰트 프리로딩 - 앱에서 사용하는 모든 폰트 weight 미리 로드
   Future<void> _preloadFonts() async {
     try {
-      debugPrint('📝 [폰트] 프리로딩 시작...');
-      
-      // 앱에서 사용하는 Noto Sans KR 모든 weight 로드
       await GoogleFonts.pendingFonts([
         GoogleFonts.notoSans(fontWeight: FontWeight.w400), // Regular
         GoogleFonts.notoSans(fontWeight: FontWeight.w500), // Medium
         GoogleFonts.notoSans(fontWeight: FontWeight.w600), // SemiBold
         GoogleFonts.notoSans(fontWeight: FontWeight.w700), // Bold
       ]);
-      
-      debugPrint('✅ [폰트] 프리로딩 완료');
     } catch (e) {
       // 폰트 로드 실패해도 앱은 계속 진행 (시스템 폰트로 대체)
-      debugPrint('⚠️ [폰트] 프리로딩 실패 (무시): $e');
+      debugPrint('⚠️ [폰트] 프리로딩 실패: $e');
     }
   }
 
