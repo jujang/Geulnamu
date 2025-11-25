@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:provider/provider.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/config/app_config.dart';
+import '../../providers/auth_provider.dart';
 
 // 웹 환경에서만 사용
 import 'dart:html' as html show window;
@@ -102,6 +104,23 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
         throw Exception('이 기능은 웹에서만 사용 가능합니다.');
       }
 
+      // 📱 redirect 방식 여부 확인
+      bool isRedirectMode = false;
+      try {
+        isRedirectMode = html.window.sessionStorage['kakao_login_redirect'] == 'true';
+        if (isRedirectMode) {
+          // 사용 후 세션 스토리지 정리
+          html.window.sessionStorage.remove('kakao_login_redirect');
+          html.window.sessionStorage.remove('kakao_login_timestamp');
+        }
+      } catch (e) {
+        // 세션 스토리지 접근 실패 시 무시
+      }
+
+      if (AppConfig.debugMode) {
+        print('📱 redirect 방식: $isRedirectMode');
+      }
+
       // 웹 전용 URL 처리
       final code = await _extractCodeFromUrl();
       
@@ -130,8 +149,19 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
         print('👤 사용자 정보: ${authResponse['userInfo']}');
       }
 
+      // 🎯 AuthProvider 상태 업데이트 (redirect 방식에서 중요!)
+      if (mounted) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        await authProvider.checkAuthStatus();
+        
+        if (AppConfig.debugMode) {
+          print('✅ AuthProvider 상태 업데이트 완료');
+          print('👤 로그인 상태: ${authProvider.isAuthenticated}');
+        }
+      }
+
       // 잠시 대기 후 메인 화면으로 이동
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(milliseconds: 500));
       
       if (mounted) {
         // 메인 화면으로 이동

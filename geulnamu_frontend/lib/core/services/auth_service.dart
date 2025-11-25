@@ -157,6 +157,43 @@ class AuthService {
     }
   }
 
+  /// 🔍 모바일 웹 환경 감지
+  bool _isMobileWeb() {
+    if (!kIsWeb) return false;
+    
+    try {
+      final userAgent = html.window.navigator.userAgent.toLowerCase();
+      
+      // 모바일 키워드 체크
+      final mobileKeywords = [
+        'android',
+        'webos',
+        'iphone',
+        'ipad',
+        'ipod',
+        'blackberry',
+        'windows phone',
+        'mobile',
+      ];
+      
+      return mobileKeywords.any((keyword) => userAgent.contains(keyword));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 🔍 PWA 환경 감지 (standalone 모드)
+  bool _isPWA() {
+    if (!kIsWeb) return false;
+    
+    try {
+      // display-mode가 standalone이면 PWA
+      return html.window.matchMedia('(display-mode: standalone)').matches;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// 🌐 웹 환경 OAuth 플로우
   Future<Map<String, dynamic>> _webLoginFlow(
     BuildContext? context,
@@ -166,12 +203,25 @@ class AuthService {
       forceAccountSelection: forceAccountSelection,
     );
 
+    final isMobile = _isMobileWeb();
+    final isPwa = _isPWA();
+
     if (AppConfig.debugMode) {
       print('🌐 웹 OAuth 진행 중...');
+      print('📱 모바일 웹: $isMobile');
+      print('📲 PWA 모드: $isPwa');
     }
 
     try {
-      // 팝업으로 카카오 인증 페이지 열기
+      // 📱 모바일 웹에서는 redirect 방식 사용 (팝업/PWA 캡처 문제 회피)
+      if (isMobile) {
+        if (AppConfig.debugMode) {
+          print('📱 모바일 감지 → redirect 방식 사용');
+        }
+        return await _mobileWebRedirectFlow(kakaoAuthUrl, context);
+      }
+      
+      // 🖥️ 데스크톱 웹에서는 팝업 방식 사용
       final popup = html.window.open(
         kakaoAuthUrl,
         'kakao_login',
@@ -189,6 +239,40 @@ class AuthService {
       }
       rethrow;
     }
+  }
+
+  /// 📱 모바일 웹 redirect 방식 OAuth
+  /// 
+  /// 모바일에서 팝업 대신 현재 창에서 직접 카카오로 이동합니다.
+  /// 인증 완료 후 /auth/callback으로 돌아오면 OAuthCallbackScreen에서 처리됩니다.
+  Future<Map<String, dynamic>> _mobileWebRedirectFlow(
+    String kakaoAuthUrl,
+    BuildContext? context,
+  ) async {
+    if (AppConfig.debugMode) {
+      print('📱 모바일 웹 redirect 방식 로그인 시작...');
+      print('🔗 이동 URL: $kakaoAuthUrl');
+    }
+    
+    // 🔄 로그인 진행 중 상태를 세션 스토리지에 저장
+    // OAuthCallbackScreen에서 이를 확인하여 redirect 방식임을 인지
+    try {
+      html.window.sessionStorage['kakao_login_redirect'] = 'true';
+      html.window.sessionStorage['kakao_login_timestamp'] = DateTime.now().millisecondsSinceEpoch.toString();
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('⚠️ 세션 스토리지 저장 실패 (무시): $e');
+      }
+    }
+    
+    // 현재 페이지를 카카오 인증 URL로 이동
+    // 이 함수는 절대 반환되지 않음 (페이지가 이동하기 때문)
+    html.window.location.href = kakaoAuthUrl;
+    
+    // 페이지 이동 후에는 이 코드에 도달하지 않지만,
+    // 혹시 모를 경우를 대비해 오래 대기 후 예외 발생
+    await Future.delayed(const Duration(seconds: 30));
+    throw Exception('페이지 이동이 완료되지 않았습니다. 다시 시도해주세요.');
   }
 
   /// 📱 모바일 환경 OAuth 플로우
