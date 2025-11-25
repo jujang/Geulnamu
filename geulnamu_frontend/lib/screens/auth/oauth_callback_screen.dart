@@ -38,14 +38,36 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
     }
   }
 
-  /// 팡업 여부 확인
+  /// 팝업 여부 확인
+  /// 
+  /// 주의: 모바일 웹/PWA에서 redirect 방식으로 돌아온 경우는
+  /// window.opener가 있더라도 팝업으로 처리하면 안 됨
   bool _isPopup() {
     if (!kIsWeb) return false;
     
     try {
-      // opener가 있으면 팡업
-      return html.window.opener != null;
+      // 📱 redirect 방식인 경우 팝업이 아님 (세션 스토리지 확인)
+      final isRedirectMode = html.window.sessionStorage['kakao_login_redirect'] == 'true';
+      
+      if (isRedirectMode) {
+        if (AppConfig.debugMode) {
+          print('📱 redirect 방식 감지 → 팝업 아님');
+        }
+        return false;  // redirect 방식은 팝업이 아님!
+      }
+      
+      // opener가 있으면 팝업 (데스크톱 팝업 방식)
+      final hasOpener = html.window.opener != null;
+      
+      if (AppConfig.debugMode) {
+        print('🔍 _isPopup() 검사: opener=${hasOpener}, redirectMode=$isRedirectMode');
+      }
+      
+      return hasOpener;
     } catch (e) {
+      if (AppConfig.debugMode) {
+        print('⚠️ _isPopup() 검사 중 오류: $e');
+      }
       return false;
     }
   }
@@ -98,6 +120,7 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
       if (AppConfig.debugMode) {
         print('🔄 OAuth 콜백 처리 시작...');
         print('🌐 kIsWeb: $kIsWeb');
+        print('🌐 현재 URL: ${html.window.location.href}');
       }
 
       if (!kIsWeb) {
@@ -115,6 +138,9 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
         }
       } catch (e) {
         // 세션 스토리지 접근 실패 시 무시
+        if (AppConfig.debugMode) {
+          print('⚠️ 세션 스토리지 접근 실패: $e');
+        }
       }
 
       if (AppConfig.debugMode) {
@@ -125,7 +151,13 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
       final code = await _extractCodeFromUrl();
       
       if (AppConfig.debugMode) {
-        print('🔑 Authorization Code: ${code.substring(0, 20)}...');
+        if (code.isNotEmpty) {
+          // 안전한 substring
+          final displayCode = code.length > 20 ? code.substring(0, 20) : code;
+          print('🔑 Authorization Code: $displayCode...');
+        } else {
+          print('❌ Authorization Code가 비어있습니다!');
+        }
       }
 
       if (code.isEmpty) {
@@ -136,10 +168,18 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
         _statusMessage = '백엔드 서버와 통신 중...';
       });
 
+      if (AppConfig.debugMode) {
+        print('🔄 백엔드로 코드 전송 중...');
+      }
+
       // AuthService를 통해 백엔드로 코드 전송
       final authService = AuthService();
       final authResponse = await authService.processOAuthCode(code);
       
+      if (AppConfig.debugMode) {
+        print('✅ 백엔드 응답 수신 완료');
+      }
+
       setState(() {
         _statusMessage = '로그인 완료! 메인 화면으로 이동 중...';
       });
@@ -164,6 +204,9 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
       await Future.delayed(const Duration(milliseconds: 500));
       
       if (mounted) {
+        if (AppConfig.debugMode) {
+          print('🏠 홈 화면으로 이동 중...');
+        }
         // 메인 화면으로 이동
         Navigator.of(context).pushReplacementNamed('/home');
       }
@@ -171,6 +214,7 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
     } catch (error) {
       if (AppConfig.debugMode) {
         print('❌ OAuth 콜백 처리 실패: $error');
+        print('❌ 오류 타입: ${error.runtimeType}');
       }
       
       setState(() {

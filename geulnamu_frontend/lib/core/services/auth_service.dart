@@ -259,15 +259,24 @@ class AuthService {
     try {
       html.window.sessionStorage['kakao_login_redirect'] = 'true';
       html.window.sessionStorage['kakao_login_timestamp'] = DateTime.now().millisecondsSinceEpoch.toString();
+      
+      if (AppConfig.debugMode) {
+        print('✅ 세션 스토리지 저장 완료');
+      }
     } catch (e) {
       if (AppConfig.debugMode) {
         print('⚠️ 세션 스토리지 저장 실패 (무시): $e');
       }
     }
     
-    // 현재 페이지를 카카오 인증 URL로 이동
-    // 이 함수는 절대 반환되지 않음 (페이지가 이동하기 때문)
-    html.window.location.href = kakaoAuthUrl;
+    // 📱 모바일/PWA에서 더 신뢰성 있는 페이지 이동 방식
+    // location.assign()은 location.href 할당보다 더 일관성 있게 작동함
+    if (AppConfig.debugMode) {
+      print('🚀 카카오 인증 페이지로 이동 중...');
+    }
+    
+    // 주요: location.assign() 사용 (location.href보다 신뢰성 높음)
+    html.window.location.assign(kakaoAuthUrl);
     
     // 페이지 이동 후에는 이 코드에 도달하지 않지만,
     // 혹시 모를 경우를 대비해 오래 대기 후 예외 발생
