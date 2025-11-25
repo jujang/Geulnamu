@@ -230,7 +230,9 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
     }
   }
 
-  /// URL에서 코드 추출 후 부모 창으로 전송
+  /// URL에서 코드 추출
+  /// 
+  /// redirect 방식일 경우 opener에 메시지를 보내지 않음 (모바일 호환성)
   Future<String> _extractCodeFromUrl() async {
     if (!kIsWeb) {
       throw Exception('웹 환경에서만 지원됩니다.');
@@ -249,12 +251,37 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
         print('📋 URL 파라미터: ${uri.queryParameters}');
       }
 
+      // 📱 redirect 방식 여부 확인 (세션 스토리지)
+      bool isRedirectMode = false;
+      try {
+        isRedirectMode = html.window.sessionStorage['kakao_login_redirect'] == 'true';
+      } catch (e) {
+        // 세션 스토리지 접근 실패 시 무시
+      }
+
       if (code != null && code.isNotEmpty) {
-        // 부모 창으로 PostMessage 전송
-        if (html.window.opener != null) {
-          html.window.opener!.postMessage('KAKAO_AUTH_CODE:$code', '*');
+        // 🎯 redirect 방식이면 opener에 메시지 보내지 않고 바로 반환!
+        if (isRedirectMode) {
           if (AppConfig.debugMode) {
-            print('📬 부모 창으로 코드 전송: ${code.substring(0, 20)}...');
+            final displayCode = code.length > 20 ? code.substring(0, 20) : code;
+            print('📱 redirect 방식: 코드 바로 반환 ($displayCode...)');
+          }
+          return code;  // ✅ 바로 반환 (opener 접근 안 함)
+        }
+        
+        // 팝업 방식: 부모 창으로 PostMessage 전송
+        try {
+          if (html.window.opener != null) {
+            html.window.opener!.postMessage('KAKAO_AUTH_CODE:$code', '*');
+            if (AppConfig.debugMode) {
+              final displayCode = code.length > 20 ? code.substring(0, 20) : code;
+              print('📬 부모 창으로 코드 전송: $displayCode...');
+            }
+          }
+        } catch (openerError) {
+          // opener 접근 실패 시 무시 (redirect 방식일 수 있음)
+          if (AppConfig.debugMode) {
+            print('⚠️ opener 접근 실패 (무시): $openerError');
           }
         }
       }
