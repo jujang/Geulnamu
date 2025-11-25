@@ -10,7 +10,7 @@
     "prefer_related_applications": false,
     "categories": ["education", "books", "social", "productivity"],
     "lang": "ko-KR",
-    "scope": "/app/",
+    "scope": "/",
     "id": "com.geulnamu.app",
     "icons": [
         {
