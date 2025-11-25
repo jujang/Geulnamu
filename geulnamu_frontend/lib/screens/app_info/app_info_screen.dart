@@ -297,13 +297,13 @@ class _AppInfoScreenState extends State<AppInfoScreen> with AppInfoLogicMixin {
                 child: Icon(Icons.delete_outline, color: context.colors.error),
               ),
               title: Text(
-                '캐시 전체 삭제',
+                '캐시 삭제',
                 style: context.textStyles.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
               subtitle: Text(
-                '앱 완전 초기화 (로그아웃 후 재로그인 필요)',
+                '앱 초기화 (로그아웃 후 재로그인 필요)',
                 style: context.textStyles.bodySmall?.copyWith(
                   color: context.colors.onSurfaceVariant,
                 ),

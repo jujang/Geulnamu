@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
+import 'dart:html' as html show window;
 import '../../../providers/auth_provider.dart';
 import '../../../services/system/health_check_service.dart';
 
@@ -61,7 +63,7 @@ mixin AppInfoLogicMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  /// 캐시 전체 삭제 + 자동 로그아웃 처리
+  /// 캐시 삭제 + 자동 로그아웃 처리
   Future<void> handleClearCache(BuildContext context) async {
     // 확인 다이얼로그 표시
     final confirmed = await _showClearCacheConfirmDialog(context);
@@ -71,20 +73,25 @@ mixin AppInfoLogicMixin<T extends StatefulWidget> on State<T> {
     }
     
     try {
-      debugPrint('🗑️ [AppInfo] 캐시 전체 삭제 시작...');
+      debugPrint('🗑️ [AppInfo] 캐시 삭제 시작...');
       
       // 🎯 1단계: SharedPreferences 전체 삭제
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
       debugPrint('✅ [AppInfo] SharedPreferences 전체 삭제 완료');
       
+      // 🎯 2단계: 웹 환경 추가 캐시 삭제 (Session Storage, IndexedDB)
+      if (kIsWeb) {
+        await _clearWebCaches();
+      }
+      
       if (context.mounted) {
-        // 🎯 2단계: AuthProvider를 통한 로그아웃 처리
+        // 🎯 3단계: AuthProvider를 통한 로그아웃 처리
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         await authProvider.logout();
         debugPrint('✅ [AppInfo] 로그아웃 완료');
         
-        // 🎯 3단계: 스플래시 화면으로 이동 (앱 완전 초기화)
+        // 🎯 4단계: 스플래시 화면으로 이동 (앱 초기화)
         Navigator.of(context).pushNamedAndRemoveUntil(
           '/splash',
           (route) => false, // 모든 이전 화면 제거
@@ -115,12 +122,36 @@ mixin AppInfoLogicMixin<T extends StatefulWidget> on State<T> {
     }
   }
   
+  /// 🌐 웹 환경 캐시 삭제 (Session Storage, IndexedDB)
+  /// Service Worker Cache는 유지 (앱 로딩 속도 유지)
+  Future<void> _clearWebCaches() async {
+    try {
+      // Session Storage 삭제
+      html.window.sessionStorage.clear();
+      debugPrint('✅ [AppInfo] Session Storage 삭제 완료');
+    } catch (e) {
+      debugPrint('⚠️ [AppInfo] Session Storage 삭제 실패 (무시): $e');
+    }
+    
+    try {
+      // IndexedDB 삭제 (Flutter 웹 데이터)
+      await html.window.indexedDB?.deleteDatabase('FlutterStorage');
+      debugPrint('✅ [AppInfo] IndexedDB (FlutterStorage) 삭제 완료');
+    } catch (e) {
+      debugPrint('⚠️ [AppInfo] IndexedDB 삭제 실패 (무시): $e');
+    }
+    
+    // ⚠️ Service Worker Cache는 의도적으로 삭제하지 않음
+    // 이유: 정적 리소스 캐시는 앱 성능에 중요하고, 사용자 데이터가 아님
+    debugPrint('💡 [AppInfo] Service Worker Cache는 유지 (앱 성능용)');
+  }
+  
   /// 캐시 삭제 확인 다이얼로그
   Future<bool?> _showClearCacheConfirmDialog(BuildContext context) {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('캐시 전체 삭제'),
+        title: const Text('캐시 삭제'),
         content: const Text(
           '모든 앱 설정 및 캐시 데이터가 삭제됩니다.\n'
           '로그아웃되며 다시 로그인해야 합니다.\n\n'
