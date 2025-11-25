@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 🎯 한국어 지원
 
@@ -70,6 +71,35 @@ void main() async {
   }
 }
 
+/// 🎯 웹에서 초기 라우트 결정 (OAuth 콜백 지원)
+/// 모바일 redirect 방식으로 돌아올 때 /auth/callback을 처리
+String _getInitialRoute() {
+  if (kIsWeb) {
+    try {
+      final uri = Uri.base; // 현재 브라우저 URL
+      final path = uri.path;
+      
+      if (AppConfig.debugMode) {
+        print('🌐 [초기 라우트] 현재 URL path: $path');
+        print('🌐 [초기 라우트] 쿼리 파라미터: ${uri.queryParameters}');
+      }
+      
+      // OAuth 콜백 URL인 경우
+      if (path == '/auth/callback' || path.contains('auth/callback')) {
+        if (AppConfig.debugMode) {
+          print('🎯 [초기 라우트] OAuth 콜백 감지 → /auth/callback으로 이동');
+        }
+        return '/auth/callback';
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [초기 라우트] URL 파싱 오류: $e');
+      }
+    }
+  }
+  return '/splash';
+}
+
 class GeulnamuApp extends StatefulWidget {
   const GeulnamuApp({super.key});
 
@@ -122,7 +152,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
             navigatorObservers: [
               HomeRouteService.routeObserver,
             ], // 🎯 RouteObserver 등록
-            initialRoute: '/splash',
+            initialRoute: _getInitialRoute(), // 🎯 동적 초기 라우트 (OAuth 콜백 지원)
             onGenerateRoute: (settings) {
               if (settings.name == null) return null;
 
@@ -159,6 +189,13 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
 
               // 🎯 정확한 라우트 매칭 시스템
               switch (path) {
+                // 🎯 OAuth 콜백 처리 (redirect 방식 지원)
+                case '/auth/callback':
+                  return MaterialPageRoute(
+                    builder: (context) => const OAuthCallbackScreen(),
+                    settings: settings,
+                  );
+
                 // 운영진용 모임 목록 화면 (정확한 매칭)
                 case '/meeting-list-staff':
                   final filterType = queryParams['filter'];
