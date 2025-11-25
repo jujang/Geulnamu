@@ -21,11 +21,20 @@ class VoCService {
     required VoCFilter filter,
   }) async {
     try {
+      // 🔥 캐시 방지를 위한 타임스탬프 추가
+      final queryParams = filter.toQueryParams(page);
+      queryParams['_t'] = DateTime.now().millisecondsSinceEpoch.toString();
+
       final response = await _dio.get(
         AppConfig.getApiEndpoint('voc/list'),
-        queryParameters: filter.toQueryParams(page),
+        queryParameters: queryParams,
         options: Options(
-          headers: {'Authorization': 'Bearer $accessToken'},
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',  // 🔥 캐시 방지
+            'Pragma': 'no-cache',  // 🔥 HTTP/1.0 캐시 방지
+            'Expires': '0',  // 🔥 캐시 만료
+          },
         ),
       );
 
