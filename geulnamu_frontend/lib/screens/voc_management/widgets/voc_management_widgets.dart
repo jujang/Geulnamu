@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
 import '../../../core/responsive.dart';
 import '../../../models/voc/voc_model.dart';
-import '../../../models/voc/voc_filter_model.dart';
 
 /// 문의 목록 화면 UI 위젯들
 ///

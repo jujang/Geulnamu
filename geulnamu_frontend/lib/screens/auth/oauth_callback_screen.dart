@@ -19,7 +19,7 @@ class OAuthCallbackScreen extends StatefulWidget {
 
 class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
   bool _isProcessing = true;
-  String _statusMessage = '카카오 로그인 처리 중...';
+  String _statusMessage = '카카오 로그인 진행 중...';
 
   @override
   void initState() {
@@ -168,7 +168,7 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
       }
 
       setState(() {
-        _statusMessage = '로그인 진행 중...';
+        _statusMessage = '카카오 로그인 진행 중...';
       });
 
       if (AppConfig.debugMode) {

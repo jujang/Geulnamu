@@ -29,7 +29,8 @@ class _ContactScreenState extends State<ContactScreen>
     return Consumer2<AuthProvider, HomeService>(
       builder: (context, authProvider, homeService, child) {
         return MainLayout(
-          isHomePage: true, // 🍔 햄버거 메뉴 표시
+          showDrawerButton: true, // 🍔 햄버거 버튼 표시
+          // isRootPage: false (기본값) - 시스템 뒤로가기 허용
           title: '문의하기',
           onMenuTap: (menu) => _homeService.handleMenuTap(context, menu), // 🔥 메뉴 탭 처리 추가
           onLogoutTap: authProvider.isAuthenticated

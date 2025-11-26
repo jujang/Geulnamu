@@ -264,49 +264,53 @@ class _HomeScreenState extends State<HomeScreen>
                 onLoginTap: navigateToLogin,
                 onLogoutTap: handleLogout,
               ),
-              body: SafeArea(
-                child: ResponsiveContainer(
-                  // 🎯 패딩 제거 - 스크롤바가 화면 끝에 위치하도록
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      // 콘텐츠에만 패딩 적용
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 동적 환영 카드 (Static Method 사용)
-                          HomeWidgets.buildDynamicWelcomeCard(
-                            context,
-                            authProvider,
-                            onProfileInputTap:
-                                navigateToProfileInput, // 개인정보 입력 버튼 핸들러
-                          ),
-                          const SizedBox(height: 24),
-
-                          // 통일된 빠른 메뉴 (Static Method 사용)
-                          HomeWidgets.buildQuickMenuGrid(
-                            context,
-                            authProvider,
-                            handleMenuTap, // mixin 메서드 사용
-                          ),
-                          const SizedBox(height: 24),
-
-                          // 로그인 상태에 따른 추가 콘텐츠
-                          if (authProvider.isAuthenticated) ...[
-                            // HomeWidgets.buildRecentMeetingsSection(context),
-                            // const SizedBox(height: 24),
-                          ] else ...[
-                            // PWA 설치 안내 (로그인 전에만 표시)
-                            PWAInstallCard(
-                              onInstallPressed:
-                                  showInstallInstructions, // mixin 메서드 사용
+              // 🎯 PopScope: 홈 화면에서 시스템 뒤로가기 차단
+              body: PopScope(
+                canPop: false, // 홈 화면에서는 시스템 뒤로가기 차단
+                child: SafeArea(
+                  child: ResponsiveContainer(
+                    // 🎯 패딩 제거 - 스크롤바가 화면 끝에 위치하도록
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        // 콘텐츠에만 패딩 적용
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 동적 환영 카드 (Static Method 사용)
+                            HomeWidgets.buildDynamicWelcomeCard(
+                              context,
+                              authProvider,
+                              onProfileInputTap:
+                                  navigateToProfileInput, // 개인정보 입력 버튼 핸들러
                             ),
                             const SizedBox(height: 24),
-                          ],
 
-                          // 추가 여백
-                          const SizedBox(height: 32),
-                        ],
+                            // 통일된 빠른 메뉴 (Static Method 사용)
+                            HomeWidgets.buildQuickMenuGrid(
+                              context,
+                              authProvider,
+                              handleMenuTap, // mixin 메서드 사용
+                            ),
+                            const SizedBox(height: 24),
+
+                            // 로그인 상태에 따른 추가 콘텐츠
+                            if (authProvider.isAuthenticated) ...[
+                              // HomeWidgets.buildRecentMeetingsSection(context),
+                              // const SizedBox(height: 24),
+                            ] else ...[
+                              // PWA 설치 안내 (로그인 전에만 표시)
+                              PWAInstallCard(
+                                onInstallPressed:
+                                    showInstallInstructions, // mixin 메서드 사용
+                              ),
+                              const SizedBox(height: 24),
+                            ],
+
+                            // 추가 여백
+                            const SizedBox(height: 32),
+                          ],
+                        ),
                       ),
                     ),
                   ),
