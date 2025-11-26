@@ -22,7 +22,8 @@ mixin PresentationLogicMixin<T extends StatefulWidget> on State<T> {
   // Getters
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  List<PresentationInfo> get presentationList => _presentationListResponse?.presentationList ?? [];
+  List<PresentationInfo> get presentationList =>
+      _presentationListResponse?.presentationList ?? [];
   PagingResponse? get pagingInfo => _presentationListResponse?.pagingResponse;
   PresentationListFilter get currentFilter => _currentFilter;
 
@@ -46,11 +47,15 @@ mixin PresentationLogicMixin<T extends StatefulWidget> on State<T> {
   /// 초기 데이터 로드
   ///
   /// [initialFilter] 초기 필터 설정 (옵션)
-  Future<void> initializePresentationList({PresentationListFilter? initialFilter}) async {
+  Future<void> initializePresentationList({
+    PresentationListFilter? initialFilter,
+  }) async {
     // 🎯 PresentationService는 Singleton이므로 이미 초기화됨
 
     // 🆕 반응형 기본 페이지 크기 설정 (발제문 전용)
-    final defaultPageSize = ResponsiveHelper.getPresentationDefaultPageSize(context);
+    final defaultPageSize = ResponsiveHelper.getPresentationDefaultPageSize(
+      context,
+    );
 
     // 🎯 초기 필터 설정 (제공된 경우)
     if (initialFilter != null) {
@@ -165,7 +170,7 @@ mixin PresentationLogicMixin<T extends StatefulWidget> on State<T> {
     await loadPresentationList(showLoading: true);
 
     if (AppConfig.debugMode) {
-      print('✅ [발제문 목록 새로고침] 완료 - 총 $totalElements개 발제문');
+      print('✅ [발제문 목록 새로고침] 완료 - 총 $totalElements개 모임');
     }
   }
 
@@ -178,12 +183,14 @@ mixin PresentationLogicMixin<T extends StatefulWidget> on State<T> {
   /// 발제문 상세 페이지 이동
   void handlePresentationTap(PresentationInfo presentation) {
     if (AppConfig.debugMode) {
-      print('🎯 [PresentationLogicMixin] 발제문 탭: ${presentation.bookTitle} (ID: ${presentation.meetingId})');
+      print(
+        '🎯 [PresentationLogicMixin] 발제문 탭: ${presentation.bookTitle} (ID: ${presentation.meetingId})',
+      );
     }
 
     // TODO: 향후 발제문 상세 페이지 구현 시 아래 코드 활성화
     // Navigator.pushNamed(context, '/presentation/${presentation.meetingId}');
-    
+
     // 임시: 모임 상세 페이지로 이동
     Navigator.pushNamed(context, '/meeting/${presentation.meetingId}');
   }

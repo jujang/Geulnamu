@@ -23,9 +23,19 @@ class PresentationListWidgets {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      child: isSmallScreen 
-        ? _buildCompactPagination(context, currentPage, totalPages, onPageChanged)
-        : _buildFullPagination(context, currentPage, totalPages, onPageChanged),
+      child: isSmallScreen
+          ? _buildCompactPagination(
+              context,
+              currentPage,
+              totalPages,
+              onPageChanged,
+            )
+          : _buildFullPagination(
+              context,
+              currentPage,
+              totalPages,
+              onPageChanged,
+            ),
     );
   }
 
@@ -45,25 +55,26 @@ class PresentationListWidgets {
           icon: const Icon(Icons.first_page),
           iconSize: 20,
           padding: const EdgeInsets.all(8),
-          constraints: const BoxConstraints(
-            minWidth: 32,
-            minHeight: 32,
-          ),
+          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
         ),
 
         // 🆕 3개 페이지 번호 버튼
-        ...buildCompactPageNumbers(context, currentPage, totalPages, onPageChanged),
+        ...buildCompactPageNumbers(
+          context,
+          currentPage,
+          totalPages,
+          onPageChanged,
+        ),
 
         // 마지막 페이지 버튼
         IconButton(
-          onPressed: currentPage < totalPages ? () => onPageChanged(totalPages) : null,
+          onPressed: currentPage < totalPages
+              ? () => onPageChanged(totalPages)
+              : null,
           icon: const Icon(Icons.last_page),
           iconSize: 20,
           padding: const EdgeInsets.all(8),
-          constraints: const BoxConstraints(
-            minWidth: 32,
-            minHeight: 32,
-          ),
+          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
         ),
       ],
     );
@@ -340,7 +351,7 @@ class PresentationListWidgets {
               ),
               const SizedBox(width: 8),
               Text(
-                '총 $totalElements개 발제문',
+                '총 $totalElements개 모임',
                 style: context.textStyles.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: context.colors.onSurface,
@@ -410,11 +421,7 @@ class PresentationListWidgets {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.info_outline,
-            color: context.colors.primary,
-            size: 24,
-          ),
+          Icon(Icons.info_outline, color: context.colors.primary, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
