@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+import java.util.TimeZone;
+
 @EnableAsync
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = {
@@ -14,6 +16,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 public class GeulnamuApplication {
 
 	public static void main(String[] args) {
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul")); // JVM 기본 타임존 서울로 설정
 		SpringApplication.run(GeulnamuApplication.class, args);
 	}
 

@@ -33,7 +33,7 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
                     attendance.member.count().subtract(normalAttendanceCount()))
             )
             .from(meeting)
-            .join(attendance).on(meeting.id.eq(attendance.meeting.id))
+            .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id))
             .where(meeting.id.eq(meetingId))
             .orderBy(attendance.createdAt.desc())
             .fetchOne();
