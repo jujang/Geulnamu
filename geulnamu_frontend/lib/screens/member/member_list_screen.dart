@@ -70,7 +70,8 @@ class _MemberListScreenState extends State<MemberListScreen>
           loadingMessage: homeService.currentOperation,
           child: MainLayout(
             title: '모임원 목록',
-            isHomePage: true, // 🎯 메인 기능이므로 사이드바 버튼 표시
+            showDrawerButton: true, // 🍔 햄버거 버튼 표시
+            // isRootPage: false (기본값) - 시스템 뒤로가기 허용
             actions: [
               // 새로고침 버튼
               IconButton(

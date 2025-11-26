@@ -31,7 +31,8 @@ class _VoCManagementScreenState extends State<VoCManagementScreen>
     return Consumer2<AuthProvider, HomeService>(
       builder: (context, authProvider, homeService, child) {
         return MainLayout(
-          isHomePage: true, // 🍔 햄버거 메뉴 표시
+          showDrawerButton: true, // 🍔 햄버거 버튼 표시
+          // isRootPage: false (기본값) - 시스템 뒤로가기 허용
           title: '문의 목록',
           actions: [
             // 새로고침 버튼

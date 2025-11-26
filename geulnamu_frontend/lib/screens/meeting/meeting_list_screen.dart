@@ -105,7 +105,8 @@ class _MeetingListScreenState extends State<MeetingListScreen>
           loadingMessage: homeService.currentOperation,
           child: MainLayout(
             title: '모임 목록',
-            isHomePage: true, // 메인 기능이므로 사이드바 버튼 표시
+            showDrawerButton: true, // 🍔 햄버거 버튼 표시
+            // isRootPage: false (기본값) - 시스템 뒤로가기 허용
             // HomeService를 통한 메뉴 및 로그아웃 처리
             onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
             onLogoutTap: () => _handleLogout(),

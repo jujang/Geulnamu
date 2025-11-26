@@ -9,10 +9,15 @@ import 'app_drawer.dart';
 ///
 /// 모든 주요 화면에서 사용하는 공통 레이아웃:
 /// - AppHeader (상단바) + AppDrawer (사이드바) 조합
-/// - 네비게이션 패턴: 홈(🍔) vs 서브(←) 자동 전환
+/// - 네비게이션 패턴: 🍔햄버거 vs ←뒤로가기 독립 제어
+/// - 시스템 뒤로가기: isRootPage로 별도 제어
 /// - 편집 모드 지원
 /// - 사용자 메뉴 통합
 /// - 반응형 레이아웃
+///
+/// 🎯 v2.0 개선사항:
+/// - isHomePage → showDrawerButton + isRootPage 분리
+/// - 햄버거 버튼 표시와 시스템 뒤로가기 제어를 독립적으로 관리
 class MainLayout extends StatelessWidget {
   /// 화면 제목
   final String title;
@@ -20,8 +25,22 @@ class MainLayout extends StatelessWidget {
   /// 메인 콘텐츠 위젯
   final Widget body;
 
-  /// 홈화면 여부 (true: 🍔햄버거, false: ←뒤로가기)
-  final bool isHomePage;
+  /// @deprecated isHomePage 대신 showDrawerButton과 isRootPage를 사용하세요
+  /// 하위 호환성을 위해 유지됨
+  final bool? isHomePage;
+
+  /// 🍔 햄버거(Drawer) 버튼 표시 여부 (UI 제어)
+  /// true: 햄버거 버튼 표시, false: 뒤로가기 버튼 표시
+  final bool? showDrawerButton;
+
+  /// ← 뒤로가기 버튼 표시 여부 (UI 제어)
+  /// showDrawerButton이 true이면 무시됨
+  final bool? showBackButton;
+
+  /// 🏠 루트 페이지 여부 (시스템 뒤로가기 제어)
+  /// true: 시스템 뒤로가기 차단 (홈 화면 등)
+  /// false: 시스템 뒤로가기 허용 (일반 서브 화면)
+  final bool isRootPage;
 
   /// 상단바 액션 버튼들
   final List<Widget>? actions;
@@ -57,12 +76,16 @@ class MainLayout extends StatelessWidget {
     super.key,
     required this.title,
     required this.body,
-    this.isHomePage = false,
+    @Deprecated('Use showDrawerButton and isRootPage instead')
+    this.isHomePage,
+    this.showDrawerButton,
+    this.showBackButton,
+    this.isRootPage = false,
     this.actions,
     this.floatingActionButton,
     this.bottomNavigationBar,
     this.customProfileWidget,
-    this.showProfileMenu = true, // 기본값: true
+    this.showProfileMenu = true,
     this.onLogoTap,
     this.onMenuTap,
     this.onLoginTap,
@@ -70,21 +93,48 @@ class MainLayout extends StatelessWidget {
     this.onBackPressed,
   });
 
+  /// 🎯 햄버거 버튼 표시 여부 계산
+  /// 우선순위: showDrawerButton > isHomePage > 기본값(false)
+  bool get _showDrawerButton {
+    if (showDrawerButton != null) return showDrawerButton!;
+    if (isHomePage != null) return isHomePage!;
+    return false;
+  }
+
+  /// 🎯 뒤로가기 버튼 표시 여부 계산
+  /// 햄버거 버튼이 표시되면 뒤로가기는 숨김
+  bool get _showBackButton {
+    if (_showDrawerButton) return false;
+    if (showBackButton != null) return showBackButton!;
+    return true;
+  }
+
+  /// 🎯 루트 페이지 여부 계산 (시스템 뒤로가기 제어)
+  /// 우선순위: isRootPage 명시 > isHomePage 레거시 > 기본값(false)
+  bool get _isRootPage {
+    // isRootPage가 명시적으로 true로 설정되었으면 사용
+    if (isRootPage) return true;
+    // 레거시: isHomePage만 사용하고 새 속성이 없는 경우
+    // 단, showDrawerButton이 명시되어 있으면 isRootPage 기본값(false) 사용
+    if (showDrawerButton == null && isHomePage == true) return true;
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<AuthProvider, HomeService>(
       builder: (context, authProvider, homeService, child) {
         // 🎯 PopScope: 브라우저/하드웨어 뒤로가기 처리
         return PopScope(
-          // 홈 화면: 뒤로가기 막음 / 서브 화면: 시스템 기본 동작 허용
-          canPop: !isHomePage && Navigator.of(context).canPop(),
+          // 루트 페이지: 뒤로가기 막음 / 일반 화면: 시스템 기본 동작 허용
+          canPop: !_isRootPage && Navigator.of(context).canPop(),
           onPopInvokedWithResult: (didPop, result) {
             if (didPop) return; // 이미 pop 되었으면 무시
             
-            // 🏠 홈 화면: 뒤로가기 무시 (아무 동작 안 함)
-            if (isHomePage) return;
+            // 🏠 루트 페이지: 뒤로가기 무시 (아무 동작 안 함)
+            if (_isRootPage) return;
             
-            // 📱 서브 화면: 스택이 비어있으면 홈으로 이동
+            // 📱 일반 화면: 스택이 비어있으면 홈으로 이동
             if (!Navigator.of(context).canPop()) {
               Navigator.pushReplacementNamed(context, '/home');
             }
@@ -93,9 +143,9 @@ class MainLayout extends StatelessWidget {
           // 🎯 테마 시스템 사용 - backgroundColor 없음
           appBar: AppHeader(
             title: title,
-            // 🧭 네비게이션 패턴: 홈 vs 서브 화면
-            showDrawerButton: isHomePage,
-            showBackButton: !isHomePage,
+            // 🧭 네비게이션 패턴: 햄버거 vs 뒤로가기 버튼 (독립 제어)
+            showDrawerButton: _showDrawerButton,
+            showBackButton: _showBackButton,
             onBackPressed: onBackPressed,
             // 🔐 로그인 상태별 처리
             showLoginButton: !authProvider.isAuthenticated,
@@ -310,7 +360,7 @@ class MainLayout extends StatelessWidget {
 
 /// MainLayout의 편의 생성자들
 class MainLayoutHelpers {
-  /// 홈화면용 MainLayout
+  /// 홈화면용 MainLayout (햄버거 버튼 + 시스템 뒤로가기 차단)
   static MainLayout home({
     required String title,
     required Widget body,
@@ -318,7 +368,7 @@ class MainLayoutHelpers {
     Widget? floatingActionButton,
     Widget? bottomNavigationBar,
     Widget? customProfileWidget,
-    bool showProfileMenu = true, // 기본값: true
+    bool showProfileMenu = true,
     VoidCallback? onLogoTap,
     Function(String)? onMenuTap,
     VoidCallback? onLoginTap,
@@ -327,12 +377,13 @@ class MainLayoutHelpers {
     return MainLayout(
       title: title,
       body: body,
-      isHomePage: true, // 🍔 햄버거 메뉴
+      showDrawerButton: true, // 🍔 햄버거 메뉴
+      isRootPage: true, // 🏠 시스템 뒤로가기 차단
       actions: actions,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       customProfileWidget: customProfileWidget,
-      showProfileMenu: showProfileMenu, // 사용자 메뉴 표시 여부
+      showProfileMenu: showProfileMenu,
       onLogoTap: onLogoTap,
       onMenuTap: onMenuTap,
       onLoginTap: onLoginTap,
@@ -340,7 +391,7 @@ class MainLayoutHelpers {
     );
   }
 
-  /// 서브화면용 MainLayout
+  /// 서브화면용 MainLayout (뒤로가기 버튼 + 시스템 뒤로가기 허용)
   static MainLayout sub({
     required String title,
     required Widget body,
@@ -348,7 +399,7 @@ class MainLayoutHelpers {
     Widget? floatingActionButton,
     Widget? bottomNavigationBar,
     Widget? customProfileWidget,
-    bool showProfileMenu = true, // 기본값: true
+    bool showProfileMenu = true,
     VoidCallback? onLogoTap,
     Function(String)? onMenuTap,
     VoidCallback? onLoginTap,
@@ -358,17 +409,50 @@ class MainLayoutHelpers {
     return MainLayout(
       title: title,
       body: body,
-      isHomePage: false, // ← 뒤로가기 버튼
+      showDrawerButton: false, // ← 뒤로가기 버튼
+      isRootPage: false, // 📱 시스템 뒤로가기 허용
       actions: actions,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       customProfileWidget: customProfileWidget,
-      showProfileMenu: showProfileMenu, // 사용자 메뉴 표시 여부
+      showProfileMenu: showProfileMenu,
       onLogoTap: onLogoTap,
       onMenuTap: onMenuTap,
       onLoginTap: onLoginTap,
       onLogoutTap: onLogoutTap,
       onBackPressed: onBackPressed,
+    );
+  }
+
+  /// 햄버거 버튼을 표시하지만 시스템 뒤로가기는 허용하는 화면
+  /// (모임 목록, 발제문 목록 등)
+  static MainLayout drawerWithBack({
+    required String title,
+    required Widget body,
+    List<Widget>? actions,
+    Widget? floatingActionButton,
+    Widget? bottomNavigationBar,
+    Widget? customProfileWidget,
+    bool showProfileMenu = true,
+    VoidCallback? onLogoTap,
+    Function(String)? onMenuTap,
+    VoidCallback? onLoginTap,
+    VoidCallback? onLogoutTap,
+  }) {
+    return MainLayout(
+      title: title,
+      body: body,
+      showDrawerButton: true, // 🍔 햄버거 메뉴
+      isRootPage: false, // 📱 시스템 뒤로가기 허용
+      actions: actions,
+      floatingActionButton: floatingActionButton,
+      bottomNavigationBar: bottomNavigationBar,
+      customProfileWidget: customProfileWidget,
+      showProfileMenu: showProfileMenu,
+      onLogoTap: onLogoTap,
+      onMenuTap: onMenuTap,
+      onLoginTap: onLoginTap,
+      onLogoutTap: onLogoutTap,
     );
   }
 }
