@@ -4,7 +4,6 @@ import '../../../providers/auth_provider.dart';
 import '../../../services/voc/voc_service.dart';
 import '../../../models/voc/voc_model.dart';
 import '../../../models/voc/voc_filter_model.dart';
-import '../../../core/config/app_config.dart';
 import '../../../core/responsive.dart'; // 🆕 반응형 헬퍼 import
 
 /// 문의 목록 화면 로직 Mixin
