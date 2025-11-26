@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/theme.dart';
 import '../../../../models/discussion/attendance_id_and_name_model.dart';
 import '../../../../models/attendance/attendance_status_model.dart';
 import '../../../../core/config/app_config.dart';
@@ -8,14 +7,18 @@ import '../../../../widgets/dialogs/add_members_dialog.dart';
 
 /// 🎯 토론 그룹 편집 모드 전용 위젯들 (드래그&드롭 방식)
 class DiscussionGroupEditWidgets {
-  
   /// 토론 그룹 편집 모드 전체 컨텐츠
   static Widget buildDiscussionGroupEditingContent(
     BuildContext context, {
     required Map<int, List<AttendanceIdAndNameModel>> editingGroups,
     required List<AttendanceIdAndNameModel> editingUnassignedMembers,
-    required void Function(AttendanceIdAndNameModel member, int targetGroupNumber) onMoveMemberToGroup,
-    required void Function(AttendanceIdAndNameModel member) onRemoveMemberFromGroup,
+    required void Function(
+      AttendanceIdAndNameModel member,
+      int targetGroupNumber,
+    )
+    onMoveMemberToGroup,
+    required void Function(AttendanceIdAndNameModel member)
+    onRemoveMemberFromGroup,
     required VoidCallback onCreateNewGroup,
     required VoidCallback onClearAllGroups,
     // 🆕 인원 추가 기능 관련 콜백 추가
@@ -72,7 +75,8 @@ class DiscussionGroupEditWidgets {
   static Widget _buildUnassignedDropZone(
     BuildContext context, {
     required List<AttendanceIdAndNameModel> editingUnassignedMembers,
-    required void Function(AttendanceIdAndNameModel member) onRemoveMemberFromGroup,
+    required void Function(AttendanceIdAndNameModel member)
+    onRemoveMemberFromGroup,
     // 🆕 인원 추가 기능 파라미터 추가
     required bool canAddMembers,
     required List<AttendanceStatus> availableMembersToAdd,
@@ -84,16 +88,18 @@ class DiscussionGroupEditWidgets {
       },
       builder: (context, candidateData, rejectedData) {
         final isHighlighted = candidateData.isNotEmpty;
-        
+
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.errorContainer.withOpacity(0.1),
+            color: Theme.of(
+              context,
+            ).colorScheme.errorContainer.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isHighlighted 
+              color: isHighlighted
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).colorScheme.error.withOpacity(0.3),
               width: isHighlighted ? 2.0 : 1.0,
@@ -108,7 +114,7 @@ class DiscussionGroupEditWidgets {
                   Icon(
                     Icons.person_off,
                     size: 20,
-                    color: isHighlighted 
+                    color: isHighlighted
                         ? Theme.of(context).colorScheme.primary
                         : Theme.of(context).colorScheme.error,
                   ),
@@ -119,7 +125,7 @@ class DiscussionGroupEditWidgets {
                     memberCount: editingUnassignedMembers.length,
                     isHighlighted: isHighlighted,
                   ),
-                  
+
                   // 🆕 인원 추가 버튼 (ADMIN만 표시)
                   if (canAddMembers) ...[
                     const Spacer(),
@@ -142,7 +148,7 @@ class DiscussionGroupEditWidgets {
                       padding: const EdgeInsets.all(4),
                     ),
                   ],
-                  
+
                   if (isHighlighted) ...[
                     const SizedBox(width: 8),
                     Text(
@@ -158,7 +164,7 @@ class DiscussionGroupEditWidgets {
 
               if (editingUnassignedMembers.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                
+
                 // 미할당 멤버들 (가로 배치)
                 Wrap(
                   spacing: 8,
@@ -173,7 +179,9 @@ class DiscussionGroupEditWidgets {
                   '💭 모든 멤버가 그룹에 배정되었습니다.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontStyle: FontStyle.italic,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
               ],
@@ -188,8 +196,13 @@ class DiscussionGroupEditWidgets {
   static Widget _buildDraggableDiscussionGroups(
     BuildContext context, {
     required Map<int, List<AttendanceIdAndNameModel>> editingGroups,
-    required void Function(AttendanceIdAndNameModel member, int targetGroupNumber) onMoveMemberToGroup,
-    required void Function(AttendanceIdAndNameModel member) onRemoveMemberFromGroup,
+    required void Function(
+      AttendanceIdAndNameModel member,
+      int targetGroupNumber,
+    )
+    onMoveMemberToGroup,
+    required void Function(AttendanceIdAndNameModel member)
+    onRemoveMemberFromGroup,
   }) {
     if (editingGroups.isEmpty) {
       return _buildNoGroupsMessage(context);
@@ -245,7 +258,11 @@ class DiscussionGroupEditWidgets {
     BuildContext context, {
     required int groupNumber,
     required List<AttendanceIdAndNameModel> members,
-    required void Function(AttendanceIdAndNameModel member, int targetGroupNumber) onMoveMemberToGroup,
+    required void Function(
+      AttendanceIdAndNameModel member,
+      int targetGroupNumber,
+    )
+    onMoveMemberToGroup,
   }) {
     return DragTarget<AttendanceIdAndNameModel>(
       onAcceptWithDetails: (details) {
@@ -253,7 +270,7 @@ class DiscussionGroupEditWidgets {
       },
       builder: (context, candidateData, rejectedData) {
         final isHighlighted = candidateData.isNotEmpty;
-        
+
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: double.infinity,
@@ -264,7 +281,7 @@ class DiscussionGroupEditWidgets {
             ),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isHighlighted 
+              color: isHighlighted
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).colorScheme.primary.withOpacity(0.3),
               width: isHighlighted ? 2.0 : 1.5,
@@ -279,7 +296,7 @@ class DiscussionGroupEditWidgets {
                   Icon(
                     Icons.group,
                     size: 18,
-                    color: isHighlighted 
+                    color: isHighlighted
                         ? Theme.of(context).colorScheme.primary
                         : Theme.of(context).colorScheme.primary,
                   ),
@@ -303,9 +320,14 @@ class DiscussionGroupEditWidgets {
                   if (members.isEmpty) ...[
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.error.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -338,7 +360,9 @@ class DiscussionGroupEditWidgets {
                   '💭 이 그룹에는 아직 배정된 멤버가 없습니다.\n멤버를 드래그해서 여기로 옮겨보세요.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontStyle: FontStyle.italic,
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
               ],
@@ -352,7 +376,11 @@ class DiscussionGroupEditWidgets {
   /// 🎯 새 그룹 생성 드롭 존
   static Widget _buildNewGroupDropZone(
     BuildContext context, {
-    required void Function(AttendanceIdAndNameModel member, int targetGroupNumber) onMoveMemberToGroup,
+    required void Function(
+      AttendanceIdAndNameModel member,
+      int targetGroupNumber,
+    )
+    onMoveMemberToGroup,
     required VoidCallback onCreateNewGroup,
     required Map<int, List<AttendanceIdAndNameModel>> editingGroups,
   }) {
@@ -360,18 +388,18 @@ class DiscussionGroupEditWidgets {
       onAcceptWithDetails: (details) {
         // 새 그룹 생성
         onCreateNewGroup();
-        
+
         // 새로 생성된 그룹 번호 계산
-        final newGroupNumber = editingGroups.isEmpty 
-            ? 1 
+        final newGroupNumber = editingGroups.isEmpty
+            ? 1
             : editingGroups.keys.reduce((a, b) => a > b ? a : b) + 1;
-        
+
         // 드래그된 멤버를 새 그룹으로 이동
         onMoveMemberToGroup(details.data, newGroupNumber);
       },
       builder: (context, candidateData, rejectedData) {
         final isHighlighted = candidateData.isNotEmpty;
-        
+
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: double.infinity,
@@ -383,7 +411,7 @@ class DiscussionGroupEditWidgets {
             ),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isHighlighted 
+              color: isHighlighted
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).colorScheme.primary.withOpacity(0.3),
               width: isHighlighted ? 2.0 : 1.5,
@@ -399,7 +427,7 @@ class DiscussionGroupEditWidgets {
               ),
               const SizedBox(width: 8),
               Text(
-                isHighlighted 
+                isHighlighted
                     ? '➕ 새 그룹을 만들고 여기에 추가하세요!'
                     : '➕ 멤버를 여기로 드래그하면 새 그룹이 생성됩니다',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -423,7 +451,7 @@ class DiscussionGroupEditWidgets {
     return Draggable<AttendanceIdAndNameModel>(
       data: member,
       dragAnchorStrategy: pointerDragAnchorStrategy,
-      
+
       // 🎯 드래그 시작 시 핸틱 피드백
       onDragStarted: () {
         HapticFeedback.lightImpact();
@@ -431,13 +459,15 @@ class DiscussionGroupEditWidgets {
           print('🚀 [드래그 시작] ${member.memberName} 드래그 시작');
         }
       },
-      
+
       // 🎯 드래그 종료 시 로깅 및 핸틱 피드백
       onDragEnd: (details) {
         if (AppConfig.debugMode) {
-          print('📍 [드래그 종료] ${member.memberName} 드래그 종료: ${{"wasAccepted": details.wasAccepted, "offset": details.offset}}');
+          print(
+            '📍 [드래그 종료] ${member.memberName} 드래그 종료: ${{"wasAccepted": details.wasAccepted, "offset": details.offset}}',
+          );
         }
-        
+
         // 드롭 성공 시 성공 피드백, 실패 시 실패 피드백
         if (details.wasAccepted) {
           HapticFeedback.mediumImpact(); // 성공: 중간 진동
@@ -445,7 +475,7 @@ class DiscussionGroupEditWidgets {
           HapticFeedback.lightImpact(); // 실패: 가벼운 진동
         }
       },
-      
+
       // 🎯 드래그 중 피드백 (회전 효과 제거)
       feedback: Material(
         elevation: 8, // 좌더 깊은 그림자
@@ -454,15 +484,11 @@ class DiscussionGroupEditWidgets {
           scale: 1.15, // 더 크게 확대
           child: Opacity(
             opacity: 0.9, // 덜 투명하게
-            child: _buildMemberCard(
-              context, 
-              member: member,
-              isDragging: true,
-            ),
+            child: _buildMemberCard(context, member: member, isDragging: true),
           ),
         ),
       ),
-      
+
       // 🎯 드래그 중 원본 카드 상태
       childWhenDragging: AnimatedScale(
         scale: 0.95, // 살짝 작아지게
@@ -473,7 +499,7 @@ class DiscussionGroupEditWidgets {
           child: _buildMemberCard(context, member: member, isDimmed: true),
         ),
       ),
-      
+
       child: _buildMemberCard(context, member: member),
     );
   }
@@ -489,10 +515,18 @@ class DiscussionGroupEditWidgets {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: _getMemberCardColor(context, isDragging: isDragging, isDimmed: isDimmed),
+        color: _getMemberCardColor(
+          context,
+          isDragging: isDragging,
+          isDimmed: isDimmed,
+        ),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _getMemberCardBorderColor(context, isDragging: isDragging, isDimmed: isDimmed),
+          color: _getMemberCardBorderColor(
+            context,
+            isDragging: isDragging,
+            isDimmed: isDimmed,
+          ),
           width: isDragging ? 2.0 : 1.0,
         ),
         boxShadow: _getMemberCardShadow(context, isDragging: isDragging),
@@ -504,12 +538,12 @@ class DiscussionGroupEditWidgets {
           Icon(
             Icons.drag_indicator,
             size: 16,
-            color: Theme.of(context).colorScheme.primary.withOpacity(
-              isDimmed ? 0.4 : 0.7,
-            ),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withOpacity(isDimmed ? 0.4 : 0.7),
           ),
           const SizedBox(width: 6),
-          
+
           // 🎯 사용자 아이콘 (애니메이션)
           AnimatedScale(
             scale: isDragging ? 1.1 : 1.0,
@@ -517,50 +551,72 @@ class DiscussionGroupEditWidgets {
             child: Icon(
               Icons.person,
               size: 16,
-              color: Theme.of(context).colorScheme.primary.withOpacity(
-                isDimmed ? 0.5 : 1.0,
-              ),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withOpacity(isDimmed ? 0.5 : 1.0),
             ),
           ),
           const SizedBox(width: 6),
-          
+
           // 🎯 멤버 이름 (애니메이션)
           AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 200),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: isDragging ? FontWeight.bold : FontWeight.w600,
-              color: _getMemberCardTextColor(context, isDragging: isDragging, isDimmed: isDimmed),
-            ) ?? const TextStyle(),
+            style:
+                Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: isDragging ? FontWeight.bold : FontWeight.w600,
+                  color: _getMemberCardTextColor(
+                    context,
+                    isDragging: isDragging,
+                    isDimmed: isDimmed,
+                  ),
+                ) ??
+                const TextStyle(),
             child: Text(member.memberName),
           ),
         ],
       ),
     );
   }
-  
+
   /// 🎨 멤버 카드 색상 결정
-  static Color _getMemberCardColor(BuildContext context, {bool isDragging = false, bool isDimmed = false}) {
+  static Color _getMemberCardColor(
+    BuildContext context, {
+    bool isDragging = false,
+    bool isDimmed = false,
+  }) {
     if (isDragging) return Theme.of(context).colorScheme.primaryContainer;
     if (isDimmed) return Theme.of(context).colorScheme.surface.withOpacity(0.7);
     return Theme.of(context).colorScheme.surface;
   }
-  
+
   /// 🎨 멤버 카드 테두리 색상 결정
-  static Color _getMemberCardBorderColor(BuildContext context, {bool isDragging = false, bool isDimmed = false}) {
+  static Color _getMemberCardBorderColor(
+    BuildContext context, {
+    bool isDragging = false,
+    bool isDimmed = false,
+  }) {
     if (isDragging) return Theme.of(context).colorScheme.primary;
     if (isDimmed) return Theme.of(context).colorScheme.outline.withOpacity(0.1);
     return Theme.of(context).colorScheme.outline.withOpacity(0.2);
   }
-  
+
   /// 🎨 멤버 카드 텍스트 색상 결정
-  static Color _getMemberCardTextColor(BuildContext context, {bool isDragging = false, bool isDimmed = false}) {
+  static Color _getMemberCardTextColor(
+    BuildContext context, {
+    bool isDragging = false,
+    bool isDimmed = false,
+  }) {
     if (isDragging) return Theme.of(context).colorScheme.onPrimaryContainer;
-    if (isDimmed) return Theme.of(context).colorScheme.onSurface.withOpacity(0.5);
+    if (isDimmed)
+      return Theme.of(context).colorScheme.onSurface.withOpacity(0.5);
     return Theme.of(context).colorScheme.onSurface;
   }
-  
+
   /// 🎨 멤버 카드 그림자 결정
-  static List<BoxShadow>? _getMemberCardShadow(BuildContext context, {bool isDragging = false}) {
+  static List<BoxShadow>? _getMemberCardShadow(
+    BuildContext context, {
+    bool isDragging = false,
+  }) {
     if (isDragging) {
       return [
         BoxShadow(
@@ -594,9 +650,7 @@ class DiscussionGroupEditWidgets {
             label: const Text('새 그룹 추가'),
             style: OutlinedButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.primary,
-              side: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              side: BorderSide(color: Theme.of(context).colorScheme.primary),
             ),
           ),
         ),
@@ -611,9 +665,7 @@ class DiscussionGroupEditWidgets {
             label: const Text('모든 그룹 해제'),
             style: OutlinedButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
-              side: BorderSide(
-                color: Theme.of(context).colorScheme.error,
-              ),
+              side: BorderSide(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ),
@@ -649,34 +701,25 @@ class DiscussionGroupEditWidgets {
       duration: const Duration(milliseconds: 300),
       transitionBuilder: (child, animation) {
         return ScaleTransition(
-          scale: Tween<double>(
-            begin: 0.7,
-            end: 1.0,
-          ).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: Curves.bounceOut,
-            ),
+          scale: Tween<double>(begin: 0.7, end: 1.0).animate(
+            CurvedAnimation(parent: animation, curve: Curves.bounceOut),
           ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
+          child: FadeTransition(opacity: animation, child: child),
         );
       },
       child: Text(
-        '📥 미할당 인원 (${memberCount}명)',
-        key: ValueKey<String>('unassigned_count_${memberCount}'),
+        '📥 미할당 인원 ($memberCount명)',
+        key: ValueKey<String>('unassigned_count_$memberCount'),
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
           fontWeight: FontWeight.bold,
-          color: isHighlighted 
+          color: isHighlighted
               ? Theme.of(context).colorScheme.primary
               : Theme.of(context).colorScheme.error,
         ),
       ),
     );
   }
-  
+
   /// 🎯 애니메이션 그룹 제목 (인원 수 변화 시 애니메이션)
   static Widget _buildAnimatedGroupTitle(
     BuildContext context, {
@@ -688,24 +731,17 @@ class DiscussionGroupEditWidgets {
       transitionBuilder: (child, animation) {
         // 🎯 세련된 결합 애니메이션: 스케일 + 페이드
         return ScaleTransition(
-          scale: Tween<double>(
-            begin: 0.8,
-            end: 1.0,
-          ).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: Curves.elasticOut,
-            ),
+          scale: Tween<double>(begin: 0.8, end: 1.0).animate(
+            CurvedAnimation(parent: animation, curve: Curves.elasticOut),
           ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
+          child: FadeTransition(opacity: animation, child: child),
         );
       },
       child: Text(
-        '🎯 ${groupNumber}조 (${memberCount}명)',
-        key: ValueKey<String>('group_${groupNumber}_count_${memberCount}'), // 고유한 키로 애니메이션 트리거
+        '🎯 $groupNumber조 ($memberCount명)',
+        key: ValueKey<String>(
+          'group_${groupNumber}_count_$memberCount',
+        ), // 고유한 키로 애니메이션 트리거
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.bold,
           color: Theme.of(context).colorScheme.onSurface,
@@ -714,14 +750,16 @@ class DiscussionGroupEditWidgets {
       ),
     );
   }
-  
+
   /// 그룹이 없을 때 메시지 (기존 유지)
   static Widget _buildNoGroupsMessage(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withOpacity(0.3),

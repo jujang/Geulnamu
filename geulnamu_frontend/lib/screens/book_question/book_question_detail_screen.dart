@@ -3,14 +3,13 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../widgets/common/loading_widgets.dart';
-import '../../core/theme.dart';
 import '../../core/config/app_config.dart';
 import '../../services/home/home_service.dart';
 import 'mixins/book_question_detail_logic_mixin.dart';
 import 'widgets/book_question_detail_widgets.dart';
 
 /// 발제문 상세 페이지
-/// 
+///
 /// 기능:
 /// - 모임별 발제문을 그룹(조)별 탭으로 표시
 /// - 포스트잇 모양의 발제문 카드
@@ -20,7 +19,7 @@ import 'widgets/book_question_detail_widgets.dart';
 class BookQuestionDetailScreen extends StatefulWidget {
   /// 모임 ID (필수)
   final int meetingId;
-  
+
   /// 모임 제목 (선택, 헤더 표시용)
   final String? meetingTitle;
 
@@ -31,18 +30,18 @@ class BookQuestionDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<BookQuestionDetailScreen> createState() => _BookQuestionDetailScreenState();
+  State<BookQuestionDetailScreen> createState() =>
+      _BookQuestionDetailScreenState();
 }
 
 class _BookQuestionDetailScreenState extends State<BookQuestionDetailScreen>
     with TickerProviderStateMixin, BookQuestionDetailLogicMixin {
-  
   final HomeService _homeService = HomeService();
 
   @override
   void initState() {
     super.initState();
-    
+
     // 화면 로드 후 초기 데이터 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeScreen();
@@ -56,7 +55,7 @@ class _BookQuestionDetailScreenState extends State<BookQuestionDetailScreen>
       debugPrint('   - meetingId: ${widget.meetingId}');
       debugPrint('   - meetingTitle: ${widget.meetingTitle ?? "제목 없음"}');
     }
-    
+
     await initializeBookQuestions(meetingId: widget.meetingId);
   }
 
@@ -83,10 +82,11 @@ class _BookQuestionDetailScreenState extends State<BookQuestionDetailScreen>
               ),
             ],
             // 플로팅 액션 버튼 (새로고침)
-            floatingActionButton: BookQuestionDetailWidgets.buildFloatingActionButton(
-              context,
-              () => _handleRefresh(),
-            ),
+            floatingActionButton:
+                BookQuestionDetailWidgets.buildFloatingActionButton(
+                  context,
+                  () => _handleRefresh(),
+                ),
             body: _buildMainContent(),
           ),
         );
@@ -169,7 +169,7 @@ class _BookQuestionDetailScreenState extends State<BookQuestionDetailScreen>
     if (AppConfig.debugMode) {
       debugPrint('🔄 [발제문 상세] 새로고침 시작');
     }
-    
+
     await refreshBookQuestions(meetingId: widget.meetingId);
   }
 
@@ -179,11 +179,11 @@ class _BookQuestionDetailScreenState extends State<BookQuestionDetailScreen>
       BookQuestionDetailWidgets.showPermissionSnackBar(context);
       return;
     }
-    
+
     if (AppConfig.debugMode) {
       debugPrint('✏️ [발제문 수정] ID: ${bookQuestion.bookQuestionId}');
     }
-    
+
     handleEditBookQuestion(bookQuestion, widget.meetingId);
   }
 
@@ -193,11 +193,11 @@ class _BookQuestionDetailScreenState extends State<BookQuestionDetailScreen>
       BookQuestionDetailWidgets.showPermissionSnackBar(context);
       return;
     }
-    
+
     if (AppConfig.debugMode) {
       debugPrint('🗑️ [발제문 삭제] ID: ${bookQuestion.bookQuestionId}');
     }
-    
+
     handleDeleteBookQuestion(bookQuestion, widget.meetingId);
   }
 
