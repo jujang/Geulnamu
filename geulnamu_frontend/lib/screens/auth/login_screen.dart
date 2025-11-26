@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/config/app_config.dart';
-import '../../core/theme.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -70,15 +69,15 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Scaffold(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios, color: colorScheme.onBackground),
+          icon: Icon(Icons.arrow_back_ios, color: colorScheme.onSurface),
         ),
       ),
       body: SafeArea(
@@ -134,17 +133,14 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _buildLogoSection() {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Column(
       children: [
         // 로고 이미지 (책갈피 디자인 컨셉) - 크기 줄임
-        Container(
+        SizedBox(
           width: 140,
           height: 140,
-          child: Image.asset(
-            'assets/logo/app_logo.png',
-            fit: BoxFit.contain,
-          ),
+          child: Image.asset('assets/logo/app_logo.png', fit: BoxFit.contain),
         ),
 
         const SizedBox(height: 20),
@@ -155,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen>
           style: GoogleFonts.notoSans(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: colorScheme.onBackground,
+            color: colorScheme.onSurface,
             letterSpacing: 2.0,
           ),
         ),
@@ -308,7 +304,7 @@ class _LoginScreenState extends State<LoginScreen>
                         width: 24,
                         height: 24,
                         fit: BoxFit.contain,
-                        filterQuality: FilterQuality.high,  // 🎨 이미지 품질 향상
+                        filterQuality: FilterQuality.high, // 🎨 이미지 품질 향상
                       ),
                       const SizedBox(width: 8),
                       // 텍스트
@@ -331,7 +327,7 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _buildFooterSection() {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Text(
       '로그인하면 서비스 이용약관 및 개인정보처리방침에 동의하게 됩니다.',
       textAlign: TextAlign.center,
@@ -385,18 +381,18 @@ class _LoginScreenState extends State<LoginScreen>
                                   ? 0.1
                                   : (_isDifferentAccountHovering ? 0.3 : 0.15),
                             ),
-                        blurRadius: _isDifferentAccountPressed
-                            ? 2
-                            : (_isDifferentAccountHovering ? 8 : 4),
-                        offset: Offset(
-                          0,
-                          _isDifferentAccountPressed
-                              ? 1
-                              : (_isDifferentAccountHovering ? 4 : 2),
-                        ),
+                            blurRadius: _isDifferentAccountPressed
+                                ? 2
+                                : (_isDifferentAccountHovering ? 8 : 4),
+                            offset: Offset(
+                              0,
+                              _isDifferentAccountPressed
+                                  ? 1
+                                  : (_isDifferentAccountHovering ? 4 : 2),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -417,7 +413,7 @@ class _LoginScreenState extends State<LoginScreen>
                         ],
                       ),
                     );
-                  }
+                  },
                 ),
               ),
             ),

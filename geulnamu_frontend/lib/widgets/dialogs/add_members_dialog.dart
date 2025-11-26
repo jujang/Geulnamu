@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/theme.dart';
 import '../../models/attendance/attendance_status_model.dart';
 
 /// 토론 그룹에 인원 추가 다이얼로그

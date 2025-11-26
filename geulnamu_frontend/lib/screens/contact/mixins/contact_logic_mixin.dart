@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../services/contact/contact_service.dart';
-import '../../../core/config/app_config.dart';
 
 /// 문의하기 화면의 로직을 담당하는 Mixin
 ///

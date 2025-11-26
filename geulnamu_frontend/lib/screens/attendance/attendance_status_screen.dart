@@ -4,7 +4,6 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../widgets/common/loading_widgets.dart';
 import '../../core/theme.dart';
-import '../../core/config/app_config.dart'; // 🆕 AppConfig import 추가
 import '../../services/home/home_service.dart';
 import 'mixins/attendance_status_logic_mixin.dart';
 import 'widgets/attendance_status_widgets.dart';
@@ -18,7 +17,7 @@ import 'widgets/attendance_status_widgets.dart';
 class AttendanceStatusScreen extends StatefulWidget {
   /// 모임 ID
   final int meetingId;
-  
+
   /// 모임 제목 (선택사항, AppBar 제목 표시용)
   final String? meetingTitle;
 
@@ -39,7 +38,7 @@ class _AttendanceStatusScreenState extends State<AttendanceStatusScreen>
   @override
   void initState() {
     super.initState();
-    
+
     // 화면 로드 후 초기 데이터 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
       initializeAttendanceStatus(widget.meetingId);
@@ -55,7 +54,7 @@ class _AttendanceStatusScreenState extends State<AttendanceStatusScreen>
           isLoading: homeService.isProcessing,
           loadingMessage: homeService.currentOperation,
           child: MainLayout(
-            title: widget.meetingTitle != null 
+            title: widget.meetingTitle != null
                 ? '${widget.meetingTitle} - 출석 현황'
                 : '출석 현황',
             isHomePage: false, // 서브 페이지이므로 뒤로가기 버튼 표시
@@ -106,16 +105,10 @@ class _AttendanceStatusScreenState extends State<AttendanceStatusScreen>
     return Column(
       children: [
         // 출석 요약 카드
-        AttendanceStatusWidgets.buildSummaryCard(
-          context,
-          summary!,
-        ),
+        AttendanceStatusWidgets.buildSummaryCard(context, summary!),
 
         // 구분선
-        Divider(
-          height: 1,
-          color: context.colors.outline.withOpacity(0.2),
-        ),
+        Divider(height: 1, color: context.colors.outline.withOpacity(0.2)),
 
         // 출석자 목록 헤더
         AttendanceStatusWidgets.buildAttendanceListHeader(context),

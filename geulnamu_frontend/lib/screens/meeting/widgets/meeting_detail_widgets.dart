@@ -23,22 +23,29 @@ class MeetingDetailWidgets {
     required String message,
     required VoidCallback onRetry,
   }) {
+    // 인증 관련 에러 감지
+    final isAuthError = _isAuthenticationError(message);
+    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: context.colors.error),
+            Icon(
+              isAuthError ? Icons.lock_outline : Icons.error_outline,
+              size: 64,
+              color: isAuthError ? context.colors.primary : context.colors.error,
+            ),
             const SizedBox(height: 16),
             Text(
-              '모임 정보를 불러올 수 없습니다',
+              isAuthError ? '로그인이 필요합니다' : '모임 정보를 불러올 수 없습니다',
               style: context.textStyles.headlineSmall?.copyWith(fontSize: 20),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              message.replaceAll('[모임 상세 조회]', '').trim(),
+              _cleanErrorMessage(message),
               style: context.textStyles.bodyLarge?.copyWith(
                 color: context.colors.onSurfaceVariant,
                 fontSize: 16,
@@ -46,15 +53,59 @@ class MeetingDetailWidgets {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('다시 시도', style: TextStyle(fontSize: 16)),
+            
+            // 버튼들
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              alignment: WrapAlignment.center,
+              children: [
+                // 다시 시도 버튼
+                ElevatedButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('다시 시도', style: TextStyle(fontSize: 16)),
+                ),
+                
+                // 인증 에러: 로그인 버튼 / 일반 에러: 홈으로 버튼
+                if (isAuthError)
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).pushReplacementNamed('/login'),
+                    icon: const Icon(Icons.login),
+                    label: const Text('로그인하기', style: TextStyle(fontSize: 16)),
+                  )
+                else
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).pushReplacementNamed('/home'),
+                    icon: const Icon(Icons.home),
+                    label: const Text('홈으로', style: TextStyle(fontSize: 16)),
+                  ),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+  
+  /// 인증 관련 에러인지 확인
+  static bool _isAuthenticationError(String message) {
+    final lowerMessage = message.toLowerCase();
+    return lowerMessage.contains('401') ||
+           lowerMessage.contains('로그인') ||
+           lowerMessage.contains('토큰') ||
+           lowerMessage.contains('인증') ||
+           lowerMessage.contains('unauthorized') ||
+           lowerMessage.contains('authentication');
+  }
+  
+  /// 에러 메시지 정리 (불필요한 접두사 제거)
+  static String _cleanErrorMessage(String message) {
+    return message
+        .replaceAll('[모임 상세 조회]', '')
+        .replaceAll('[운영진용 모임 상세 조회]', '')
+        .replaceAll('Exception:', '')
+        .trim();
   }
 
   /// 메인 콘텐츠 위젯

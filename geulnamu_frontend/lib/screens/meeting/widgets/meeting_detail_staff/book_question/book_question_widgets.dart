@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../../models/book_question/book_question_model.dart';
-import '../../../../../core/config/app_config.dart';
 import 'post_it_book_question_widget.dart';
 
 /// 발제문 섹션 위젯들
@@ -25,7 +24,11 @@ class BookQuestionWidgets {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 섹션 헤더 (총 갯수 포함)
-            _buildSectionHeader(context, onRefresh, bookQuestionList: bookQuestionList ?? []),
+            _buildSectionHeader(
+              context,
+              onRefresh,
+              bookQuestionList: bookQuestionList ?? [],
+            ),
             const SizedBox(height: 16),
 
             // 내용
@@ -75,7 +78,7 @@ class BookQuestionWidgets {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            '총 ${totalCount}개',
+            '총 $totalCount개',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onPrimaryContainer,
               fontWeight: FontWeight.w500,

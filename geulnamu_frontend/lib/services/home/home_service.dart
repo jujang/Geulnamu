@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/config/app_config.dart'; // AppConfig import 추가
-import '../../core/constants/permission_constants.dart'; // 권한 상수 import
 
 /// 홈화면 비즈니스 로직을 담당하는 Singleton Service
 ///
