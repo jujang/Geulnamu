@@ -121,21 +121,19 @@ class MeetingWidgets {
               // 🎯 하단: 출석 버튼들 (5:5 비율)
               Row(
                 children: [
-                  // 왼쪽: 출석 버튼 (QR 출석) - 출석 상태에 따라 비활성화
+                  // 왼쪽: 출석 버튼 (QR 출석) - 출석 상태 및 모임 날짜에 따라 비활성화
                   Expanded(
                     child: ElevatedButton.icon(
-                      // 출석, 지각, 불참 상태일 때 비활성화
+                      // 출석/지각/불참 상태이거나 모임 날짜가 지났으면 비활성화 (당일까지는 출석 가능)
                       onPressed:
-                          _isAttendanceButtonDisabled(meeting.attendanceStatus?.value)
+                          _isAttendanceButtonDisabled(meeting)
                           ? null
                           : onAttendance,
                       icon: Icon(
                         Icons.qr_code_scanner,
                         size: 18,
                         color:
-                            _isAttendanceButtonDisabled(
-                              meeting.attendanceStatus?.value,
-                            )
+                            _isAttendanceButtonDisabled(meeting)
                             ? context.colors.onSurface.withOpacity(0.38)
                             : context.colors.onPrimary,
                       ),
@@ -143,9 +141,7 @@ class MeetingWidgets {
                         '출석',
                         style: TextStyle(
                           color:
-                              _isAttendanceButtonDisabled(
-                                meeting.attendanceStatus?.toString(),
-                              )
+                              _isAttendanceButtonDisabled(meeting)
                               ? context.colors.onSurface.withOpacity(0.38)
                               : context.colors.onPrimary,
                           fontWeight: FontWeight.w600,
@@ -153,15 +149,11 @@ class MeetingWidgets {
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
-                            _isAttendanceButtonDisabled(
-                              meeting.attendanceStatus?.value,
-                            )
+                            _isAttendanceButtonDisabled(meeting)
                             ? context.colors.onSurface.withOpacity(0.12)
                             : context.colors.primary,
                         foregroundColor:
-                            _isAttendanceButtonDisabled(
-                              meeting.attendanceStatus?.value,
-                            )
+                            _isAttendanceButtonDisabled(meeting)
                             ? context.colors.onSurface.withOpacity(0.38)
                             : context.colors.onPrimary,
                         shape: RoundedRectangleBorder(
@@ -216,13 +208,37 @@ class MeetingWidgets {
   // ==================== 공통 헬퍼 메서드들 ====================
 
   /// 출석 버튼 비활성화 여부 확인
-  /// 출석, 지각, 불참 상태일 때 비활성화
-  static bool _isAttendanceButtonDisabled(String? attendanceStatus) {
-    if (attendanceStatus == null || attendanceStatus.isEmpty) return false;
+  /// 
+  /// 비활성화 조건:
+  /// 1. 이미 출석(ATTEND) 또는 지각(ATTEND_LATE) 상태일 때 (이미 출석 처리됨)
+  /// 2. 모임 날짜가 오늘 이전(어제 이전)일 때
+  /// 
+  /// 활성화 조건:
+  /// - 진행 전(NOT_STARTED) 또는 불참(NOT_ATTEND) 상태이고, 모임 날짜가 오늘 또는 미래일 때
+  /// - 당일에는 모임 시간이 지났더라도 지각 출석 가능!
+  static bool _isAttendanceButtonDisabled(MeetingInfo meeting) {
+    // 1. 이미 출석/지각 상태면 비활성화 (이미 출석 처리 완료)
+    // NOT_ATTEND(불참)은 제외 - 당일에는 지각으로라도 출석 가능
+    const attendedStatuses = ['ATTEND', 'ATTEND_LATE'];
+    if (attendedStatuses.contains(meeting.attendanceStatus.value)) {
+      return true;
+    }
     
-    // 출석 상태가 '출석', '지각', '불참'일 때 비활성화
-    const disabledStatuses = ['ATTEND', 'ATTEND_LATE', 'NOT_ATTEND'];
-    return disabledStatuses.contains(attendanceStatus);
+    // 2. 모임 날짜가 오늘 이전(어제 이전)이면 비활성화
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final meetingDate = DateTime(
+      meeting.meetingDateTime.year,
+      meeting.meetingDateTime.month,
+      meeting.meetingDateTime.day,
+    );
+    
+    // 모임 날짜가 오늘보다 이전이면 비활성화 (당일까지는 출석 가능)
+    if (meetingDate.isBefore(today)) {
+      return true;
+    }
+    
+    return false;
   }
 
   /// 출석 상태 색상 가져오기
