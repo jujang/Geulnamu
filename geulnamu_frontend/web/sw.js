@@ -83,6 +83,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   
+  // 🚫 GET 요청이 아니면 Service Worker 개입 없이 바로 네트워크로 전달
+  // POST, PATCH, DELETE 등은 캐시할 수 없으므로 조기 차단
+  if (event.request.method !== 'GET') {
+    return; // event.respondWith를 호출하지 않으면 브라우저가 기본 처리
+  }
+  
   // 캐시 블랙리스트 체크
   if (shouldSkipCache(url)) {
     event.respondWith(fetch(event.request));

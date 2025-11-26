@@ -13,27 +13,26 @@ class AppConfig {
     try {
       // 🎯 환경별 파일 자동 선택
       String envFile = await _detectEnvironmentFile();
-      
+
       await dotenv.load(fileName: envFile);
-      
+
       print('✅ 환경변수 로드 완료: $envFile');
-      
     } catch (e) {
       print('❌ 환경변수 로드 실패: $e');
       print('💡 .env 파일이 있는지 확인하세요!');
       rethrow;
     }
   }
-  
+
   /// 🔍 환경 감지 및 적절한 .env 파일 선택
   static Future<String> _detectEnvironmentFile() async {
     // 1. kIsWeb으로 웹 환경 감지
     const bool isWeb = identical(0, 0.0); // 컴파일 타임 상수로 웹 감지
-    
+
     if (isWeb) {
       // 웹 환경: URL 호스트로 판단
       final String hostname = Uri.base.host;
-      
+
       if (hostname == 'localhost' || hostname == '127.0.0.1') {
         print('🏠 로컬 환경 감지 (웹): .env.local 사용');
         return '.env.local';
@@ -54,18 +53,18 @@ class AppConfig {
   static String get appVersion => dotenv.env['APP_VERSION'] ?? '1.0.0';
 
   // 🔑 카카오 OAuth 키들 (프론트엔드용)
-  static String get kakaoNativeAppKey => 
+  static String get kakaoNativeAppKey =>
       dotenv.env['KAKAO_NATIVE_APP_KEY'] ?? '';
-  static String get kakaoJavaScriptAppKey => 
+  static String get kakaoJavaScriptAppKey =>
       dotenv.env['KAKAO_JAVASCRIPT_APP_KEY'] ?? '';
-  
+
   // ℹ️ REST_API_KEY는 백엔드에서 관리합니다 (보안상 이유)
   // static String get kakaoRestApiKey => dotenv.env['KAKAO_REST_API_KEY'] ?? '';
 
   // 🌐 백엔드 API 설정 (업데이트)
-  static String get _rawApiBaseUrl => 
+  static String get _rawApiBaseUrl =>
       dotenv.env['API_BASE_URL'] ?? 'http://localhost:8080';
-  
+
   /// 완전한 API Base URL (백엔드 경로와 일치)
   static String get apiBaseUrl {
     final baseUrl = _rawApiBaseUrl.trim();
@@ -86,22 +85,20 @@ class AppConfig {
   }
 
   // 📱 앱 설정
-  static String get androidPackageName => 
+  static String get androidPackageName =>
       dotenv.env['ANDROID_PACKAGE_NAME'] ?? 'com.geulnamu.app';
-  static String get iosBundleId => 
+  static String get iosBundleId =>
       dotenv.env['IOS_BUNDLE_ID'] ?? 'com.geulnamu.app';
-  static String get webDomain => 
+  static String get webDomain =>
       dotenv.env['WEB_DOMAIN'] ?? 'http://localhost:3030';
 
   // 🔄 OAuth 설정
-  static String get kakaoRedirectUri => 
+  static String get kakaoRedirectUri =>
       dotenv.env['KAKAO_REDIRECT_URI'] ?? '$webDomain/auth/callback';
 
   // 🛠️ 디버그 설정
-  static bool get debugMode => 
+  static bool get debugMode =>
       dotenv.env['DEBUG_MODE']?.toLowerCase() == 'true';
-  static String get logLevel => 
-      dotenv.env['LOG_LEVEL'] ?? 'info';
 
   // 🌐 환경별 설정
   static bool get isProduction => appEnv.toLowerCase() == 'production';
@@ -110,17 +107,17 @@ class AppConfig {
 
   // 🔍 유효성 검사 (프론트엔드 필수 설정)
   static bool get isValidConfig {
-    final hasKakaoKeys = kakaoNativeAppKey.isNotEmpty && 
-                        kakaoJavaScriptAppKey.isNotEmpty;
+    final hasKakaoKeys =
+        kakaoNativeAppKey.isNotEmpty && kakaoJavaScriptAppKey.isNotEmpty;
     final hasApiUrl = _rawApiBaseUrl.isNotEmpty;
-    
+
     return hasKakaoKeys && hasApiUrl;
   }
 
   // 🚨 누락된 설정 체크
   static List<String> get missingConfigs {
     List<String> missing = [];
-    
+
     if (kakaoNativeAppKey.isEmpty) {
       missing.add('KAKAO_NATIVE_APP_KEY');
     }
@@ -130,7 +127,7 @@ class AppConfig {
     if (_rawApiBaseUrl.isEmpty) {
       missing.add('API_BASE_URL');
     }
-    
+
     return missing;
   }
 
@@ -155,13 +152,13 @@ class AppConfig {
       print('리다이렉트 URI: $kakaoRedirectUri');
       print('디버그 모드: $debugMode');
       print('설정 유효성: ${isValidConfig ? '✅' : '❌'}');
-      
+
       if (!isValidConfig) {
         print('❌ 누락된 설정: ${missingConfigs.join(', ')}');
       }
-      
+
       print('================================');
-      
+
       // API 엔드포인트 예시
       if (isValidConfig) {
         print('📡 주요 API 엔드포인트:');
@@ -178,7 +175,7 @@ class AppConfig {
     if (!isValidConfig) {
       throw Exception(
         '필수 환경변수가 누락되었습니다: ${missingConfigs.join(', ')}\n'
-        '.env 파일을 확인해주세요!'
+        '.env 파일을 확인해주세요!',
       );
     }
 
@@ -200,20 +197,22 @@ class AppConfig {
   /// 디버그용 - 전체 환경변수 출력 (민감 정보 마스킹)
   static void printAllEnvironmentVariables() {
     if (!debugMode) return;
-    
+
     print('🔍 === 전체 환경변수 ===');
-    
+
     dotenv.env.forEach((key, value) {
       // 민감한 정보는 마스킹
       String maskedValue = value;
-      if (key.contains('KEY') || key.contains('SECRET') || key.contains('PASSWORD')) {
-        maskedValue = value.length > 6 
+      if (key.contains('KEY') ||
+          key.contains('SECRET') ||
+          key.contains('PASSWORD')) {
+        maskedValue = value.length > 6
             ? '${value.substring(0, 3)}${'*' * (value.length - 6)}${value.substring(value.length - 3)}'
             : '***';
       }
       print('$key: $maskedValue');
     });
-    
+
     print('========================');
   }
 }
