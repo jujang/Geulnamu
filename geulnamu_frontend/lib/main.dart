@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 🎯 한국어 지원
+import 'package:firebase_core/firebase_core.dart'; // 🔥 Firebase Core
+import 'firebase_options.dart'; // 🔥 Firebase 설정
 
 // Core imports
 import 'core/config/app_config.dart';
@@ -39,6 +41,7 @@ import 'services/attendance/attendance_service.dart'; // 출석 서비스
 import 'services/member/member_service.dart'; // 모임원 서비스
 import 'services/profile/profile_service.dart'; // 프로필 서비스
 import 'services/presentation/presentation_service.dart'; // 발제문 서비스
+import 'services/notification/fcm_service.dart'; // 🔥 FCM 푸시 알림 서비스
 
 // 🎯 Global Navigator Key - 전역에서 접근 가능
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -48,6 +51,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    // 🔥 Firebase 초기화 (가장 먼저!)
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print('✅ Firebase 초기화 완료');
+
     // 환경변수 초기화
     await AppConfig.initialize();
 
@@ -60,6 +69,9 @@ void main() async {
     MemberService(); // Singleton 인스턴스 생성
     ProfileService(); // Singleton 인스턴스 생성
     PresentationService(); // Singleton 인스턴스 생성
+
+    // 🔥 FCM 푸시 알림 서비스 초기화
+    await FcmService().initialize();
 
     // 앱 설정 정보 출력 (디버그용)
     AppConfig.printConfig();
