@@ -74,3 +74,8 @@ lib/core/config/keys.dart
 # mkcert로 생성된 인증서들
 localhost*.pem
 localhost*.key
+
+# Node Modules
+node_modules/
+package-lock.json
+package.json

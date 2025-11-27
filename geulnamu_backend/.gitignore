@@ -37,3 +37,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Firebase FCM ###
+geulnamu-app-firebase-adminsdk.json

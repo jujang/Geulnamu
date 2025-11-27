@@ -49,6 +49,8 @@ dependencies:
   # QR Code
   qr_flutter: ^4.1.0 # QR 코드 생성
   ai_barcode_scanner: ^5.1.5 # QR 코드 스캔 (웹/모바일 모두 지원)
+  firebase_core: ^4.2.1
+  firebase_messaging: ^16.0.4
 
 dev_dependencies:
   flutter_test:
