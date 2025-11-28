@@ -1,6 +1,7 @@
 package com.geulnamu.domain.member;
 
 import com.geulnamu.domain.attendance.Attendance;
+import com.geulnamu.domain.fcmToken.FcmToken;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.shared.*;
 import com.geulnamu.domain.shared.converter.GenderConverter;
@@ -50,6 +51,9 @@ public class Member extends DateColumn {
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<Attendance> attendances;
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    private List<FcmToken> fcmTokens;
 
     @Column(name = "kakao_user_id", nullable = false, length = 50)
     private String kakaoUserId;
