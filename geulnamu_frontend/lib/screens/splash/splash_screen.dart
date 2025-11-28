@@ -91,7 +91,8 @@ class _SplashScreenState extends State<SplashScreen>
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      // 🎯 scaffoldBackgroundColor와 동일하게 설정 (다른 화면과 일관성 유지)
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,

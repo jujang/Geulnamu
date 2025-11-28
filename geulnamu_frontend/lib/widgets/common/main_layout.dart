@@ -72,6 +72,10 @@ class MainLayout extends StatelessWidget {
   /// 뒤로가기 버튼 커스텀 핸들러 (null이면 기본 Navigator.pop)
   final VoidCallback? onBackPressed;
 
+  /// 키보드가 올라올 때 화면 크기 자동 조정 여부 (기본: true)
+  /// PWA 환경에서 키보드 처리를 직접 할 때 false로 설정
+  final bool resizeToAvoidBottomInset;
+
   const MainLayout({
     super.key,
     required this.title,
@@ -91,6 +95,7 @@ class MainLayout extends StatelessWidget {
     this.onLoginTap,
     this.onLogoutTap,
     this.onBackPressed,
+    this.resizeToAvoidBottomInset = true,
   });
 
   /// 🎯 햄버거 버튼 표시 여부 계산
@@ -141,8 +146,8 @@ class MainLayout extends StatelessWidget {
           },
           child: Scaffold(
           // 🎯 테마 시스템 사용 - backgroundColor 없음
-          // 🎯 키보드가 올라올 때 화면 크기 자동 조정
-          resizeToAvoidBottomInset: true,
+          // 🎯 키보드 처리 - 화면별로 선택 가능 (기본: true)
+          resizeToAvoidBottomInset: resizeToAvoidBottomInset,
           appBar: AppHeader(
             title: title,
             // 🧭 네비게이션 패턴: 햄버거 vs 뒤로가기 버튼 (독립 제어)
