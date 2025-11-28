@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FcmQueryRepository extends JpaRepository<FcmToken, Long> {
-    Optional<FcmToken> findByToken(String token);
     Optional<FcmToken> findByMemberAndDeviceType(Member member, String deviceType);
     List<FcmToken> findByMemberIdIn(List<Long> memberIds);
-    List<FcmToken> findByMemberIdInMemberPushEnabledTrue(List<Long> memberIds);
     Optional<FcmToken> findByMember(Member member);
 }
