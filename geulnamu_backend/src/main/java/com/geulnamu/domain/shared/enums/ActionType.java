@@ -63,8 +63,11 @@ public enum ActionType {
     VOC_ISSUE_STATUS_MODIFY("이슈 상태 변경"),
 
     // 활동 내역 관련
-    ACTION_HISTORY_LIST_VIEW("활동 내역 조회");
+    ACTION_HISTORY_LIST_VIEW("활동 내역 조회"),
 
+    // FCM 앱 푸시 관련
+    FCM_TOKEN_REGISTER("FCM 토큰 등록"),
+    FCM_TOKEN_DELETE("FCM 토큰 삭제");
 
     private final String description;
 

@@ -81,7 +81,8 @@ public class SecurityConfig {
         "/discussions/groups/assign-member",
         "/action-histories/list",
         "/voc/list",
-        "/voc/{vocId}/status"
+        "/voc/{vocId}/status",
+        "/fcm-token"
     };
 
 
