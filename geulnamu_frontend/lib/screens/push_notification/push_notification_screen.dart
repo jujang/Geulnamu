@@ -236,6 +236,10 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
   Widget _buildTitleField(BuildContext context) {
     return TextFormField(
       controller: _titleController,
+      // 🎯 브라우저 자동완성 비활성화
+      autofillHints: const [],
+      autocorrect: false,
+      enableSuggestions: false,
       decoration: InputDecoration(
         hintText: '알림 제목을 입력하세요',
         filled: true,
@@ -286,6 +290,11 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
       children: [
         TextFormField(
           controller: _memberIdsController,
+          // 🎯 브라우저 자동완성 비활성화
+          autofillHints: const [],
+          autocorrect: false,
+          enableSuggestions: false,
+          keyboardType: TextInputType.number,
           decoration: InputDecoration(
             hintText: '회원 ID를 쉼표로 구분하여 입력 (예: 1, 2, 3)',
             filled: true,
