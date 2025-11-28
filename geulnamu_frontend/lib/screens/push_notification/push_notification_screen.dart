@@ -141,20 +141,14 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
 
   /// 메인 콘텐츠
   Widget _buildContent(BuildContext context) {
-    return SingleChildScrollView(
-      // 🎯 키보드가 올라올 때 자동 스크롤 및 여백 처리
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        // 키보드 높이만큼 하단 여백 추가
-        bottom: MediaQuery.of(context).viewInsets.bottom + 32,
-      ),
+    return GestureDetector(
+      // 🎯 빈 영역 탭 시 키보드 닫기
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        // 🎯 ListView 사용 - 키보드가 올라올 때 자동으로 포커스된 필드로 스크롤
+        child: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
             // 안내 카드
             _buildInfoCard(context),
@@ -181,6 +175,7 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
             // 발송 버튼
             _buildSendButton(context),
             
+            // 하단 여백
             const SizedBox(height: 32),
           ],
         ),
