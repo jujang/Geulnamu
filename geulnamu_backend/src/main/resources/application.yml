@@ -30,6 +30,10 @@ management:
     enable:
       hikari: true
 
+firebase:
+  credentials:
+    path: ${FIREBASE_CREDENTIALS_PATH}
+
 server:
   port: 8080
   servlet:
