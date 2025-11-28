@@ -27,11 +27,10 @@ public class FirebaseConfig {
 
             if(FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
-                log.info("Firebase Admin SDK 초기화 완료 ({})", firebaseCredentials.getDescription());
+                log.info("Firebase Admin SDK 초기화 완료");
             }
         } catch (Exception e) {
-            log.error("Firebase 초기화 실패: {}, {}",
-                firebaseCredentials.getDescription(), e.getMessage());
+            log.error("Firebase 초기화 실패: {}", e.getMessage());
         }
     }
 }
