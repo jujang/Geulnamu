@@ -189,43 +189,36 @@ class FcmService {
     _log('포그라운드 메시지 처리 완료');
   }
 
-  /// 🌐 브라우저 알림 표시 (Web Notification API)
-  void _showBrowserNotification(String title, String body, Map<String, dynamic> data) {
+  /// 🌐 브라우저 알림 표시 (ServiceWorker Notification API)
+  /// 
+  /// PWA 환경에서는 html.Notification() 생성자가 차단되므로
+  /// ServiceWorkerRegistration.showNotification()을 사용해야 합니다.
+  Future<void> _showBrowserNotification(String title, String body, Map<String, dynamic> data) async {
     try {
       // 알림 권한 확인
       if (html.Notification.permission == 'granted') {
-        // 알림 생성
-        final notification = html.Notification(
-          title,
-          body: body,
-          icon: '/icons/Icon-192.png', // 앱 아이콘
-          tag: 'geulnamu-notification', // 중복 알림 방지
-        );
-
-        // 알림 클릭 시 처리
-        notification.onClick.listen((event) {
-          _log('🔔 브라우저 알림 클릭됨!');
-          
-          // 해당 탭으로 포커스 이동 (JavaScript 직접 호출)
-          js.context.callMethod('focus');
-          
-          // 알림 닫기
-          notification.close();
-          
-          // 데이터에 따른 화면 이동 처리
-          if (data.containsKey('meetingId')) {
-            final meetingId = data['meetingId'];
-            _log('모임 상세 화면으로 이동: $meetingId');
-            // TODO: Navigator로 모임 상세 화면 이동
-          }
-        });
-
-        // 5초 후 자동 닫기
-        Future.delayed(const Duration(seconds: 5), () {
-          notification.close();
-        });
-
-        _log('🔔 브라우저 알림 표시 완료: $title');
+        // Service Worker를 통한 알림 표시 (PWA 환경에서 필수)
+        final jsCode = '''
+          (async function() {
+            try {
+              const registration = await navigator.serviceWorker.ready;
+              await registration.showNotification("${_escapeJsString(title)}", {
+                body: "${_escapeJsString(body)}",
+                icon: "/icons/Icon-192.png",
+                badge: "/icons/Icon-192.png",
+                tag: "geulnamu-foreground-notification",
+                vibrate: [100, 50, 100],
+                requireInteraction: false
+              });
+              console.log('🔔 [FCM] Service Worker 알림 표시 성공');
+            } catch (e) {
+              console.error('🔔 [FCM] Service Worker 알림 표시 실패:', e);
+            }
+          })();
+        ''';
+        
+        js.context.callMethod('eval', [jsCode]);
+        _log('🔔 브라우저 알림 표시 요청 완료: $title');
       } else if (html.Notification.permission == 'default') {
         // 권한 요청 필요
         _log('알림 권한이 아직 설정되지 않았습니다.', isError: true);
@@ -236,6 +229,16 @@ class FcmService {
     } catch (e) {
       _log('브라우저 알림 표시 실패: $e', isError: true);
     }
+  }
+  
+  /// 🔧 JavaScript 문자열 이스케이프 처리
+  String _escapeJsString(String input) {
+    return input
+        .replaceAll('\\', '\\\\')
+        .replaceAll('"', '\\"')
+        .replaceAll("'", "\\'")
+        .replaceAll('\n', '\\n')
+        .replaceAll('\r', '\\r');
   }
 
   /// 🔔 알림 클릭 처리
