@@ -127,11 +127,31 @@
 </head>
 <body>
   <!-- 🎯 앱 초기 로딩 화면 (Flutter 엔진 로드 전에 표시) -->
+  <!-- 스플래시 스크린과 동일한 디자인으로 자연스러운 전환 -->
   <div id="app-loading">
     <div class="loading-content">
-      <img src="icons/Icon-192.png" alt="글나무" class="loading-logo">
+      <!-- 로고 컨테이너 (스플래시 스타일) -->
+      <div class="logo-container">
+        <img src="icons/Icon-192.png" alt="글나무" class="loading-logo">
+      </div>
+      
+      <!-- 앱 이름 -->
+      <h1 class="app-name">글나무</h1>
+      
+      <!-- 서브 타이틀 -->
+      <p class="app-subtitle">BOOK CLUB</p>
+      
+      <!-- 설명 텍스트 -->
+      <p class="app-description">
+        독서 토론의 새로운 시작<br>
+        함께 읽고, 함께 성장해요
+      </p>
+      
+      <!-- 로딩 스피너 -->
       <div class="loading-spinner"></div>
-      <div class="loading-text">로딩 중...</div>
+      
+      <!-- 로딩 텍스트 -->
+      <p class="loading-text">앱을 시작하는 중...</p>
     </div>
   </div>
   
@@ -160,35 +180,108 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 12px;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    /* 로고 컨테이너 - 스플래시 스타일 */
+    #app-loading .logo-container {
+      width: 180px;
+      height: 180px;
+      background: linear-gradient(135deg, #7DD3C0 0%, #6BC4B0 100%);
+      border-radius: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(125, 211, 192, 0.3);
+      animation: float 3s ease-in-out infinite;
+      padding: 15px;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
     
     #app-loading .loading-logo {
-      width: 80px;
-      height: 80px;
-      border-radius: 16px;
-      animation: pulse 2s ease-in-out infinite;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
     
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.8; }
+    /* 앱 이름 */
+    #app-loading .app-name {
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 12px 0 0 0;
+      letter-spacing: 2px;
     }
     
-    #app-loading .loading-spinner {
-      width: 32px;
-      height: 32px;
-    }
-    
-    #app-loading .loading-text {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+    /* 서브 타이틀 */
+    #app-loading .app-subtitle {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 14px;
+      font-weight: 500;
       color: #7DD3C0;
+      margin: 0;
+      letter-spacing: 1.5px;
     }
     
-    /* 다크모드 로딩 텍스트 색상 */
+    /* 설명 텍스트 */
+    #app-loading .app-description {
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin: 8px 0 0 0;
+      line-height: 1.5;
+    }
+    
+    /* 로딩 스피너 */
+    #app-loading .loading-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2.5px solid rgba(125, 211, 192, 0.3);
+      border-top-color: #7DD3C0;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-top: 24px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* 로딩 텍스트 */
+    #app-loading .loading-text {
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      color: var(--text-tertiary);
+      margin: 8px 0 0 0;
+    }
+    
+    /* 라이트 모드 색상 */
+    :root {
+      --text-primary: #1a1a1a;
+      --text-secondary: #666666;
+      --text-tertiary: rgba(102, 102, 102, 0.7);
+    }
+    
+    /* 다크 모드 색상 */
     @media (prefers-color-scheme: dark) {
-      #app-loading .loading-text {
+      :root {
+        --text-primary: #f5f5f5;
+        --text-secondary: #b0b0b0;
+        --text-tertiary: rgba(176, 176, 176, 0.7);
+      }
+      
+      #app-loading .logo-container {
+        box-shadow: 0 10px 30px rgba(125, 211, 192, 0.2);
+      }
+      
+      #app-loading .app-subtitle {
         color: #8FE8D5;
       }
     }
