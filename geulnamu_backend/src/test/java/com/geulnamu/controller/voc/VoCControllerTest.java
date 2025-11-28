@@ -80,7 +80,7 @@ public class VoCControllerTest extends ControllerTest {
                     headerWithName("Authorization").description("액세스 토큰")
                 ),
                 requestFields(
-                    fieldWithPath("content").type(JsonFieldType.STRING).attributes(key("format").value("형식, 길이 제한 없는 문자열")).description("내용")
+                    fieldWithPath("content").type(JsonFieldType.STRING).attributes(key("format").value("255자 이하의 형식 제한 없는 문자열")).description("내용")
                 ),
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
@@ -125,7 +125,7 @@ public class VoCControllerTest extends ControllerTest {
                     headerWithName("Authorization").description("액세스 토큰")
                 ),
                 requestFields(
-                    fieldWithPath("content").type(JsonFieldType.STRING).attributes(key("format").value("형식, 길이 제한 없는 문자열")).description("내용")
+                    fieldWithPath("content").type(JsonFieldType.STRING).attributes(key("format").value("255자 이하의 형식 제한 없는 문자열")).description("내용")
                 ),
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),

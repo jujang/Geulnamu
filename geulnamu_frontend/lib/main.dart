@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 🎯 한국어 지원
+import 'package:firebase_core/firebase_core.dart'; // 🔥 Firebase Core
+import 'firebase_options.dart'; // 🔥 Firebase 설정
 
 // Core imports
 import 'core/config/app_config.dart';
@@ -33,12 +35,14 @@ import 'screens/contact/contact_screen.dart'; // 문의하기 화면
 import 'screens/voc_management/voc_management_screen.dart'; // 문의 목록 화면
 import 'screens/settings_screen.dart'; // 설정 화면
 import 'screens/app_info/app_info_screen.dart'; // 앱 정보 화면
+import 'screens/push_notification/push_notification_screen.dart'; // 푸시 알림 발송 화면 (관리자)
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 import 'services/meeting/meeting_service.dart'; // 모임 서비스
 import 'services/attendance/attendance_service.dart'; // 출석 서비스
 import 'services/member/member_service.dart'; // 모임원 서비스
 import 'services/profile/profile_service.dart'; // 프로필 서비스
 import 'services/presentation/presentation_service.dart'; // 발제문 서비스
+import 'services/notification/fcm_service.dart'; // 🔥 FCM 푸시 알림 서비스
 
 // 🎯 Global Navigator Key - 전역에서 접근 가능
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -48,6 +52,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    // 🔥 Firebase 초기화 (가장 먼저!)
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print('✅ Firebase 초기화 완료');
+
     // 환경변수 초기화
     await AppConfig.initialize();
 
@@ -60,6 +70,9 @@ void main() async {
     MemberService(); // Singleton 인스턴스 생성
     ProfileService(); // Singleton 인스턴스 생성
     PresentationService(); // Singleton 인스턴스 생성
+
+    // 🔥 FCM 푸시 알림 서비스 초기화
+    await FcmService().initialize();
 
     // 앱 설정 정보 출력 (디버그용)
     AppConfig.printConfig();
@@ -274,6 +287,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
                     const VoCManagementScreen(), // 문의 목록
                 '/settings': (context) => const SettingsScreen(),
                 '/app-info': (context) => const AppInfoScreen(), // 앱 정보
+                '/push-notification': (context) => const PushNotificationScreen(), // 푸시 알림 발송 (관리자)
               };
 
               final builder = routeMap[settings.name];

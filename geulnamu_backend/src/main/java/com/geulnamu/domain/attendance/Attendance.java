@@ -36,7 +36,7 @@ public class Attendance extends DateColumn {
     @Column(name = "attendance_type", nullable = false)
     private AttendanceType attendanceType;
 
-    @Column(name = "note", length = 1)
+    @Column(name = "note")
     private String note; // 비고 (출석 관련 특이사항이 적는 곳)
 
     @Column(name = "want_discussion", columnDefinition = "TINYINT(1)", nullable = false)

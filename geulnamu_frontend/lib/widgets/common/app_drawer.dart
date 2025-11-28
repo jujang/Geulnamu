@@ -114,6 +114,14 @@ class AppDrawer extends StatelessWidget {
 
                     // ⚙️ 기타 섹션
                     _buildMenuSection(context, '기타', [
+                      // 🔔 관리자만 푸시 알림 발송 표시
+                      if (authProvider.isAdminLevel)
+                        _DrawerMenuItem(
+                          icon: Icons.notifications_active_outlined,
+                          title: '푸시 알림',
+                          subtitle: '모임원에게 알림 발송 (관리자용)',
+                          onTap: () => _handleMenuTap(context, '푸시 알림'),
+                        ),
                       // 🔒 로그인 후에만 문의하기 표시
                       if (authProvider.isAuthenticated)
                         _DrawerMenuItem(

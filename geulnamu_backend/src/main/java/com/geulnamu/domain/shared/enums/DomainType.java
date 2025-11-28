@@ -12,7 +12,8 @@ public enum DomainType {
     ATTENDANCE("attendance"),
     BOOK_QUESTION("bookQuestion"),
     VOC("voc"),
-    ACTION_HISTORY("actionHistory");
+    ACTION_HISTORY("actionHistory"),
+    FCM("fcm");
 
     private final String description;
 }

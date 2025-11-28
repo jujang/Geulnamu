@@ -42,6 +42,7 @@ public class SecurityConfig {
         "/login/logout",
         "/members/me/profile-status",
         "/members/me/profile",
+        "/members/me/push-setting",
         "/meetings/staff-list",
         "/meetings/list",
         "/meetings/{meetingId}",
@@ -57,7 +58,8 @@ public class SecurityConfig {
         "/book-questions/meeting",
         "/book-questions/{bookQuestionId}",
         "/voc/error-report",
-        "/voc/feature-request"
+        "/voc/feature-request",
+        "/fcm/token"
     };
 
     private static final String[] AUTH_FOR_STAFF = {
@@ -81,7 +83,8 @@ public class SecurityConfig {
         "/discussions/groups/assign-member",
         "/action-histories/list",
         "/voc/list",
-        "/voc/{vocId}/status"
+        "/voc/{vocId}/status",
+        "/fcm/notification"
     };
 
 

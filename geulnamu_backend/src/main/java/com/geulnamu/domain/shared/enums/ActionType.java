@@ -15,6 +15,8 @@ public enum ActionType {
     MEMBER_MY_VIEW("모임원 조회 - 본인용"),
     MEMBER_VIEW("모임원 조회 - 관리자용"),
     MEMBER_LIST_VIEW("모임원 목록 조회"),
+    MEMBER_PUSH_SETTING_VIEW("푸시 알림 수신 여부 변경"),
+    MEMBER_PUSH_SETTING_UPDATE("푸시 알림 수신 여부 변경"),
     MEMBER_INFO_UPDATE("개인 정보 수정"),
     MEMBER_ROLE_UPDATE("모임원 권한 변경"),
     MEMBER_NAME_UPDATE("모임원 이름 변경"),
@@ -63,8 +65,11 @@ public enum ActionType {
     VOC_ISSUE_STATUS_MODIFY("이슈 상태 변경"),
 
     // 활동 내역 관련
-    ACTION_HISTORY_LIST_VIEW("활동 내역 조회");
+    ACTION_HISTORY_LIST_VIEW("활동 내역 조회"),
 
+    // FCM 앱 푸시 관련
+    FCM_TOKEN_REGISTER("FCM 토큰 등록"),
+    FCM_NOTIFICATION("FCM 수동 알림");
 
     private final String description;
 
