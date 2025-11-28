@@ -124,8 +124,10 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
         
         return MainLayout(
           title: '푸시 알림 발송',
-          showDrawerButton: false, // ← 뒤로가기 버튼 표시
+          showDrawerButton: false,
           showProfileMenu: true,
+          // 🎯 PWA 키보드 처리를 직접 함 (viewInsets 사용)
+          resizeToAvoidBottomInset: false,
           onBackPressed: _handleBackPressed,
           onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
           onLogoutTap: authProvider.isAuthenticated
@@ -141,6 +143,9 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
 
   /// 메인 콘텐츠
   Widget _buildContent(BuildContext context) {
+    // 🎯 키보드 높이 가져오기 (viewInsets 직접 처리)
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    
     return GestureDetector(
       // 🎯 빈 영역 탭 시 키보드 닫기
       onTap: () => FocusScope.of(context).unfocus(),
@@ -149,8 +154,14 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
         child: ListView(
           // 🎯 키보드 드래그 시 닫기
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          // 🎯 고정 패딩 - Scaffold의 resizeToAvoidBottomInset이 키보드 처리
-          padding: const EdgeInsets.all(16),
+          // 🎯 키보드 높이만큼 하단 패딩 추가
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            // 키보드 있을 때: 키보드 높이, 없을 때: 일반 여백
+            bottom: bottomInset > 0 ? bottomInset : 32,
+          ),
           children: [
             // 안내 카드
             _buildInfoCard(context),
