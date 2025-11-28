@@ -67,7 +67,7 @@ public class MemberController {
 
     @LogAction(value = ActionType.MEMBER_PUSH_SETTING_UPDATE, actionDomain = DomainType.MEMBER)
     @AccessLevel(Level.MEMBER)
-    @PatchMapping(value = "/me/push", name = "앱 푸시 수신 여부 수정")
+    @PatchMapping(value = "/me/push-setting", name = "앱 푸시 수신 여부 수정")
     public BaseResponse<Void> updatePushSetting(@AuthMemberId Long memberId, @Valid @RequestBody MemberPushSettingRequest request) {
         memberService.updatePushSetting(memberId, request.isPushEnabled());
         return BaseResponse.ofSuccess();

@@ -42,6 +42,7 @@ public class SecurityConfig {
         "/login/logout",
         "/members/me/profile-status",
         "/members/me/profile",
+        "/members/me/push-setting",
         "/meetings/staff-list",
         "/meetings/list",
         "/meetings/{meetingId}",
