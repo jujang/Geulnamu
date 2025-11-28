@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/config/app_config.dart';
 import '../../core/services/auth_service.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/home/home_service.dart';
 import '../../services/notification/fcm_service.dart';
 import '../../widgets/common/main_layout.dart';
 
@@ -22,6 +23,7 @@ class PushNotificationScreen extends StatefulWidget {
 class _PushNotificationScreenState extends State<PushNotificationScreen> {
   final FcmService _fcmService = FcmService();
   final AuthService _authService = AuthService();
+  final HomeService _homeService = HomeService();
   
   // 폼 컨트롤러
   final _formKey = GlobalKey<FormState>();
@@ -113,27 +115,42 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    final userRole = authProvider.userInfo?['role'] as String?;
-    
-    // 관리자 권한 체크
-    final isAdmin = userRole == 'ADMIN' || userRole == 'LEADER' || userRole == 'VICE_LEADER';
-    
-    return MainLayout(
-      title: '푸시 알림 발송',
-      isHomePage: false,
-      showProfileMenu: true,
-      onBackPressed: _handleBackPressed,
-      body: isAdmin 
-          ? _buildContent(context)
-          : _buildAccessDenied(context),
+    return Consumer2<AuthProvider, HomeService>(
+      builder: (context, authProvider, homeService, child) {
+        final userRole = authProvider.userInfo?['role'] as String?;
+        
+        // 관리자 권한 체크
+        final isAdmin = userRole == 'ADMIN' || userRole == 'LEADER' || userRole == 'VICE_LEADER';
+        
+        return MainLayout(
+          title: '푸시 알림 발송',
+          showDrawerButton: false, // ← 뒤로가기 버튼 표시
+          showProfileMenu: true,
+          onBackPressed: _handleBackPressed,
+          onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
+          onLogoutTap: authProvider.isAuthenticated
+              ? () => homeService.handleLogout(context, authProvider)
+              : null,
+          body: isAdmin 
+              ? _buildContent(context)
+              : _buildAccessDenied(context),
+        );
+      },
     );
   }
 
   /// 메인 콘텐츠
   Widget _buildContent(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      // 🎯 키보드가 올라올 때 자동 스크롤 및 여백 처리
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        // 키보드 높이만큼 하단 여백 추가
+        bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
