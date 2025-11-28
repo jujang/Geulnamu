@@ -23,7 +23,7 @@ public class FcmController {
     private final FcmService fcmService;
 
     @ErrorLogAction(value = ActionType.FCM_TOKEN_REGISTER, actionDomain = DomainType.FCM)
-    @AccessLevel(Level.ADMIN)
+    @AccessLevel(Level.MEMBER)
     @PostMapping("/token")
     public BaseResponse<Void> registerToken(@AuthMemberId Long memberId,
                                             @Valid @RequestBody FcmTokenRequest request) {

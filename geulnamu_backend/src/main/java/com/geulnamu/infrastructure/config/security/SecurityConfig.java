@@ -58,7 +58,8 @@ public class SecurityConfig {
         "/book-questions/meeting",
         "/book-questions/{bookQuestionId}",
         "/voc/error-report",
-        "/voc/feature-request"
+        "/voc/feature-request",
+        "/fcm/token"
     };
 
     private static final String[] AUTH_FOR_STAFF = {
@@ -83,7 +84,7 @@ public class SecurityConfig {
         "/action-histories/list",
         "/voc/list",
         "/voc/{vocId}/status",
-        "/fcm/**"
+        "/fcm/notification"
     };
 
 
