@@ -4,6 +4,7 @@ import '../core/services/profile_status_service.dart';
 import '../core/config/app_config.dart'; // 🎯 AppConfig import
 import '../core/enums/permission_level.dart'; // 🆕 권한 레벨 import
 import '../core/constants/permission_constants.dart'; // 🆕 권한 상수 import
+import '../services/notification/fcm_service.dart'; // 🔥 FCM 서비스 import
 import '../main.dart'; // 🎯 global navigatorKey import
 
 enum AuthStatus { uninitialized, authenticated, unauthenticated, loading }
@@ -147,6 +148,9 @@ class AuthProvider with ChangeNotifier {
         print('👤 사용자: ${_userInfo?['memberName'] ?? '이름 미등록'}');
       }
 
+      // 🔥 FCM 토큰 등록 (로그인 성공 후)
+      await _registerFcmToken();
+
       // 개인정보 상태 확인
       await _checkProfileStatusSilent();
 
@@ -184,6 +188,9 @@ class AuthProvider with ChangeNotifier {
         print('✅ 다른 계정 로그인 성공!');
         print('👤 사용자: ${_userInfo?['memberName'] ?? '이름 미등록'}');
       }
+
+      // 🔥 FCM 토큰 등록 (로그인 성공 후)
+      await _registerFcmToken();
 
       // 개인정보 상태 확인
       await _checkProfileStatusSilent();
@@ -577,6 +584,36 @@ class AuthProvider with ChangeNotifier {
       await checkProfileStatus();
     } catch (e) {
       print('⚠️ [개인정보 상태 조용히 확인] 오류 (무시): $e');
+    }
+  }
+
+  /// 🔥 FCM 토큰 등록 (로그인 성공 후 호출)
+  ///
+  /// 오류가 발생해도 로그인 프로세스를 막지 않음
+  Future<void> _registerFcmToken() async {
+    try {
+      final fcmService = FcmService();
+      final token = fcmService.currentToken;
+      
+      if (token != null && token.isNotEmpty) {
+        final success = await fcmService.registerTokenToServer(token);
+        if (AppConfig.debugMode) {
+          if (success) {
+            print('🔥 [AuthProvider] FCM 토큰 등록 성공!');
+          } else {
+            print('⚠️ [AuthProvider] FCM 토큰 등록 실패');
+          }
+        }
+      } else {
+        if (AppConfig.debugMode) {
+          print('⚠️ [AuthProvider] FCM 토큰이 없어서 등록 생략');
+        }
+      }
+    } catch (e) {
+      // FCM 등록 실패해도 로그인은 성공으로 처리
+      if (AppConfig.debugMode) {
+        print('⚠️ [AuthProvider] FCM 토큰 등록 중 오류 (무시): $e');
+      }
     }
   }
 

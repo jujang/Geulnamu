@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/services/settings_service.dart';
-import '../../providers/theme_provider.dart';
-import '../../widgets/common/main_layout.dart';
-import '../../widgets/common/settings_widgets.dart';
+import '../core/config/app_config.dart';
+import '../core/services/settings_service.dart';
+import '../core/services/auth_service.dart';
+import '../providers/theme_provider.dart';
+import '../widgets/common/main_layout.dart';
+import '../widgets/common/settings_widgets.dart';
+import '../services/member/member_service.dart';
 
 /// 설정 화면
 /// 테마 설정, 알림 설정 등 앱 설정 관리
@@ -16,6 +19,8 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final SettingsService _settingsService = SettingsService();
+  final MemberService _memberService = MemberService();
+  final AuthService _authService = AuthService();
   
   // 상태 변수
   bool _meetingNotificationEnabled = true;
@@ -36,8 +41,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
 
     try {
-      // 모임 알림 설정 로드
-      _meetingNotificationEnabled = await _settingsService.getMeetingNotification();
+      // 🔐 액세스 토큰 확인
+      final accessToken = await _authService.getAccessToken();
+      
+      if (accessToken != null && accessToken.isNotEmpty) {
+        // 로그인 상태: 백엔드에서 푸시 설정 조회
+        try {
+          _meetingNotificationEnabled = await _memberService.getPushSetting(
+            accessToken: accessToken,
+          );
+          debugPrint('✅ [SettingsScreen] 백엔드에서 푸시 설정 로드 완료: $_meetingNotificationEnabled');
+        } catch (e) {
+          // 백엔드 조회 실패 시 로컬 값 사용 (폴백)
+          debugPrint('⚠️ [SettingsScreen] 백엔드 조회 실패, 로컬 값 사용: $e');
+          _meetingNotificationEnabled = await _settingsService.getMeetingNotification();
+        }
+      } else {
+        // 비로그인 상태: 로컬 저장소에서 로드
+        _meetingNotificationEnabled = await _settingsService.getMeetingNotification();
+        debugPrint('ℹ️ [SettingsScreen] 비로그인 상태 - 로컬 설정 사용');
+      }
       
       if (mounted) {
         setState(() {});
@@ -90,20 +113,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     try {
-      final success = await _settingsService.setMeetingNotification(enabled);
+      // 🔐 액세스 토큰 가져오기
+      final accessToken = await _authService.getAccessToken();
+      if (accessToken == null || accessToken.isEmpty) {
+        throw Exception('로그인이 필요합니다.');
+      }
+
+      // 🔔 백엔드 API 호출
+      await _memberService.updatePushSetting(enabled, accessToken: accessToken);
       
-      if (success) {
-        if (mounted) {
-          _showSuccessSnackBar(enabled ? '모임 알림이 켜졌습니다.' : '모임 알림이 꺼졌습니다.');
-        }
-      } else {
-        // 저장 실패 시 이전 상태로 복원
-        if (mounted) {
-          setState(() {
-            _meetingNotificationEnabled = !enabled;
-          });
-          _showErrorSnackBar('알림 설정 저장에 실패했습니다.');
-        }
+      // 로컬 저장도 함께 업데이트
+      await _settingsService.setMeetingNotification(enabled);
+      
+      if (mounted) {
+        _showSuccessSnackBar(enabled ? '모임 알림이 켜졌습니다.' : '모임 알림이 꺼졌습니다.');
       }
     } catch (e) {
       debugPrint('❌ [SettingsScreen] 알림 설정 변경 실패: $e');
@@ -233,4 +256,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
 }

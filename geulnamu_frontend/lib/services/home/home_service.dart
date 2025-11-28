@@ -291,6 +291,9 @@ class HomeService extends ChangeNotifier {
       case '문의하기':
         Navigator.pushNamed(context, '/contact');
         break;
+      case '푸시 알림':
+        Navigator.pushNamed(context, '/push-notification');
+        break;
       case '앱 정보':
         Navigator.pushNamed(context, '/app-info');
         break;

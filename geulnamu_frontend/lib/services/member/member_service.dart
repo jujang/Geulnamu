@@ -283,4 +283,88 @@ class MemberService {
     const adminRoles = ['ADMIN', 'VICE_LEADER', 'LEADER'];
     return adminRoles.contains(userRole);
   }
+
+  /// 🔔 앵 푸시 수신 여부 조회
+  /// 
+  /// API: GET /api/members/me/push-setting
+  /// 권한: MEMBER 이상
+  Future<bool> getPushSetting({required String accessToken}) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [앱 푸시 설정 조회] API 요청 시작...');
+      }
+
+      final response = await _dio.get(
+        '/members/me/push-setting',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '앱 푸시 설정 조회',
+        );
+
+        final pushEnabled = processedResponse['data'] as bool;
+        if (AppConfig.debugMode) {
+          print('✅ [앱 푸시 설정 조회] 성공: $pushEnabled');
+        }
+        return pushEnabled;
+      } else {
+        throw Exception('[앱 푸시 설정 조회] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '앱 푸시 설정 조회', showDialog: false);
+      }
+      rethrow;
+    }
+  }
+
+  /// 🔔 앵 푸시 수신 여부 수정
+  /// 
+  /// API: PATCH /api/members/me/push
+  /// 권한: MEMBER 이상
+  Future<void> updatePushSetting(bool enabled, {required String accessToken}) async {
+    try {
+      if (AppConfig.debugMode) {
+        print('🚀 [앱 푸시 설정] API 요청 시작... (enabled: $enabled)');
+      }
+
+      final response = await _dio.patch(
+        '/members/me/push-setting',
+        data: {'isPushEnabled': enabled},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final processedResponse = ApiUtils.processBackendResponse(
+          response,
+          '앱 푸시 설정',
+          expectData: false,
+        );
+
+        if (AppConfig.debugMode) {
+          print('✅ [앱 푸시 설정] 성공: ${processedResponse['message']}');
+        }
+      } else {
+        throw Exception('[앱 푸시 설정] HTTP 오류: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        throw ApiUtils.processDioException(e, '앱 푸시 설정', showDialog: false);
+      }
+      rethrow;
+    }
+  }
 }

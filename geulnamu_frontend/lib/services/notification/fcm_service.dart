@@ -1,9 +1,12 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:dio/dio.dart';
+import 'dart:html' as html; // 🔔 브라우저 알림용
+import 'dart:js' as js; // 🔔 JavaScript 호출용
 
 import '../../core/config/app_config.dart';
 import '../../core/utils/api_utils.dart';
+import '../../core/services/auth_service.dart'; // 🔐 인증 토큰용
 
 /// 🔥 FCM 푸시 알림 서비스
 ///
@@ -23,6 +26,9 @@ class FcmService {
 
   // Dio 인스턴스
   final Dio _dio = Dio();
+
+  // 🔐 AuthService 인스턴스 (인증 토큰 조회용)
+  final AuthService _authService = AuthService();
 
   // 현재 FCM 토큰
   String? _currentToken;
@@ -168,12 +174,68 @@ class FcmService {
 
   /// 📬 포그라운드 메시지 처리
   void _handleForegroundMessage(RemoteMessage message) {
-    // 웹에서는 브라우저 알림으로 표시
-    // 모바일에서는 로컬 알림으로 표시 (flutter_local_notifications 필요)
+    final title = message.notification?.title ?? '글나무';
+    final body = message.notification?.body ?? '';
 
-    // 현재는 로그만 출력
-    // TODO: 인앱 알림 UI 또는 로컬 알림 표시 구현
+    // 🌐 웹: 브라우저 Notification API 사용
+    if (kIsWeb) {
+      _showBrowserNotification(title, body, message.data);
+    } else {
+      // 📱 모바일: flutter_local_notifications 필요
+      // TODO: 모바일 로컬 알림 구현
+      _log('모바일 포그라운드 알림 처리 (미구현)');
+    }
+
     _log('포그라운드 메시지 처리 완료');
+  }
+
+  /// 🌐 브라우저 알림 표시 (Web Notification API)
+  void _showBrowserNotification(String title, String body, Map<String, dynamic> data) {
+    try {
+      // 알림 권한 확인
+      if (html.Notification.permission == 'granted') {
+        // 알림 생성
+        final notification = html.Notification(
+          title,
+          body: body,
+          icon: '/icons/Icon-192.png', // 앱 아이콘
+          tag: 'geulnamu-notification', // 중복 알림 방지
+        );
+
+        // 알림 클릭 시 처리
+        notification.onClick.listen((event) {
+          _log('🔔 브라우저 알림 클릭됨!');
+          
+          // 해당 탭으로 포커스 이동 (JavaScript 직접 호출)
+          js.context.callMethod('focus');
+          
+          // 알림 닫기
+          notification.close();
+          
+          // 데이터에 따른 화면 이동 처리
+          if (data.containsKey('meetingId')) {
+            final meetingId = data['meetingId'];
+            _log('모임 상세 화면으로 이동: $meetingId');
+            // TODO: Navigator로 모임 상세 화면 이동
+          }
+        });
+
+        // 5초 후 자동 닫기
+        Future.delayed(const Duration(seconds: 5), () {
+          notification.close();
+        });
+
+        _log('🔔 브라우저 알림 표시 완료: $title');
+      } else if (html.Notification.permission == 'default') {
+        // 권한 요청 필요
+        _log('알림 권한이 아직 설정되지 않았습니다.', isError: true);
+        html.Notification.requestPermission();
+      } else {
+        _log('알림 권한이 거부되었습니다.', isError: true);
+      }
+    } catch (e) {
+      _log('브라우저 알림 표시 실패: $e', isError: true);
+    }
   }
 
   /// 🔔 알림 클릭 처리
@@ -197,6 +259,13 @@ class FcmService {
     try {
       _log('백엔드에 FCM 토큰 등록 중...');
 
+      // 🔐 인증 토큰 가져오기
+      final accessToken = await _authService.getAccessToken();
+      if (accessToken == null || accessToken.isEmpty) {
+        _log('액세스 토큰이 없습니다. 로그인 후 시도해주세요.', isError: true);
+        return false;
+      }
+
       // 디바이스 타입 결정
       String deviceType;
       if (kIsWeb) {
@@ -212,8 +281,7 @@ class FcmService {
         options: Options(
           headers: {
             'Content-Type': 'application/json',
-            // TODO: 인증 토큰 추가
-            // 'Authorization': 'Bearer $accessToken',
+            'Authorization': 'Bearer $accessToken', // 🔐 인증 토큰 추가
           },
         ),
       );
@@ -235,32 +303,49 @@ class FcmService {
     }
   }
 
-  /// 🗑️ 백엔드에서 FCM 토큰 삭제 (로그아웃 시)
-  Future<bool> unregisterTokenFromServer() async {
-    if (_currentToken == null) return true;
-
+  /// 📤 푸시 알림 발송 (관리자 전용)
+  /// 
+  /// API: POST /fcm/notification
+  /// 권한: ADMIN
+  Future<bool> sendNotification({
+    required String title,
+    required String body,
+    required List<int> memberIds,
+    required String accessToken,
+  }) async {
     try {
-      _log('백엔드에서 FCM 토큰 삭제 중...');
+      _log('푸시 알림 발송 중...');
+      _log('  제목: $title');
+      _log('  내용: $body');
+      _log('  수신자: $memberIds');
 
-      final response = await _dio.delete(
-        AppConfig.getApiEndpoint('fcm/token'),
-        data: {'token': _currentToken},
+      final response = await _dio.post(
+        AppConfig.getApiEndpoint('fcm/notification'),
+        data: {
+          'title': title,
+          'body': body,
+          'memberList': memberIds,
+        },
         options: Options(
           headers: {
             'Content-Type': 'application/json',
-            // TODO: 인증 토큰 추가
+            'Authorization': 'Bearer $accessToken',
           },
         ),
       );
 
       if (response.statusCode == 200) {
-        _log('FCM 토큰 백엔드 삭제 성공! ✅');
-        return true;
+        final result = ApiUtils.processBackendResponse(response, '푸시 알림 발송');
+        if (result['success']) {
+          _log('푸시 알림 발송 성공! ✅');
+          return true;
+        }
       }
 
+      _log('푸시 알림 발송 실패', isError: true);
       return false;
     } catch (e) {
-      _log('FCM 토큰 백엔드 삭제 실패: $e', isError: true);
+      _log('푸시 알림 발송 실패: $e', isError: true);
       return false;
     }
   }

@@ -35,6 +35,7 @@ import 'screens/contact/contact_screen.dart'; // 문의하기 화면
 import 'screens/voc_management/voc_management_screen.dart'; // 문의 목록 화면
 import 'screens/settings_screen.dart'; // 설정 화면
 import 'screens/app_info/app_info_screen.dart'; // 앱 정보 화면
+import 'screens/push_notification/push_notification_screen.dart'; // 푸시 알림 발송 화면 (관리자)
 import 'services/home/home_route_service.dart'; // 🎯 RouteObserver import
 import 'services/meeting/meeting_service.dart'; // 모임 서비스
 import 'services/attendance/attendance_service.dart'; // 출석 서비스
@@ -286,6 +287,7 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
                     const VoCManagementScreen(), // 문의 목록
                 '/settings': (context) => const SettingsScreen(),
                 '/app-info': (context) => const AppInfoScreen(), // 앱 정보
+                '/push-notification': (context) => const PushNotificationScreen(), // 푸시 알림 발송 (관리자)
               };
 
               final builder = routeMap[settings.name];
