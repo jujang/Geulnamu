@@ -146,8 +146,10 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Form(
         key: _formKey,
-        // 🎯 ListView 사용 - 키보드가 올라올 때 자동으로 포커스된 필드로 스크롤
         child: ListView(
+          // 🎯 키보드 드래그 시 닫기
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          // 🎯 고정 패딩 - Scaffold의 resizeToAvoidBottomInset이 키보드 처리
           padding: const EdgeInsets.all(16),
           children: [
             // 안내 카드

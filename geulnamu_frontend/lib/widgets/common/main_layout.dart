@@ -141,6 +141,8 @@ class MainLayout extends StatelessWidget {
           },
           child: Scaffold(
           // 🎯 테마 시스템 사용 - backgroundColor 없음
+          // 🎯 키보드가 올라올 때 화면 크기 자동 조정
+          resizeToAvoidBottomInset: true,
           appBar: AppHeader(
             title: title,
             // 🧭 네비게이션 패턴: 햄버거 vs 뒤로가기 버튼 (독립 제어)
