@@ -23,7 +23,7 @@ public class NormalNotificationScheduler {
     private final FcmQueryRepository fcmQueryRepository;
     private final FcmPushService fcmPushService;
 
-    @Scheduled(cron = "0 * * 28 11 *") // 초 분 시 일 월 요일
+//    @Scheduled(cron = "0 * * 28 11 *") // 초 분 시 일 월 요일
     public void NormalNotification() {
         LocalDateTime now = LocalDateTime.now();
 

@@ -30,10 +30,6 @@ management:
     enable:
       hikari: true
 
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-
 server:
   port: 8080
   servlet:

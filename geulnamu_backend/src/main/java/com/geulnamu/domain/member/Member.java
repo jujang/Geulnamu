@@ -55,14 +55,14 @@ public class Member extends DateColumn {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<FcmToken> fcmTokens;
 
+    @Column(name = "push_enabled", columnDefinition = "TINYINT(1)", nullable = false)
+    private boolean pushEnabled; // 앱 푸시 수신 여부
+
     @Column(name = "kakao_user_id", nullable = false, length = 50)
     private String kakaoUserId;
 
     @Column(name = "refresh_token")
     private String refreshToken;
-
-    @Column(name = "push_enabled", columnDefinition = "TINYINT(1)", nullable = false)
-    private boolean pushEnabled; // 앱 푸시 수신 여부
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;

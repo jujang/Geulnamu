@@ -40,9 +40,19 @@ public class FcmPushService {
                     .build())
                 .build();
 
-            BatchResponse response = FirebaseMessaging.getInstance().sendMulticast(message);
+            BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(message);
             log.info("멀티 캐스트 푸시 발송: 성공{}, 실패{}",
                 response.getSuccessCount(), response.getFailureCount());
+
+            if (response.getFailureCount() > 0) {
+                List<SendResponse> responses = response.getResponses();
+                for(int i = 0; i < responses.size(); i++) {
+                    if(!responses.get(i).isSuccessful()) {
+                        log.warn("토큰 {} 발송 실패: {}", tokens.get(i),
+                            responses.get(i).getException().getMessage());
+                    }
+                }
+            }
         } catch (Exception e) {
             log.error("멀티캐스트 푸시 발송 실패: {}", e.getMessage());
         }

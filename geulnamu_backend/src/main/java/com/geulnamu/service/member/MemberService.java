@@ -66,6 +66,11 @@ public class MemberService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public boolean getPushSetting(Long memberId) {
+        return findMemberOrThrow(memberId).isPushEnabled();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public void updatePushSetting(Long memberId, boolean pushEnabled) {
         Member member = findMemberOrThrow(memberId);
         member.updatePushSetting(pushEnabled);

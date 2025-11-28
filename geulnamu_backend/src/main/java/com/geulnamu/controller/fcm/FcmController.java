@@ -7,7 +7,7 @@ import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
-import com.geulnamu.infrastructure.annotation.ErrorLogAction;
+import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.fcm.FcmService;
 import jakarta.validation.Valid;
@@ -22,7 +22,7 @@ public class FcmController {
 
     private final FcmService fcmService;
 
-    @ErrorLogAction(value = ActionType.FCM_TOKEN_REGISTER, actionDomain = DomainType.FCM)
+    @LogAction(value = ActionType.FCM_TOKEN_REGISTER, actionDomain = DomainType.FCM)
     @AccessLevel(Level.MEMBER)
     @PostMapping("/token")
     public BaseResponse<Void> registerToken(@AuthMemberId Long memberId,
@@ -31,7 +31,7 @@ public class FcmController {
         return BaseResponse.ofSuccess();
     }
 
-    @ErrorLogAction(value = ActionType.FCM_NOTIFICATION, actionDomain = DomainType.FCM)
+    @LogAction(value = ActionType.FCM_NOTIFICATION, actionDomain = DomainType.FCM)
     @AccessLevel(Level.ADMIN)
     @PostMapping("/notification")
     public BaseResponse<Void> sendNotification(@Valid @RequestBody NotificationRequest request) {

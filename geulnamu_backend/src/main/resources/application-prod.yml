@@ -16,7 +16,6 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: validate
-    show-sql: false
 server:
   forward-headers-strategy: framework
   compression:

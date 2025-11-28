@@ -1,6 +1,7 @@
 package com.geulnamu.controller.fcm.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class NotificationRequest {
     @NotBlank(message = "내용 필수 입력")
     private String body;
 
-    @NotBlank(message = "받는이 필수 입력")
+    @NotEmpty(message = "수신자 1명 이상 입력")
     private List<Long> memberList;
 
 }
