@@ -1,4 +1,4 @@
-package com.geulnamu.domain.fcmToken;
+package com.geulnamu.domain.fcm;
 
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.DateColumn;
@@ -27,15 +27,8 @@ public class FcmToken extends DateColumn {
     @Column(name = "device_type", nullable = false)
     private String deviceType;
 
-    @Column(name = "is_active", columnDefinition = "TINYINT(1)", nullable = false)
-    private boolean isActive;
 
-
-    public void updateMember(Member member) {
-        this.member = member;
-    }
-
-    public void updateIsActive(boolean isActive) {
-        this.isActive = isActive;
+    public void updateToken(String token) {
+        this.token = token;
     }
 }

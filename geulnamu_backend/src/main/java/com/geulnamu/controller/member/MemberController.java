@@ -65,6 +65,14 @@ public class MemberController {
         return BaseResponse.ofSuccess(response);
     }
 
+    @LogAction(value = ActionType.MEMBER_PUSH_SETTING_UPDATE, actionDomain = DomainType.MEMBER)
+    @AccessLevel(Level.MEMBER)
+    @PatchMapping(value = "/me/push", name = "앱 푸시 수신 여부 수정")
+    public BaseResponse<Void> updatePushSetting(@AuthMemberId Long memberId, @Valid @RequestBody MemberPushSettingRequest request) {
+        memberService.updatePushSetting(memberId, request.isPushEnabled());
+        return BaseResponse.ofSuccess();
+    }
+
     @LogAction(value = ActionType.MEMBER_INFO_UPDATE, actionDomain = DomainType.MEMBER)
     @AccessLevel(Level.MEMBER)
     @PatchMapping(value = "/me/profile", name = "개인 정보 수정")

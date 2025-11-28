@@ -66,6 +66,12 @@ public class MemberService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public void updatePushSetting(Long memberId, boolean pushEnabled) {
+        Member member = findMemberOrThrow(memberId);
+        member.updatePushSetting(pushEnabled);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public void updateMemberRole(Long memberId, Role targetRole) {
         Member member = findMemberOrThrow(memberId);
         member.updateMemberRole(targetRole);

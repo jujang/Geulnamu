@@ -82,7 +82,7 @@ public class SecurityConfig {
         "/action-histories/list",
         "/voc/list",
         "/voc/{vocId}/status",
-        "/fcm-token"
+        "/fcm/**"
     };
 
 

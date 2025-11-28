@@ -1,10 +1,10 @@
 package com.geulnamu.service.notification;
 
-import com.geulnamu.domain.fcmToken.FcmToken;
+import com.geulnamu.domain.fcm.FcmToken;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
-import com.geulnamu.repository.fcm.FcmTokenQueryRepository;
+import com.geulnamu.repository.fcm.FcmQueryRepository;
 import com.geulnamu.repository.member.MemberQueryRepository;
 import com.geulnamu.service.fcm.FcmPushService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 public class NormalNotificationScheduler {
 
     private final MemberQueryRepository memberQueryRepository;
-    private final FcmTokenQueryRepository fcmTokenQueryRepository;
+    private final FcmQueryRepository fcmQueryRepository;
     private final FcmPushService fcmPushService;
 
     @Scheduled(cron = "0 * * 28 11 *") // 초 분 시 일 월 요일
@@ -30,7 +30,7 @@ public class NormalNotificationScheduler {
         Member member = memberQueryRepository.findById(10L)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
 
-        FcmToken token = fcmTokenQueryRepository.findByMember(member)
+        FcmToken token = fcmQueryRepository.findByMember(member)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
 
         String title = "타이틀입니다~";

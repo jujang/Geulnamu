@@ -1,7 +1,7 @@
 package com.geulnamu.domain.member;
 
 import com.geulnamu.domain.attendance.Attendance;
-import com.geulnamu.domain.fcmToken.FcmToken;
+import com.geulnamu.domain.fcm.FcmToken;
 import com.geulnamu.domain.meeting.Meeting;
 import com.geulnamu.domain.shared.*;
 import com.geulnamu.domain.shared.converter.GenderConverter;
@@ -61,6 +61,9 @@ public class Member extends DateColumn {
     @Column(name = "refresh_token")
     private String refreshToken;
 
+    @Column(name = "push_enabled", columnDefinition = "TINYINT(1)", nullable = false)
+    private boolean pushEnabled; // 앱 푸시 수신 여부
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
@@ -70,6 +73,7 @@ public class Member extends DateColumn {
             .role(Role.MEMBER)
             .nickname(nickname)
             .kakaoUserId(kakaoUserId)
+            .pushEnabled(true)
             .build();
     }
 
@@ -104,6 +108,10 @@ public class Member extends DateColumn {
 
     public void updateMemberRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public void updatePushSetting(boolean pushEnabled) {
+        this.pushEnabled = pushEnabled;
     }
 
     public void activate() {
