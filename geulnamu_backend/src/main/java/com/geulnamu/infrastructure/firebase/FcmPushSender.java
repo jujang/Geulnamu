@@ -1,4 +1,4 @@
-package com.geulnamu.service.fcm;
+package com.geulnamu.infrastructure.firebase;
 
 import com.google.firebase.messaging.*;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class FcmPushService {
+public class FcmPushSender {
 
     // 단일 기기에 푸시 발송
     public void sendToToken(String token, String title, String body) {

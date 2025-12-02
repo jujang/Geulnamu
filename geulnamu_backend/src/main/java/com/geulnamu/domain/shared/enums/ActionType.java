@@ -69,7 +69,9 @@ public enum ActionType {
 
     // FCM 앱 푸시 관련
     FCM_TOKEN_REGISTER("FCM 토큰 등록"),
-    FCM_NOTIFICATION("FCM 수동 알림");
+    FCM_NOTIFICATION("FCM 수동 알림"),
+    FCM_TOKEN_FOR_MEETING_REGISTER("토론용 FCM 토큰 등록"),
+    FCM_TOKEN_FOR_MEETING_UNREGISTER("토론용 FCM 토큰 삭제");
 
     private final String description;
 

@@ -1,25 +1,24 @@
-package com.geulnamu.domain.fcm;
+package com.geulnamu.domain.fcmTokenForMeeting;
 
-import com.geulnamu.domain.member.Member;
+import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.shared.DateColumn;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
 @Builder
-@Entity(name = "fcm_tokens")
+@Entity(name = "fcm_tokens_for_meetings")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FcmToken extends DateColumn {
+public class FcmTokenForMeeting extends DateColumn {
 
     @Id
-    @Column(name = "fcm_token_id", updatable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "fcm_token_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "attendance_id", nullable = false)
+    private Attendance attendance;
 
     @Column(name = "token", nullable = false)
     private String token;
@@ -31,4 +30,5 @@ public class FcmToken extends DateColumn {
     public void updateToken(String token) {
         this.token = token;
     }
+
 }
