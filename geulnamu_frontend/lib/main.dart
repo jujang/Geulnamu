@@ -71,8 +71,16 @@ void main() async {
     ProfileService(); // Singleton 인스턴스 생성
     PresentationService(); // Singleton 인스턴스 생성
 
-    // 🔥 FCM 푸시 알림 서비스 초기화
-    await FcmService().initialize();
+    // 🔥 FCM 푸시 알림 서비스 초기화 (비동기로 백그라운드 실행 - 앱 시작 지연 방지)
+    FcmService().initialize().then((_) {
+      if (AppConfig.debugMode) {
+        print('✅ FCM 서비스 백그라운드 초기화 완료');
+      }
+    }).catchError((e) {
+      if (AppConfig.debugMode) {
+        print('⚠️ FCM 서비스 초기화 실패 (앱 실행에는 영향 없음): $e');
+      }
+    });
 
     // 앱 설정 정보 출력 (디버그용)
     AppConfig.printConfig();
