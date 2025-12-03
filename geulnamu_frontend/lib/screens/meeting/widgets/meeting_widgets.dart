@@ -20,12 +20,14 @@ class MeetingWidgets {
   /// [onTap] 카드 탭 콜백 (향후 상세보기 기능)
   /// [onAttendance] 🆕 QR 출석 버튼 콜백
   /// [onAttendanceCheck] 출석현황 확인 버튼 콜백
+  /// [onDiscussionGroup] 🆕 조 구성 버튼 콜백
   static Widget buildMeetingCard(
     BuildContext context,
     MeetingInfo meeting, {
     VoidCallback? onTap,
     VoidCallback? onAttendance,
     VoidCallback? onAttendanceCheck,
+    VoidCallback? onDiscussionGroup,
   }) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -118,10 +120,10 @@ class MeetingWidgets {
 
               const SizedBox(height: 16),
 
-              // 🎯 하단: 출석 버튼들 (5:5 비율)
+              // 🎯 하단: 출석 버튼들 (1:1:1 비율 - 3개 버튼)
               Row(
                 children: [
-                  // 왼쪽: 출석 버튼 (QR 출석) - 출석 상태 및 모임 날짜에 따라 비활성화
+                  // 출석 버튼 (QR 출석) - 출석 상태 및 모임 날짜에 따라 비활성화
                   Expanded(
                     child: ElevatedButton.icon(
                       // 출석/지각/불참 상태이거나 모임 날짜가 지났으면 비활성화 (당일까지는 출석 가능)
@@ -131,7 +133,7 @@ class MeetingWidgets {
                           : onAttendance,
                       icon: Icon(
                         Icons.qr_code_scanner,
-                        size: 18,
+                        size: 16,
                         color:
                             _isAttendanceButtonDisabled(meeting)
                             ? context.colors.onSurface.withOpacity(0.38)
@@ -145,6 +147,7 @@ class MeetingWidgets {
                               ? context.colors.onSurface.withOpacity(0.38)
                               : context.colors.onPrimary,
                           fontWeight: FontWeight.w600,
+                          fontSize: 13,
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -159,7 +162,7 @@ class MeetingWidgets {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                         // Material 3 스타일의 비활성화된 버튼 색상
                         disabledBackgroundColor: context.colors.onSurface
                             .withOpacity(0.12),
@@ -169,22 +172,23 @@ class MeetingWidgets {
                     ),
                   ),
 
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
 
-                  // 오른쪽: 출석 현황 버튼
+                  // 출석 현황 버튼
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: onAttendanceCheck,
                       icon: Icon(
                         Icons.people_outline,
-                        size: 18,
+                        size: 16,
                         color: context.colors.primary,
                       ),
                       label: Text(
-                        '출석 현황',
+                        '현황',
                         style: TextStyle(
                           color: context.colors.primary,
                           fontWeight: FontWeight.w600,
+                          fontSize: 13,
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
@@ -192,7 +196,36 @@ class MeetingWidgets {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 6),
+
+                  // 🆕 조 구성 버튼
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onDiscussionGroup,
+                      icon: Icon(
+                        Icons.groups_outlined,
+                        size: 16,
+                        color: context.colors.secondary,
+                      ),
+                      label: Text(
+                        '조 구성',
+                        style: TextStyle(
+                          color: context.colors.secondary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: context.colors.secondary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                       ),
                     ),
                   ),

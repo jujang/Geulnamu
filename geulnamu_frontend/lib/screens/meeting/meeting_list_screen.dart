@@ -12,6 +12,7 @@ import 'widgets/meeting_widgets.dart';
 import 'widgets/meeting_list_widgets.dart';
 import 'widgets/meeting_speed_dial.dart'; // 🆕 SpeedDial 위젯
 import 'meeting_qr_scanner_screen.dart'; // 🆕 QR 스캔 화면
+import '../discussion/discussion_group_screen.dart'; // 🆕 조 구성 화면
 import '../../core/enums/permission_level.dart';
 import '../../core/constants/permission_constants.dart';
 
@@ -205,6 +206,8 @@ class _MeetingListScreenState extends State<MeetingListScreen>
                       _handleAttendance(meeting.meetingId), // 🆕 QR 출석
                   onAttendanceCheck: () =>
                       _handleAttendanceCheck(meeting.meetingId),
+                  onDiscussionGroup: () =>
+                      _handleDiscussionGroup(meeting), // 🆕 조 구성
                 );
               },
             ),
@@ -260,6 +263,18 @@ class _MeetingListScreenState extends State<MeetingListScreen>
   /// 출석현황 확인 버튼 처리 (MeetingLogicMixin에서 처리)
   void _handleAttendanceCheck(int meetingId) {
     handleAttendanceCheck(meetingId);
+  }
+
+  /// 🆕 조 구성 버튼 처리 - 조 구성 화면으로 이동
+  void _handleDiscussionGroup(MeetingInfo meeting) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => DiscussionGroupScreen(
+          meetingId: meeting.meetingId,
+          meetingTitle: meeting.meetingName,
+        ),
+      ),
+    );
   }
 
   /// 🆕 모임 만들기 권한 체크
