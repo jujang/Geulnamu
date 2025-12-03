@@ -44,17 +44,21 @@ public class NormalNotificationScheduler {
             for(Map.Entry<DiscussionGroup, List<Attendance>> groupEntry : meetingEntry.getValue().entrySet()) {
                 List<Attendance> groupMembers = groupEntry.getValue();
 
+                String title = meetingEntry.getKey().getAlarmMessage();
+
                 String body = groupMembers.stream()
                     .map(attendance -> attendance.getMember().getName())
                     .collect(Collectors.joining(", "));
 
-//                 Map<String, String> data = null; // 모임 참여 페이지
+                // 모임 참여 페이지
+                Map<String, String> data = Map.of(
+                    "type", "DISCUSSION_GROUP",
+                    "meetingId", meetingEntry.getKey().getId().toString()
+                );
 
-//                 PUSH 하기
+                // PUSH 하기
                 for(Attendance attendance : groupMembers) {
-                    fcmPushSender.sendToToken(attendance.getFcmToken(), meetingEntry.getKey().getAlarmMessage(), body);
-                    // TODO: 페이지 이동 데이터 추가할 것
-                    // fcmPushSender.sendWithData(attendance.getFcmToken(), meetingEntry.getKey().getAlarmMessage(), body, data);
+                     fcmPushSender.sendWithData(attendance.getFcmToken(), title, body, data);
                 }
             }
         }
