@@ -27,7 +27,7 @@ public class NormalNotificationScheduler {
 
     // 토론 시작 시간에 해당 모임에 참여한 (토론을 희망하는) 인원들의 조를 APP PUSH 하기
     @Transactional(readOnly = true)
-    @Scheduled(cron = "0 0/5 * * * *") // 초 분 시 일 월 요일
+    @Scheduled(cron = "0 * * * * *") // 초 분 시 일 월 요일
     public void discussionGroupNotification() {
         // 현재 시간에 토론 참여하는 참석자 명단 조회
         LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
