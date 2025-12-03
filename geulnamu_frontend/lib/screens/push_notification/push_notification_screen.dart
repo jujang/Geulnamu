@@ -7,12 +7,13 @@ import '../../services/home/home_service.dart';
 import '../../services/notification/fcm_service.dart';
 import '../../models/fcm/fcm_send_result.dart';
 import '../../widgets/common/main_layout.dart';
+import 'widgets/member_select_dialog.dart';
 
 /// 🔔 관리자 전용 푸시 알림 발송 화면
 /// 
 /// 기능:
 /// - 푸시 알림 제목/내용 입력
-/// - 수신자 회원 ID 입력 (쉼표로 구분)
+/// - 수신자 회원 ID 입력 (수동/자동 선택)
 /// - 알림 발송
 class PushNotificationScreen extends StatefulWidget {
   const PushNotificationScreen({super.key});
@@ -34,6 +35,8 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
   
   // 상태
   bool _isLoading = false;
+  bool _isAutoSelect = false; // 🆕 자동 선택 모드
+  Set<int> _selectedMemberIds = {}; // 🆕 선택된 멤버 ID
 
   @override
   void dispose() {
@@ -46,6 +49,45 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
   /// 뒤로가기 처리
   void _handleBackPressed() {
     Navigator.of(context).pop();
+  }
+
+  /// 🆕 토글 전환 처리
+  void _handleToggleChange(bool value) {
+    setState(() {
+      if (value) {
+        // 수동 → 자동: 기존 입력 초기화
+        _memberIdsController.clear();
+        _selectedMemberIds.clear();
+      } else {
+        // 자동 → 수동: 선택된 ID들을 입력창에 유지
+        if (_selectedMemberIds.isNotEmpty) {
+          _memberIdsController.text = _selectedMemberIds.join(', ');
+        }
+      }
+      _isAutoSelect = value;
+    });
+  }
+
+  /// 🆕 모임원 선택 다이얼로그 열기
+  Future<void> _openMemberSelectDialog() async {
+    final accessToken = await _authService.getAccessToken();
+    if (accessToken == null || accessToken.isEmpty) {
+      _showErrorSnackBar('로그인이 필요합니다.');
+      return;
+    }
+
+    final result = await MemberSelectDialog.show(
+      context,
+      accessToken: accessToken,
+      initialSelectedIds: _selectedMemberIds,
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedMemberIds = result;
+        _memberIdsController.text = result.join(', ');
+      });
+    }
   }
 
   /// 푸시 알림 발송
@@ -65,13 +107,20 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
       }
 
       // 회원 ID 파싱
-      final memberIdsString = _memberIdsController.text.trim();
-      final memberIds = memberIdsString
-          .split(',')
-          .map((s) => int.tryParse(s.trim()))
-          .where((id) => id != null)
-          .cast<int>()
-          .toList();
+      List<int> memberIds;
+      if (_isAutoSelect) {
+        // 자동 선택 모드: Set에서 직접 가져오기
+        memberIds = _selectedMemberIds.toList();
+      } else {
+        // 수동 입력 모드: 텍스트 파싱
+        final memberIdsString = _memberIdsController.text.trim();
+        memberIds = memberIdsString
+            .split(',')
+            .map((s) => int.tryParse(s.trim()))
+            .where((id) => id != null)
+            .cast<int>()
+            .toList();
+      }
 
       if (memberIds.isEmpty) {
         _showErrorSnackBar('유효한 회원 ID를 입력해주세요.');
@@ -83,6 +132,7 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
         debugPrint('   제목: ${_titleController.text}');
         debugPrint('   내용: ${_bodyController.text}');
         debugPrint('   수신자: $memberIds');
+        debugPrint('   입력 방식: ${_isAutoSelect ? '자동' : '수동'}');
       }
 
       // 푸시 알림 발송
@@ -110,6 +160,9 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
           _titleController.clear();
           _bodyController.clear();
           _memberIdsController.clear();
+          setState(() {
+            _selectedMemberIds.clear();
+          });
         }
       } else {
         _showErrorSnackBar('푸시 알림 발송에 실패했습니다.');
@@ -192,10 +245,8 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
             _buildBodyField(context),
             const SizedBox(height: 20),
             
-            // 수신자 입력
-            _buildSectionTitle(context, '수신자 (회원 ID)', Icons.people_outlined),
-            const SizedBox(height: 8),
-            _buildMemberIdsField(context),
+            // 🆕 수신자 입력 (토글 포함)
+            _buildRecipientSection(context),
             const SizedBox(height: 32),
             
             // 발송 버튼
@@ -309,14 +360,84 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
     );
   }
 
-  /// 수신자 입력 필드
-  Widget _buildMemberIdsField(BuildContext context) {
+  /// 🆕 수신자 섹션 (토글 + 입력/선택)
+  Widget _buildRecipientSection(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 헤더: 제목 + 토글
+        Row(
+          children: [
+            Icon(
+              Icons.people_outlined,
+              size: 20,
+              color: colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '수신자 (회원 ID)',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const Spacer(),
+            // 토글: 수동/자동
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '수동',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: !_isAutoSelect 
+                        ? colorScheme.primary 
+                        : colorScheme.onSurfaceVariant,
+                    fontWeight: !_isAutoSelect 
+                        ? FontWeight.w600 
+                        : FontWeight.normal,
+                  ),
+                ),
+                Switch(
+                  value: _isAutoSelect,
+                  onChanged: _handleToggleChange,
+                ),
+                Text(
+                  '자동',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: _isAutoSelect 
+                        ? colorScheme.primary 
+                        : colorScheme.onSurfaceVariant,
+                    fontWeight: _isAutoSelect 
+                        ? FontWeight.w600 
+                        : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        
+        // 입력 필드 (수동/자동에 따라 다르게 표시)
+        _isAutoSelect 
+            ? _buildAutoSelectField(context)
+            : _buildManualInputField(context),
+      ],
+    );
+  }
+
+  /// 🆕 수동 입력 필드
+  Widget _buildManualInputField(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextFormField(
           controller: _memberIdsController,
-          // 🎯 브라우저 자동완성 비활성화
           autofillHints: const [],
           autocorrect: false,
           enableSuggestions: false,
@@ -335,7 +456,6 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
             if (value == null || value.trim().isEmpty) {
               return '수신자를 입력해주세요';
             }
-            // 숫자와 쉼표만 허용
             final ids = value.split(',').map((s) => int.tryParse(s.trim()));
             if (ids.every((id) => id == null)) {
               return '유효한 회원 ID를 입력해주세요';
@@ -349,6 +469,73 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
           style: TextStyle(
             fontSize: 12,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 🆕 자동 선택 필드
+  Widget _buildAutoSelectField(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 비활성화된 입력 필드 (선택된 ID 표시)
+        TextFormField(
+          controller: _memberIdsController,
+          enabled: false, // 비활성화
+          decoration: InputDecoration(
+            hintText: '모임원을 선택해주세요',
+            filled: true,
+            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            disabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: colorScheme.outline.withOpacity(0.3),
+              ),
+            ),
+          ),
+          validator: (value) {
+            if (_selectedMemberIds.isEmpty) {
+              return '모임원을 선택해주세요';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 12),
+        
+        // 모임원 선택 버튼
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: _openMemberSelectDialog,
+            icon: const Icon(Icons.person_add_outlined),
+            label: Text(
+              _selectedMemberIds.isEmpty 
+                  ? '모임원 선택'
+                  : '모임원 선택 (${_selectedMemberIds.length}명)',
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '💡 버튼을 눌러 모임원 목록에서 수신자를 선택하세요.',
+          style: TextStyle(
+            fontSize: 12,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
       ],
