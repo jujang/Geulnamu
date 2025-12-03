@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/attendance/qr_service.dart';
 import '../../services/attendance/attendance_service.dart';
 import '../../services/home/home_service.dart';
+import '../../services/notification/fcm_service.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../core/config/app_config.dart';
 import '../../models/attendance/qr_data.dart';
@@ -26,6 +27,7 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
   final QrService _qrService = QrService();
   final AttendanceService _attendanceService = AttendanceService();
   final HomeService _homeService = HomeService();
+  final FcmService _fcmService = FcmService();
 
   // 스캐너 컨트롤러
   MobileScannerController? _scannerController;
@@ -170,10 +172,17 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
         return;
       }
 
-      // 출석 처리 API 호출
+      // FCM 토큰 가져오기 (푸시 알림용)
+      final fcmToken = _fcmService.currentToken;
+      if (AppConfig.debugMode) {
+        print('📱 [QR 출석] FCM 토큰: ${fcmToken != null ? "있음" : "없음"}');
+      }
+
+      // 출석 처리 API 호출 (FCM 토큰 포함)
       final attendanceId = await _attendanceService.checkIn(
         meetingId: qrData.meetingId,
         accessToken: accessToken,
+        fcmToken: fcmToken,
       );
 
       if (AppConfig.debugMode) {
