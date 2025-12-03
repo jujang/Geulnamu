@@ -29,21 +29,31 @@ class AttendanceService {
 
   /// 모임 출석 체크인
   /// 
-  /// API: POST /attendances/check-in?meetingId={meetingId}
+  /// API: POST /attendances/check-in?meetingId={meetingId}&fcmToken={fcmToken}
   /// 권한: MEMBER 이상
   Future<int> checkIn({
     required int meetingId,
     required String accessToken,
+    String? fcmToken,
   }) async {
     try {
       if (AppConfig.debugMode) {
         print('🚀 [출석 체크인] API 요청 시작...');
         print('🔗 [출석 체크인] 요청 URL: ${_dio.options.baseUrl}/attendances/check-in?meetingId=$meetingId');
+        if (fcmToken != null) {
+          print('📱 [출석 체크인] FCM 토큰 전송: ${fcmToken.length > 20 ? '${fcmToken.substring(0, 10)}...${fcmToken.substring(fcmToken.length - 10)}' : fcmToken}');
+        }
+      }
+
+      // fcmToken이 있을 경우에만 queryParameters에 추가
+      final queryParams = <String, dynamic>{'meetingId': meetingId};
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        queryParams['fcmToken'] = fcmToken;
       }
 
       final response = await _dio.post(
         '/attendances/check-in',
-        queryParameters: {'meetingId': meetingId},
+        queryParameters: queryParams,
         options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken',
