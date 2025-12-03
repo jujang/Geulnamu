@@ -506,7 +506,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h4 id="_request"><a class="link" href="#_request">request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">POST /attendances/check-in?meetingId=1 HTTP/2.0
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">POST /attendances/check-in?meetingId=1&amp;fcmToken=fcmTokenString~~ HTTP/2.0
 Content-Type: application/json;charset=UTF-8
 Authorization: Bearer access_token
 Accept: application/json
@@ -561,6 +561,13 @@ Host: docs.api.com</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">1 이상의 정수</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임 고유번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>fcmToken</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">500자 이하의 형식 제한 없는 문자열</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FCM 토큰</p></td>
 </tr>
 </tbody>
 </table>

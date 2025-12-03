@@ -13,8 +13,7 @@ public enum DomainType {
     BOOK_QUESTION("bookQuestion"),
     VOC("voc"),
     ACTION_HISTORY("actionHistory"),
-    FCM("fcm"),
-    FCM_TFM("fcmTokenForMeeting");
+    FCM("fcm");
 
     private final String description;
 }

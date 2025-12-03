@@ -14,8 +14,11 @@ import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.attendance.AttendanceService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Nullable;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,8 +31,8 @@ public class AttendanceController {
     @LogAction(value = ActionType.ATTENDANCE_CREATE, actionDomain = DomainType.ATTENDANCE)
     @AccessLevel(Level.MEMBER)
     @PostMapping(value = "/check-in", name = "모임 출석")
-    public BaseResponse<Long> meetingAttend(@AuthMemberId Long memberId, @RequestParam @Min(value = 1) Long meetingId) {
-        Long attendanceId = attendanceService.createAttendanceByQR(memberId, meetingId);
+    public BaseResponse<Long> meetingAttend(@AuthMemberId Long memberId, @RequestParam @Min(value = 1) Long meetingId, @RequestParam @Nullable String fcmToken) {
+        Long attendanceId = attendanceService.createAttendanceByQR(memberId, meetingId, fcmToken);
         return BaseResponse.ofSuccess(attendanceId);
     }
 

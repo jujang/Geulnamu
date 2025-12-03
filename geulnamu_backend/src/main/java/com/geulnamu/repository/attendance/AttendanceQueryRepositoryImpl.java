@@ -4,9 +4,11 @@ import com.geulnamu.controller.attendance.dto.MemberAttendanceInfoWithGroup;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceStatusResponse;
 import com.geulnamu.controller.attendance.dto.response.MeetingAttendanceSummaryResponse;
 import com.geulnamu.controller.shared.dto.response.AttendanceIdAndNameResponse;
+import com.geulnamu.domain.attendance.Attendance;
 import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.attendance.QAttendance;
 import com.geulnamu.domain.meeting.QMeeting;
+import com.geulnamu.domain.member.QMember;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -14,6 +16,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -21,8 +24,10 @@ import java.util.List;
 public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final QMember member = QMember.member;
     private final QMeeting meeting = QMeeting.meeting;
     private final QAttendance attendance = QAttendance.attendance;
+
 
     @Override
     public MeetingAttendanceSummaryResponse findMeetingAttendanceSummary(Long meetingId) {
@@ -103,6 +108,25 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
             .fetchOne();
 
         return count != null ? count : 0L;
+    }
+
+    @Override
+    public List<Attendance> findAllForDiscussionNotification(LocalDateTime discussionTime) {
+        return queryFactory
+            .selectFrom(attendance)
+            .join(attendance.meeting).fetchJoin()
+            .join(attendance.member).fetchJoin()
+            .where(
+                meeting.discussionTime.eq(discussionTime),
+                attendance.wantDiscussion.eq(true),
+                attendance.discussionGroup.isNotNull(),
+                attendance.fcmToken.isNotNull()
+            )
+            .orderBy(
+                meeting.id.asc(),
+                attendance.discussionGroup.asc()
+            )
+            .fetch();
     }
 
 
