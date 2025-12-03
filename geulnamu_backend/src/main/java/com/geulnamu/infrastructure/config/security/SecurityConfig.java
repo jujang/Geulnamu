@@ -53,6 +53,7 @@ public class SecurityConfig {
         "/attendances/{attendanceId}/just-read",
         "/attendances/{attendanceId}/want-discussion",
         "/discussions/{attendanceId}/my-group",
+        "/discussions/groups",
         "/book-questions/create",
         "/book-questions/me",
         "/book-questions/meeting",
@@ -70,7 +71,6 @@ public class SecurityConfig {
         "/meetings/{meetingId}/discussion",
         "/meetings/{meetingId}/remove",
         "/discussions/list/want-discussion",
-        "/discussions/groups",
         "/discussions/groups/assign",
         "/book-questions/my-group"
     };

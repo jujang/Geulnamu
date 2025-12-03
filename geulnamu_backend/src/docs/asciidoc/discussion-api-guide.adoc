@@ -65,8 +65,8 @@ include::{snippets}/discussions/my-group/view/response-fields.adoc[]
 ---
 
 === 모임별 전체 토론 그룹 명단 조회
-* 접근 가능 권한 레벨: STAFF / 에러 로그만 생성
-* 운영진 모임원이 특정 모임의 전체 토론 그룹 모임원 명단을 조회하는 용도의 API
+* 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
+* 모임원이 특정 모임의 전체 토론 그룹 모임원 명단을 조회하는 용도의 API
 
 ==== request
 include::{snippets}/discussions/groups/view/http-request.adoc[]

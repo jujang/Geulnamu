@@ -498,6 +498,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>모임 출석은 모임 개최 당일 개최 시간으로부터 1시간 전부터 가능</p>
 </li>
 <li>
+<p>해당 요청 시, 이후 토론 참여 APP PUSH 용도의 FCM Token을 같이 받음 (있을 경우에만)</p>
+</li>
+<li>
 <p>비활성화된 모임원은 해당 기능이 제한됨 (460 에러)</p>
 </li>
 </ul>
@@ -565,7 +568,7 @@ Host: docs.api.com</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>fcmToken</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">500자 이하의 형식 제한 없는 문자열</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">FCM 토큰</p></td>
 </tr>
@@ -1738,7 +1741,7 @@ Content-Type: application/json;charset=UTF-8
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-07-18 19:29:05 +0900
+Last updated 2025-12-03 16:40:52 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
