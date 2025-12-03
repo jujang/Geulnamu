@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'dart:html' as html; // 🔔 브라우저 알림용
 import 'dart:js' as js; // 🔔 JavaScript 호출용
@@ -17,7 +18,7 @@ import '../../main.dart' show navigatorKey; // 🎯 전역 Navigator Key
 /// - 알림 권한 요청
 /// - 포그라운드/백그라운드 알림 처리
 /// - 백엔드에 토큰 등록
-/// - 알림 클릭 시 화면 이동
+/// - 알림 클릭 시 화면 이동 (Service Worker postMessage 방식)
 class FcmService {
   // Singleton 패턴
   static final FcmService _instance = FcmService._internal();
@@ -71,8 +72,13 @@ class FcmService {
         // 4️⃣ 포그라운드 메시지 리스너 설정
         _setupForegroundMessageListener();
 
-        // 5️⃣ 알림 클릭 리스너 설정
+        // 5️⃣ 알림 클릭 리스너 설정 (Firebase)
         _setupNotificationClickListener();
+
+        // 6️⃣ 🌐 웹: Service Worker 메시지 리스너 설정
+        if (kIsWeb) {
+          _setupServiceWorkerMessageListener();
+        }
 
         _isInitialized = true;
         _log('FCM 서비스 초기화 완료! ✅');
@@ -157,11 +163,11 @@ class FcmService {
     });
   }
 
-  /// 🔔 알림 클릭 리스너
+  /// 🔔 알림 클릭 리스너 (Firebase - 모바일용)
   void _setupNotificationClickListener() {
     // 앱이 백그라운드에서 열렸을 때
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      _log('🔔 알림 클릭으로 앱 열림!');
+      _log('🔔 알림 클릭으로 앱 열림! (Firebase)');
       _log('  데이터: ${message.data}');
 
       _handleNotificationClick(message);
@@ -170,12 +176,82 @@ class FcmService {
     // 앱이 종료된 상태에서 알림으로 열렸을 때
     _messaging.getInitialMessage().then((RemoteMessage? message) {
       if (message != null) {
-        _log('🔔 종료 상태에서 알림으로 앱 실행!');
+        _log('🔔 종료 상태에서 알림으로 앱 실행! (Firebase)');
         _log('  데이터: ${message.data}');
 
         _handleNotificationClick(message);
       }
     });
+  }
+
+  /// 🌐 Service Worker 메시지 리스너 (웹 전용)
+  /// 
+  /// Service Worker에서 postMessage로 보낸 알림 클릭 이벤트를 처리합니다.
+  void _setupServiceWorkerMessageListener() {
+    _log('🌐 Service Worker 메시지 리스너 설정 중...');
+
+    html.window.onMessage.listen((html.MessageEvent event) {
+      _log('📨 window.onMessage 수신: ${event.data}');
+
+      // Service Worker에서 보낸 메시지인지 확인
+      if (event.data is Map) {
+        final data = Map<String, dynamic>.from(event.data);
+        final messageType = data['type'] as String?;
+
+        if (messageType == 'NOTIFICATION_CLICK') {
+          _log('🔔 알림 클릭 메시지 수신! (Service Worker postMessage)');
+          _log('  URL: ${data['url']}');
+          _log('  데이터: ${data['data']}');
+
+          _handleServiceWorkerNotificationClick(data);
+        }
+      }
+    });
+
+    _log('🌐 Service Worker 메시지 리스너 설정 완료! ✅');
+  }
+
+  /// 🌐 Service Worker 알림 클릭 처리
+  void _handleServiceWorkerNotificationClick(Map<String, dynamic> message) {
+    final url = message['url'] as String?;
+    final notificationData = message['data'];
+
+    _log('🎯 Service Worker 알림 클릭 처리');
+    _log('  URL: $url');
+    _log('  데이터: $notificationData');
+
+    if (url != null && url.isNotEmpty) {
+      // URL 방식으로 네비게이션
+      _navigateToUrl(url);
+    } else if (notificationData != null) {
+      // 데이터 방식으로 네비게이션
+      final data = notificationData is Map 
+          ? Map<String, dynamic>.from(notificationData)
+          : <String, dynamic>{};
+      _navigateByNotificationData(data);
+    }
+  }
+
+  /// 🎯 URL로 화면 이동 (쿼리 파라미터 방식)
+  void _navigateToUrl(String url) {
+    _log('🎯 URL로 화면 이동: $url');
+
+    // Navigator가 준비되었는지 확인
+    if (navigatorKey.currentState == null) {
+      _log('Navigator가 아직 준비되지 않았습니다. 지연 후 재시도...', isError: true);
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _navigateToUrl(url);
+      });
+      return;
+    }
+
+    try {
+      // URL을 직접 pushNamed로 이동 (main.dart의 onGenerateRoute가 처리)
+      navigatorKey.currentState?.pushNamed(url);
+      _log('✅ 화면 이동 성공: $url');
+    } catch (e) {
+      _log('화면 이동 실패: $e', isError: true);
+    }
   }
 
   /// 📬 포그라운드 메시지 처리
@@ -203,6 +279,9 @@ class FcmService {
     try {
       // 알림 권한 확인
       if (html.Notification.permission == 'granted') {
+        // 🎯 데이터를 JSON 문자열로 변환
+        final dataJson = _encodeDataForJs(data);
+        
         // Service Worker를 통한 알림 표시 (PWA 환경에서 필수)
         final jsCode = '''
           (async function() {
@@ -212,7 +291,8 @@ class FcmService {
                 body: "${_escapeJsString(body)}",
                 icon: "/icons/Icon-192.png",
                 badge: "/icons/Icon-192.png",
-                tag: "geulnamu-foreground-notification",
+                tag: "geulnamu-foreground-notification-" + Date.now(),
+                data: $dataJson,
                 vibrate: [100, 50, 100],
                 requireInteraction: false
               });
@@ -236,6 +316,21 @@ class FcmService {
       _log('브라우저 알림 표시 실패: $e', isError: true);
     }
   }
+
+  /// 🔧 데이터를 JavaScript JSON 형식으로 인코딩
+  String _encodeDataForJs(Map<String, dynamic> data) {
+    if (data.isEmpty) return '{}';
+    
+    final entries = data.entries.map((e) {
+      final key = _escapeJsString(e.key);
+      final value = e.value is String 
+          ? '"${_escapeJsString(e.value)}"'
+          : '${e.value}';
+      return '"$key": $value';
+    }).join(', ');
+    
+    return '{$entries}';
+  }
   
   /// 🔧 JavaScript 문자열 이스케이프 처리
   String _escapeJsString(String input) {
@@ -247,14 +342,14 @@ class FcmService {
         .replaceAll('\r', '\\r');
   }
 
-  /// 🔔 알림 클릭 처리 - 화면 이동
+  /// 🔔 알림 클릭 처리 - 화면 이동 (Firebase 방식)
   /// 
   /// 백엔드에서 보내는 데이터 구조:
   /// - type: 알림 타입 (예: "DISCUSSION_GROUP")
   /// - meetingId: 모임 ID (문자열)
   void _handleNotificationClick(RemoteMessage message) {
     final data = message.data;
-    _log('🎯 알림 클릭 처리 시작');
+    _log('🎯 알림 클릭 처리 시작 (Firebase)');
     _log('  데이터: $data');
 
     // Navigator가 준비되었는지 확인
@@ -448,7 +543,7 @@ class FcmService {
   void _log(String message, {bool isError = false}) {
     if (AppConfig.debugMode) {
       final prefix = isError ? '❌' : '🔔';
-      print('$prefix [FCM] $message');
+      debugPrint('$prefix [FCM] $message');
     }
   }
 
