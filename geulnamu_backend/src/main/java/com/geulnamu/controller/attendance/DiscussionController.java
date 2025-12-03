@@ -45,7 +45,7 @@ public class DiscussionController {
     }
 
     @ErrorLogAction(value = ActionType.DISCUSSION_ALL_GROUP_LIST_VIEW, actionDomain = DomainType.ATTENDANCE)
-    @AccessLevel(Level.STAFF)
+    @AccessLevel(Level.MEMBER)
     @GetMapping(value = "/groups", name = "모임별 전체 토론 그룹 명단 조회")
     public BaseResponse<List<DiscussionGroupResponse>> getAllDiscussionGroupMemberList(@RequestParam @Min(value = 1) Long meetingId) {
         List<DiscussionGroupResponse> responseList = attendanceService.getAllDiscussionGroupMemberList(meetingId);

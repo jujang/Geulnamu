@@ -138,7 +138,7 @@ public class DiscussionControllerTest extends ControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "STAFF")
+    @WithMockUser(roles = "MEMBER")
     public void getAllDiscussionGroupMemberListTest() throws Exception {
         // given
         String accessToken = "Bearer access_token";

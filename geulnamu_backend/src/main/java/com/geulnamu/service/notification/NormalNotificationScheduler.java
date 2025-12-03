@@ -58,7 +58,7 @@ public class NormalNotificationScheduler {
                 }
             }
         }
-        log.info("토론 알림 발송 완료: {} 시간, {}명", now, wantDiscussionAttendances.size());
+        log.info("토론 알림 발송 완료: 시간 - {} , {}명", now, wantDiscussionAttendances.size());
         // TODO: 누구(+FCM token값)한테, 어떤 알림 보냈는지를 모아서, slack 메세지로 남기고 싶은데 가능하려나
     }
 
