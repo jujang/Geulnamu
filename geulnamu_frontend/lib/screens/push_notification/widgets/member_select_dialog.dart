@@ -127,7 +127,7 @@ class _MemberSelectDialogState extends State<MemberSelectDialog> {
         });
       }
       if (AppConfig.debugMode) {
-        debugPrint('❌ [모임원 선택] 로딩 실패: $e');
+        debugPrint('[모임원 선택] 로딩 실패: $e');
       }
     }
   }
@@ -172,7 +172,7 @@ class _MemberSelectDialogState extends State<MemberSelectDialog> {
         });
       }
       if (AppConfig.debugMode) {
-        debugPrint('❌ [모임원 선택] 추가 로딩 실패: $e');
+        debugPrint('[모임원 선택] 추가 로딩 실패: $e');
       }
     }
   }

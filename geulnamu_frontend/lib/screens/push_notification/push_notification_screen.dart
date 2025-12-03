@@ -128,11 +128,7 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
       }
 
       if (AppConfig.debugMode) {
-        debugPrint('📤 [푸시 발송] 시작...');
-        debugPrint('   제목: ${_titleController.text}');
-        debugPrint('   내용: ${_bodyController.text}');
-        debugPrint('   수신자: $memberIds');
-        debugPrint('   입력 방식: ${_isAutoSelect ? '자동' : '수동'}');
+        debugPrint('[푸시 발송] 제목: ${_titleController.text}, 수신자: $memberIds (${_isAutoSelect ? '자동' : '수동'})');
       }
 
       // 푸시 알림 발송
@@ -168,7 +164,6 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
         _showErrorSnackBar('푸시 알림 발송에 실패했습니다.');
       }
     } catch (e) {
-      debugPrint('❌ [푸시 발송] 오류: $e');
       _showErrorSnackBar('푸시 알림 발송 중 오류가 발생했습니다.');
     } finally {
       if (mounted) {

@@ -21,12 +21,16 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
   // 🎯 RouteObserver 등록/해제 메서드들
   
   void registerRouteObserver() {
-    debugPrint('🔄 [RouteAwareMixin] RouteObserver 등록 시도');
+    if (AppConfig.debugMode) {
+      debugPrint('🔄 [RouteAwareMixin] RouteObserver 등록 시도');
+    }
     _routeService.registerRouteObserver(context, this);
   }
 
   void unregisterRouteObserver() {
-    debugPrint('🔄 [RouteAwareMixin] RouteObserver 구독 해제');
+    if (AppConfig.debugMode) {
+      debugPrint('🔄 [RouteAwareMixin] RouteObserver 구독 해제');
+    }
     _routeService.unregisterRouteObserver(this);
   }
 
@@ -35,7 +39,9 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
   @override
   void didPush() {
     super.didPush();
-    debugPrint('🏠 [RouteAwareMixin] 화면 진입 감지');
+    if (AppConfig.debugMode) {
+      debugPrint('🏠 [RouteAwareMixin] 화면 진입 감지');
+    }
     _routeService.onPush();
     
     // 개인정보 상태 확인 (로그인 상태에서만)
@@ -45,14 +51,18 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
   @override
   void didPushNext() {
     super.didPushNext();
-    debugPrint('🚪 [RouteAwareMixin] 다른 화면으로 이동 감지');
+    if (AppConfig.debugMode) {
+      debugPrint('🚪 [RouteAwareMixin] 다른 화면으로 이동 감지');
+    }
     _routeService.onPushNext();
   }
 
   @override
   void didPopNext() {
     super.didPopNext();
-    debugPrint('🔄 [RouteAwareMixin] 화면 복귀 감지');
+    if (AppConfig.debugMode) {
+      debugPrint('🔄 [RouteAwareMixin] 화면 복귀 감지');
+    }
     _routeService.onPopNext(context);
     
     // 개인정보 상태 확인 (로그인 상태에서만)
@@ -62,7 +72,9 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
   @override
   void didPop() {
     super.didPop();
-    debugPrint('🚪 [RouteAwareMixin] 화면 종료 감지');
+    if (AppConfig.debugMode) {
+      debugPrint('🚪 [RouteAwareMixin] 화면 종료 감지');
+    }
     _routeService.onPop();
   }
 
