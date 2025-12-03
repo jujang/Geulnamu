@@ -1,5 +1,6 @@
 // Firebase Messaging Service Worker for PWA Push Notifications
 // 글나무 앱 - 푸시 알림 서비스 워커
+// v4 - 토론 조 페이지 이동 + 지연 개선
 
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
@@ -29,7 +30,14 @@ function getNotificationUrl(data) {
   // 타입별 URL 분기
   switch (type) {
     case 'DISCUSSION_GROUP':
-      // 토론 조 알림 → 출석 현황 화면
+      // 🔥 v4 변경: 토론 조 알림 → 토론 조 화면 (출석 현황 아님!)
+      if (meetingId) {
+        return `/discussion-group?meetingId=${meetingId}`;
+      }
+      return '/home';
+
+    case 'ATTENDANCE':
+      // 출석 알림 → 출석 현황 화면
       if (meetingId) {
         return `/attendance/status?meetingId=${meetingId}`;
       }
@@ -47,9 +55,9 @@ function getNotificationUrl(data) {
       return '/home';
 
     default:
-      // 기본: meetingId가 있으면 출석 현황으로
+      // 🔥 v4 변경: 기본값도 토론 조 화면으로
       if (meetingId) {
-        return `/attendance/status?meetingId=${meetingId}`;
+        return `/discussion-group?meetingId=${meetingId}`;
       }
       // route가 지정되어 있으면 해당 경로로
       if (data.route) {
@@ -83,12 +91,11 @@ messaging.onBackgroundMessage((payload) => {
   return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 🔔 알림 클릭 처리
+// 🔔 알림 클릭 처리 (v4 - 지연 개선)
 self.addEventListener('notificationclick', (event) => {
   console.log('🔔 [글나무 SW] 알림 클릭!');
   console.log('  notification:', event.notification);
   console.log('  data:', event.notification.data);
-  console.log('  action:', event.action);
 
   // 알림 닫기
   event.notification.close();
@@ -97,7 +104,6 @@ self.addEventListener('notificationclick', (event) => {
   const urlToOpen = getNotificationUrl(event.notification.data);
   const fullUrl = new URL(urlToOpen, self.location.origin).href;
   console.log('🎯 [글나무 SW] 이동할 URL:', urlToOpen);
-  console.log('🎯 [글나무 SW] 전체 URL:', fullUrl);
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
@@ -114,26 +120,22 @@ self.addEventListener('notificationclick', (event) => {
         }
 
         if (appClient) {
-          console.log('✅ [글나무 SW] 기존 창 발견, postMessage로 네비게이션 요청');
+          console.log('✅ [글나무 SW] 기존 창 발견, 즉시 postMessage 전송');
           
-          // 🎯 포커스 먼저
-          appClient.focus().then(() => {
-            // 🎯 postMessage로 Flutter 앱에 네비게이션 요청
-            appClient.postMessage({
-              type: 'NOTIFICATION_CLICK',
-              url: urlToOpen,
-              data: event.notification.data
-            });
-            console.log('✅ [글나무 SW] postMessage 전송 완료');
-          }).catch((focusError) => {
-            console.warn('⚠️ [글나무 SW] 포커스 실패, postMessage만 전송:', focusError);
-            // 포커스 실패해도 메시지는 전송
-            appClient.postMessage({
-              type: 'NOTIFICATION_CLICK',
-              url: urlToOpen,
-              data: event.notification.data
-            });
+          // 🔥 v4 개선: postMessage를 먼저 전송 (지연 제거!)
+          appClient.postMessage({
+            type: 'NOTIFICATION_CLICK',
+            url: urlToOpen,
+            data: event.notification.data
           });
+          console.log('✅ [글나무 SW] postMessage 전송 완료');
+
+          // 🔥 v4 개선: focus는 별도로 실행 (실패해도 무시)
+          appClient.focus().catch((err) => {
+            console.log('⚠️ [글나무 SW] focus 실패 (무시):', err.message);
+          });
+
+          return; // 처리 완료
         } else {
           // 열린 창이 없으면 새 창 열기
           console.log('🆕 [글나무 SW] 새 창 열기:', fullUrl);
@@ -167,4 +169,4 @@ self.addEventListener('push', (event) => {
   }
 });
 
-console.log('🔥 [글나무 SW] Firebase Messaging Service Worker 로드 완료 (v3 - postMessage 방식)');
+console.log('🔥 [글나무 SW] Firebase Messaging Service Worker 로드 완료 (v4 - 토론 조 페이지 + 지연 개선)');

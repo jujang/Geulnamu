@@ -30,6 +30,7 @@ import 'screens/meeting/meeting_detail_screen.dart'; // 모임 상세 화면
 import 'screens/meeting/meeting_detail_staff_screen.dart'; // 운영진용 모임 상세 화면
 import 'screens/meeting/meeting_qr_scanner_screen.dart'; // QR 스캐너 화면
 import 'screens/attendance/attendance_status_screen.dart'; // 출석 현황 화면
+import 'screens/discussion/discussion_group_screen.dart'; // 토론 조 화면
 import 'screens/presentation/presentation_list_screen.dart'; // 발제문 목록 화면
 import 'screens/contact/contact_screen.dart'; // 문의하기 화면
 import 'screens/voc_management/voc_management_screen.dart'; // 문의 목록 화면
@@ -280,6 +281,42 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
                   if (meetingId != null) {
                     return MaterialPageRoute(
                       builder: (context) => AttendanceStatusScreen(
+                        meetingId: meetingId!,
+                        meetingTitle: meetingTitle,
+                      ),
+                      settings: settings,
+                    );
+                  }
+                  
+                  // meetingId가 없으면 404 처리
+                  return null;
+
+                // 토론 조 화면 (푸시 알림 클릭 시)
+                // 🎯 쿼리 파라미터 방식 지원
+                // 예: /discussion-group?meetingId=123
+                case '/discussion-group':
+                  int? meetingId;
+                  String? meetingTitle;
+
+                  // 1️⃣ 쿼리 파라미터에서 meetingId 확인 (알림 클릭 시)
+                  if (queryParams.containsKey('meetingId')) {
+                    meetingId = int.tryParse(queryParams['meetingId'] ?? '');
+                    meetingTitle = queryParams['meetingTitle'];
+                  }
+                  
+                  // 2️⃣ arguments에서 meetingId 확인 (일반 네비게이션)
+                  if (meetingId == null) {
+                    final arguments = settings.arguments as Map<String, dynamic>?;
+                    if (arguments != null) {
+                      meetingId = arguments['meetingId'] as int?;
+                      meetingTitle = arguments['meetingTitle'] as String?;
+                    }
+                  }
+
+                  // meetingId가 있으면 화면으로 이동
+                  if (meetingId != null) {
+                    return MaterialPageRoute(
+                      builder: (context) => DiscussionGroupScreen(
                         meetingId: meetingId!,
                         meetingTitle: meetingTitle,
                       ),

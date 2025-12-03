@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'dart:html' as html; // 🔔 브라우저 알림용
 import 'dart:js' as js; // 🔔 JavaScript 호출용
+import 'dart:convert'; // 🔔 JSON 인코딩용
 
 import '../../core/config/app_config.dart';
 import '../../core/utils/api_utils.dart';
@@ -115,7 +116,6 @@ class FcmService {
 
       if (kIsWeb) {
         // 🌐 웹: VAPID 키 필요
-        // Firebase Console > 프로젝트 설정 > 클라우드 메시징 > 웹 구성에서 확인
         token = await _messaging.getToken(vapidKey: _getVapidKey());
       } else {
         // 📱 모바일: VAPID 키 불필요
@@ -187,24 +187,52 @@ class FcmService {
   /// 🌐 Service Worker 메시지 리스너 (웹 전용)
   /// 
   /// Service Worker에서 postMessage로 보낸 알림 클릭 이벤트를 처리합니다.
+  /// navigator.serviceWorker.onmessage를 사용해야 합니다.
   void _setupServiceWorkerMessageListener() {
     _log('🌐 Service Worker 메시지 리스너 설정 중...');
 
-    html.window.onMessage.listen((html.MessageEvent event) {
-      _log('📨 window.onMessage 수신: ${event.data}');
-
-      // Service Worker에서 보낸 메시지인지 확인
-      if (event.data is Map) {
-        final data = Map<String, dynamic>.from(event.data);
-        final messageType = data['type'] as String?;
-
-        if (messageType == 'NOTIFICATION_CLICK') {
-          _log('🔔 알림 클릭 메시지 수신! (Service Worker postMessage)');
-          _log('  URL: ${data['url']}');
-          _log('  데이터: ${data['data']}');
-
-          _handleServiceWorkerNotificationClick(data);
+    // JavaScript를 통해 Service Worker 메시지 리스너 등록
+    final jsCode = '''
+      (function() {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.addEventListener('message', function(event) {
+            console.log('📨 [Flutter] Service Worker 메시지 수신:', event.data);
+            
+            if (event.data && event.data.type === 'NOTIFICATION_CLICK') {
+              // Flutter로 이벤트 전달 (window.postMessage 사용)
+              window.postMessage({
+                source: 'service-worker',
+                type: 'NOTIFICATION_CLICK',
+                url: event.data.url,
+                data: event.data.data
+              }, '*');
+            }
+          });
+          console.log('✅ [Flutter] Service Worker 메시지 리스너 등록 완료');
         }
+      })();
+    ''';
+    
+    js.context.callMethod('eval', [jsCode]);
+
+    // window.postMessage 리스너 (Service Worker → JS → Flutter)
+    html.window.onMessage.listen((html.MessageEvent event) {
+      try {
+        // Service Worker에서 전달된 메시지인지 확인
+        if (event.data is Map) {
+          final data = Map<String, dynamic>.from(event.data as Map);
+          
+          if (data['source'] == 'service-worker' && 
+              data['type'] == 'NOTIFICATION_CLICK') {
+            _log('🔔 알림 클릭 메시지 수신! (Service Worker → Flutter)');
+            _log('  URL: ${data['url']}');
+            _log('  데이터: ${data['data']}');
+
+            _handleServiceWorkerNotificationClick(data);
+          }
+        }
+      } catch (e) {
+        _log('메시지 처리 오류: $e', isError: true);
       }
     });
 
@@ -277,22 +305,35 @@ class FcmService {
   /// ServiceWorkerRegistration.showNotification()을 사용해야 합니다.
   Future<void> _showBrowserNotification(String title, String body, Map<String, dynamic> data) async {
     try {
+      _log('🔔 브라우저 알림 표시 시도...');
+      _log('  제목: $title');
+      _log('  내용: $body');
+      _log('  데이터: $data');
+
       // 알림 권한 확인
       if (html.Notification.permission == 'granted') {
-        // 🎯 데이터를 JSON 문자열로 변환
-        final dataJson = _encodeDataForJs(data);
+        // 🎯 데이터를 안전하게 JSON 문자열로 변환
+        String dataJsonString;
+        try {
+          dataJsonString = jsonEncode(data);
+        } catch (e) {
+          _log('데이터 JSON 변환 실패, 빈 객체 사용: $e', isError: true);
+          dataJsonString = '{}';
+        }
         
         // Service Worker를 통한 알림 표시 (PWA 환경에서 필수)
         final jsCode = '''
           (async function() {
             try {
               const registration = await navigator.serviceWorker.ready;
+              const notificationData = $dataJsonString;
+              
               await registration.showNotification("${_escapeJsString(title)}", {
                 body: "${_escapeJsString(body)}",
                 icon: "/icons/Icon-192.png",
                 badge: "/icons/Icon-192.png",
-                tag: "geulnamu-foreground-notification-" + Date.now(),
-                data: $dataJson,
+                tag: "geulnamu-foreground-" + Date.now(),
+                data: notificationData,
                 vibrate: [100, 50, 100],
                 requireInteraction: false
               });
@@ -304,9 +345,8 @@ class FcmService {
         ''';
         
         js.context.callMethod('eval', [jsCode]);
-        _log('🔔 브라우저 알림 표시 요청 완료: $title');
+        _log('🔔 브라우저 알림 표시 요청 완료');
       } else if (html.Notification.permission == 'default') {
-        // 권한 요청 필요
         _log('알림 권한이 아직 설정되지 않았습니다.', isError: true);
         html.Notification.requestPermission();
       } else {
@@ -315,21 +355,6 @@ class FcmService {
     } catch (e) {
       _log('브라우저 알림 표시 실패: $e', isError: true);
     }
-  }
-
-  /// 🔧 데이터를 JavaScript JSON 형식으로 인코딩
-  String _encodeDataForJs(Map<String, dynamic> data) {
-    if (data.isEmpty) return '{}';
-    
-    final entries = data.entries.map((e) {
-      final key = _escapeJsString(e.key);
-      final value = e.value is String 
-          ? '"${_escapeJsString(e.value)}"'
-          : '${e.value}';
-      return '"$key": $value';
-    }).join(', ');
-    
-    return '{$entries}';
   }
   
   /// 🔧 JavaScript 문자열 이스케이프 처리
@@ -343,10 +368,6 @@ class FcmService {
   }
 
   /// 🔔 알림 클릭 처리 - 화면 이동 (Firebase 방식)
-  /// 
-  /// 백엔드에서 보내는 데이터 구조:
-  /// - type: 알림 타입 (예: "DISCUSSION_GROUP")
-  /// - meetingId: 모임 ID (문자열)
   void _handleNotificationClick(RemoteMessage message) {
     final data = message.data;
     _log('🎯 알림 클릭 처리 시작 (Firebase)');
@@ -355,7 +376,6 @@ class FcmService {
     // Navigator가 준비되었는지 확인
     if (navigatorKey.currentState == null) {
       _log('Navigator가 아직 준비되지 않았습니다.', isError: true);
-      // 약간의 지연 후 재시도
       Future.delayed(const Duration(milliseconds: 500), () {
         _navigateByNotificationData(data);
       });
@@ -372,19 +392,22 @@ class FcmService {
 
     _log('🎯 알림 타입: $type, 모임 ID: $meetingIdStr');
 
-    // type에 따라 분기 처리
     switch (type) {
       case typeDiscussionGroup:
-        // 🎯 토론 조 알림 → 출석 현황 화면으로 이동
+        // 토론 조 알림 → 토론 조 화면으로 이동
+        _navigateToDiscussionGroup(meetingIdStr);
+        break;
+      
+      case 'ATTENDANCE':
+        // 출석 알림 → 출석 현황 화면으로 이동
         _navigateToAttendanceStatus(meetingIdStr);
         break;
       
       default:
-        // type이 없거나 알 수 없는 경우, meetingId만 있으면 출석 현황으로
         if (meetingIdStr != null && meetingIdStr.isNotEmpty) {
-          _navigateToAttendanceStatus(meetingIdStr);
+          // 기본값: 토론 조 화면으로 이동
+          _navigateToDiscussionGroup(meetingIdStr);
         } else if (data.containsKey('route')) {
-          // route가 있으면 해당 라우트로 이동
           final route = data['route'] as String?;
           if (route != null && route.isNotEmpty) {
             _navigateToRoute(route);
@@ -392,6 +415,34 @@ class FcmService {
         } else {
           _log('처리할 수 없는 알림 데이터입니다.', isError: true);
         }
+    }
+  }
+
+  /// 🎯 토론 조 화면으로 이동
+  void _navigateToDiscussionGroup(String? meetingIdStr) {
+    if (meetingIdStr == null || meetingIdStr.isEmpty) {
+      _log('meetingId가 없습니다.', isError: true);
+      return;
+    }
+
+    final meetingId = int.tryParse(meetingIdStr);
+    if (meetingId == null) {
+      _log('meetingId 파싱 실패: $meetingIdStr', isError: true);
+      return;
+    }
+
+    _log('✅ 토론 조 화면으로 이동: meetingId=$meetingId');
+
+    try {
+      navigatorKey.currentState?.pushNamed(
+        '/discussion-group',
+        arguments: {
+          'meetingId': meetingId,
+          'meetingTitle': null,
+        },
+      );
+    } catch (e) {
+      _log('화면 이동 실패: $e', isError: true);
     }
   }
 
@@ -415,7 +466,7 @@ class FcmService {
         '/attendance/status',
         arguments: {
           'meetingId': meetingId,
-          'meetingTitle': null, // 제목은 화면에서 조회
+          'meetingTitle': null,
         },
       );
     } catch (e) {
@@ -439,21 +490,13 @@ class FcmService {
     try {
       _log('백엔드에 FCM 토큰 등록 중...');
 
-      // 🔐 인증 토큰 가져오기
       final accessToken = await _authService.getAccessToken();
       if (accessToken == null || accessToken.isEmpty) {
         _log('액세스 토큰이 없습니다. 로그인 후 시도해주세요.', isError: true);
         return false;
       }
 
-      // 디바이스 타입 결정
-      String deviceType;
-      if (kIsWeb) {
-        deviceType = 'WEB';
-      } else {
-        // TODO: Platform.isAndroid / Platform.isIOS 체크
-        deviceType = 'MOBILE';
-      }
+      String deviceType = kIsWeb ? 'WEB' : 'MOBILE';
 
       final response = await _dio.post(
         AppConfig.getApiEndpoint('fcm/token'),
@@ -461,7 +504,7 @@ class FcmService {
         options: Options(
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer $accessToken', // 🔐 인증 토큰 추가
+            'Authorization': 'Bearer $accessToken',
           },
         ),
       );
@@ -477,17 +520,12 @@ class FcmService {
       _log('FCM 토큰 백엔드 등록 실패', isError: true);
       return false;
     } catch (e) {
-      // 백엔드 API가 아직 없을 수 있으므로 에러는 경고로 처리
       _log('FCM 토큰 백엔드 등록 실패 (API 미구현?): $e', isError: false);
       return false;
     }
   }
 
   /// 📤 푸시 알림 발송 (관리자 전용)
-  /// 
-  /// API: POST /fcm/notification
-  /// 권한: ADMIN
-  /// 반환: FcmSendResult? (성공 시 결과 객체, 실패 시 null)
   Future<FcmSendResult?> sendNotification({
     required String title,
     required String body,
@@ -533,8 +571,6 @@ class FcmService {
   }
 
   /// 🔑 VAPID 키 (웹 푸시용)
-  ///
-  /// Firebase Console > 프로젝트 설정 > 클라우드 메시징 > 웹 구성에서 확인
   String _getVapidKey() {
     return 'BLSz2JcQqCnn4UUrvfc7UFylmfnaXXgzx2nvT2yn9wma13CY5lmFPoRukKhy6Fv52nL82bDFwlnIATzLbbatn78';
   }
