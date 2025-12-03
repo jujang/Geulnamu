@@ -5,6 +5,7 @@ import '../../core/services/auth_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/home/home_service.dart';
 import '../../services/notification/fcm_service.dart';
+import '../../models/fcm/fcm_send_result.dart';
 import '../../widgets/common/main_layout.dart';
 
 /// 🔔 관리자 전용 푸시 알림 발송 화면
@@ -85,19 +86,31 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
       }
 
       // 푸시 알림 발송
-      final success = await _fcmService.sendNotification(
+      final result = await _fcmService.sendNotification(
         title: _titleController.text.trim(),
         body: _bodyController.text.trim(),
         memberIds: memberIds,
         accessToken: accessToken,
       );
 
-      if (success) {
-        _showSuccessSnackBar('푸시 알림이 발송되었습니다!');
-        // 입력 필드 초기화
-        _titleController.clear();
-        _bodyController.clear();
-        _memberIdsController.clear();
+      if (result != null) {
+        // 결과에 따른 메시지 표시
+        if (result.isAllSuccess) {
+          _showSuccessSnackBar(result.resultMessage);
+        } else if (result.isAllFailed) {
+          _showErrorSnackBar(result.resultMessage);
+        } else if (result.isPartialSuccess) {
+          _showWarningSnackBar(result.resultMessage);
+        } else if (result.isEmpty) {
+          _showWarningSnackBar(result.resultMessage);
+        }
+        
+        // 성공이 1건이라도 있으면 입력 필드 초기화
+        if (result.successCount > 0) {
+          _titleController.clear();
+          _bodyController.clear();
+          _memberIdsController.clear();
+        }
       } else {
         _showErrorSnackBar('푸시 알림 발송에 실패했습니다.');
       }
@@ -419,6 +432,26 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  /// 경고 스낵바 (부분 성공/발송 대상 없음)
+  void _showWarningSnackBar(String message) {
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.warning_amber, color: Colors.white, size: 20),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 4),
       ),
     );
   }

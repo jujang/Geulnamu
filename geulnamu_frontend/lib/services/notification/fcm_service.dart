@@ -7,6 +7,7 @@ import 'dart:js' as js; // 🔔 JavaScript 호출용
 import '../../core/config/app_config.dart';
 import '../../core/utils/api_utils.dart';
 import '../../core/services/auth_service.dart'; // 🔐 인증 토큰용
+import '../../models/fcm/fcm_send_result.dart'; // 📤 발송 결과 모델
 
 /// 🔥 FCM 푸시 알림 서비스
 ///
@@ -310,7 +311,8 @@ class FcmService {
   /// 
   /// API: POST /fcm/notification
   /// 권한: ADMIN
-  Future<bool> sendNotification({
+  /// 반환: FcmSendResult? (성공 시 결과 객체, 실패 시 null)
+  Future<FcmSendResult?> sendNotification({
     required String title,
     required String body,
     required List<int> memberIds,
@@ -339,17 +341,18 @@ class FcmService {
 
       if (response.statusCode == 200) {
         final result = ApiUtils.processBackendResponse(response, '푸시 알림 발송');
-        if (result['success']) {
-          _log('푸시 알림 발송 성공! ✅');
-          return true;
+        if (result['success'] && result['data'] != null) {
+          final sendResult = FcmSendResult.fromJson(result['data']);
+          _log('푸시 알림 발송 완료! ${sendResult.resultMessage}');
+          return sendResult;
         }
       }
 
       _log('푸시 알림 발송 실패', isError: true);
-      return false;
+      return null;
     } catch (e) {
       _log('푸시 알림 발송 실패: $e', isError: true);
-      return false;
+      return null;
     }
   }
 
