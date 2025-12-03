@@ -76,7 +76,7 @@ public class AttendanceControllerTest extends ControllerTest {
                 ),
                 queryParameters(
                     parameterWithName("meetingId").attributes(key("type").value(JsonFieldType.NUMBER)).attributes(setAttributes("1 이상의 정수")).description("모임 고유번호"),
-                    parameterWithName("fcmToken").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("500자 이하의 형식 제한 없는 문자열")).description("FCM 토큰")
+                    parameterWithName("fcmToken").attributes(key("type").value(JsonFieldType.STRING)).attributes(setAttributes("500자 이하의 형식 제한 없는 문자열")).description("FCM 토큰").optional()
                 ),
                 responseFields(
                     fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
