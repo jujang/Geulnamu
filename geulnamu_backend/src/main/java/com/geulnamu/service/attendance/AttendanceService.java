@@ -39,7 +39,7 @@ public class AttendanceService {
 
     // TODO: 추후 lock을 걸지 고민해 볼 것
     @Transactional(rollbackFor = Exception.class)
-    public Long createAttendanceByQR(Long memberId, Long meetingId) {
+    public Long createAttendanceByQR(Long memberId, Long meetingId, String fcmToken) {
         Member member =  memberQueryRepository.findById(memberId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.MEMBER.getDescription()));
         Meeting meeting = meetingQueryRepository.findById(meetingId)
@@ -52,7 +52,7 @@ public class AttendanceService {
             throw new BadRequestException(ResponseMessage.ATTENDANCE_DUPLICATE_ISSUE);
         }
 
-        Attendance attendance = Attendance.createAttendance(meeting, member, AttendanceType.QR);
+        Attendance attendance = Attendance.createAttendance(meeting, member, AttendanceType.QR, fcmToken);
         attendanceCommandRepository.save(attendance);
         return attendance.getId();
     }

@@ -36,6 +36,9 @@ public class Attendance extends DateColumn {
     @Column(name = "attendance_type", nullable = false)
     private AttendanceType attendanceType;
 
+    @Column(name = "fcm_token", length = 500)
+    private String fcmToken;
+
     @Column(name = "note")
     private String note; // 비고 (출석 관련 특이사항이 적는 곳)
 
@@ -50,11 +53,12 @@ public class Attendance extends DateColumn {
     private List<BookQuestion> bookQuestions;
 
 
-    public static Attendance createAttendance(Meeting meeting, Member member, AttendanceType attendanceType) {
+    public static Attendance createAttendance(Meeting meeting, Member member, AttendanceType attendanceType, String fcmToken) {
         return Attendance.builder()
             .meeting(meeting)
             .member(member)
             .attendanceType(attendanceType)
+            .fcmToken(fcmToken)
             .wantDiscussion(true)
             .build();
     }

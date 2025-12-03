@@ -17,6 +17,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/attendances")
@@ -28,8 +29,9 @@ public class AttendanceController {
     @LogAction(value = ActionType.ATTENDANCE_CREATE, actionDomain = DomainType.ATTENDANCE)
     @AccessLevel(Level.MEMBER)
     @PostMapping(value = "/check-in", name = "모임 출석")
-    public BaseResponse<Long> meetingAttend(@AuthMemberId Long memberId, @RequestParam @Min(value = 1) Long meetingId) {
-        Long attendanceId = attendanceService.createAttendanceByQR(memberId, meetingId);
+    public BaseResponse<Long> meetingAttend(@AuthMemberId Long memberId, @RequestParam @Min(value = 1) Long meetingId,
+                                            @RequestParam(required = false) String fcmToken) {
+        Long attendanceId = attendanceService.createAttendanceByQR(memberId, meetingId, fcmToken);
         return BaseResponse.ofSuccess(attendanceId);
     }
 

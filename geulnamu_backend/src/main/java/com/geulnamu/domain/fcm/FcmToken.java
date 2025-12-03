@@ -7,7 +7,7 @@ import lombok.*;
 
 @Getter
 @Builder
-@Entity(name = "fcm_Tokens")
+@Entity(name = "fcm_tokens")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FcmToken extends DateColumn {

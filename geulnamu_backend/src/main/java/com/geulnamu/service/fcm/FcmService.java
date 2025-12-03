@@ -4,6 +4,7 @@ import com.geulnamu.domain.fcm.FcmToken;
 import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
+import com.geulnamu.infrastructure.firebase.FcmPushSender;
 import com.geulnamu.repository.fcm.FcmCommandRepository;
 import com.geulnamu.repository.fcm.FcmQueryRepository;
 import com.geulnamu.repository.member.MemberQueryRepository;
@@ -20,7 +21,7 @@ public class FcmService {
     private final FcmCommandRepository fcmCommandRepository;
     private final FcmQueryRepository fcmQueryRepository;
     private final MemberQueryRepository memberQueryRepository;
-    private final FcmPushService fcmPushService;
+    private final FcmPushSender fcmPushSender;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -50,7 +51,7 @@ public class FcmService {
             .filter(token -> token.getMember().isPushEnabled())
             .map(FcmToken::getToken)
             .toList();
-        fcmPushService.sendToMultipleTokens(tokens, title, body);
+        fcmPushSender.sendToMultipleTokens(tokens, title, body);
     }
 
 }
