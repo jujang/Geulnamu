@@ -1,7 +1,7 @@
 {
     "name": "글나무 - 독서 토론 모임 관리 서비스",
     "short_name": "글나무",
-    "start_url": "/",
+    "start_url": "/?source=pwa",
     "display": "standalone",
     "background_color": "#7DD3C0",
     "theme_color": "#7DD3C0",
