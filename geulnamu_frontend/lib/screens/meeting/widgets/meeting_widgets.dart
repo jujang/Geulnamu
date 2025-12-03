@@ -30,7 +30,7 @@ class MeetingWidgets {
     VoidCallback? onDiscussionGroup,
   }) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -45,7 +45,7 @@ class MeetingWidgets {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -118,7 +118,7 @@ class MeetingWidgets {
                 ],
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               // 🎯 하단: 출석 버튼들 (1:1:1 비율 - 3개 버튼)
               Row(
@@ -162,7 +162,7 @@ class MeetingWidgets {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
                         // Material 3 스타일의 비활성화된 버튼 색상
                         disabledBackgroundColor: context.colors.onSurface
                             .withOpacity(0.12),
@@ -184,7 +184,7 @@ class MeetingWidgets {
                         color: context.colors.primary,
                       ),
                       label: Text(
-                        '현황',
+                        '출석 현황',
                         style: TextStyle(
                           color: context.colors.primary,
                           fontWeight: FontWeight.w600,
@@ -196,36 +196,36 @@ class MeetingWidgets {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
                       ),
                     ),
                   ),
 
                   const SizedBox(width: 6),
 
-                  // 🆕 조 구성 버튼
+                  // 토론 조 버튼
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: onDiscussionGroup,
                       icon: Icon(
                         Icons.groups_outlined,
                         size: 16,
-                        color: context.colors.secondary,
+                        color: GeulnamuColors.info,
                       ),
                       label: Text(
-                        '조 구성',
+                        '토론 조',
                         style: TextStyle(
-                          color: context.colors.secondary,
+                          color: GeulnamuColors.info,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: context.colors.secondary),
+                        side: BorderSide(color: GeulnamuColors.info),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
                       ),
                     ),
                   ),
