@@ -70,9 +70,41 @@ public class FcmPushSender {
                 .putAllData(data)
                 .build();
 
-            FirebaseMessaging.getInstance().send(message);
+            String response = FirebaseMessaging.getInstance().send(message);
+            log.info("푸시 발송 성공: {}", response);
         } catch (Exception e) {
             log.error("데이터 푸시 발송 실패: {}", e.getMessage());
+        }
+    }
+
+    // (여러기기에) 데이터 포함 푸시 발송 (클릭 시 특정 화면으로 이동)
+    public void sendWithDataToMultiple(List<String> tokens, String title, String body, Map<String, String> data) {
+        try {
+            MulticastMessage message = MulticastMessage.builder()
+                .addAllTokens(tokens)
+                .setNotification(Notification.builder()
+                    .setTitle(title)
+                    .setBody(body)
+                    .build())
+                .putAllData(data)
+                .build();
+
+            BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(message);
+            log.info("멀티캐스트 데이터 푸시 발송: 성공{}, 싪패{}",
+                response.getSuccessCount(), response.getFailureCount());
+
+            // 실패한 토큰 로깅
+            if(response.getFailureCount() > 0) {
+                List<SendResponse> responses = response.getResponses();
+                for(int i = 0; i < responses.size(); i++) {
+                    if(!responses.get(i).isSuccessful()) {
+                        log.warn("토큰 {} 발송 실패: {}", tokens.get(i),
+                            responses.get(i).getException().getMessage());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("멀티캐스트 데이터 푸시 발송 실패: {}", e.getMessage());
         }
     }
 }
