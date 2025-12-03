@@ -58,10 +58,13 @@ public class NormalNotificationScheduler {
                 );
 
                 // PUSH 하기
-                for(Attendance attendance : groupMembers) {
-                    if(!attendance.getFcmToken().isBlank()) {
-                        fcmPushSender.sendWithData(attendance.getFcmToken(), title, body, data);
-                    }
+                List<String> tokens = groupMembers.stream()
+                    .map(Attendance::getFcmToken)
+                    .filter(token -> !token.isBlank())
+                    .toList();
+
+                if(!tokens.isEmpty()) {
+                    fcmPushSender.sendToMultiple(tokens, title, body, data);
                 }
             }
         }

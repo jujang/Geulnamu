@@ -51,7 +51,7 @@ public class FcmService {
             .filter(token -> token.getMember().isPushEnabled())
             .map(FcmToken::getToken)
             .toList();
-        fcmPushSender.sendToMultipleTokens(tokens, title, body);
+        fcmPushSender.sendToMultiple(tokens, title, body, null);
     }
 
 }
