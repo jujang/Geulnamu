@@ -114,8 +114,8 @@ class _DiscussionGroupScreenState extends State<DiscussionGroupScreen> {
           loadingMessage: homeService.currentOperation,
           child: MainLayout(
             title: widget.meetingTitle != null
-                ? '${widget.meetingTitle} - 조 구성'
-                : '조 구성',
+                ? '${widget.meetingTitle} - 토론 조'
+                : '토론 조',
             isHomePage: false, // 서브 페이지이므로 뒤로가기 버튼 표시
             onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
             onLogoutTap: () => _handleLogout(),
@@ -278,10 +278,10 @@ class _DiscussionGroupScreenState extends State<DiscussionGroupScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // 총 조 수
+          // 조 수
           _buildSummaryItem(
-            icon: Icons.groups,
-            label: '총 조 수',
+            icon: Icons.category,
+            label: '조 수',
             value: '$groupCount개',
             color: context.colors.primary,
           ),
@@ -295,10 +295,10 @@ class _DiscussionGroupScreenState extends State<DiscussionGroupScreen> {
 
           // 총 참여 인원
           _buildSummaryItem(
-            icon: Icons.person,
+            icon: Icons.groups,
             label: '참여 인원',
             value: '$totalMembers명',
-            color: context.colors.secondary,
+            color: context.colors.primary,
           ),
         ],
       ),
@@ -397,26 +397,13 @@ class _DiscussionGroupScreenState extends State<DiscussionGroupScreen> {
                 runSpacing: 8,
                 children: group.members.map((member) {
                   return Chip(
-                    avatar: CircleAvatar(
-                      backgroundColor: context.colors.secondaryContainer,
-                      child: Text(
-                        member.memberName.isNotEmpty 
-                            ? member.memberName[0] 
-                            : '?',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: context.colors.onSecondaryContainer,
-                        ),
-                      ),
-                    ),
                     label: Text(member.memberName),
                     backgroundColor: context.colors.surfaceContainerHighest,
                     labelStyle: context.textStyles.bodyMedium?.copyWith(
                       color: context.colors.onSurface,
                     ),
                     side: BorderSide.none,
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                   );
                 }).toList(),
               ),
