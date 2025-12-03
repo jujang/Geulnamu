@@ -247,22 +247,38 @@ class _GeulnamuAppState extends State<GeulnamuApp> {
                   );
 
                 // 출석 현황 화면 (정확한 매칭)
+                // 🎯 쿼리 파라미터 방식 지원 (Service Worker 알림 클릭)
+                // 예: /attendance/status?meetingId=123
                 case '/attendance/status':
-                  final arguments = settings.arguments as Map<String, dynamic>?;
-                  if (arguments != null) {
-                    final meetingId = arguments['meetingId'] as int?;
-                    final meetingTitle = arguments['meetingTitle'] as String?;
+                  int? meetingId;
+                  String? meetingTitle;
 
-                    if (meetingId != null) {
-                      return MaterialPageRoute(
-                        builder: (context) => AttendanceStatusScreen(
-                          meetingId: meetingId,
-                          meetingTitle: meetingTitle,
-                        ),
-                        settings: settings,
-                      );
+                  // 1️⃣ 쿼리 파라미터에서 meetingId 확인 (알림 클릭 시)
+                  if (queryParams.containsKey('meetingId')) {
+                    meetingId = int.tryParse(queryParams['meetingId'] ?? '');
+                    meetingTitle = queryParams['meetingTitle'];
+                  }
+                  
+                  // 2️⃣ arguments에서 meetingId 확인 (일반 네비게이션)
+                  if (meetingId == null) {
+                    final arguments = settings.arguments as Map<String, dynamic>?;
+                    if (arguments != null) {
+                      meetingId = arguments['meetingId'] as int?;
+                      meetingTitle = arguments['meetingTitle'] as String?;
                     }
                   }
+
+                  // meetingId가 있으면 화면으로 이동
+                  if (meetingId != null) {
+                    return MaterialPageRoute(
+                      builder: (context) => AttendanceStatusScreen(
+                        meetingId: meetingId!,
+                        meetingTitle: meetingTitle,
+                      ),
+                      settings: settings,
+                    );
+                  }
+                  
                   // meetingId가 없으면 404 처리
                   return null;
               }

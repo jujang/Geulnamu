@@ -8,6 +8,7 @@ import '../../core/config/app_config.dart';
 import '../../core/utils/api_utils.dart';
 import '../../core/services/auth_service.dart'; // 🔐 인증 토큰용
 import '../../models/fcm/fcm_send_result.dart'; // 📤 발송 결과 모델
+import '../../main.dart' show navigatorKey; // 🎯 전역 Navigator Key
 
 /// 🔥 FCM 푸시 알림 서비스
 ///
@@ -16,6 +17,7 @@ import '../../models/fcm/fcm_send_result.dart'; // 📤 발송 결과 모델
 /// - 알림 권한 요청
 /// - 포그라운드/백그라운드 알림 처리
 /// - 백엔드에 토큰 등록
+/// - 알림 클릭 시 화면 이동
 class FcmService {
   // Singleton 패턴
   static final FcmService _instance = FcmService._internal();
@@ -38,6 +40,9 @@ class FcmService {
   // 초기화 여부
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
+
+  // 🎯 알림 타입 상수 (백엔드와 일치)
+  static const String typeDiscussionGroup = 'DISCUSSION_GROUP';
 
   /// 🔥 FCM 서비스 초기화
   ///
@@ -242,19 +247,95 @@ class FcmService {
         .replaceAll('\r', '\\r');
   }
 
-  /// 🔔 알림 클릭 처리
+  /// 🔔 알림 클릭 처리 - 화면 이동
+  /// 
+  /// 백엔드에서 보내는 데이터 구조:
+  /// - type: 알림 타입 (예: "DISCUSSION_GROUP")
+  /// - meetingId: 모임 ID (문자열)
   void _handleNotificationClick(RemoteMessage message) {
-    // 알림 데이터에 따라 특정 화면으로 이동
     final data = message.data;
+    _log('🎯 알림 클릭 처리 시작');
+    _log('  데이터: $data');
 
-    if (data.containsKey('meetingId')) {
-      final meetingId = data['meetingId'];
-      _log('모임 상세 화면으로 이동: $meetingId');
-      // TODO: Navigator로 모임 상세 화면 이동
-    } else if (data.containsKey('route')) {
-      final route = data['route'];
-      _log('지정된 라우트로 이동: $route');
-      // TODO: Navigator로 해당 라우트 이동
+    // Navigator가 준비되었는지 확인
+    if (navigatorKey.currentState == null) {
+      _log('Navigator가 아직 준비되지 않았습니다.', isError: true);
+      // 약간의 지연 후 재시도
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _navigateByNotificationData(data);
+      });
+      return;
+    }
+
+    _navigateByNotificationData(data);
+  }
+
+  /// 🎯 알림 데이터에 따라 화면 이동
+  void _navigateByNotificationData(Map<String, dynamic> data) {
+    final type = data['type'] as String?;
+    final meetingIdStr = data['meetingId'] as String?;
+
+    _log('🎯 알림 타입: $type, 모임 ID: $meetingIdStr');
+
+    // type에 따라 분기 처리
+    switch (type) {
+      case typeDiscussionGroup:
+        // 🎯 토론 조 알림 → 출석 현황 화면으로 이동
+        _navigateToAttendanceStatus(meetingIdStr);
+        break;
+      
+      default:
+        // type이 없거나 알 수 없는 경우, meetingId만 있으면 출석 현황으로
+        if (meetingIdStr != null && meetingIdStr.isNotEmpty) {
+          _navigateToAttendanceStatus(meetingIdStr);
+        } else if (data.containsKey('route')) {
+          // route가 있으면 해당 라우트로 이동
+          final route = data['route'] as String?;
+          if (route != null && route.isNotEmpty) {
+            _navigateToRoute(route);
+          }
+        } else {
+          _log('처리할 수 없는 알림 데이터입니다.', isError: true);
+        }
+    }
+  }
+
+  /// 🎯 출석 현황 화면으로 이동
+  void _navigateToAttendanceStatus(String? meetingIdStr) {
+    if (meetingIdStr == null || meetingIdStr.isEmpty) {
+      _log('meetingId가 없습니다.', isError: true);
+      return;
+    }
+
+    final meetingId = int.tryParse(meetingIdStr);
+    if (meetingId == null) {
+      _log('meetingId 파싱 실패: $meetingIdStr', isError: true);
+      return;
+    }
+
+    _log('✅ 출석 현황 화면으로 이동: meetingId=$meetingId');
+
+    try {
+      navigatorKey.currentState?.pushNamed(
+        '/attendance/status',
+        arguments: {
+          'meetingId': meetingId,
+          'meetingTitle': null, // 제목은 화면에서 조회
+        },
+      );
+    } catch (e) {
+      _log('화면 이동 실패: $e', isError: true);
+    }
+  }
+
+  /// 🎯 지정된 라우트로 이동
+  void _navigateToRoute(String route) {
+    _log('✅ 지정된 라우트로 이동: $route');
+
+    try {
+      navigatorKey.currentState?.pushNamed(route);
+    } catch (e) {
+      _log('화면 이동 실패: $e', isError: true);
     }
   }
 

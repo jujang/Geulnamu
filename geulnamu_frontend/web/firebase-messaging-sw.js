@@ -17,6 +17,52 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// 🎯 알림 타입별 URL 생성
+function getNotificationUrl(data) {
+  if (!data) return '/home';
+
+  const type = data.type;
+  const meetingId = data.meetingId;
+
+  console.log('🎯 [글나무 SW] 알림 데이터 파싱 - type:', type, 'meetingId:', meetingId);
+
+  // 타입별 URL 분기
+  switch (type) {
+    case 'DISCUSSION_GROUP':
+      // 토론 조 알림 → 출석 현황 화면
+      if (meetingId) {
+        return `/attendance/status?meetingId=${meetingId}`;
+      }
+      return '/home';
+
+    case 'NEW_MEETING':
+      // 새 모임 알림 → 모임 상세 화면
+      if (meetingId) {
+        return `/meeting/${meetingId}`;
+      }
+      return '/meeting-list';
+
+    case 'ANNOUNCEMENT':
+      // 공지사항 → 홈
+      return '/home';
+
+    default:
+      // 기본: meetingId가 있으면 출석 현황으로
+      if (meetingId) {
+        return `/attendance/status?meetingId=${meetingId}`;
+      }
+      // route가 지정되어 있으면 해당 경로로
+      if (data.route) {
+        return data.route;
+      }
+      // url이 지정되어 있으면 해당 URL로
+      if (data.url) {
+        return data.url;
+      }
+      return '/home';
+  }
+}
+
 // 백그라운드 메시지 처리
 messaging.onBackgroundMessage((payload) => {
   console.log('📬 [글나무 SW] 백그라운드 메시지 수신:', payload);
@@ -26,45 +72,78 @@ messaging.onBackgroundMessage((payload) => {
     body: payload.notification?.body || '새로운 알림이 있습니다.',
     icon: '/icons/Icon-192.png',
     badge: '/icons/Icon-192.png',
-    tag: payload.data?.tag || 'geulnamu-notification',
-    data: payload.data,
+    tag: payload.data?.tag || 'geulnamu-notification-' + Date.now(),
+    data: payload.data, // 🎯 중요: 데이터를 알림에 저장
     // 진동 패턴 (모바일)
     vibrate: [100, 50, 100],
-    // 클릭 시 액션
-    actions: [
-      { action: 'open', title: '열기' },
-      { action: 'close', title: '닫기' }
-    ]
+    // 🎯 알림 클릭 시 자동으로 닫히도록
+    requireInteraction: false
   };
 
   return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 알림 클릭 처리
+// 🔔 알림 클릭 처리
 self.addEventListener('notificationclick', (event) => {
-  console.log('🔔 [글나무 SW] 알림 클릭:', event.notification);
+  console.log('🔔 [글나무 SW] 알림 클릭!');
+  console.log('  notification:', event.notification);
+  console.log('  data:', event.notification.data);
+  console.log('  action:', event.action);
+
+  // 알림 닫기
   event.notification.close();
 
-  // 액션 처리
-  if (event.action === 'close') {
-    return; // 닫기만 하고 종료
-  }
-
-  // 앱으로 이동 (기본 또는 'open' 액션)
-  const urlToOpen = event.notification.data?.url || '/home';
+  // 🎯 알림 데이터에서 URL 생성
+  const urlToOpen = getNotificationUrl(event.notification.data);
+  const fullUrl = new URL(urlToOpen, self.location.origin).href;
+  console.log('🎯 [글나무 SW] 이동할 URL:', urlToOpen);
+  console.log('🎯 [글나무 SW] 전체 URL:', fullUrl);
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((windowClients) => {
-        // 이미 열린 창이 있으면 포커스
+        console.log('🔍 [글나무 SW] 열린 창 수:', windowClients.length);
+
+        // 🎯 우리 앱 창 찾기
+        let appClient = null;
         for (const client of windowClients) {
           if (client.url.includes(self.location.origin)) {
-            client.focus();
-            return client.navigate(urlToOpen);
+            appClient = client;
+            break;
           }
         }
-        // 없으면 새 창 열기
-        return clients.openWindow(urlToOpen);
+
+        if (appClient) {
+          console.log('✅ [글나무 SW] 기존 창 발견, postMessage로 네비게이션 요청');
+          
+          // 🎯 포커스 먼저
+          appClient.focus().then(() => {
+            // 🎯 postMessage로 Flutter 앱에 네비게이션 요청
+            appClient.postMessage({
+              type: 'NOTIFICATION_CLICK',
+              url: urlToOpen,
+              data: event.notification.data
+            });
+            console.log('✅ [글나무 SW] postMessage 전송 완료');
+          }).catch((focusError) => {
+            console.warn('⚠️ [글나무 SW] 포커스 실패, postMessage만 전송:', focusError);
+            // 포커스 실패해도 메시지는 전송
+            appClient.postMessage({
+              type: 'NOTIFICATION_CLICK',
+              url: urlToOpen,
+              data: event.notification.data
+            });
+          });
+        } else {
+          // 열린 창이 없으면 새 창 열기
+          console.log('🆕 [글나무 SW] 새 창 열기:', fullUrl);
+          return clients.openWindow(fullUrl);
+        }
+      })
+      .catch((error) => {
+        console.error('❌ [글나무 SW] 처리 실패:', error);
+        // 실패 시 새 창으로 시도
+        return clients.openWindow(fullUrl);
       })
   );
 });
@@ -74,4 +153,18 @@ self.addEventListener('notificationclose', (event) => {
   console.log('🔕 [글나무 SW] 알림 닫힘:', event.notification);
 });
 
-console.log('🔥 [글나무 SW] Firebase Messaging Service Worker 로드 완료');
+// 🔥 푸시 이벤트 (포그라운드에서도 알림 표시를 위해)
+self.addEventListener('push', (event) => {
+  console.log('📨 [글나무 SW] Push 이벤트 수신');
+  
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      console.log('📨 [글나무 SW] Push 데이터:', payload);
+    } catch (e) {
+      console.log('📨 [글나무 SW] Push 텍스트:', event.data.text());
+    }
+  }
+});
+
+console.log('🔥 [글나무 SW] Firebase Messaging Service Worker 로드 완료 (v3 - postMessage 방식)');
