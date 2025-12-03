@@ -12,15 +12,14 @@ import java.util.Map;
 public class FcmPushSender {
 
     // 단일 푸시 발송 (data가 null 이면 안 넣음)
-    public void send(String token, String title, String body, Map<String, String> data) {
+    public FcmSendResult send(String token, String title, String body, Map<String, String> data) {
         try {
             Message.Builder builder = Message.builder()
                 .setToken(token)
                 .setNotification(Notification.builder()
                     .setTitle(title)
                     .setBody(body)
-                    .build())
-                .putAllData(data);
+                    .build());
 
             if(data != null && !data.isEmpty()) {
                 builder.putAllData(data);
@@ -28,28 +27,29 @@ public class FcmPushSender {
 
             String response = FirebaseMessaging.getInstance().send(builder.build());
             log.info("푸시 발송 성공: {}", response);
+            return new FcmSendResult(1, 0);
         } catch (Exception e) {
             log.error("데이터 푸시 발송 실패: {}", e.getMessage());
+            return new FcmSendResult(0, 1);
         }
     }
 
     // 다중 푸시 발송 (data가 null 이면 안 넣음)
-    public void sendToMultiple(List<String> tokens, String title, String body, Map<String, String> data) {
+    public FcmSendResult sendToMultiple(List<String> tokens, String title, String body, Map<String, String> data) {
         try {
             MulticastMessage.Builder builder = MulticastMessage.builder()
                 .addAllTokens(tokens)
                 .setNotification(Notification.builder()
                     .setTitle(title)
                     .setBody(body)
-                    .build())
-                .putAllData(data);
+                    .build());
 
             if(data != null && !data.isEmpty()) {
                 builder.putAllData(data);
             }
 
             BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(builder.build());
-            log.info("멀티캐스트 데이터 푸시 발송: 성공{}, 싪패{}",
+            log.info("멀티캐스트 데이터 푸시 발송: 성공{}, 실패{}",
                 response.getSuccessCount(), response.getFailureCount());
 
             // 실패한 토큰 로깅
@@ -62,8 +62,11 @@ public class FcmPushSender {
                     }
                 }
             }
+
+            return new FcmSendResult(response.getSuccessCount(), response.getFailureCount());
         } catch (Exception e) {
             log.error("멀티캐스트 데이터 푸시 발송 실패: {}", e.getMessage());
+            return new FcmSendResult(0, tokens.size());
         }
     }
 }

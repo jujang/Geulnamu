@@ -8,6 +8,7 @@ import com.geulnamu.domain.shared.enums.Level;
 import com.geulnamu.infrastructure.annotation.AccessLevel;
 import com.geulnamu.infrastructure.annotation.AuthMemberId;
 import com.geulnamu.infrastructure.annotation.LogAction;
+import com.geulnamu.infrastructure.firebase.FcmSendResult;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.fcm.FcmService;
 import jakarta.validation.Valid;
@@ -34,8 +35,8 @@ public class FcmController {
     @LogAction(value = ActionType.FCM_NOTIFICATION, actionDomain = DomainType.FCM)
     @AccessLevel(Level.ADMIN)
     @PostMapping("/notification")
-    public BaseResponse<Void> sendNotification(@Valid @RequestBody NotificationRequest request) {
-        fcmService.sendNotification(request.getTitle(), request.getBody(), request.getMemberList());
-        return BaseResponse.ofSuccess();
+    public BaseResponse<FcmSendResult> sendNotification(@Valid @RequestBody NotificationRequest request) {
+        FcmSendResult result = fcmService.sendNotification(request.getTitle(), request.getBody(), request.getMemberList());
+        return BaseResponse.ofSuccess(result);
     }
 }

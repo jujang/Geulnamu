@@ -5,6 +5,7 @@ import com.geulnamu.domain.member.Member;
 import com.geulnamu.domain.shared.enums.DomainType;
 import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.infrastructure.firebase.FcmPushSender;
+import com.geulnamu.infrastructure.firebase.FcmSendResult;
 import com.geulnamu.repository.fcm.FcmCommandRepository;
 import com.geulnamu.repository.fcm.FcmQueryRepository;
 import com.geulnamu.repository.member.MemberQueryRepository;
@@ -45,13 +46,18 @@ public class FcmService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void sendNotification(String title, String body, List<Long> memberId) {
+    public FcmSendResult sendNotification(String title, String body, List<Long> memberId) {
         List<String> tokens = fcmQueryRepository.findByMemberIdIn(memberId)
             .stream()
             .filter(token -> token.getMember().isPushEnabled())
             .map(FcmToken::getToken)
             .toList();
-        fcmPushSender.sendToMultiple(tokens, title, body, null);
+
+        if(tokens.isEmpty()) {
+            return new FcmSendResult(0, 0);
+        }
+
+        return fcmPushSender.sendToMultiple(tokens, title, body, null);
     }
 
 }
