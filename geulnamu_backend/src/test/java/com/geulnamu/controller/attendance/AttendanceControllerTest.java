@@ -164,11 +164,11 @@ public class AttendanceControllerTest extends ControllerTest {
                 ),
                 Arrays.asList(
                     new MeetingAttendanceStatusResponse(
-                        1L, "나뭉일", LocalDateTime.of(2025, 5, 31, 10, 20), false),
+                        1L, 1L, "나뭉일", LocalDateTime.of(2025, 5, 31, 10, 20), false, true),
                     new MeetingAttendanceStatusResponse(
-                        2L, "나뭉이", LocalDateTime.of(2025, 5, 31, 10, 44), false),
+                        2L, 2L, "나뭉이", LocalDateTime.of(2025, 5, 31, 10, 44), false, true),
                     new MeetingAttendanceStatusResponse(
-                        3L, "나뭉삼", LocalDateTime.of(2025, 5, 31, 10, 50), true)
+                        3L, 3L, "나뭉삼", LocalDateTime.of(2025, 5, 31, 10, 50), true, false)
                 )
             );
 
@@ -209,9 +209,11 @@ public class AttendanceControllerTest extends ControllerTest {
                     fieldWithPath("data.meetingAttendanceSummaryResponse.lateAttendCount").type(JsonFieldType.NUMBER).description("지각 참석자 수"),
                     fieldWithPath("data.meetingAttendanceStatusResponseList[]").type(JsonFieldType.ARRAY).description("모임원별 출석 정보"),
                     fieldWithPath("data.meetingAttendanceStatusResponseList[].attendanceId").type(JsonFieldType.NUMBER).description("출석 고유번호"),
+                    fieldWithPath("data.meetingAttendanceStatusResponseList[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),
                     fieldWithPath("data.meetingAttendanceStatusResponseList[].name").type(JsonFieldType.STRING).description("모임원 이름"),
                     fieldWithPath("data.meetingAttendanceStatusResponseList[].attendanceTime").type(JsonFieldType.STRING).description("출석 시간"),
-                    fieldWithPath("data.meetingAttendanceStatusResponseList[].isLate").type(JsonFieldType.BOOLEAN).description("지각 여부")
+                    fieldWithPath("data.meetingAttendanceStatusResponseList[].isLate").type(JsonFieldType.BOOLEAN).description("지각 여부"),
+                    fieldWithPath("data.meetingAttendanceStatusResponseList[].wantDiscussion").type(JsonFieldType.BOOLEAN).description("토론 참여 여부")
                 )
             ));
     }
