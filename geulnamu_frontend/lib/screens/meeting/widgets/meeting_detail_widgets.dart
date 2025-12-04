@@ -107,8 +107,8 @@ class MeetingDetailWidgets {
     if (isStaffOrAbove) return true;
     
     // 이미 출석/지각 상태면 표시 안 함
-    if (meeting.attendanceStatus == 'ATTENDED' || 
-        meeting.attendanceStatus == 'LATE') {
+    if (meeting.attendanceStatus == 'ATTEND' || 
+        meeting.attendanceStatus == 'ATTEND_LATE') {
       return false;
     }
     
@@ -120,8 +120,8 @@ class MeetingDetailWidgets {
   /// - 미출석/불참 상태이고 모임 당일까지만 표시
   static bool _canShowQrScanButton(MeetingDetailInfo meeting) {
     // 이미 출석/지각 상태면 표시 안 함
-    if (meeting.attendanceStatus == 'ATTENDED' || 
-        meeting.attendanceStatus == 'LATE') {
+    if (meeting.attendanceStatus == 'ATTEND' || 
+        meeting.attendanceStatus == 'ATTEND_LATE') {
       return false;
     }
     
