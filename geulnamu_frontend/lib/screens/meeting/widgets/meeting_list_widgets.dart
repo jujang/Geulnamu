@@ -325,6 +325,7 @@ class MeetingListWidgets {
     BuildContext context, {
     required int totalElements,
     required MeetingListFilter currentFilter,
+    VoidCallback? onFilterTap,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -338,10 +339,31 @@ class MeetingListWidgets {
               color: context.colors.onSurface,
             ),
           ),
-          Text(
-            _getFilterSummary(currentFilter),
-            style: context.textStyles.bodySmall?.copyWith(
-              color: context.colors.onSurface.withValues(alpha: 0.7),
+          // 🎯 필터 텍스트를 탭 가능하게 변경
+          InkWell(
+            onTap: onFilterTap,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _getFilterSummary(currentFilter),
+                    style: context.textStyles.bodySmall?.copyWith(
+                      color: context.colors.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  if (onFilterTap != null) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.tune,
+                      size: 14,
+                      color: context.colors.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ],

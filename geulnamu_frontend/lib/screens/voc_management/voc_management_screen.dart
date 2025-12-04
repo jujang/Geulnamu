@@ -94,8 +94,8 @@ class _VoCManagementScreenState extends State<VoCManagementScreen>
         VoCManagementWidgets.buildListHeader(
           context,
           totalElements: currentResponse!.totalElements,
-          currentPage: currentResponse!.pageNumber,
-          totalPages: currentResponse!.totalPages,
+          currentFilter: currentFilter,
+          onFilterTap: _showFilterBottomSheet,
         ),
 
         // 이슈 목록
