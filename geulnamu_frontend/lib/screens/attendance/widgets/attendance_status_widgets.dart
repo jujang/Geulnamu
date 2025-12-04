@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';  // 🆕 클립보드 복사용
 import '../../../core/theme.dart';
 import '../../../models/attendance/attendance_status_model.dart';
 
@@ -237,30 +238,174 @@ class AttendanceStatusWidgets {
   // ==================== 출석자 목록 ====================
 
   /// 출석자 목록 헤더
-  static Widget buildAttendanceListHeader(BuildContext context) {
+  static Widget buildAttendanceListHeader(
+    BuildContext context, {
+    List<AttendanceStatus>? attendanceList,  // 🆕 복사 기능을 위해 추가
+    bool showAdminActions = false,  // 🆕 관리자 액션 표시 여부
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.people_outline, color: context.colors.primary, size: 24),
-          const SizedBox(width: 8),
-          Text(
-            '출석자 목록',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: context.colors.onSurface,
-            ),
+          // 헤더 행
+          Row(
+            children: [
+              Icon(Icons.people_outline, color: context.colors.primary, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                '출석자 목록',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: context.colors.onSurface,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '(늦게 온 순)',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.colors.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
           ),
-          const Spacer(),
-          Text(
-            '(늦게 온 순)',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: context.colors.onSurface.withValues(alpha: 0.5),
-            ),
-          ),
+          
+          // 🆕 관리자용 복사 버튼들
+          if (showAdminActions && attendanceList != null && attendanceList.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _buildCopyButtonsRow(context, attendanceList),
+          ],
         ],
       ),
     );
+  }
+
+  /// 🆕 관리자용 복사 버튼 행
+  static Widget _buildCopyButtonsRow(
+    BuildContext context,
+    List<AttendanceStatus> attendanceList,
+  ) {
+    // 토론 참여 희망자 수 계산
+    final discussionWantCount = attendanceList
+        .where((a) => a.wantDiscussion == true)
+        .length;
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        // 모임원 명단 복사 버튼
+        _buildCopyButton(
+          context,
+          icon: Icons.content_copy,
+          label: '모임원 명단 (${attendanceList.length}명)',
+          onPressed: () => _copyAttendeeIds(context, attendanceList),
+        ),
+        
+        // 토론 참여 모임원 명단 복사 버튼
+        _buildCopyButton(
+          context,
+          icon: Icons.forum_outlined,
+          label: '토론 참여 모임원 명단 ($discussionWantCount명)',
+          onPressed: discussionWantCount > 0
+              ? () => _copyDiscussionWantIds(context, attendanceList)
+              : null,  // 0명이면 비활성화
+        ),
+      ],
+    );
+  }
+
+  /// 🆕 복사 버튼 위젯
+  static Widget _buildCopyButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback? onPressed,
+  }) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label, style: const TextStyle(fontSize: 13)),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        side: BorderSide(
+          color: onPressed != null
+              ? context.colors.primary
+              : context.colors.outline.withValues(alpha: 0.3),
+        ),
+        foregroundColor: onPressed != null
+            ? context.colors.primary
+            : context.colors.onSurface.withValues(alpha: 0.4),
+      ),
+    );
+  }
+
+  /// 🆕 출석자 전체 memberId 복사
+  static Future<void> _copyAttendeeIds(
+    BuildContext context,
+    List<AttendanceStatus> attendanceList,
+  ) async {
+    final memberIds = attendanceList
+        .map((a) => a.memberId.toString())
+        .join(',');
+    
+    await Clipboard.setData(ClipboardData(text: memberIds));
+    
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '모임원 ${attendanceList.length}명의 ID가 복사되었습니다.',
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: context.colors.primary,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  /// 🆕 토론 참여 희망자 memberId 복사
+  static Future<void> _copyDiscussionWantIds(
+    BuildContext context,
+    List<AttendanceStatus> attendanceList,
+  ) async {
+    final discussionWantList = attendanceList
+        .where((a) => a.wantDiscussion == true)
+        .toList();
+    
+    final memberIds = discussionWantList
+        .map((a) => a.memberId.toString())
+        .join(',');
+    
+    await Clipboard.setData(ClipboardData(text: memberIds));
+    
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '토론 참여 희망자 ${discussionWantList.length}명의 ID가 복사되었습니다.',
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: context.colors.primary,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   /// 출석자 목록 빌드

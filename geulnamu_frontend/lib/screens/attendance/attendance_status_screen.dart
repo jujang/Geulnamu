@@ -110,8 +110,12 @@ class _AttendanceStatusScreenState extends State<AttendanceStatusScreen>
         // 구분선
         Divider(height: 1, color: context.colors.outline.withOpacity(0.2)),
 
-        // 출석자 목록 헤더
-        AttendanceStatusWidgets.buildAttendanceListHeader(context),
+        // 출석자 목록 헤더 (🆕 관리자용 복사 버튼 포함)
+        AttendanceStatusWidgets.buildAttendanceListHeader(
+          context,
+          attendanceList: attendanceList,
+          showAdminActions: _isAdminLevel(),
+        ),
 
         // 출석자 목록
         Expanded(

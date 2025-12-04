@@ -103,24 +103,30 @@ class AttendanceSummary {
 
 /// 개별 출석 상태 정보
 class AttendanceStatus {
-  final int attendanceId;  // memberId → attendanceId로 변경
+  final int attendanceId;
+  final int memberId;  // 🆕 회원 ID 추가 (푸시 알림 수신자용)
   final String name;
   final DateTime attendanceTime;
   final bool isLate;
+  final bool? wantDiscussion;  // 🆕 토론 참여 희망 여부 추가
 
   const AttendanceStatus({
-    required this.attendanceId,  // memberId → attendanceId로 변경
+    required this.attendanceId,
+    required this.memberId,
     required this.name,
     required this.attendanceTime,
     required this.isLate,
+    this.wantDiscussion,
   });
 
   factory AttendanceStatus.fromJson(Map<String, dynamic> json) {
     return AttendanceStatus(
-      attendanceId: (json['attendanceId'] as num?)?.toInt() ?? 0,  // memberId → attendanceId로 변경
+      attendanceId: (json['attendanceId'] as num?)?.toInt() ?? 0,
+      memberId: (json['memberId'] as num?)?.toInt() ?? 0,  // 🆕 memberId 파싱
       name: json['name']?.toString() ?? '알 수 없음',
       attendanceTime: _parseDateTime(json['attendanceTime']),
       isLate: json['isLate'] as bool? ?? false,
+      wantDiscussion: json['wantDiscussion'] as bool?,  // 🆕 wantDiscussion 파싱
     );
   }
 
@@ -138,10 +144,12 @@ class AttendanceStatus {
 
   Map<String, dynamic> toJson() {
     return {
-      'attendanceId': attendanceId,  // memberId → attendanceId로 변경
+      'attendanceId': attendanceId,
+      'memberId': memberId,
       'name': name,
       'attendanceTime': attendanceTime.toIso8601String(),
       'isLate': isLate,
+      'wantDiscussion': wantDiscussion,
     };
   }
 }
