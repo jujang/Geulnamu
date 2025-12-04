@@ -99,6 +99,50 @@ class MeetingDetailWidgets {
            lowerMessage.contains('authentication');
   }
   
+  /// QR 출석 섹션 표시 여부 확인
+  /// - 운영진 이상: 항상 표시
+  /// - 일반 사용자: 미출석/불참 상태이고 모임 당일까지만 표시
+  static bool _canShowQrSection(MeetingDetailInfo meeting, bool isStaffOrAbove) {
+    // 운영진 이상은 항상 표시
+    if (isStaffOrAbove) return true;
+    
+    // 이미 출석/지각 상태면 표시 안 함
+    if (meeting.attendanceStatus == 'ATTENDED' || 
+        meeting.attendanceStatus == 'LATE') {
+      return false;
+    }
+    
+    // 모임 당일까지만 표시 (미출석/불참 상태)
+    return _isOnOrBeforeMeetingDay(meeting.meetingDateTime);
+  }
+  
+  /// QR 출석 버튼 표시 여부 확인 (일반 사용자용)
+  /// - 미출석/불참 상태이고 모임 당일까지만 표시
+  static bool _canShowQrScanButton(MeetingDetailInfo meeting) {
+    // 이미 출석/지각 상태면 표시 안 함
+    if (meeting.attendanceStatus == 'ATTENDED' || 
+        meeting.attendanceStatus == 'LATE') {
+      return false;
+    }
+    
+    // 모임 당일까지만 표시
+    return _isOnOrBeforeMeetingDay(meeting.meetingDateTime);
+  }
+  
+  /// 모임 당일 또는 이전인지 확인
+  static bool _isOnOrBeforeMeetingDay(DateTime meetingDateTime) {
+    final now = DateTime.now();
+    final meetingDate = DateTime(
+      meetingDateTime.year,
+      meetingDateTime.month,
+      meetingDateTime.day,
+    );
+    final today = DateTime(now.year, now.month, now.day);
+    
+    // 오늘이 모임 날짜와 같거나 이전이면 true
+    return !today.isAfter(meetingDate);
+  }
+  
   /// 에러 메시지 정리 (불필요한 접두사 제거)
   static String _cleanErrorMessage(String message) {
     return message
@@ -151,9 +195,10 @@ class MeetingDetailWidgets {
           ),
           const SizedBox(height: 16),
 
-          // QR 출석 기능 (조건부 표시 - '진행 전' 상태일 때만)
-          // 참석, 지각, 불참 상태에서는 QR 출석 섹션 숨김
-          if (meeting.attendanceStatus == 'NOT_STARTED') ...[
+          // QR 출석 기능 (조건부 표시)
+          // - 일반 사용자: 미출석/불참 상태이고 모임 당일까지만 표시
+          // - 운영진 이상: 항상 표시 (출석용 QR 표시 버튼 접근 위해)
+          if (_canShowQrSection(meeting, isStaffOrAbove)) ...[
             _buildQrAttendanceCard(
               context,
               meeting,
@@ -848,21 +893,41 @@ class MeetingDetailWidgets {
             ),
             const SizedBox(height: 16),
 
-            // 버튼들 - 🆕 모든 사용자가 출석 가능하도록 수정
-            // 운영진도 일반 모임 상세에서는 출석만 가능 (QR 관리는 운영진용 페이지에서)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: onQrScanTap,
-                icon: const Icon(Icons.qr_code_scanner),
-                label: const Text('QR로 출석하기'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: context.colors.primary,
-                  foregroundColor: context.colors.onPrimary,
+            // 🆕 QR로 출석하기 버튼 - 미출석/불참 상태이고 모임 당일까지만 표시
+            if (_canShowQrScanButton(meeting)) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: onQrScanTap,
+                  icon: const Icon(Icons.qr_code_scanner),
+                  label: const Text('QR로 출석하기'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: context.colors.primary,
+                    foregroundColor: context.colors.onPrimary,
+                  ),
                 ),
               ),
-            ),
+            ],
+            
+            // 🆕 운영진 이상일 때 QR 표시 버튼 (출석 여부와 무관하게 항상 표시)
+            if (isStaffOrAbove && onQrDisplayTap != null) ...[
+              // QR 출석 버튼이 있으면 간격 추가
+              if (_canShowQrScanButton(meeting))
+                const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: onQrDisplayTap,
+                  icon: const Icon(Icons.qr_code_2),
+                  label: const Text('출석용 QR 표시 (운영진용)'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: BorderSide(color: context.colors.primary),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
