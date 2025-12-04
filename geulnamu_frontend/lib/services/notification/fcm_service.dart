@@ -131,12 +131,23 @@ class FcmService {
 
   /// Service Worker 메시지 리스너 (웹 전용)
   void _setupServiceWorkerMessageListener() {
+    if (AppConfig.debugMode) {
+      print('📡 [FCM] Service Worker 메시지 리스너 설정 시작...');
+    }
+
     // Service Worker 메시지 리스너 등록
     final jsCode = '''
       (function() {
-        if ('serviceWorker' in navigator) {
+        console.log('[글나무 JS] Service Worker 메시지 리스너 등록 시작...');
+        
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          console.log('[글나무 JS] Service Worker controller 존재!');
+          
           navigator.serviceWorker.addEventListener('message', function(event) {
+            console.log('[글나무 JS] SW에서 메시지 수신:', event.data);
+            
             if (event.data && event.data.type === 'NOTIFICATION_CLICK') {
+              console.log('[글나무 JS] NOTIFICATION_CLICK 감지, window.postMessage 전송...');
               window.postMessage({
                 source: 'service-worker',
                 type: 'NOTIFICATION_CLICK',
@@ -144,6 +155,29 @@ class FcmService {
                 data: event.data.data
               }, '*');
             }
+          });
+          
+          console.log('[글나무 JS] Service Worker 메시지 리스너 등록 완료!');
+        } else {
+          console.warn('[글나무 JS] Service Worker controller가 없음!');
+          
+          // controller가 아직 없으면 ready 대기
+          navigator.serviceWorker.ready.then(function(registration) {
+            console.log('[글나무 JS] Service Worker ready, 리스너 등록...');
+            
+            navigator.serviceWorker.addEventListener('message', function(event) {
+              console.log('[글나무 JS] SW에서 메시지 수신:', event.data);
+              
+              if (event.data && event.data.type === 'NOTIFICATION_CLICK') {
+                console.log('[글나무 JS] NOTIFICATION_CLICK 감지, window.postMessage 전송...');
+                window.postMessage({
+                  source: 'service-worker',
+                  type: 'NOTIFICATION_CLICK',
+                  url: event.data.url,
+                  data: event.data.data
+                }, '*');
+              }
+            });
           });
         }
       })();
@@ -154,11 +188,18 @@ class FcmService {
     // window.postMessage 리스너
     html.window.onMessage.listen((html.MessageEvent event) {
       try {
+        if (AppConfig.debugMode) {
+          print('📨 [FCM] window.onMessage 수신: ${event.data}');
+        }
+        
         if (event.data is Map) {
           final data = Map<String, dynamic>.from(event.data as Map);
           
           if (data['source'] == 'service-worker' && 
               data['type'] == 'NOTIFICATION_CLICK') {
+            if (AppConfig.debugMode) {
+              print('✅ [FCM] NOTIFICATION_CLICK 메시지 확인!');
+            }
             _handleServiceWorkerNotificationClick(data);
           }
         }
@@ -166,26 +207,58 @@ class FcmService {
         _log('메시지 처리 오류: $e', isError: true);
       }
     });
+
+    if (AppConfig.debugMode) {
+      print('✅ [FCM] Service Worker 메시지 리스너 설정 완료!');
+    }
   }
 
   /// Service Worker 알림 클릭 처리
   void _handleServiceWorkerNotificationClick(Map<String, dynamic> message) {
+    if (AppConfig.debugMode) {
+      print('📩 [FCM] Service Worker 알림 클릭 수신!');
+      print('📩 [FCM] 메시지 전체: $message');
+    }
+
     final url = message['url'] as String?;
     final notificationData = message['data'];
 
+    if (AppConfig.debugMode) {
+      print('📩 [FCM] URL: $url');
+      print('📩 [FCM] data: $notificationData');
+    }
+
     if (url != null && url.isNotEmpty) {
+      if (AppConfig.debugMode) {
+        print('🚀 [FCM] URL로 이동 시도: $url');
+      }
       _navigateToUrl(url);
     } else if (notificationData != null) {
       final data = notificationData is Map 
           ? Map<String, dynamic>.from(notificationData)
           : <String, dynamic>{};
+      if (AppConfig.debugMode) {
+        print('🚀 [FCM] data로 이동 시도: $data');
+      }
       _navigateByNotificationData(data);
+    } else {
+      if (AppConfig.debugMode) {
+        print('⚠️ [FCM] 이동할 URL이나 data가 없음!');
+      }
     }
   }
 
   /// URL로 화면 이동
   void _navigateToUrl(String url) {
+    if (AppConfig.debugMode) {
+      print('🎯 [FCM] _navigateToUrl 호출: $url');
+      print('🎯 [FCM] navigatorKey.currentState: ${navigatorKey.currentState}');
+    }
+
     if (navigatorKey.currentState == null) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [FCM] Navigator 없음, 500ms 후 재시도...');
+      }
       Future.delayed(const Duration(milliseconds: 500), () {
         _navigateToUrl(url);
       });
@@ -193,6 +266,9 @@ class FcmService {
     }
 
     try {
+      if (AppConfig.debugMode) {
+        print('✅ [FCM] pushNamed 실행: $url');
+      }
       navigatorKey.currentState?.pushNamed(url);
     } catch (e) {
       _log('화면 이동 실패: $e', isError: true);
