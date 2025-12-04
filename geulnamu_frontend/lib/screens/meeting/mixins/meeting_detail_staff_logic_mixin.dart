@@ -656,8 +656,8 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
           const SnackBar(content: Text('모임이 삭제되었습니다.')),
         );
 
-        // 목록 화면으로 돌아가기
-        Navigator.of(context).pop(true); // 삭제 성공 결과 반환
+        // 🆕 목록 화면으로 교체 이동 (브라우저 히스토리에서 삭제된 페이지 제거)
+        Navigator.of(context).pushReplacementNamed('/meeting-list-staff');
       }
     } catch (e) {
       if (mounted) {
