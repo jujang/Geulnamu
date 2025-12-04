@@ -147,6 +147,20 @@ class AttendanceStatusWidgets {
             Colors.orange,
           ),
         ),
+        // 🆕 토론희망 항목 추가
+        Container(
+          width: 1,
+          height: 40,
+          color: context.colors.outline.withValues(alpha: 0.3),
+        ),
+        Expanded(
+          child: _buildStatItem(
+            context,
+            '토론희망',
+            '${summary.wantDiscussionCount}명',
+            context.colors.primary,
+          ),
+        ),
       ],
     );
   }

@@ -36,6 +36,7 @@ class AttendanceSummary {
   final int totalAttendCount;
   final int attendCount;
   final int lateAttendCount;
+  final int wantDiscussionCount;  // 🆕 토론 참여 희망자 수
 
   const AttendanceSummary({
     required this.meetingDate,
@@ -43,6 +44,7 @@ class AttendanceSummary {
     required this.totalAttendCount,
     required this.attendCount,
     required this.lateAttendCount,
+    required this.wantDiscussionCount,
   });
 
   factory AttendanceSummary.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class AttendanceSummary {
       totalAttendCount: (json['totalAttendCount'] as num?)?.toInt() ?? 0,
       attendCount: (json['attendCount'] as num?)?.toInt() ?? 0,
       lateAttendCount: (json['lateAttendCount'] as num?)?.toInt() ?? 0,
+      wantDiscussionCount: (json['wantDiscussionCount'] as num?)?.toInt() ?? 0,  // 🆕 파싱
     );
   }
 
@@ -94,6 +97,7 @@ class AttendanceSummary {
       'totalAttendCount': totalAttendCount,
       'attendCount': attendCount,
       'lateAttendCount': lateAttendCount,
+      'wantDiscussionCount': wantDiscussionCount,
     };
   }
 
