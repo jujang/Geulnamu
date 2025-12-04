@@ -198,6 +198,9 @@ class _DiscussionGroupScreenState extends State<DiscussionGroupScreen> {
 
   /// 에러 위젯
   Widget _buildError(String message) {
+    // 로그인 관련 에러인지 확인
+    final isAuthError = _isAuthenticationError(message);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -214,15 +217,51 @@ class _DiscussionGroupScreenState extends State<DiscussionGroupScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _loadDiscussionGroups,
-              icon: const Icon(Icons.refresh),
-              label: const Text('다시 시도'),
+            // 버튼들 (Row로 배치)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 다시 시도 버튼
+                ElevatedButton.icon(
+                  onPressed: _loadDiscussionGroups,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('다시 시도'),
+                ),
+                // 로그인 관련 에러일 때만 로그인 버튼 표시
+                if (isAuthError) ...[
+                  const SizedBox(width: 12),
+                  OutlinedButton.icon(
+                    onPressed: _navigateToLogin,
+                    icon: const Icon(Icons.login),
+                    label: const Text('로그인하기'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: context.colors.primary,
+                      side: BorderSide(color: context.colors.primary),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  /// 인증 관련 에러인지 확인
+  bool _isAuthenticationError(String message) {
+    final lowerMessage = message.toLowerCase();
+    return lowerMessage.contains('로그인') ||
+        lowerMessage.contains('인증') ||
+        lowerMessage.contains('토큰') ||
+        lowerMessage.contains('401') ||
+        lowerMessage.contains('unauthorized') ||
+        lowerMessage.contains('authentication');
+  }
+
+  /// 로그인 페이지로 이동
+  void _navigateToLogin() {
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
   }
 
   /// 빈 상태 위젯
