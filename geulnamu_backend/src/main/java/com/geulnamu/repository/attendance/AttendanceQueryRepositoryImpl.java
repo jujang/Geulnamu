@@ -35,7 +35,9 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
             .select(Projections.constructor(MeetingAttendanceSummaryResponse.class,
                 meeting.meetingDate, meeting.lateThresholdTime, attendance.member.count(),
                     normalAttendanceCount(),
-                    attendance.member.count().subtract(normalAttendanceCount()))
+                    attendance.member.count().subtract(normalAttendanceCount()),
+                    attendance.wantDiscussion.count()
+                )
             )
             .from(meeting)
             .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id))

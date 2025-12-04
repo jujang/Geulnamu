@@ -160,7 +160,7 @@ public class AttendanceControllerTest extends ControllerTest {
                 new MeetingAttendanceSummaryResponse(
                     LocalDateTime.of(2025, 5, 31, 10, 30),
                     LocalDateTime.of(2025, 5, 31, 10, 45),
-                    3L, 2L, 1L
+                    3L, 2L, 1L, 2L
                 ),
                 Arrays.asList(
                     new MeetingAttendanceStatusResponse(
@@ -207,6 +207,7 @@ public class AttendanceControllerTest extends ControllerTest {
                     fieldWithPath("data.meetingAttendanceSummaryResponse.totalAttendCount").type(JsonFieldType.NUMBER).description("전체 참석 인원수"),
                     fieldWithPath("data.meetingAttendanceSummaryResponse.attendCount").type(JsonFieldType.NUMBER).description("정상 참석자 수"),
                     fieldWithPath("data.meetingAttendanceSummaryResponse.lateAttendCount").type(JsonFieldType.NUMBER).description("지각 참석자 수"),
+                    fieldWithPath("data.meetingAttendanceSummaryResponse.wantDiscussionCount").type(JsonFieldType.NUMBER).description("토론 참석 희망자 수"),
                     fieldWithPath("data.meetingAttendanceStatusResponseList[]").type(JsonFieldType.ARRAY).description("모임원별 출석 정보"),
                     fieldWithPath("data.meetingAttendanceStatusResponseList[].attendanceId").type(JsonFieldType.NUMBER).description("출석 고유번호"),
                     fieldWithPath("data.meetingAttendanceStatusResponseList[].memberId").type(JsonFieldType.NUMBER).description("모임원 고유번호"),

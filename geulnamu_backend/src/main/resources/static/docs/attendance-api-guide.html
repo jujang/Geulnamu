@@ -998,23 +998,30 @@ Content-Type: application/json;charset=UTF-8
       "lateThresholdTime" : "10:45",
       "totalAttendCount" : 3,
       "attendCount" : 2,
-      "lateAttendCount" : 1
+      "lateAttendCount" : 1,
+      "wantDiscussionCount" : 2
     },
     "meetingAttendanceStatusResponseList" : [ {
       "attendanceId" : 1,
+      "memberId" : 1,
       "name" : "나뭉일",
       "attendanceTime" : "2025.05.31 10:20",
-      "isLate" : false
+      "isLate" : false,
+      "wantDiscussion" : true
     }, {
       "attendanceId" : 2,
+      "memberId" : 2,
       "name" : "나뭉이",
       "attendanceTime" : "2025.05.31 10:44",
-      "isLate" : false
+      "isLate" : false,
+      "wantDiscussion" : true
     }, {
       "attendanceId" : 3,
+      "memberId" : 3,
       "name" : "나뭉삼",
       "attendanceTime" : "2025.05.31 10:50",
-      "isLate" : true
+      "isLate" : true,
+      "wantDiscussion" : false
     } ]
   }
 }</code></pre>
@@ -1098,6 +1105,13 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">지각 참석자 수</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceSummaryResponse.wantDiscussionCount</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">토론 참석 희망자 수</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[]</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
@@ -1110,6 +1124,13 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">출석 고유번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[].memberId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">모임원 고유번호</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[].name</code></p></td>
@@ -1131,6 +1152,13 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">지각 여부</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data.meetingAttendanceStatusResponseList[].wantDiscussion</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">토론 참여 여부</p></td>
 </tr>
 </tbody>
 </table>

@@ -16,4 +16,5 @@ public class MeetingAttendanceSummaryResponse {
     private Long totalAttendCount;
     private Long attendCount;
     private Long lateAttendCount;
+    private Long wantDiscussionCount;
 }
