@@ -70,11 +70,12 @@ function selectBestClient(clients) {
   return pwaClient || browserClient || null;
 }
 
-// 백그라운드 메시지 처리
+// 백그라운드 메시지 처리 (data-only 메시지 방식)
 messaging.onBackgroundMessage((payload) => {
-  const notificationTitle = payload.notification?.title || '글나무 알림';
+  // 🎯 data-only 메시지: title/body를 payload.data에서 가져옴
+  const notificationTitle = payload.data?.title || '글나무 알림';
   const notificationOptions = {
-    body: payload.notification?.body || '새로운 알림이 있습니다.',
+    body: payload.data?.body || '새로운 알림이 있습니다.',
     icon: '/icons/Icon-192.png',
     badge: '/icons/Icon-192.png',
     tag: payload.data?.tag || 'geulnamu-notification-' + Date.now(),
@@ -90,26 +91,39 @@ messaging.onBackgroundMessage((payload) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
+  // 🔍 디버그 로그
+  console.log('[글나무 SW] 알림 클릭!');
+  console.log('[글나무 SW] notification.data:', event.notification.data);
+
   const urlToOpen = getNotificationUrl(event.notification.data);
   const fullUrl = new URL(urlToOpen, self.location.origin).href;
+  
+  console.log('[글나무 SW] 이동할 URL:', urlToOpen);
+  console.log('[글나무 SW] 전체 URL:', fullUrl);
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((windowClients) => {
+        console.log('[글나무 SW] 열린 창 수:', windowClients.length);
+        
         const targetClient = selectBestClient(windowClients);
+        console.log('[글나무 SW] 대상 클라이언트:', targetClient ? '찾음' : '없음');
 
         if (targetClient) {
           // 기존 창으로 이동
+          console.log('[글나무 SW] 기존 창에 postMessage 전송...');
           targetClient.postMessage({
             type: 'NOTIFICATION_CLICK',
             url: urlToOpen,
             data: event.notification.data
           });
+          console.log('[글나무 SW] postMessage 전송 완료!');
 
           targetClient.focus().catch(() => {});
           return;
         } else {
           // 새 창 열기
+          console.log('[글나무 SW] 새 창 열기:', fullUrl);
           return clients.openWindow(fullUrl);
         }
       })

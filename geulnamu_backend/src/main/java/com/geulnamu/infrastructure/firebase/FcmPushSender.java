@@ -4,6 +4,7 @@ import com.google.firebase.messaging.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,18 +15,20 @@ public class FcmPushSender {
     // 단일 푸시 발송 (data가 null 이면 안 넣음)
     public FcmSendResult send(String token, String title, String body, Map<String, String> data) {
         try {
-            Message.Builder builder = Message.builder()
-                .setToken(token)
-                .setNotification(Notification.builder()
-                    .setTitle(title)
-                    .setBody(body)
-                    .build());
+            Map<String, String> messageData = new HashMap<>();
+            messageData.put("title", title);
+            messageData.put("body", body);
 
             if(data != null && !data.isEmpty()) {
-                builder.putAllData(data);
+                messageData.putAll(data);
             }
 
-            String response = FirebaseMessaging.getInstance().send(builder.build());
+            Message message = Message.builder()
+                .setToken(token)
+                .putAllData(messageData)
+                .build();
+
+            String response = FirebaseMessaging.getInstance().send(message);
             log.info("푸시 발송 성공: {}", response);
             return new FcmSendResult(1, 0);
         } catch (Exception e) {
@@ -37,18 +40,22 @@ public class FcmPushSender {
     // 다중 푸시 발송 (data가 null 이면 안 넣음)
     public FcmSendResult sendToMultiple(List<String> tokens, String title, String body, Map<String, String> data) {
         try {
-            MulticastMessage.Builder builder = MulticastMessage.builder()
-                .addAllTokens(tokens)
-                .setNotification(Notification.builder()
-                    .setTitle(title)
-                    .setBody(body)
-                    .build());
+
+            Map<String, String> messageData = new HashMap<>();
+            messageData.put("title", title);
+            messageData.put("body", body);
 
             if(data != null && !data.isEmpty()) {
-                builder.putAllData(data);
+                messageData.putAll(data);
             }
 
-            BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(builder.build());
+            MulticastMessage message = MulticastMessage.builder()
+                .addAllTokens(tokens)
+                .putAllData(messageData)
+                .build();
+
+            BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(message);
+
             log.info("멀티캐스트 데이터 푸시 발송: 성공{}, 실패{}",
                 response.getSuccessCount(), response.getFailureCount());
 

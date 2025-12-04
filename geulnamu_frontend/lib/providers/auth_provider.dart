@@ -116,6 +116,9 @@ class AuthProvider with ChangeNotifier {
 
           // 개인정보 상태 확인
           await _checkProfileStatusSilent();
+          
+          // 🔥 FCM 토큰 등록 (앱 재시작/redirect 로그인 시에도 토큰 등록)
+          await _registerFcmToken();
         } else {
           _setStatus(AuthStatus.unauthenticated);
         }
