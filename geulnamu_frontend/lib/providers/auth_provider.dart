@@ -502,14 +502,18 @@ class AuthProvider with ChangeNotifier {
     _userInfo = null;
     _profileCompleted = null; // 개인정보 상태 초기화
     _setStatus(AuthStatus.unauthenticated);
-    print('🔧 디버그용 강제 로그아웃 완료');
+    if (AppConfig.debugMode) {
+      print('🔧 디버그용 강제 로그아웃 완료');
+    }
   }
 
   /// 디버그용 - 개인정보 상태 강제 설정
   void debugSetProfileStatus(bool? status) {
     _profileCompleted = status;
     notifyListeners();
-    print('🔧 개인정보 상태 강제 설정: $status');
+    if (AppConfig.debugMode) {
+      print('🔧 개인정보 상태 강제 설정: $status');
+    }
   }
 
   /// 개인정보 상태 확인 (메인 화면 진입 시 호출)
@@ -517,29 +521,39 @@ class AuthProvider with ChangeNotifier {
   /// 5분 스마트 캠싱 + 자동 로그아웃 처리
   Future<void> checkProfileStatus({bool forceRefresh = false}) async {
     if (!isAuthenticated) {
-      print('⚠️ 로그인되지 않은 상태에서 개인정보 상태를 확인할 수 없습니다.');
+      if (AppConfig.debugMode) {
+        print('⚠️ 로그인되지 않은 상태에서 개인정보 상태를 확인할 수 없습니다.');
+      }
       return;
     }
 
     try {
       final accessToken = await _authService.getAccessToken();
       if (accessToken == null) {
-        print('⚠️ 액세스 토큰이 없습니다.');
+        if (AppConfig.debugMode) {
+          print('⚠️ 액세스 토큰이 없습니다.');
+        }
         return;
       }
 
-      print('🔍 [개인정보 상태 확인] API 호출 시작...');
-      print('🔑 [개인정보 상태 확인] 액세스 토큰: ${accessToken.substring(0, 20)}...');
+      if (AppConfig.debugMode) {
+        print('🔍 [개인정보 상태 확인] API 호출 시작...');
+        print('🔑 [개인정보 상태 확인] 액세스 토큰: ${accessToken.substring(0, 20)}...');
+      }
 
       final profileStatus = await _profileStatusService.checkProfileStatus(
         accessToken: accessToken,
         forceRefresh: forceRefresh,
         onAutoLogout: () {
-          print('🚨 === [개인정보 상태 확인] 자동 로그아웃 콜백 호출 ===');
-          print('🔍 [자동 로그아웃] 현재 AuthProvider 상태: $_status');
-          print('🔍 [자동 로그아웃] 사용자 정보: ${_userInfo != null ? '있음' : '없음'}');
+          if (AppConfig.debugMode) {
+            print('🚨 === [개인정보 상태 확인] 자동 로그아웃 콜백 호출 ===');
+            print('🔍 [자동 로그아웃] 현재 AuthProvider 상태: $_status');
+            print('🔍 [자동 로그아웃] 사용자 정보: ${_userInfo != null ? '있음' : '없음'}');
+          }
           _forceLogoutWithoutContext(); // 즉시 실행
-          print('✅ [자동 로그아웃] 강제 로그아웃 콜백 완료');
+          if (AppConfig.debugMode) {
+            print('✅ [자동 로그아웃] 강제 로그아웃 콜백 완료');
+          }
         },
       );
 
@@ -548,17 +562,23 @@ class AuthProvider with ChangeNotifier {
         _profileCompleted = profileStatus;
         notifyListeners();
 
-        print('✅ [개인정보 상태 확인] 성공: ${profileStatus ? '완료' : '미입력'}');
-        if (AppConfig.debugMode && previousStatus != profileStatus) {
-          print(
-            '🔍 [AuthProvider] 개인정보 상태 변경: $previousStatus -> $profileStatus',
-          );
+        if (AppConfig.debugMode) {
+          print('✅ [개인정보 상태 확인] 성공: ${profileStatus ? '완료' : '미입력'}');
+          if (previousStatus != profileStatus) {
+            print(
+              '🔍 [AuthProvider] 개인정보 상태 변경: $previousStatus -> $profileStatus',
+            );
+          }
         }
       } else {
-        print('⚠️ [개인정보 상태 확인] 자동 로그아웃 처리됨');
+        if (AppConfig.debugMode) {
+          print('⚠️ [개인정보 상태 확인] 자동 로그아웃 처리됨');
+        }
       }
     } catch (e) {
-      print('❌ [개인정보 상태 확인] 오류: $e');
+      if (AppConfig.debugMode) {
+        print('❌ [개인정보 상태 확인] 오류: $e');
+      }
 
       // 🎯 인증 관련 에러는 다시 throw 하여 상위에서 처리
       final errorString = e.toString().toLowerCase();
@@ -567,7 +587,9 @@ class AuthProvider with ChangeNotifier {
           errorString.contains('만료') ||
           errorString.contains('unauthorized') ||
           errorString.contains('token')) {
-        print('🚨 [개인정보 상태 확인] 인증 관련 에러 감지 - 다시 throw');
+        if (AppConfig.debugMode) {
+          print('🚨 [개인정보 상태 확인] 인증 관련 에러 감지 - 다시 throw');
+        }
         rethrow; // RouteAwareMixin에서 처리하도록
       }
 
@@ -583,7 +605,9 @@ class AuthProvider with ChangeNotifier {
     try {
       await checkProfileStatus();
     } catch (e) {
-      print('⚠️ [개인정보 상태 조용히 확인] 오류 (무시): $e');
+      if (AppConfig.debugMode) {
+        print('⚠️ [개인정보 상태 조용히 확인] 오류 (무시): $e');
+      }
     }
   }
 
@@ -624,7 +648,9 @@ class AuthProvider with ChangeNotifier {
     _profileCompleted = true;
     _profileStatusService.invalidateCache(); // 캠시 무효화
     notifyListeners();
-    print('✅ 개인정보 입력 완료로 표시');
+    if (AppConfig.debugMode) {
+      print('✅ 개인정보 입력 완료로 표시');
+    }
   }
 
   /// 개인정보 상태 강제 새로고침

@@ -27,7 +27,7 @@ public class NormalNotificationScheduler {
 
     // 토론 시작 시간에 해당 모임에 참여한 (토론을 희망하는) 인원들의 조를 APP PUSH 하기
     @Transactional(readOnly = true)
-    @Scheduled(cron = "0 0/5 * * * *") // 초 분 시 일 월 요일
+    @Scheduled(cron = "0 * * * * *") // 초 분 시 일 월 요일
     public void discussionGroupNotification() {
         // 현재 시간에 토론 참여하는 참석자 명단 조회
         LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
@@ -41,20 +41,30 @@ public class NormalNotificationScheduler {
             ));
 
         for(Map.Entry<Meeting, Map<DiscussionGroup, List<Attendance>>> meetingEntry : groupedData.entrySet()) {
+            Meeting meeting = meetingEntry.getKey();
             for(Map.Entry<DiscussionGroup, List<Attendance>> groupEntry : meetingEntry.getValue().entrySet()) {
                 List<Attendance> groupMembers = groupEntry.getValue();
+
+                String title = meeting.getAlarmMessage();
 
                 String body = groupMembers.stream()
                     .map(attendance -> attendance.getMember().getName())
                     .collect(Collectors.joining(", "));
 
-//                 Map<String, String> data = null; // 모임 참여 페이지
+                // 모임 참여 페이지
+                Map<String, String> data = Map.of(
+                    "type", "DISCUSSION_GROUP",
+                    "meetingId", meeting.getId().toString()
+                );
 
-//                 PUSH 하기
-                for(Attendance attendance : groupMembers) {
-                    fcmPushSender.sendToToken(attendance.getFcmToken(), meetingEntry.getKey().getAlarmMessage(), body);
-                    // TODO: 페이지 이동 데이터 추가할 것
-                    // fcmPushSender.sendWithData(attendance.getFcmToken(), meetingEntry.getKey().getAlarmMessage(), body, data);
+                // PUSH 하기
+                List<String> tokens = groupMembers.stream()
+                    .map(Attendance::getFcmToken)
+                    .filter(token -> !token.isBlank())
+                    .toList();
+
+                if(!tokens.isEmpty()) {
+                    fcmPushSender.sendToMultiple(tokens, title, body, data);
                 }
             }
         }

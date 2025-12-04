@@ -11,40 +11,49 @@ import java.util.Map;
 @Service
 public class FcmPushSender {
 
-    // 단일 기기에 푸시 발송
-    public void sendToToken(String token, String title, String body) {
+    // 단일 푸시 발송 (data가 null 이면 안 넣음)
+    public FcmSendResult send(String token, String title, String body, Map<String, String> data) {
         try {
-            Message message = Message.builder()
+            Message.Builder builder = Message.builder()
                 .setToken(token)
                 .setNotification(Notification.builder()
                     .setTitle(title)
                     .setBody(body)
-                    .build())
-                .build();
+                    .build());
 
-            String response = FirebaseMessaging.getInstance().send(message);
+            if(data != null && !data.isEmpty()) {
+                builder.putAllData(data);
+            }
+
+            String response = FirebaseMessaging.getInstance().send(builder.build());
             log.info("푸시 발송 성공: {}", response);
+            return new FcmSendResult(1, 0);
         } catch (Exception e) {
-            log.error("푸시 발송 실패: {} ", e.getMessage());
+            log.error("데이터 푸시 발송 실패: {}", e.getMessage());
+            return new FcmSendResult(0, 1);
         }
     }
 
-    // 여러 기기에 푸시 발송
-    public void sendToMultipleTokens(List<String> tokens, String title, String body) {
+    // 다중 푸시 발송 (data가 null 이면 안 넣음)
+    public FcmSendResult sendToMultiple(List<String> tokens, String title, String body, Map<String, String> data) {
         try {
-            MulticastMessage message = MulticastMessage.builder()
+            MulticastMessage.Builder builder = MulticastMessage.builder()
                 .addAllTokens(tokens)
                 .setNotification(Notification.builder()
                     .setTitle(title)
                     .setBody(body)
-                    .build())
-                .build();
+                    .build());
 
-            BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(message);
-            log.info("멀티 캐스트 푸시 발송: 성공{}, 실패{}",
+            if(data != null && !data.isEmpty()) {
+                builder.putAllData(data);
+            }
+
+            BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(builder.build());
+            log.info("멀티캐스트 데이터 푸시 발송: 성공{}, 실패{}",
                 response.getSuccessCount(), response.getFailureCount());
 
-            if (response.getFailureCount() > 0) {
+            // 실패한 토큰 로깅
+            if(response.getFailureCount() > 0) {
                 List<SendResponse> responses = response.getResponses();
                 for(int i = 0; i < responses.size(); i++) {
                     if(!responses.get(i).isSuccessful()) {
@@ -53,26 +62,11 @@ public class FcmPushSender {
                     }
                 }
             }
-        } catch (Exception e) {
-            log.error("멀티캐스트 푸시 발송 실패: {}", e.getMessage());
-        }
-    }
 
-    // 데이터 포함 푸시 발송 (클릭 시 특정 화면으로 이동)
-    public void sendWithData(String token, String title, String body, Map<String, String> data) {
-        try {
-            Message message = Message.builder()
-                .setToken(token)
-                .setNotification(Notification.builder()
-                    .setTitle(title)
-                    .setBody(body)
-                    .build())
-                .putAllData(data)
-                .build();
-
-            FirebaseMessaging.getInstance().send(message);
+            return new FcmSendResult(response.getSuccessCount(), response.getFailureCount());
         } catch (Exception e) {
-            log.error("데이터 푸시 발송 실패: {}", e.getMessage());
+            log.error("멀티캐스트 데이터 푸시 발송 실패: {}", e.getMessage());
+            return new FcmSendResult(0, tokens.size());
         }
     }
 }

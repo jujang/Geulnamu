@@ -4,7 +4,7 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
 
-// Firebase 구성 (firebase_options.dart의 web 값과 동일)
+// Firebase 구성
 firebase.initializeApp({
   apiKey: "AIzaSyDqZl2WCbE8GdzPaXY6DHgfV-f2qNpEvPw",
   authDomain: "geulnamu-app.firebaseapp.com",
@@ -17,24 +17,70 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// 알림 타입별 URL 생성
+function getNotificationUrl(data) {
+  if (!data) return '/home';
+
+  const type = data.type;
+  const meetingId = data.meetingId;
+
+  switch (type) {
+    case 'DISCUSSION_GROUP':
+      return meetingId ? `/discussion-group?meetingId=${meetingId}` : '/home';
+
+    case 'ATTENDANCE':
+      return meetingId ? `/attendance/status?meetingId=${meetingId}` : '/home';
+
+    case 'NEW_MEETING':
+      return meetingId ? `/meeting/${meetingId}` : '/meeting-list';
+
+    case 'ANNOUNCEMENT':
+      return '/home';
+
+    default:
+      if (meetingId) return `/discussion-group?meetingId=${meetingId}`;
+      if (data.route) return data.route;
+      if (data.url) return data.url;
+      return '/home';
+  }
+}
+
+// PWA 창인지 확인
+function isPwaClient(client) {
+  return client.url.includes('source=pwa');
+}
+
+// 열린 창들 중에서 최적의 창 선택 (PWA 우선)
+function selectBestClient(clients) {
+  if (!clients || clients.length === 0) return null;
+
+  let pwaClient = null;
+  let browserClient = null;
+
+  for (const client of clients) {
+    if (client.url.includes(self.location.origin)) {
+      if (isPwaClient(client)) {
+        if (!pwaClient) pwaClient = client;
+      } else {
+        if (!browserClient) browserClient = client;
+      }
+    }
+  }
+
+  return pwaClient || browserClient || null;
+}
+
 // 백그라운드 메시지 처리
 messaging.onBackgroundMessage((payload) => {
-  console.log('📬 [글나무 SW] 백그라운드 메시지 수신:', payload);
-
   const notificationTitle = payload.notification?.title || '글나무 알림';
   const notificationOptions = {
     body: payload.notification?.body || '새로운 알림이 있습니다.',
     icon: '/icons/Icon-192.png',
     badge: '/icons/Icon-192.png',
-    tag: payload.data?.tag || 'geulnamu-notification',
+    tag: payload.data?.tag || 'geulnamu-notification-' + Date.now(),
     data: payload.data,
-    // 진동 패턴 (모바일)
     vibrate: [100, 50, 100],
-    // 클릭 시 액션
-    actions: [
-      { action: 'open', title: '열기' },
-      { action: 'close', title: '닫기' }
-    ]
+    requireInteraction: false
   };
 
   return self.registration.showNotification(notificationTitle, notificationOptions);
@@ -42,36 +88,44 @@ messaging.onBackgroundMessage((payload) => {
 
 // 알림 클릭 처리
 self.addEventListener('notificationclick', (event) => {
-  console.log('🔔 [글나무 SW] 알림 클릭:', event.notification);
   event.notification.close();
 
-  // 액션 처리
-  if (event.action === 'close') {
-    return; // 닫기만 하고 종료
-  }
-
-  // 앱으로 이동 (기본 또는 'open' 액션)
-  const urlToOpen = event.notification.data?.url || '/home';
+  const urlToOpen = getNotificationUrl(event.notification.data);
+  const fullUrl = new URL(urlToOpen, self.location.origin).href;
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((windowClients) => {
-        // 이미 열린 창이 있으면 포커스
-        for (const client of windowClients) {
-          if (client.url.includes(self.location.origin)) {
-            client.focus();
-            return client.navigate(urlToOpen);
-          }
+        const targetClient = selectBestClient(windowClients);
+
+        if (targetClient) {
+          // 기존 창으로 이동
+          targetClient.postMessage({
+            type: 'NOTIFICATION_CLICK',
+            url: urlToOpen,
+            data: event.notification.data
+          });
+
+          targetClient.focus().catch(() => {});
+          return;
+        } else {
+          // 새 창 열기
+          return clients.openWindow(fullUrl);
         }
-        // 없으면 새 창 열기
-        return clients.openWindow(urlToOpen);
+      })
+      .catch((error) => {
+        console.error('[글나무 SW] 알림 처리 실패:', error);
+        return clients.openWindow(fullUrl);
       })
   );
 });
 
 // 알림 닫기 이벤트
 self.addEventListener('notificationclose', (event) => {
-  console.log('🔕 [글나무 SW] 알림 닫힘:', event.notification);
+  // 필요시 분석용 로깅 추가
 });
 
-console.log('🔥 [글나무 SW] Firebase Messaging Service Worker 로드 완료');
+// 푸시 이벤트
+self.addEventListener('push', (event) => {
+  // 필요시 분석용 로깅 추가
+});
