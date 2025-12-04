@@ -11,6 +11,7 @@ import '../../core/utils/api_utils.dart';
 import '../../core/services/auth_service.dart';
 import '../../models/fcm/fcm_send_result.dart';
 import '../../main.dart' show navigatorKey;
+import '../navigation/pending_navigation_service.dart';
 
 /// FCM 푸시 알림 서비스
 ///
@@ -28,6 +29,7 @@ class FcmService {
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final Dio _dio = Dio();
   final AuthService _authService = AuthService();
+  final PendingNavigationService _pendingNavigationService = PendingNavigationService();
 
   String? _currentToken;
   String? get currentToken => _currentToken;
@@ -214,7 +216,7 @@ class FcmService {
   }
 
   /// Service Worker 알림 클릭 처리
-  void _handleServiceWorkerNotificationClick(Map<String, dynamic> message) {
+  void _handleServiceWorkerNotificationClick(Map<String, dynamic> message) async {
     if (AppConfig.debugMode) {
       print('📩 [FCM] Service Worker 알림 클릭 수신!');
       print('📩 [FCM] 메시지 전체: $message');
@@ -228,24 +230,93 @@ class FcmService {
       print('📩 [FCM] data: $notificationData');
     }
 
+    // 🔐 로그인 상태 확인
+    final isLoggedIn = await _authService.isLoggedIn();
+    
+    if (AppConfig.debugMode) {
+      print('🔐 [FCM] 로그인 상태: ${isLoggedIn ? '로그인됨' : '비로그인'}');
+    }
+
     if (url != null && url.isNotEmpty) {
-      if (AppConfig.debugMode) {
-        print('🚀 [FCM] URL로 이동 시도: $url');
+      if (isLoggedIn) {
+        if (AppConfig.debugMode) {
+          print('🚀 [FCM] 로그인 상태 - URL로 바로 이동: $url');
+        }
+        _navigateToUrl(url);
+      } else {
+        if (AppConfig.debugMode) {
+          print('📌 [FCM] 비로그인 상태 - Pending Navigation 저장: $url');
+        }
+        await _pendingNavigationService.savePendingNavigationFromUrl(url);
+        // 홈화면으로 이동 (로그인 유도)
+        _navigateToUrl('/home');
       }
-      _navigateToUrl(url);
     } else if (notificationData != null) {
       final data = notificationData is Map 
           ? Map<String, dynamic>.from(notificationData)
           : <String, dynamic>{};
-      if (AppConfig.debugMode) {
-        print('🚀 [FCM] data로 이동 시도: $data');
+      
+      if (isLoggedIn) {
+        if (AppConfig.debugMode) {
+          print('🚀 [FCM] 로그인 상태 - data로 바로 이동: $data');
+        }
+        _navigateByNotificationData(data);
+      } else {
+        if (AppConfig.debugMode) {
+          print('📌 [FCM] 비로그인 상태 - Pending Navigation 저장 (data): $data');
+        }
+        await _savePendingNavigationFromData(data);
+        // 홈화면으로 이동 (로그인 유도)
+        _navigateToUrl('/home');
       }
-      _navigateByNotificationData(data);
     } else {
       if (AppConfig.debugMode) {
         print('⚠️ [FCM] 이동할 URL이나 data가 없음!');
       }
     }
+  }
+
+  /// 알림 data를 기반으로 Pending Navigation 저장
+  Future<void> _savePendingNavigationFromData(Map<String, dynamic> data) async {
+    final type = data['type'] as String?;
+    final meetingIdStr = data['meetingId'] as String?;
+    final meetingTitle = data['meetingTitle'] as String?;
+
+    String route;
+    Map<String, dynamic>? arguments;
+
+    switch (type) {
+      case typeDiscussionGroup:
+        route = '/discussion-group';
+        break;
+      case 'ATTENDANCE':
+        route = '/attendance/status';
+        break;
+      default:
+        // 기본값: 토론 조 화면
+        if (meetingIdStr != null && meetingIdStr.isNotEmpty) {
+          route = '/discussion-group';
+        } else if (data.containsKey('route')) {
+          route = data['route'] as String? ?? '/home';
+        } else {
+          route = '/home';
+        }
+    }
+
+    if (meetingIdStr != null && meetingIdStr.isNotEmpty) {
+      final meetingId = int.tryParse(meetingIdStr);
+      if (meetingId != null) {
+        arguments = {
+          'meetingId': meetingId,
+          if (meetingTitle != null) 'meetingTitle': meetingTitle,
+        };
+      }
+    }
+
+    await _pendingNavigationService.savePendingNavigation(
+      route: route,
+      arguments: arguments,
+    );
   }
 
   /// URL로 화면 이동

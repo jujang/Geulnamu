@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../../core/config/app_config.dart';
 import '../../../services/home/home_route_service.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../services/navigation/pending_navigation_service.dart';
+import '../../../main.dart' show navigatorKey;
 
 /// RouteAware 기능을 담당하는 mixin
 /// 
@@ -17,6 +19,10 @@ import '../../../providers/auth_provider.dart';
 /// 주의: RouteAware를 함께 with 해야 함
 mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
   final HomeRouteService _routeService = HomeRouteService();
+  final PendingNavigationService _pendingNavigationService = PendingNavigationService();
+  
+  // 🚨 Pending Navigation 처리 중복 방지 플래그
+  bool _isProcessingPendingNavigation = false;
 
   // 🎯 RouteObserver 등록/해제 메서드들
   
@@ -86,6 +92,9 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
         
         // 로그인 상태에서만 실행
         if (authProvider.isAuthenticated) {
+          // 🚀 Pending Navigation 처리 (로그인 완료 후)
+          await _processPendingNavigation();
+          
           try {
             await authProvider.checkProfileStatus();
           } catch (profileError) {
@@ -109,6 +118,66 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
         // UI에 영향주지 않음
       }
     });
+  }
+
+  /// 🚀 Pending Navigation 처리
+  /// 
+  /// 로그인 완료 후 저장된 목적지로 이동
+  Future<void> _processPendingNavigation() async {
+    // 중복 처리 방지
+    if (_isProcessingPendingNavigation) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [RouteAwareMixin] Pending Navigation 이미 처리 중 - 건너뜀');
+      }
+      return;
+    }
+
+    try {
+      _isProcessingPendingNavigation = true;
+
+      final pending = await _pendingNavigationService.getPendingNavigation();
+      
+      if (pending == null) {
+        if (AppConfig.debugMode) {
+          print('📭 [RouteAwareMixin] Pending Navigation 없음');
+        }
+        return;
+      }
+
+      if (AppConfig.debugMode) {
+        print('🚀 [RouteAwareMixin] Pending Navigation 발견!');
+        print('🚀 route: ${pending.route}');
+        print('🚀 arguments: ${pending.arguments}');
+      }
+
+      // 목적지로 이동
+      if (navigatorKey.currentState != null) {
+        // 먼저 Pending Navigation 삭제 (중복 이동 방지)
+        await _pendingNavigationService.clearPendingNavigation();
+        
+        // 약간의 지연 후 이동 (화면 렌더링 완료 대기)
+        await Future.delayed(const Duration(milliseconds: 300));
+        
+        if (AppConfig.debugMode) {
+          print('🚀 [RouteAwareMixin] 목적지로 이동: ${pending.route}');
+        }
+        
+        navigatorKey.currentState?.pushNamed(
+          pending.route,
+          arguments: pending.arguments,
+        );
+      } else {
+        if (AppConfig.debugMode) {
+          print('⚠️ [RouteAwareMixin] Navigator가 아직 준비되지 않음');
+        }
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [RouteAwareMixin] Pending Navigation 처리 오류: $e');
+      }
+    } finally {
+      _isProcessingPendingNavigation = false;
+    }
   }
 
   /// 🔍 인증 에러 여부 정확히 감지
