@@ -70,11 +70,12 @@ function selectBestClient(clients) {
   return pwaClient || browserClient || null;
 }
 
-// 백그라운드 메시지 처리
+// 백그라운드 메시지 처리 (data-only 메시지 방식)
 messaging.onBackgroundMessage((payload) => {
-  const notificationTitle = payload.notification?.title || '글나무 알림';
+  // 🎯 data-only 메시지: title/body를 payload.data에서 가져옴
+  const notificationTitle = payload.data?.title || '글나무 알림';
   const notificationOptions = {
-    body: payload.notification?.body || '새로운 알림이 있습니다.',
+    body: payload.data?.body || '새로운 알림이 있습니다.',
     icon: '/icons/Icon-192.png',
     badge: '/icons/Icon-192.png',
     tag: payload.data?.tag || 'geulnamu-notification-' + Date.now(),

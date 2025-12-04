@@ -199,10 +199,11 @@ class FcmService {
     }
   }
 
-  /// 포그라운드 메시지 처리
+  /// 포그라운드 메시지 처리 (data-only 메시지 방식)
   void _handleForegroundMessage(RemoteMessage message) {
-    final title = message.notification?.title ?? '글나무';
-    final body = message.notification?.body ?? '';
+    // 🎯 data-only 메시지: title/body를 message.data에서 가져옴
+    final title = message.data['title'] ?? '글나무';
+    final body = message.data['body'] ?? '';
 
     if (kIsWeb) {
       _showBrowserNotification(title, body, message.data);
