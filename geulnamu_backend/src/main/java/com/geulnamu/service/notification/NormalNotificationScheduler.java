@@ -47,9 +47,10 @@ public class NormalNotificationScheduler {
 
                 String title = meeting.getAlarmMessage();
 
-                String body = groupMembers.stream()
+                String body = "조 구성원: " + groupMembers.stream()
                     .map(attendance -> attendance.getMember().getName())
                     .collect(Collectors.joining(", "));
+                
 
                 // 모임 참여 페이지
                 Map<String, String> data = Map.of(
