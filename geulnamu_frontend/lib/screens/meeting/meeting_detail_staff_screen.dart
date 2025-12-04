@@ -77,6 +77,8 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
         return MainLayout(
           title: currentTitle,
           isHomePage: false, // 서브 페이지이므로 뒤로가기 버튼 표시
+          // 🎯 PWA 키보드 처리를 직접 함 (viewInsets 사용)
+          resizeToAvoidBottomInset: false,
           // HomeService를 통한 메뉴 및 로그아웃 처리
           onMenuTap: (menu) => _homeService.handleMenuTap(context, menu),
           onLogoutTap: () => _handleLogout(),

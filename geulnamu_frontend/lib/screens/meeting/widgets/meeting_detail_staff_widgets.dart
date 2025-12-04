@@ -101,8 +101,23 @@ class MeetingDetailStaffWidgets {
     required VoidCallback onRefreshBookQuestionData,
     Function(BookQuestionModel)? onBookQuestionTap,
   }) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+    // 🎯 키보드 높이 가져오기 (viewInsets 직접 처리)
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    
+    return GestureDetector(
+      // 🎯 빈 영역 탭 시 키보드 닫기
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SingleChildScrollView(
+        // 🎯 키보드 드래그 시 닫기
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        // 🎯 키보드 높이만큼 하단 패딩 추가
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          // 키보드 있을 때: 키보드 높이, 없을 때: 일반 여백
+          bottom: bottomInset > 0 ? bottomInset + 16 : 16,
+        ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -219,6 +234,7 @@ class MeetingDetailStaffWidgets {
           ),
         ],
       ),
-    );
+      ),  // SingleChildScrollView 닫힘
+    );  // GestureDetector 닫힘
   }
 }
