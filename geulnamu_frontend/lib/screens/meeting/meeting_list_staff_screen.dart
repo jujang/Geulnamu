@@ -188,6 +188,7 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
             context,
             totalElements: totalElements,
             currentFilter: currentFilter,
+            onFilterTap: _showStaffFilterBottomSheet,
           ),
         ),
 

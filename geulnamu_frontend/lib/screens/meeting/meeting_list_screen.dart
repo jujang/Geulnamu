@@ -178,6 +178,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
           context,
           totalElements: totalElements,
           currentFilter: currentFilter,
+          onFilterTap: _showFilterBottomSheet,
         ),
 
         // 구분선

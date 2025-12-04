@@ -10,8 +10,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MeetingAttendanceStatusResponse {
     private Long attendanceId;
+    private Long memberId;
     private String name;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     private LocalDateTime attendanceTime;
     private Boolean isLate;
+    private Boolean wantDiscussion;
 }

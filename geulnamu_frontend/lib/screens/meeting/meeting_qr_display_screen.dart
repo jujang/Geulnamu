@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/attendance/qr_service.dart';
@@ -6,6 +10,10 @@ import '../../services/home/home_service.dart';
 import '../../models/attendance/qr_data.dart';
 import '../../widgets/common/main_layout.dart';
 import '../../core/config/app_config.dart';
+import '../../core/theme.dart';
+
+// 웹 환경에서 다운로드를 위한 import
+import 'package:web/web.dart' as web;
 
 /// 운영진용 QR 코드 표시 화면
 ///
@@ -32,6 +40,10 @@ class _MeetingQrDisplayScreenState extends State<MeetingQrDisplayScreen> {
   final HomeService _homeService = HomeService();
   late QrData _currentQrData;
 
+  // 🆕 QR 코드 캔처를 위한 GlobalKey
+  final GlobalKey _qrKey = GlobalKey();
+  bool _isDownloading = false;
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +65,111 @@ class _MeetingQrDisplayScreenState extends State<MeetingQrDisplayScreen> {
   Future<void> _handleLogout() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     await _homeService.handleLogout(context, authProvider);
+  }
+
+  /// 🆕 QR 코드 이미지 다운로드
+  Future<void> _downloadQrImage() async {
+    if (_isDownloading) return;
+
+    setState(() {
+      _isDownloading = true;
+    });
+
+    try {
+      // RepaintBoundary로부터 이미지 캔처
+      final RenderRepaintBoundary? boundary =
+          _qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+
+      if (boundary == null) {
+        throw Exception('QR 코드를 찾을 수 없습니다.');
+      }
+
+      // 이미지로 변환 (고해상도)
+      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+
+      if (byteData == null) {
+        throw Exception('이미지 변환에 실패했습니다.');
+      }
+
+      final Uint8List pngBytes = byteData.buffer.asUint8List();
+
+      // 웹 환경에서 다운로드
+      await _downloadImageWeb(pngBytes);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Text('QR 코드 이미지가 다운로드되었습니다.'),
+              ],
+            ),
+            backgroundColor: context.colors.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+
+      if (AppConfig.debugMode) {
+        print('✅ [QR 다운로드] 성공');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [QR 다운로드] 실패: $e');
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(child: Text('QR 다운로드 실패: $e')),
+              ],
+            ),
+            backgroundColor: context.colors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+        });
+      }
+    }
+  }
+
+  /// 웹 환경에서 이미지 다운로드
+  Future<void> _downloadImageWeb(Uint8List imageBytes) async {
+    // Base64로 인코딩
+    final base64Image = base64Encode(imageBytes);
+    final dataUrl = 'data:image/png;base64,$base64Image';
+
+    // 파일명 생성 (모임명_QR_날짜)
+    final now = DateTime.now();
+    final dateStr =
+        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+    final safeTitle = widget.meetingTitle
+        .replaceAll(RegExp(r'[^a-zA-Z0-9가-힣]'), '_');
+    final fileName = '${safeTitle}_QR_$dateStr.png';
+
+    // 다운로드 링크 생성 및 클릭
+    final anchor = web.HTMLAnchorElement()
+      ..href = dataUrl
+      ..download = fileName
+      ..style.display = 'none';
+
+    web.document.body?.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
   }
 
   @override
@@ -167,55 +284,74 @@ class _MeetingQrDisplayScreenState extends State<MeetingQrDisplayScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // QR 코드
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: FutureBuilder<Widget>(
-                            future: _qrService.createQrWidget(
-                              qrData: _currentQrData,
-                              size: 250,
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.black,
+                        // QR 코드 (🆕 RepaintBoundary로 감싸서 캔처 가능하게)
+                        RepaintBoundary(
+                          key: _qrKey,
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return snapshot.data!;
-                              } else {
-                                return Container(
-                                  width: 250,
-                                  height: 250,
-                                  alignment: Alignment.center,
-                                  child: CircularProgressIndicator(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                  ),
-                                );
-                              }
-                            },
+                            child: FutureBuilder<Widget>(
+                              future: _qrService.createQrWidget(
+                                qrData: _currentQrData,
+                                size: 250,
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.black,
+                              ),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return snapshot.data!;
+                                } else {
+                                  return Container(
+                                    width: 250,
+                                    height: 250,
+                                    alignment: Alignment.center,
+                                    child: CircularProgressIndicator(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
                           ),
                         ),
 
                         const SizedBox(height: 20),
 
-                        // QR 정보 - 텍스트 제거
-                        // Text(
-                        //   '📚 고정 출석 QR 코드 (시간 제한 없음)',
-                        //   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        //     color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                        //   ),
-                        // ),
+                        // 🆕 다운로드 버튼
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: _isDownloading ? null : _downloadQrImage,
+                            icon: _isDownloading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(Icons.download),
+                            label: Text(
+                              _isDownloading ? '다운로드 중...' : 'QR 이미지 다운로드',
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

@@ -509,10 +509,12 @@ class MeetingWidgets {
     BuildContext context, {
     required int totalElements,
     required MeetingListFilter currentFilter,
+    VoidCallback? onFilterTap,
   }) => MeetingStaffWidgets.buildStaffListHeader(
     context,
     totalElements: totalElements,
     currentFilter: currentFilter,
+    onFilterTap: onFilterTap,
   );
 
   static Widget buildStaffFilterBottomSheet(

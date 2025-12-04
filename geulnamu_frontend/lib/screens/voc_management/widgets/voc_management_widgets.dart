@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
 import '../../../core/responsive.dart';
 import '../../../models/voc/voc_model.dart';
+import '../../../models/voc/voc_filter_model.dart';
 
 /// 문의 목록 화면 UI 위젯들
 ///
@@ -101,8 +102,8 @@ class VoCManagementWidgets {
   static Widget buildListHeader(
     BuildContext context, {
     required int totalElements,
-    required int currentPage,
-    required int totalPages,
+    required VoCFilter currentFilter,
+    VoidCallback? onFilterTap,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -116,15 +117,57 @@ class VoCManagementWidgets {
               color: context.colors.onSurface,
             ),
           ),
-          Text(
-            '$currentPage / $totalPages 페이지',
-            style: context.textStyles.bodySmall?.copyWith(
-              color: context.colors.onSurface.withValues(alpha: 0.7),
+          // 🎯 필터 텍스트를 탭 가능하게 변경
+          InkWell(
+            onTap: onFilterTap,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _getFilterSummary(currentFilter),
+                    style: context.textStyles.bodySmall?.copyWith(
+                      color: context.colors.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  if (onFilterTap != null) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.tune,
+                      size: 14,
+                      color: context.colors.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// 필터 요약 텍스트 생성
+  static String _getFilterSummary(VoCFilter filter) {
+    final List<String> filterParts = [];
+
+    // 이슈 유형 필터
+    if (filter.voCType != null) {
+      filterParts.add(filter.voCType!.displayName);
+    }
+
+    // 이슈 상태 필터
+    if (filter.issueStatus != null) {
+      filterParts.add(filter.issueStatus!.displayName);
+    }
+
+    // 정렬 정보
+    final order = filter.isAsc ? '↑' : '↓';
+    filterParts.add('${filter.sortBy.displayName}$order');
+
+    return filterParts.join(' · ');
   }
 
   // ==================== 이슈 목록 ====================

@@ -137,6 +137,7 @@ class _MemberListScreenState extends State<MemberListScreen>
           context,
           totalElements: totalElements,
           currentFilter: currentFilter,
+          onFilterTap: _showFilterBottomSheet,
         ),
         
         // 구분선

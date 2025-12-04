@@ -67,9 +67,24 @@ class _AddMembersDialogState extends State<AddMembersDialog> {
 
   @override
   Widget build(BuildContext context) {
+    // 🎯 화면 크기 기반 동적 사이즈 계산
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // 높이: 화면의 75%, 최소 350px, 최대 600px
+    final dialogHeight = (screenHeight * 0.75).clamp(350.0, 600.0);
+
+    // 너비: 모바일(600px 미만)에서는 화면의 90%, 그 외에는 400px 고정
+    final dialogWidth = screenWidth < 600 ? screenWidth * 0.9 : 400.0;
+
     return AlertDialog(
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      // 🎯 다이얼로그 여백 조정 (모바일에서 더 넓게 표시)
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: screenWidth < 600 ? 16 : 40,
+        vertical: 24,
+      ),
       title: Row(
         children: [
           Icon(
@@ -78,18 +93,20 @@ class _AddMembersDialogState extends State<AddMembersDialog> {
             size: 24,
           ),
           const SizedBox(width: 8),
-          Text(
-            '토론 인원 추가',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+          Expanded(
+            child: Text(
+              '토론 인원 추가',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
           ),
         ],
       ),
       content: SizedBox(
-        width: double.maxFinite,
-        height: 400, // 고정 높이
+        width: dialogWidth,
+        height: dialogHeight - 140, // title과 actions 영역 고려
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -148,10 +165,14 @@ class _AddMembersDialogState extends State<AddMembersDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
           child: Text(
             '닫기',
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

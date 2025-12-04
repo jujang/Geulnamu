@@ -197,6 +197,7 @@ class _PresentationListScreenState extends State<PresentationListScreen>
           context,
           totalElements: totalElements,
           currentFilter: currentFilter,
+          onFilterTap: _showFilterBottomSheet,
         ),
 
         // 구분선

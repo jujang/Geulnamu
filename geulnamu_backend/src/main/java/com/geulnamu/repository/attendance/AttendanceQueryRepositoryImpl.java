@@ -35,7 +35,9 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
             .select(Projections.constructor(MeetingAttendanceSummaryResponse.class,
                 meeting.meetingDate, meeting.lateThresholdTime, attendance.member.count(),
                     normalAttendanceCount(),
-                    attendance.member.count().subtract(normalAttendanceCount()))
+                    attendance.member.count().subtract(normalAttendanceCount()),
+                    attendance.wantDiscussion.count()
+                )
             )
             .from(meeting)
             .leftJoin(attendance).on(meeting.id.eq(attendance.meeting.id))
@@ -87,7 +89,9 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
     public List<MeetingAttendanceStatusResponse> findMeetingAttendanceStatus(Long meetingId) {
         return queryFactory
             .select(Projections.constructor(MeetingAttendanceStatusResponse.class,
-                attendance.id, attendance.member.name, attendance.createdAt, attendance.createdAt.after(meeting.lateThresholdTime))
+                attendance.id, attendance.member.id, attendance.member.name,
+                attendance.createdAt, attendance.createdAt.after(meeting.lateThresholdTime),
+                attendance.wantDiscussion)
             )
             .from(meeting)
             .join(attendance).on(meeting.id.eq(attendance.meeting.id))
