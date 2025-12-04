@@ -847,12 +847,29 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
     // 🔥 토론 시간이 설정된 경우에만 유효성 검사
     if (_selectedDiscussionTime != null && _selectedMeetingDateTime != null) {
+      // 검증 1: 모임 당일 & 모임 시간 이후인지
       if (!_isValidDiscussionTime(_selectedDiscussionTime!, _selectedMeetingDateTime!)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               '⚠️ 토론 시간이 올바르지 않습니다.\n'
               '조건: ${_formatDate(_selectedMeetingDateTime!)} (모임 당일) ${_formatTime(_selectedMeetingDateTime!)} 이후로 설정해주세요.',
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        return false;
+      }
+      
+      // 검증 2: 현재 시간 이후인지
+      final now = DateTime.now();
+      if (_selectedDiscussionTime!.isBefore(now)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '⚠️ 토론 시간이 올바르지 않습니다.\n'
+              '현재 시간(${_formatTime(now)}) 이후로 설정해주세요.',
             ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
@@ -961,12 +978,27 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
 
   void onDiscussionTimeChanged(DateTime? value) {
     if (value != null && _selectedMeetingDateTime != null) {
-      // 🔥 토론 시간 검증
+      // 🔥 토론 시간 검증 1: 모임 당일 & 모임 시간 이후인지
       if (!_isValidDiscussionTime(value, _selectedMeetingDateTime!)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('⚠️ 토론 시간은 모임 당일에 모임 시간 이후로 설정해야 합니다.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return; // 변경 차단
+      }
+      
+      // 🔥 토론 시간 검증 2: 현재 시간 이후인지
+      final now = DateTime.now();
+      if (value.isBefore(now)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('⚠️ 토론 시간은 현재 시간 이후로 설정해야 합니다.'),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 3),
             ),
