@@ -162,23 +162,39 @@ class DiscussionWidgets {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 취소 버튼
+              // 취소 버튼 (크기 축소)
               TextButton(
                 onPressed: isSaving ? null : onToggleEdit,
-                child: const Text('취소'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('취소', style: TextStyle(fontSize: 13)),
               ),
-              const SizedBox(width: 8),
-              // 저장 버튼
-              ElevatedButton.icon(
-                onPressed: isSaving ? null : onSave,
-                icon: isSaving
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.save),
-                label: Text(isSaving ? '저장 중...' : '저장'),
+              const SizedBox(width: 4),
+              // 저장 버튼 (크기 축소)
+              SizedBox(
+                height: 32,
+                child: ElevatedButton.icon(
+                  onPressed: isSaving ? null : onSave,
+                  icon: isSaving
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save, size: 16),
+                  label: Text(
+                    isSaving ? '저장중' : '저장',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
               ),
             ],
           )
@@ -356,8 +372,9 @@ class DiscussionWidgets {
   }) {
     return Row(
       children: [
+        // 🆕 편집 중에도 제목은 동일하게 표시 ('편집 중' 텍스트 제거)
         Text(
-          isEditingDiscussionGroups ? '👥 토론 조 정보 (편집 중)' : '👥 토론 조 정보',
+          '👥 토론 조 정보',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.primary,
@@ -366,22 +383,39 @@ class DiscussionWidgets {
         const Spacer(),
 
         if (isEditingDiscussionGroups) ...[
-          // 편집 모드: 취소 + 저장 버튼
+          // 편집 모드: 취소 + 저장 버튼 (크기 축소)
           TextButton(
             onPressed: isSaving ? null : onToggleEdit,
-            child: const Text('취소'),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('취소', style: TextStyle(fontSize: 13)),
           ),
-          const SizedBox(width: 8),
-          ElevatedButton.icon(
-            onPressed: isSaving ? null : onSave,
-            icon: isSaving
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.save),
-            label: Text(isSaving ? '저장 중...' : '저장'),
+          const SizedBox(width: 4),
+          // 🆕 저장 버튼 크기 축소
+          SizedBox(
+            height: 32,
+            child: ElevatedButton.icon(
+              onPressed: isSaving ? null : onSave,
+              icon: isSaving
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.save, size: 16),
+              label: Text(
+                isSaving ? '저장중' : '저장',
+                style: const TextStyle(fontSize: 13),
+              ),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
           ),
         ] else ...[
           // 조회 모드: 새로고침 + 편집 버튼

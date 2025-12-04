@@ -38,6 +38,8 @@ class BasicInfoWidgets {
               onSave: onSave,
             ),
 
+            const SizedBox(height: 16), // 헤더와 콘텐츠 사이 여백
+
             // 내용 (조회 모드 vs 편집 모드)
             if (isEditing)
               _buildBasicInfoEditForm(
@@ -83,23 +85,39 @@ class BasicInfoWidgets {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 취소 버튼
+              // 취소 버튼 (크기 축소)
               TextButton(
                 onPressed: isSaving ? null : onToggleEdit,
-                child: const Text('취소'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('취소', style: TextStyle(fontSize: 13)),
               ),
-              const SizedBox(width: 8),
-              // 저장 버튼
-              ElevatedButton.icon(
-                onPressed: isSaving ? null : onSave,
-                icon: isSaving
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.save),
-                label: Text(isSaving ? '저장 중...' : '저장'),
+              const SizedBox(width: 4),
+              // 저장 버튼 (크기 축소)
+              SizedBox(
+                height: 32,
+                child: ElevatedButton.icon(
+                  onPressed: isSaving ? null : onSave,
+                  icon: isSaving
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.save, size: 16),
+                  label: Text(
+                    isSaving ? '저장중' : '저장',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
               ),
             ],
           )

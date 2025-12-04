@@ -223,12 +223,14 @@ class DiscussionGroupEditWidgets {
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 8),
-            Text(
-              '토론 그룹 구성 현황 (드래그&드롭 편집)',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 16,
+            Flexible(
+              child: Text(
+                '토론 그룹 구성 현황 (드래그&드롭 편집)',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 16,
+                ),
               ),
             ),
           ],
@@ -426,14 +428,16 @@ class DiscussionGroupEditWidgets {
                 color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: 8),
-              Text(
-                isHighlighted
-                    ? '➕ 새 그룹을 만들고 여기에 추가하세요!'
-                    : '➕ 멤버를 여기로 드래그하면 새 그룹이 생성됩니다',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: isHighlighted ? FontWeight.bold : FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 16,
+              Flexible(
+                child: Text(
+                  isHighlighted
+                      ? '➕ 새 그룹을 만들고 여기에 추가하세요!'
+                      : '➕ 멤버를 여기로 드래그하면 새 그룹이 생성됩니다',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: isHighlighted ? FontWeight.bold : FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ],
