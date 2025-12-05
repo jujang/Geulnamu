@@ -55,12 +55,15 @@ class _SplashScreenState extends State<SplashScreen>
     await _preloadFonts();
 
     if (mounted) {
-      // 백그라운드에서 로그인 상태 확인 (UI에 영향 없음)
+      // 🔐 로그인 상태 확인 (await로 완료 대기)
+      // Pending Navigation 처리를 위해 로그인 상태가 결정된 후 홈으로 이동해야 함
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      authProvider.checkAuthStatus();
+      await authProvider.checkAuthStatus();
 
-      // 항상 메인 화면으로 이동
-      Navigator.pushReplacementNamed(context, '/home');
+      if (mounted) {
+        // 항상 메인 화면으로 이동
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     }
   }
 
