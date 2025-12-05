@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';  // 🎯 SystemNavigator 추가
+import 'package:flutter/foundation.dart';  // 🎯 kIsWeb 추가
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/home/home_service.dart';
@@ -287,8 +289,10 @@ class _HomeScreenState extends State<HomeScreen>
                       ],
                     ),
                   );
-                  if (shouldExit == true && context.mounted) {
-                    Navigator.of(context).pop();
+                  if (shouldExit == true) {
+                    // 🎯 PWA/웹 환경에서는 SystemNavigator.pop() 사용
+                    // Android PWA에서 앱을 최소화/종료함
+                    SystemNavigator.pop();
                   }
                 },
                 child: SafeArea(
