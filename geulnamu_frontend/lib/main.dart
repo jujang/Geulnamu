@@ -44,6 +44,7 @@ import 'services/member/member_service.dart'; // 모임원 서비스
 import 'services/profile/profile_service.dart'; // 프로필 서비스
 import 'services/presentation/presentation_service.dart'; // 발제문 서비스
 import 'services/notification/fcm_service.dart'; // 🔥 FCM 푸시 알림 서비스
+import 'services/navigation/pending_navigation_service.dart'; // 🎯 Pending Navigation 서비스
 
 // 🎯 Global Navigator Key - 전역에서 접근 가능
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -93,8 +94,9 @@ void main() async {
   }
 }
 
-/// 🎯 웹에서 초기 라우트 결정 (OAuth 콜백 지원)
+/// 🎯 웹에서 초기 라우트 결정 (OAuth 콜백 + 알림 딜링크 지원)
 /// 모바일 redirect 방식으로 돌아올 때 /auth/callback을 처리
+/// 알림 클릭으로 열릴 때 목적지 URL을 Pending Navigation으로 저장
 String _getInitialRoute() {
   if (kIsWeb) {
     try {
@@ -113,6 +115,20 @@ String _getInitialRoute() {
         }
         return '/auth/callback';
       }
+      
+      // 🚀 알림 딜링크 URL 처리 (Service Worker가 openWindow로 열었을 때)
+      // 예: /discussion-group?meetingId=123, /attendance/status?meetingId=123
+      if (_isNotificationDeepLink(path)) {
+        if (AppConfig.debugMode) {
+          print('📩 [초기 라우트] 알림 딜링크 감지: $path');
+        }
+        
+        // Pending Navigation으로 저장 (비동기로 처리)
+        _savePendingNavigationFromUrl(uri);
+        
+        // 스플래시로 시작 (로그인 확인 후 목적지로 이동)
+        return '/splash';
+      }
     } catch (e) {
       if (AppConfig.debugMode) {
         print('⚠️ [초기 라우트] URL 파싱 오류: $e');
@@ -120,6 +136,63 @@ String _getInitialRoute() {
     }
   }
   return '/splash';
+}
+
+/// 🚀 알림 딜링크 URL인지 확인
+bool _isNotificationDeepLink(String path) {
+  // 알림으로 열릴 수 있는 경로들
+  final notificationPaths = [
+    '/discussion-group',
+    '/attendance/status',
+    '/meeting/',  // /meeting/123 형식
+  ];
+  
+  for (final notificationPath in notificationPaths) {
+    if (path.startsWith(notificationPath)) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+/// 🚀 URL에서 Pending Navigation 저장
+void _savePendingNavigationFromUrl(Uri uri) {
+  // 비동기로 저장 (main 함수가 블록되지 않도록)
+  Future.microtask(() async {
+    try {
+      final pendingService = PendingNavigationService();
+      
+      // 쿼리 파라미터를 arguments로 변환
+      Map<String, dynamic>? arguments;
+      if (uri.queryParameters.isNotEmpty) {
+        arguments = Map<String, dynamic>.from(uri.queryParameters);
+        
+        // meetingId는 int로 변환
+        if (arguments.containsKey('meetingId')) {
+          final meetingIdStr = arguments['meetingId'] as String?;
+          if (meetingIdStr != null) {
+            arguments['meetingId'] = int.tryParse(meetingIdStr) ?? meetingIdStr;
+          }
+        }
+      }
+      
+      await pendingService.savePendingNavigation(
+        route: uri.path,
+        arguments: arguments,
+      );
+      
+      if (AppConfig.debugMode) {
+        print('✅ [초기 라우트] Pending Navigation 저장 완료!');
+        print('✅ route: ${uri.path}');
+        print('✅ arguments: $arguments');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [초기 라우트] Pending Navigation 저장 실패: $e');
+      }
+    }
+  });
 }
 
 class GeulnamuApp extends StatefulWidget {
