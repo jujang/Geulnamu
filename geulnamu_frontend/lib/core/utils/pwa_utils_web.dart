@@ -1,5 +1,4 @@
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:js_interop';
+import 'dart:js_util' as js_util;
 import 'package:flutter/foundation.dart';
 import 'package:web/web.dart' as web;
 
@@ -29,10 +28,10 @@ bool isInstalledPWA() {
 /// iOS Safari의 standalone 속성 확인
 bool _isIOSStandalone() {
   try {
+    // JavaScript의 navigator.standalone 속성 접근
     final navigator = web.window.navigator;
-    final jsNavigator = navigator as JSObject;
-    final standalone = jsNavigator.getProperty<JSBoolean?>('standalone'.toJS);
-    return standalone?.toDart ?? false;
+    final standalone = js_util.getProperty<bool?>(navigator, 'standalone');
+    return standalone ?? false;
   } catch (e) {
     return false;
   }
