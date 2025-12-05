@@ -429,8 +429,8 @@ class _LoginScreenState extends State<LoginScreen>
     final success = await authProvider.loginWithKakao(context: context);
 
     if (success && mounted) {
-      // 🎯 로그인 성공 시 홈 화면으로 교체 (브라우저 히스토리에서 /login 제거)
-      Navigator.pushReplacementNamed(context, '/home');
+      // 🎯 로그인 성공 시 모든 라우트 스택 제거 후 홈으로 이동 (PWA 뒤로가기 문제 해결)
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     }
     // 실패 시에는 AuthProvider의 errorMessage가 자동으로 표시됩니다
   }
@@ -450,8 +450,8 @@ class _LoginScreenState extends State<LoginScreen>
     );
 
     if (success && mounted) {
-      // 🎯 로그인 성공 시 홈 화면으로 교체 (브라우저 히스토리에서 /login 제거)
-      Navigator.pushReplacementNamed(context, '/home');
+      // 🎯 로그인 성공 시 모든 라우트 스택 제거 후 홈으로 이동 (PWA 뒤로가기 문제 해결)
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     }
     // 실패 시에는 AuthProvider의 errorMessage가 자동으로 표시됩니다
   }
