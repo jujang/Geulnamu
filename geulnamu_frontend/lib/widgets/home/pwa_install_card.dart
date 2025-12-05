@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../common/responsive_widget.dart';
 import '../../core/responsive.dart';
 import '../../core/theme.dart';  // 확장 메서드 사용
+import '../../core/utils/pwa_utils.dart';  // 🎯 PWA 유틸리티 추가
 
 class PWAInstallCard extends SimpleResponsiveWidget {
   final VoidCallback? onInstallPressed;
@@ -14,8 +15,10 @@ class PWAInstallCard extends SimpleResponsiveWidget {
 
   @override
   Widget buildResponsive(BuildContext context) {
-    // PWA는 웹 환경에서만 표시
-    if (!kIsWeb) return const SizedBox.shrink();
+    // 🎯 웹 환경이 아니거나, 이미 PWA로 설치된 경우 숨김
+    if (!kIsWeb || PWAUtils.isInstalledPWA()) {
+      return const SizedBox.shrink();
+    }
 
     final cardPadding = ResponsiveHelper.getPWACardPadding(context);
     final iconSize = ResponsiveHelper.getPWAIconSize(context);
