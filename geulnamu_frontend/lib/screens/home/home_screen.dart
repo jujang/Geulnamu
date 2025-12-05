@@ -264,9 +264,33 @@ class _HomeScreenState extends State<HomeScreen>
                 onLoginTap: navigateToLogin,
                 onLogoutTap: handleLogout,
               ),
-              // 🎯 PopScope: 홈 화면에서 시스템 뒤로가기 차단
+              // 🎯 PopScope: 홈 화면에서 시스템 뒤로가기 시 종료 확인
               body: PopScope(
                 canPop: false, // 홈 화면에서는 시스템 뒤로가기 차단
+                onPopInvokedWithResult: (didPop, result) async {
+                  if (didPop) return;
+                  // 🎯 앱 종료 확인 다이얼로그
+                  final shouldExit = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('앱 종료'),
+                      content: const Text('앱을 종료하시겠습니까?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('취소'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('종료'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (shouldExit == true && context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                },
                 child: SafeArea(
                   child: ResponsiveContainer(
                     // 🎯 패딩 제거 - 스크롤바가 화면 끝에 위치하도록
