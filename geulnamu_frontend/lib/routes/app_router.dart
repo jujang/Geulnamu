@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:go_router/go_router.dart';
 
 import '../core/config/app_config.dart';
+import '../core/services/auth_service.dart';  // 🆕 인증 서비스
 import '../services/navigation/pending_navigation_service.dart';
 
 // Screen imports
@@ -49,6 +50,20 @@ class AppRouter {
   /// 🎯 GoRouter 인스턴스 (싱글톤)
   static GoRouter? _router;
   
+  /// 🎯 앱 초기화 완료 여부 (SplashScreen에서 설정)
+  static bool _isInitialized = false;
+  
+  /// 앱 초기화 완료 표시 (SplashScreen에서 호출)
+  static void markInitialized() {
+    _isInitialized = true;
+    if (AppConfig.debugMode) {
+      print('✅ [AppRouter] 앱 초기화 완료 표시');
+    }
+  }
+  
+  /// 앱 초기화 상태 확인
+  static bool get isInitialized => _isInitialized;
+  
   /// GoRouter 인스턴스 가져오기
   static GoRouter get router {
     _router ??= _createRouter();
@@ -65,6 +80,45 @@ class AppRouter {
       navigatorKey: navigatorKey,
       initialLocation: _getInitialLocation(),
       debugLogDiagnostics: AppConfig.debugMode,
+      
+      // 🎯 글로벌 redirect - 보호된 라우트 인증 확인
+      redirect: (context, state) async {
+        final path = state.uri.path;
+        
+        // 초기화 전이면 redirect 하지 않음 (splash에서 처리)
+        if (!_isInitialized) {
+          if (AppConfig.debugMode) {
+            print('🔄 [GoRouter redirect] 초기화 전 - skip (path: $path)');
+          }
+          return null;
+        }
+        
+        // 공개 라우트는 redirect 하지 않음
+        if (_isPublicRoute(path)) {
+          return null;
+        }
+        
+        // 보호된 라우트: 로그인 상태 확인
+        final authService = AuthService();
+        final isLoggedIn = await authService.isLoggedIn();
+        
+        if (AppConfig.debugMode) {
+          print('🔐 [GoRouter redirect] path: $path, isLoggedIn: $isLoggedIn');
+        }
+        
+        if (!isLoggedIn) {
+          // 비로그인 상태에서 보호된 라우트 접근 시
+          // Pending Navigation 저장 후 홈으로 이동
+          if (AppConfig.debugMode) {
+            print('🚫 [GoRouter redirect] 비로그인 → 홈으로 리다이렉트');
+          }
+          
+          await _savePendingNavigationFromState(state);
+          return '/home';
+        }
+        
+        return null;
+      },
       
       // 🎯 라우트 정의
       routes: [
@@ -413,6 +467,54 @@ class AppRouter {
         }
       }
     });
+  }
+  
+  /// 🆕 공개 라우트인지 확인 (로그인 불필요)
+  static bool _isPublicRoute(String path) {
+    final publicRoutes = [
+      '/',
+      '/splash',
+      '/login',
+      '/auth/callback',
+      '/home',
+      '/introduction',
+      '/app-info',
+    ];
+    
+    return publicRoutes.contains(path);
+  }
+  
+  /// 🆕 GoRouterState에서 Pending Navigation 저장
+  static Future<void> _savePendingNavigationFromState(GoRouterState state) async {
+    try {
+      final pendingService = PendingNavigationService();
+      
+      Map<String, dynamic>? arguments;
+      if (state.uri.queryParameters.isNotEmpty) {
+        arguments = Map<String, dynamic>.from(state.uri.queryParameters);
+        
+        // meetingId를 int로 변환
+        if (arguments.containsKey('meetingId')) {
+          final meetingIdStr = arguments['meetingId'] as String?;
+          if (meetingIdStr != null) {
+            arguments['meetingId'] = int.tryParse(meetingIdStr) ?? meetingIdStr;
+          }
+        }
+      }
+      
+      await pendingService.savePendingNavigation(
+        route: state.uri.path,
+        arguments: arguments,
+      );
+      
+      if (AppConfig.debugMode) {
+        print('📌 [GoRouter redirect] Pending Navigation 저장: ${state.uri.path}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [GoRouter redirect] Pending 저장 실패: $e');
+      }
+    }
   }
 }
 

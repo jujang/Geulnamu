@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/navigation/pending_navigation_service.dart';
 import '../../core/config/app_config.dart';
+import '../../routes/app_router.dart';  // 🆕 AppRouter import
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -115,6 +116,7 @@ class _SplashScreenState extends State<SplashScreen>
               print('🚀 [Splash] 로그인됨 → Pending 페이지로 이동: $url');
             }
             
+            AppRouter.markInitialized();  // 🆕 초기화 완료 표시
             context.go(url);
           }
         } else {
@@ -125,6 +127,7 @@ class _SplashScreenState extends State<SplashScreen>
           }
           
           if (mounted) {
+            AppRouter.markInitialized();  // 🆕 초기화 완료 표시
             context.go('/home');
           }
         }
@@ -135,6 +138,7 @@ class _SplashScreenState extends State<SplashScreen>
         }
         
         if (mounted) {
+          AppRouter.markInitialized();  // 🆕 초기화 완료 표시
           context.go('/home');
         }
       }
@@ -145,6 +149,7 @@ class _SplashScreenState extends State<SplashScreen>
       
       // 오류 발생 시 안전하게 홈으로 이동
       if (mounted) {
+        AppRouter.markInitialized();  // 🆕 초기화 완료 표시
         context.go('/home');
       }
     }
