@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;  // 🆕 웹 플랫폼 확인
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -5,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/navigation/pending_navigation_service.dart';
 import '../../core/config/app_config.dart';
-import '../../routes/app_router.dart';  // 🆕 AppRouter import
+import '../../routes/app_router.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -94,6 +95,44 @@ class _SplashScreenState extends State<SplashScreen>
     final pendingService = PendingNavigationService();
     
     try {
+      // 🆕 1. URL 쿼리 파라미터에서 pending URL 확인 (Service Worker에서 전달)
+      String? pendingUrl = _getPendingUrlFromQueryParams();
+      
+      if (pendingUrl != null) {
+        if (AppConfig.debugMode) {
+          print('📩 [Splash] URL 쿼리 파라미터에서 pending 발견: $pendingUrl');
+          print('📩 [Splash] 로그인 상태: ${authProvider.isAuthenticated}');
+        }
+        
+        if (authProvider.isAuthenticated) {
+          // ✅ 로그인 상태: 해당 페이지로 바로 이동
+          if (AppConfig.debugMode) {
+            print('🚀 [Splash] 로그인됨 → Pending URL로 이동: $pendingUrl');
+          }
+          
+          if (mounted) {
+            AppRouter.markInitialized();
+            context.go(pendingUrl);
+          }
+          return;
+        } else {
+          // ⏳ 비로그인 상태: Pending 저장 후 홈으로 이동
+          if (AppConfig.debugMode) {
+            print('⏳ [Splash] 비로그인 → Pending 저장 후 홈으로 이동');
+          }
+          
+          // Pending Navigation 저장 (로그인 후 처리용)
+          await _savePendingFromUrl(pendingUrl);
+          
+          if (mounted) {
+            AppRouter.markInitialized();
+            context.go('/home');
+          }
+          return;
+        }
+      }
+      
+      // 2. 기존 PendingNavigationService에서 확인
       final pending = await pendingService.getPendingNavigation();
       
       if (pending != null) {
@@ -172,6 +211,69 @@ class _SplashScreenState extends State<SplashScreen>
           .map((e) => '${e.key}=${Uri.encodeComponent(e.value.toString())}')
           .join('&');
       return '$route?$params';
+    }
+  }
+
+  /// 🆕 URL 쿼리 파라미터에서 pending URL 추출
+  /// Service Worker가 /splash?pending=/discussion-group?meetingId=33 형식으로 전달
+  String? _getPendingUrlFromQueryParams() {
+    if (!kIsWeb) return null;
+    
+    try {
+      final uri = Uri.base;
+      final pendingParam = uri.queryParameters['pending'];
+      
+      if (pendingParam != null && pendingParam.isNotEmpty) {
+        // URL 디코딩 (Service Worker에서 encodeURIComponent 사용)
+        final decodedUrl = Uri.decodeComponent(pendingParam);
+        
+        if (AppConfig.debugMode) {
+          print('🔗 [Splash] pending 파라미터 발견: $pendingParam');
+          print('🔗 [Splash] 디코딩된 URL: $decodedUrl');
+        }
+        
+        return decodedUrl;
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [Splash] pending 파라미터 파싱 오류: $e');
+      }
+    }
+    
+    return null;
+  }
+
+  /// 🆕 URL에서 Pending Navigation 저장
+  Future<void> _savePendingFromUrl(String url) async {
+    try {
+      final pendingService = PendingNavigationService();
+      final uri = Uri.parse(url);
+      
+      Map<String, dynamic>? arguments;
+      if (uri.queryParameters.isNotEmpty) {
+        arguments = Map<String, dynamic>.from(uri.queryParameters);
+        
+        // meetingId를 int로 변환
+        if (arguments.containsKey('meetingId')) {
+          final meetingIdStr = arguments['meetingId'] as String?;
+          if (meetingIdStr != null) {
+            arguments['meetingId'] = int.tryParse(meetingIdStr) ?? meetingIdStr;
+          }
+        }
+      }
+      
+      await pendingService.savePendingNavigation(
+        route: uri.path,
+        arguments: arguments,
+      );
+      
+      if (AppConfig.debugMode) {
+        print('📌 [Splash] Pending Navigation 저장 완료: ${uri.path}');
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [Splash] Pending 저장 실패: $e');
+      }
     }
   }
 

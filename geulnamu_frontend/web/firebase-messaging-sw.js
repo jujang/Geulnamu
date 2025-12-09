@@ -122,14 +122,18 @@ self.addEventListener('notificationclick', (event) => {
           targetClient.focus().catch(() => {});
           return;
         } else {
-          // 새 창 열기
-          console.log('[글나무 SW] 새 창 열기:', fullUrl);
-          return clients.openWindow(fullUrl);
+          // 🆕 새 창 열기: /splash?pending=... 형식으로 리다이렉트
+          const splashUrl = `/splash?pending=${encodeURIComponent(urlToOpen)}`;
+          const splashFullUrl = new URL(splashUrl, self.location.origin).href;
+          console.log('[글나무 SW] 새 창 열기 (splash 경유):', splashFullUrl);
+          return clients.openWindow(splashFullUrl);
         }
       })
       .catch((error) => {
         console.error('[글나무 SW] 알림 처리 실패:', error);
-        return clients.openWindow(fullUrl);
+        // 🆕 에러 시에도 splash 경유
+        const splashUrl = `/splash?pending=${encodeURIComponent(urlToOpen)}`;
+        return clients.openWindow(new URL(splashUrl, self.location.origin).href);
       })
   );
 });
