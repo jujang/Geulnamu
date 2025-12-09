@@ -104,9 +104,25 @@ class AuthProvider with ChangeNotifier {
   /// 앱 시작 시 로그인 상태 확인
   Future<void> checkAuthStatus() async {
     try {
+      if (AppConfig.debugMode) {
+        print('🔐 [AuthProvider] checkAuthStatus 시작...');
+      }
+
       _setStatus(AuthStatus.loading);
 
+      // 🔑 토큰 직접 확인 (디버그용)
+      if (AppConfig.debugMode) {
+        final accessToken = await _authService.getAccessToken();
+        final userInfoRaw = await _authService.getUserInfo();
+        print('🔑 [AuthProvider] AccessToken: ${accessToken != null && accessToken.isNotEmpty ? "${accessToken.substring(0, 20)}..." : "null/empty"}'  );
+        print('🔑 [AuthProvider] UserInfo(raw): $userInfoRaw');
+      }
+
       final isLoggedIn = await _authService.isLoggedIn();
+
+      if (AppConfig.debugMode) {
+        print('🔑 [AuthProvider] isLoggedIn 결과: $isLoggedIn');
+      }
 
       if (isLoggedIn) {
         final userInfo = await _authService.getUserInfo();
@@ -114,20 +130,31 @@ class AuthProvider with ChangeNotifier {
           _userInfo = userInfo;
           _setStatus(AuthStatus.authenticated);
 
+          if (AppConfig.debugMode) {
+            print('✅ [AuthProvider] 로그인 상태 복원 성공!');
+            print('✅ [AuthProvider] 사용자: ${userInfo['memberName']}');
+          }
+
           // 개인정보 상태 확인
           await _checkProfileStatusSilent();
           
           // 🔥 FCM 토큰 등록 (앱 재시작/redirect 로그인 시에도 토큰 등록)
           await _registerFcmToken();
         } else {
+          if (AppConfig.debugMode) {
+            print('⚠️ [AuthProvider] isLoggedIn=true 인데 userInfo=null');
+          }
           _setStatus(AuthStatus.unauthenticated);
         }
       } else {
+        if (AppConfig.debugMode) {
+          print('🚫 [AuthProvider] 비로그인 상태');
+        }
         _setStatus(AuthStatus.unauthenticated);
       }
     } catch (e) {
       if (AppConfig.debugMode) {
-        print('❌ 로그인 상태 확인 중 오류: $e');
+        print('❌ [AuthProvider] 로그인 상태 확인 중 오류: $e');
       }
       _setError('로그인 상태 확인 중 오류가 발생했습니다.');
       _setStatus(AuthStatus.unauthenticated);
