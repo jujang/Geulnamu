@@ -5,7 +5,7 @@ import '../core/config/app_config.dart'; // 🎯 AppConfig import
 import '../core/enums/permission_level.dart'; // 🆕 권한 레벨 import
 import '../core/constants/permission_constants.dart'; // 🆕 권한 상수 import
 import '../services/notification/fcm_service.dart'; // 🔥 FCM 서비스 import
-import '../main.dart'; // 🎯 global navigatorKey import
+import '../routes/app_router.dart'; // 🎯 GoRouter navigatorKey import
 
 enum AuthStatus { uninitialized, authenticated, unauthenticated, loading }
 
@@ -420,7 +420,7 @@ class AuthProvider with ChangeNotifier {
 
       try {
         final context =
-            navigatorKey.currentContext; // 🎯 Global Navigator Key 사용
+            AppRouter.navigatorKey.currentContext; // 🎯 GoRouter Navigator Key 사용
 
         if (context != null) {
           // 🔥 플래그 설정: 다이얼로그 표시 시작

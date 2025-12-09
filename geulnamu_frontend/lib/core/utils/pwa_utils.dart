@@ -31,4 +31,24 @@ class PWAUtils {
   static bool canShowInstallPrompt() {
     return kIsWeb && !isInstalledPWA();
   }
+
+  /// 🎯 PWA 히스토리 초기화
+  /// PWA 시작 시 브라우저 히스토리가 비어있으면 Flutter PopScope가 동작하지 않음
+  /// 더미 히스토리 항목을 추가하여 뒤로가기가 앱 내에서 처리되도록 함
+  static void initializePWAHistory() {
+    if (!kIsWeb) return;
+    platform.initializePWAHistory();
+  }
+
+  /// 브라우저 히스토리 길이 확인
+  static int getHistoryLength() {
+    if (!kIsWeb) return 0;
+    return platform.getHistoryLength();
+  }
+
+  /// 브라우저 히스토리에 현재 URL 추가 (중복 방지용)
+  static void ensureHistoryEntry() {
+    if (!kIsWeb) return;
+    platform.ensureHistoryEntry();
+  }
 }

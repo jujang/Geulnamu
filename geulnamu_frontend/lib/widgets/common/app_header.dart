@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -67,11 +68,11 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       // ← 뒤로가기 버튼 우선
       return IconButton(
         onPressed: onBackPressed ?? () {
-          // 🎯 스택이 비어있는 경우 홈으로 이동 (앱 업데이트 후 빈 화면 방지)
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop();
+          // 🎯 GoRouter: 스택이 비어있는 경우 홈으로 이동 (앱 업데이트 후 빈 화면 방지)
+          if (context.canPop()) {
+            context.pop();
           } else {
-            Navigator.pushReplacementNamed(context, '/home');
+            context.go('/home');
           }
         },
         icon: const Icon(Icons.arrow_back_ios),

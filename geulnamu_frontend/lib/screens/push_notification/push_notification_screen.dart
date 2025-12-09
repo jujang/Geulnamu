@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/config/app_config.dart';
 import '../../core/services/auth_service.dart';
@@ -48,7 +49,12 @@ class _PushNotificationScreenState extends State<PushNotificationScreen> {
 
   /// 뒤로가기 처리
   void _handleBackPressed() {
-    Navigator.of(context).pop();
+    // 🎯 GoRouter: 스택이 비어있으면 홈으로 이동
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/home');
+    }
   }
 
   /// 🆕 토글 전환 처리

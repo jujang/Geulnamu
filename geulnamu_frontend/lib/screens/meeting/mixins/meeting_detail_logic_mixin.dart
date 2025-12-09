@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/meeting/meeting_service.dart';
@@ -545,7 +546,8 @@ mixin MeetingDetailLogicMixin<T extends StatefulWidget> on State<T> {
     if (AppConfig.debugMode) {
       print('🗺️ [모임 상세] 운영진용 페이지로 이동 시도: /meeting/$meetingId/staff');
     }
-    Navigator.pushNamed(context, '/meeting/$meetingId/staff');
+    // 🎯 GoRouter: push로 운영진용 상세 페이지 이동
+    context.push('/meeting/$meetingId/staff');
   }
   
   /// 발제문 작성

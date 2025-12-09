@@ -6,6 +6,7 @@ import '../../../models/meeting/meeting_model.dart';
 import '../../../models/meeting/meeting_filter_model.dart';
 import '../../../core/config/app_config.dart'; // AppConfig import 추가
 import '../../../core/responsive.dart'; // 🆕 반응형 헬퍼 import
+import '../../../routes/app_router.dart'; // 🎯 GoRouter 확장 메서드 import
 
 /// 모임 목록 화면 로직 Mixin
 ///
@@ -225,15 +226,8 @@ mixin MeetingLogicMixin<T extends StatefulWidget> on State<T> {
       print('🎯 [MeetingLogicMixin] 출석현황 확인: meetingId=$meetingId');
     }
 
-    // 출석 현황 페이지로 이동
-    Navigator.pushNamed(
-      context,
-      '/attendance/status',
-      arguments: {
-        'meetingId': meetingId,
-        'meetingTitle': null, // 추후 필요시 모임 제목 추가
-      },
-    );
+    // 🎯 GoRouter: push로 출석 현황 페이지 이동
+    context.goAttendanceStatus(meetingId);
   }
 
   /// 에러 메시지 변환
