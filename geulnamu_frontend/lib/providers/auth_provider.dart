@@ -114,7 +114,10 @@ class AuthProvider with ChangeNotifier {
       if (AppConfig.debugMode) {
         final accessToken = await _authService.getAccessToken();
         final userInfoRaw = await _authService.getUserInfo();
-        print('🔑 [AuthProvider] AccessToken: ${accessToken != null && accessToken.isNotEmpty ? "${accessToken.substring(0, 20)}..." : "null/empty"}'  );
+        final tokenPreview = (accessToken != null && accessToken.length > 20) 
+            ? '${accessToken.substring(0, 20)}...' 
+            : (accessToken ?? 'null');
+        print('🔑 [AuthProvider] AccessToken: $tokenPreview');
         print('🔑 [AuthProvider] UserInfo(raw): $userInfoRaw');
       }
 
