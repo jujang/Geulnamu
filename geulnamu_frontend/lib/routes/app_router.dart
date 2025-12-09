@@ -81,42 +81,22 @@ class AppRouter {
       initialLocation: _getInitialLocation(),
       debugLogDiagnostics: AppConfig.debugMode,
       
-      // 🎯 글로벌 redirect - 보호된 라우트 인증 확인
-      redirect: (context, state) async {
-        final path = state.uri.path;
-        
+      // 🎯 글로벌 redirect - 보호된 라우트 인증 확인 (단순화됨)
+      // 💡 Service Worker가 /splash?pending=... 형식으로 열기 때문에
+      //    이 redirect는 주로 URL 직접 입력/공유 링크 대응용
+      redirect: (context, state) {
         // 초기화 전이면 redirect 하지 않음 (splash에서 처리)
         if (!_isInitialized) {
-          if (AppConfig.debugMode) {
-            print('🔄 [GoRouter redirect] 초기화 전 - skip (path: $path)');
-          }
           return null;
         }
         
         // 공개 라우트는 redirect 하지 않음
-        if (_isPublicRoute(path)) {
+        if (_isPublicRoute(state.uri.path)) {
           return null;
         }
         
-        // 보호된 라우트: 로그인 상태 확인
-        final authService = AuthService();
-        final isLoggedIn = await authService.isLoggedIn();
-        
-        if (AppConfig.debugMode) {
-          print('🔐 [GoRouter redirect] path: $path, isLoggedIn: $isLoggedIn');
-        }
-        
-        if (!isLoggedIn) {
-          // 비로그인 상태에서 보호된 라우트 접근 시
-          // Pending Navigation 저장 후 홈으로 이동
-          if (AppConfig.debugMode) {
-            print('🚫 [GoRouter redirect] 비로그인 → 홈으로 리다이렉트');
-          }
-          
-          await _savePendingNavigationFromState(state);
-          return '/home';
-        }
-        
+        // 보호된 라우트는 현재는 그냥 통과 (이미 splash에서 인증 확인 완료)
+        // 필요시 여기에 추가 보안 로직 구현 가능
         return null;
       },
       
