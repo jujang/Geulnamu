@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/navigation/pending_navigation_service.dart';
+import '../../core/config/app_config.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -52,19 +54,119 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _navigateToHome() async {
+    if (AppConfig.debugMode) {
+      print('🚀 [Splash] _navigateToHome 시작...');
+    }
+
     // 🎯 폰트 프리로딩 (플래시 방지) - 완료 후 즉시 이동
     await _preloadFonts();
 
     if (mounted) {
+      if (AppConfig.debugMode) {
+        print('🔐 [Splash] checkAuthStatus 호출 전...');
+      }
+
       // 🔐 로그인 상태 확인 (await로 완료 대기)
-      // Pending Navigation 처리를 위해 로그인 상태가 결정된 후 홈으로 이동해야 함
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.checkAuthStatus();
 
+      if (AppConfig.debugMode) {
+        print('🔐 [Splash] checkAuthStatus 완료!');
+        print('🔐 [Splash] 로그인 상태: ${authProvider.isAuthenticated}');
+        print('🔐 [Splash] AuthStatus: ${authProvider.status}');
+        print('🔐 [Splash] 사용자 정보: ${authProvider.userInfo}');
+      }
+
       if (mounted) {
-        // 🎯 GoRouter: go()로 홈으로 이동 (히스토리 대체)
+        // 📩 Pending Navigation 처리 (알림 클릭으로 앱 시작 시)
+        await _handlePendingNavigation(authProvider);
+      }
+    }
+  }
+
+  /// 📩 Pending Navigation 처리
+  /// 
+  /// 알림 클릭으로 앱이 시작된 경우, 저장된 목적지로 이동
+  /// - 로그인 상태: 해당 페이지로 바로 이동
+  /// - 비로그인 상태: 홈으로 이동 (Pending 유지, 로그인 후 처리)
+  Future<void> _handlePendingNavigation(AuthProvider authProvider) async {
+    final pendingService = PendingNavigationService();
+    
+    try {
+      final pending = await pendingService.getPendingNavigation();
+      
+      if (pending != null) {
+        if (AppConfig.debugMode) {
+          print('📩 [Splash] Pending Navigation 발견!');
+          print('📩 [Splash] route: ${pending.route}');
+          print('📩 [Splash] arguments: ${pending.arguments}');
+          print('📩 [Splash] 로그인 상태: ${authProvider.isAuthenticated}');
+        }
+        
+        if (authProvider.isAuthenticated) {
+          // ✅ 로그인 상태: Pending Navigation 삭제 후 해당 페이지로 이동
+          await pendingService.clearPendingNavigation();
+          
+          if (mounted) {
+            // 🎯 URL 형식으로 이동 (쿼리 파라미터 포함)
+            final url = _buildUrlWithArguments(pending.route, pending.arguments);
+            
+            if (AppConfig.debugMode) {
+              print('🚀 [Splash] 로그인됨 → Pending 페이지로 이동: $url');
+            }
+            
+            context.go(url);
+          }
+        } else {
+          // ⏳ 비로그인 상태: Pending 유지하고 홈으로 이동
+          // (로그인 후 HomeScreen 또는 다른 곳에서 처리 가능)
+          if (AppConfig.debugMode) {
+            print('⏳ [Splash] 비로그인 → 홈으로 이동 (Pending 유지)');
+          }
+          
+          if (mounted) {
+            context.go('/home');
+          }
+        }
+      } else {
+        // 📭 Pending Navigation 없음: 일반 홈 화면 이동
+        if (AppConfig.debugMode) {
+          print('📭 [Splash] Pending Navigation 없음 → 홈으로 이동');
+        }
+        
+        if (mounted) {
+          context.go('/home');
+        }
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [Splash] Pending Navigation 처리 오류: $e');
+      }
+      
+      // 오류 발생 시 안전하게 홈으로 이동
+      if (mounted) {
         context.go('/home');
       }
+    }
+  }
+
+  /// URL에 arguments를 쿼리 파라미터로 추가
+  String _buildUrlWithArguments(String route, Map<String, dynamic>? arguments) {
+    if (arguments == null || arguments.isEmpty) {
+      return route;
+    }
+    
+    // 이미 쿼리 파라미터가 있는 경우
+    if (route.contains('?')) {
+      final params = arguments.entries
+          .map((e) => '${e.key}=${Uri.encodeComponent(e.value.toString())}')
+          .join('&');
+      return '$route&$params';
+    } else {
+      final params = arguments.entries
+          .map((e) => '${e.key}=${Uri.encodeComponent(e.value.toString())}')
+          .join('&');
+      return '$route?$params';
     }
   }
 
