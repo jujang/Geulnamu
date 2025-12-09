@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';  // 🎯 SystemNavigator 추가
-import 'package:flutter/foundation.dart';  // 🎯 kIsWeb 추가
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../core/utils/pwa_utils.dart';  // 🎯 PWA 유틸리티 추가
 import '../../providers/auth_provider.dart';
 import '../../services/home/home_service.dart';
 import '../../widgets/common/app_header.dart';
@@ -41,6 +41,9 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _setupAnimations();
+
+    // 🎯 PWA 히스토리 초기화 (뒤로가기 문제 해결)
+    PWAUtils.initializePWAHistory();
 
     // 🎯 RouteObserver 등록을 위해 다음 프레임에서 실행
     WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -5,3 +5,12 @@
 
 /// PWA 설치 상태 확인 (네이티브에서는 항상 false)
 bool isInstalledPWA() => false;
+
+/// PWA 히스토리 초기화 (네이티브에서는 아무 동작 안 함)
+void initializePWAHistory() {}
+
+/// 브라우저 히스토리 길이 확인 (네이티브에서는 항상 0)
+int getHistoryLength() => 0;
+
+/// 브라우저 히스토리에 현재 URL 추가 (네이티브에서는 아무 동작 안 함)
+void ensureHistoryEntry() {}

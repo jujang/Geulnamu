@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/home/home_service.dart';
@@ -375,12 +376,13 @@ class AppDrawer extends StatelessWidget {
         ),
       ),
       child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: () {
-            Navigator.pop(context); // Drawer 닫기
-            onLoginTap?.call();
-          },
+      width: double.infinity,
+      child: ElevatedButton.icon(
+      onPressed: () {
+      // 🎯 GoRouter: pop으로 Drawer 닫기
+      context.pop();
+        onLoginTap?.call();
+            },
           icon: const Icon(Icons.login),
           label: const Text('로그인'),
           style: ElevatedButton.styleFrom(
@@ -393,7 +395,8 @@ class AppDrawer extends StatelessWidget {
 
   /// 🎯 메뉴 탭 처리
   void _handleMenuTap(BuildContext context, String menu) {
-    Navigator.pop(context); // Drawer 닫기
+    // 🎯 GoRouter: pop으로 Drawer 닫기
+    context.pop();
     onMenuTap?.call(menu);
   }
 }

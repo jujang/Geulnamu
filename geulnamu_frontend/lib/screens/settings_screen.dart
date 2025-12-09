@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../core/config/app_config.dart';
 import '../core/services/settings_service.dart';
@@ -144,7 +145,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// 뒤로가기 처리
   void _handleBackPressed() {
     debugPrint('🔙 [SettingsScreen] 설정 화면 나가기');
-    Navigator.of(context).pop();
+    // 🎯 GoRouter: pop으로 이전 화면으로 돌아가기
+    context.pop();
   }
 
   @override

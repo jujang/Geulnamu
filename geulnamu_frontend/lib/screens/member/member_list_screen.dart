@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
@@ -45,7 +46,8 @@ class _MemberListScreenState extends State<MemberListScreen>
     if (!authProvider.isStaffLevel) {
       // 권한 없음 - 이전 화면으로 돌아가기
       if (mounted) {
-        Navigator.pop(context);
+        // 🎯 GoRouter: pop으로 이전 화면으로 돌아가기
+        context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('모임원 목록은 임원진 이상만 볼 수 있습니다.'),
@@ -224,9 +226,7 @@ class _MemberListScreenState extends State<MemberListScreen>
     
     final currentPageNum = currentPage;
     
-    Navigator.pushNamed(
-      context,
-      '/profile?memberId=${member.memberId}&mode=admin&returnPage=$currentPageNum',
-    );
+    // 🎯 GoRouter: push로 프로필 화면 이동 (관리자 모드)
+    context.push('/profile?memberId=${member.memberId}&mode=admin&returnPage=$currentPageNum');
   }
 }

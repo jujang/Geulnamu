@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/config/app_config.dart';
@@ -210,8 +211,8 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
         if (AppConfig.debugMode) {
           print('🏠 홈 화면으로 이동 중...');
         }
-        // 메인 화면으로 이동
-        Navigator.of(context).pushReplacementNamed('/home');
+        // 🎯 GoRouter: go로 홈 화면으로 이동 (히스토리 대체)
+        context.go('/home');
       }
     } catch (error) {
       if (AppConfig.debugMode) {
@@ -227,7 +228,8 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
       // 3초 후 로그인 화면으로 돌아가기
       await Future.delayed(const Duration(seconds: 3));
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/login');
+        // 🎯 GoRouter: go로 로그인 화면으로 이동 (히스토리 대체)
+        context.go('/login');
       }
     }
   }
@@ -344,7 +346,8 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
             else
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pushReplacementNamed('/login');
+                  // 🎯 GoRouter: go로 로그인 화면으로 이동
+                  context.go('/login');
                 },
                 child: const Text('로그인 화면으로 돌아가기'),
               ),

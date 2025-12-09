@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
@@ -261,7 +262,8 @@ class _DiscussionGroupScreenState extends State<DiscussionGroupScreen> {
 
   /// 로그인 페이지로 이동
   void _navigateToLogin() {
-    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    // 🎯 GoRouter: go로 로그인 화면 이동 (히스토리 대체)
+    context.go('/login');
   }
 
   /// 빈 상태 위젯

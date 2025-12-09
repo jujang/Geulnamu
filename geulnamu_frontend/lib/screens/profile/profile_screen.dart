@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
@@ -178,7 +179,8 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   /// 로그인 탭 핸들러
   void _handleLoginTap() {
-    Navigator.pushNamed(context, '/login');
+    // 🎯 GoRouter: push로 로그인 화면 이동
+    context.push('/login');
   }
 
   /// 로그아웃 핸들러
@@ -197,19 +199,11 @@ class _ProfileScreenState extends State<ProfileScreen>
   /// 로고 탭 핸들러 (모드에 따라 다른 이동)
   void _handleLogoTap() {
     if (isAdminMode && returnPage != null) {
-      // 🎯 관리자 모드: 모임원 목록으로 돌아가기 (페이지 상태 복원)
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/member-list',
-        (route) => false,
-      );
+      // 🎯 관리자 모드: 모임원 목록으로 돌아가기 (GoRouter go로 히스토리 대체)
+      context.go('/member-list');
     } else {
-      // 🎯 본인 모드: 홈으로 이동
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/home',
-        (route) => false,
-      );
+      // 🎯 본인 모드: 홈으로 이동 (GoRouter go로 히스토리 대체)
+      context.go('/home');
     }
   }
 

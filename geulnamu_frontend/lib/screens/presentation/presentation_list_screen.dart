@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
@@ -8,7 +9,7 @@ import '../../core/config/app_config.dart'; // AppConfig import 추가
 import '../../models/presentation/presentation_model.dart';
 import '../../services/home/home_service.dart';
 import '../../services/home/home_route_service.dart'; // RouteObserver
-import '../book_question/book_question_detail_screen.dart'; // 발제문 상세 페이지 import
+// 발제문 상세 페이지는 GoRouter로 이동
 import 'mixins/presentation_logic_mixin.dart';
 import 'widgets/presentation_widgets.dart';
 import 'widgets/presentation_list_widgets.dart';
@@ -324,15 +325,8 @@ class _PresentationListScreenState extends State<PresentationListScreen>
       print('📖 [발제문] 클릭: ${presentation.bookTitle} (meetingId: ${presentation.meetingId})');
     }
     
-    // 발제문 상세 페이지로 이동
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BookQuestionDetailScreen(
-          meetingId: presentation.meetingId,
-          meetingTitle: presentation.bookTitle,
-        ),
-      ),
-    );
+    // 🎯 GoRouter: push로 발제문 상세 페이지로 이동
+    final title = Uri.encodeComponent(presentation.bookTitle);
+    context.push('/book-question/${presentation.meetingId}?title=$title');
   }
 }

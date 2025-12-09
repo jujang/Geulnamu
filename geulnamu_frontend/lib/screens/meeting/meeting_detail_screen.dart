@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
@@ -8,8 +9,7 @@ import '../../core/config/app_config.dart';
 import '../../models/book_question/book_question_model.dart';
 import 'mixins/meeting_detail_logic_mixin.dart';
 import 'widgets/meeting_detail_widgets.dart';
-import 'meeting_qr_display_screen.dart'; // 🆕 QR 표시 화면
-import 'meeting_qr_scanner_screen.dart'; // 🆕 QR 스캔 화면
+// QR 화면들은 GoRouter로 이동
 
 /// 모임 상세 조회 화면
 ///
@@ -172,14 +172,8 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
       print('📱 [QR 표시] 화면 이동: meetingId=${widget.meetingId}');
     }
     
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => MeetingQrDisplayScreen(
-          meetingId: widget.meetingId,
-          meetingTitle: meetingDetail!.meetingName,
-        ),
-      ),
-    );
+    // 🎯 GoRouter: push로 QR 표시 화면 이동
+    context.push('/meeting/${widget.meetingId}/qr-display');
   }
 
   /// QR 스캔 화면으로 이동 (일반 사용자용)
@@ -188,11 +182,8 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
       print('📷 [QR 스캔] 화면 이동');
     }
     
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (context) => const MeetingQrScannerScreen(),
-      ),
-    );
+    // 🎯 GoRouter: push로 QR 스캔 화면 이동
+    final result = await context.push<bool>('/qr-scanner');
     
     // 출석 성공 시 새로고침
     if (result == true) {

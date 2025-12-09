@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../providers/auth_provider.dart';
@@ -61,8 +62,8 @@ class _SplashScreenState extends State<SplashScreen>
       await authProvider.checkAuthStatus();
 
       if (mounted) {
-        // 항상 메인 화면으로 이동
-        Navigator.pushReplacementNamed(context, '/home');
+        // 🎯 GoRouter: go()로 홈으로 이동 (히스토리 대체)
+        context.go('/home');
       }
     }
   }
