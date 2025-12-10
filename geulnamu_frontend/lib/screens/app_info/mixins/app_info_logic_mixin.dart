@@ -3,10 +3,11 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:async';
-import 'dart:html' as html show window;
 import '../../../providers/auth_provider.dart';
 import '../../../services/system/health_check_service.dart';
+import '../../../core/utils/web_cache_utils.dart';  // 🎯 웹 캐시 유틸리티 추가
 
 /// 앱 정보 화면 로직 Mixin
 ///
@@ -91,11 +92,8 @@ mixin AppInfoLogicMixin<T extends StatefulWidget> on State<T> {
         await authProvider.logout();
         debugPrint('✅ [AppInfo] 로그아웃 완료');
         
-        // 🎯 4단계: 스플래시 화면으로 이동 (앱 초기화)
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/splash',
-          (route) => false, // 모든 이전 화면 제거
-        );
+        // 🎯 4단계: 스플래시 화면으로 이동 (앱 초기화) - GoRouter 사용!
+        context.go('/splash');
         
         // 성공 메시지
         ScaffoldMessenger.of(context).showSnackBar(
@@ -122,28 +120,25 @@ mixin AppInfoLogicMixin<T extends StatefulWidget> on State<T> {
     }
   }
   
-  /// 🌐 웹 환경 캐시 삭제 (Session Storage, IndexedDB)
-  /// Service Worker Cache는 유지 (앱 로딩 속도 유지)
+  /// 🌐 웹 환경 캐시 삭제
+  /// Service Worker에게 메시지를 보내 API 캐시 삭제 요청
   Future<void> _clearWebCaches() async {
     try {
-      // Session Storage 삭제
-      html.window.sessionStorage.clear();
-      debugPrint('✅ [AppInfo] Session Storage 삭제 완료');
+      debugPrint('🧹 [AppInfo] Service Worker API 캐시 삭제 시도...');
+      
+      // 🎯 Service Worker에게 API 캐시 삭제 요청
+      final success = await WebCacheUtils.clearUserCache();
+      
+      if (success) {
+        debugPrint('✅ [AppInfo] Service Worker API 캐시 삭제 완료');
+      } else {
+        debugPrint('⚠️ [AppInfo] Service Worker API 캐시 삭제 실패 (무시)');
+      }
+      
+      debugPrint('💡 [AppInfo] 정적 리소스 캐시는 유지 (앱 성능용)');
     } catch (e) {
-      debugPrint('⚠️ [AppInfo] Session Storage 삭제 실패 (무시): $e');
+      debugPrint('⚠️ [AppInfo] 웹 캐시 삭제 실패 (무시): $e');
     }
-    
-    try {
-      // IndexedDB 삭제 (Flutter 웹 데이터)
-      await html.window.indexedDB?.deleteDatabase('FlutterStorage');
-      debugPrint('✅ [AppInfo] IndexedDB (FlutterStorage) 삭제 완료');
-    } catch (e) {
-      debugPrint('⚠️ [AppInfo] IndexedDB 삭제 실패 (무시): $e');
-    }
-    
-    // ⚠️ Service Worker Cache는 의도적으로 삭제하지 않음
-    // 이유: 정적 리소스 캐시는 앱 성능에 중요하고, 사용자 데이터가 아님
-    debugPrint('💡 [AppInfo] Service Worker Cache는 유지 (앱 성능용)');
   }
   
   /// 캐시 삭제 확인 다이얼로그
