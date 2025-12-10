@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/config/app_config.dart';
 import '../../../services/home/home_route_service.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/navigation/pending_navigation_service.dart';
-import '../../../routes/app_router.dart'; // 🎯 GoRouter navigatorKey
+import '../../../main.dart' show navigatorKey;
 
 /// RouteAware 기능을 담당하는 mixin
 /// 
@@ -152,7 +151,7 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
       }
 
       // 목적지로 이동
-      if (AppRouter.navigatorKey.currentContext != null) {
+      if (navigatorKey.currentState != null) {
         // 먼저 Pending Navigation 삭제 (중복 이동 방지)
         await _pendingNavigationService.clearPendingNavigation();
         
@@ -163,11 +162,9 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
           print('🚀 [RouteAwareMixin] 목적지로 이동: ${pending.route}');
         }
         
-        // 🎯 GoRouter를 사용하여 이동
-        final routerContext = AppRouter.navigatorKey.currentContext!;
-        GoRouter.of(routerContext).push(
+        navigatorKey.currentState?.pushNamed(
           pending.route,
-          extra: pending.arguments,
+          arguments: pending.arguments,
         );
       } else {
         if (AppConfig.debugMode) {

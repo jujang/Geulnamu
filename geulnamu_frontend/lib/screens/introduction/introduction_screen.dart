@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 
 /// 🌿 글나무 소개 페이지
@@ -21,14 +20,7 @@ class IntroductionScreen extends StatelessWidget {
             backgroundColor: context.colors.primary,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-              onPressed: () {
-                // 🎯 GoRouter: 스택이 비어있으면 홈으로 이동
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go('/home');
-                }
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: false, // 🎯 제목을 왼쪽 정렬로 변경

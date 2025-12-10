@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
@@ -249,8 +248,7 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
 
   /// 모임 카드 탭 처리 (운영진용 상세보기 기능)
   void _handleMeetingTap(MeetingInfo meeting) {
-    // 🎯 GoRouter: push로 운영진용 상세 페이지 이동
-    context.push('/meeting/${meeting.meetingId}/staff').then((result) {
+    Navigator.pushNamed(context, '/meeting/${meeting.meetingId}/staff').then((result) {
       // 모임 수정/삭제 후 목록 새로고침
       if (result == true && mounted) {
         refreshMeetingList();
@@ -274,8 +272,10 @@ class _MeetingListStaffScreenState extends State<MeetingListStaffScreen>
 
   /// 🆕 모임 만들기 버튼 처리
   void _handleCreateMeeting() {
-    // 🎯 GoRouter: push로 모임 만들기 화면 이동
-    context.push('/meeting-create').then((result) {
+    Navigator.pushNamed(
+      context,
+      '/meeting-create',
+    ).then((result) {
       // 모임 생성 후 목록 새로고침
       if (result == true && mounted) {
         refreshMeetingList();

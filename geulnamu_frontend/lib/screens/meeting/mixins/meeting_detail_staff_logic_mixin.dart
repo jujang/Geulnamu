@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/meeting/meeting_service.dart';
@@ -657,8 +656,8 @@ mixin MeetingDetailStaffLogicMixin<T extends StatefulWidget> on State<T> {
           const SnackBar(content: Text('모임이 삭제되었습니다.')),
         );
 
-        // 🎯 GoRouter: go로 목록 화면으로 교체 이동 (브라우저 히스토리에서 삭제된 페이지 제거)
-        context.go('/meeting-list-staff');
+        // 🆕 목록 화면으로 교체 이동 (브라우저 히스토리에서 삭제된 페이지 제거)
+        Navigator.of(context).pushReplacementNamed('/meeting-list-staff');
       }
     } catch (e) {
       if (mounted) {

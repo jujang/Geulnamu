@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
@@ -9,7 +8,8 @@ import '../../core/config/app_config.dart'; // AppConfig import 추가
 import 'mixins/meeting_detail_staff_logic_mixin.dart';
 import 'widgets/meeting_detail_staff_widgets.dart';
 import '../../models/book_question/book_question_model.dart';
-// QR 표시, 사용자 화면은 GoRouter로 이동
+import 'meeting_qr_display_screen.dart'; // 🆕 QR 표시 화면
+import 'meeting_detail_screen.dart'; // 🆕 일반 사용자 화면
 
 /// 운영진용 모임 상세 조회 화면
 ///
@@ -206,8 +206,14 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       print('📱 [QR 표시] 화면 이동: meetingId=${widget.meetingId}');
     }
 
-    // 🎯 GoRouter: push로 QR 표시 화면 이동
-    context.push('/meeting/${widget.meetingId}/qr-display');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MeetingQrDisplayScreen(
+          meetingId: widget.meetingId,
+          meetingTitle: meetingDetail!.meetingName,
+        ),
+      ),
+    );
   }
 
   /// 일반 사용자 화면으로 이동
@@ -216,8 +222,11 @@ class _MeetingDetailStaffScreenState extends State<MeetingDetailStaffScreen>
       print('👥 [사용자 화면] 이동: meetingId=${widget.meetingId}');
     }
 
-    // 🎯 GoRouter: push로 일반 사용자 상세 화면 이동
-    context.push('/meeting/${widget.meetingId}');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MeetingDetailScreen(meetingId: widget.meetingId),
+      ),
+    );
   }
 
   /// 로그아웃 처리 (HomeService 활용)

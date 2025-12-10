@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/config/app_config.dart';
@@ -77,8 +76,7 @@ class _LoginScreenState extends State<LoginScreen>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          // 🎯 GoRouter: go()로 홈으로 이동 (브라우저 히스토리에 /login 안 남김)
-          onPressed: () => context.go('/home'),
+          onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios, color: colorScheme.onSurface),
         ),
       ),
@@ -431,8 +429,8 @@ class _LoginScreenState extends State<LoginScreen>
     final success = await authProvider.loginWithKakao(context: context);
 
     if (success && mounted) {
-      // 🎯 GoRouter: go()는 현재 URL을 대체하여 히스토리에 남지 않음 (PWA 뒤로가기 문제 해결)
-      context.go('/home');
+      // 🎯 로그인 성공 시 모든 라우트 스택 제거 후 홈으로 이동 (PWA 뒤로가기 문제 해결)
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     }
     // 실패 시에는 AuthProvider의 errorMessage가 자동으로 표시됩니다
   }
@@ -452,8 +450,8 @@ class _LoginScreenState extends State<LoginScreen>
     );
 
     if (success && mounted) {
-      // 🎯 GoRouter: go()는 현재 URL을 대체하여 히스토리에 남지 않음 (PWA 뒤로가기 문제 해결)
-      context.go('/home');
+      // 🎯 로그인 성공 시 모든 라우트 스택 제거 후 홈으로 이동 (PWA 뒤로가기 문제 해결)
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     }
     // 실패 시에는 AuthProvider의 errorMessage가 자동으로 표시됩니다
   }

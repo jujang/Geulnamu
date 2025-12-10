@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/config/app_config.dart';
@@ -28,38 +27,6 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
     if (AppConfig.debugMode) {
       print('🔄 OAuthCallbackScreen initState 시작!');
       print('🌐 팡업 여부: ${_isPopup()}');
-    }
-
-    // 🎯 PostFrameCallback으로 처리하여 Provider 접근 가능하도록
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _processCallback();
-    });
-  }
-
-  /// 콜백 처리 (이미 로그인 상태 체크 포함)
-  Future<void> _processCallback() async {
-    // 🎯 이미 로그인된 상태에서 뒤로가기로 다시 이 화면에 온 경우 처리
-    try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      if (authProvider.isAuthenticated) {
-        if (AppConfig.debugMode) {
-          print('🎯 [OAuth] 이미 로그인됨 - 홈으로 리다이렉트');
-        }
-        // 히스토리 정리 후 홈으로
-        try {
-          html.window.history.replaceState(null, '', '/home');
-        } catch (e) {
-          // 무시
-        }
-        if (mounted) {
-          context.go('/home');
-        }
-        return;
-      }
-    } catch (e) {
-      if (AppConfig.debugMode) {
-        print('⚠️ [OAuth] 로그인 상태 체크 실패: $e');
-      }
     }
 
     // 팡업인 경우 PostMessage 전송 후 종료
@@ -243,21 +210,8 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
         if (AppConfig.debugMode) {
           print('🏠 홈 화면으로 이동 중...');
         }
-        
-        // 🎯 현재 URL을 /home으로 교체 (히스토리에서 OAuth 콜백 URL 제거)
-        try {
-          html.window.history.replaceState(null, '', '/home');
-          if (AppConfig.debugMode) {
-            print('🎯 [OAuth] 히스토리 URL 교체 완료');
-          }
-        } catch (e) {
-          if (AppConfig.debugMode) {
-            print('⚠️ [OAuth] 히스토리 URL 교체 실패: $e');
-          }
-        }
-        
-        // 🎯 GoRouter: go로 홈 화면으로 이동
-        context.go('/home');
+        // 메인 화면으로 이동
+        Navigator.of(context).pushReplacementNamed('/home');
       }
     } catch (error) {
       if (AppConfig.debugMode) {
@@ -273,8 +227,7 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
       // 3초 후 로그인 화면으로 돌아가기
       await Future.delayed(const Duration(seconds: 3));
       if (mounted) {
-        // 🎯 GoRouter: go로 로그인 화면으로 이동 (히스토리 대체)
-        context.go('/login');
+        Navigator.of(context).pushReplacementNamed('/login');
       }
     }
   }
@@ -391,8 +344,7 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
             else
               ElevatedButton(
                 onPressed: () {
-                  // 🎯 GoRouter: go로 로그인 화면으로 이동
-                  context.go('/login');
+                  Navigator.of(context).pushReplacementNamed('/login');
                 },
                 child: const Text('로그인 화면으로 돌아가기'),
               ),

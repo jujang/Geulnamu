@@ -1,7 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import 'dart:html' as html;
 import 'dart:js' as js;
@@ -11,7 +10,7 @@ import '../../core/config/app_config.dart';
 import '../../core/utils/api_utils.dart';
 import '../../core/services/auth_service.dart';
 import '../../models/fcm/fcm_send_result.dart';
-import '../../routes/app_router.dart'; // 🎯 GoRouter navigatorKey
+import '../../main.dart' show navigatorKey;
 import '../navigation/pending_navigation_service.dart';
 
 /// FCM 푸시 알림 서비스
@@ -324,10 +323,10 @@ class FcmService {
   void _navigateToUrl(String url) {
     if (AppConfig.debugMode) {
       print('🎯 [FCM] _navigateToUrl 호출: $url');
-      print('🎯 [FCM] navigatorKey.currentContext: ${AppRouter.navigatorKey.currentContext}');
+      print('🎯 [FCM] navigatorKey.currentState: ${navigatorKey.currentState}');
     }
 
-    if (AppRouter.navigatorKey.currentContext == null) {
+    if (navigatorKey.currentState == null) {
       if (AppConfig.debugMode) {
         print('⚠️ [FCM] Navigator 없음, 500ms 후 재시도...');
       }
@@ -339,11 +338,9 @@ class FcmService {
 
     try {
       if (AppConfig.debugMode) {
-        print('✅ [FCM] GoRouter push 실행: $url');
+        print('✅ [FCM] pushNamed 실행: $url');
       }
-      // 🎯 GoRouter 방식으로 이동
-      final context = AppRouter.navigatorKey.currentContext!;
-      GoRouter.of(context).push(url);
+      navigatorKey.currentState?.pushNamed(url);
     } catch (e) {
       _log('화면 이동 실패: $e', isError: true);
     }
@@ -351,11 +348,12 @@ class FcmService {
 
   /// 포그라운드 메시지 처리 (data-only 메시지 방식)
   void _handleForegroundMessage(RemoteMessage message) {
-    // 🎯 Service Worker에서 알림을 표시하므로 여기서는 표시 안 함
-    // (중복 알림 방지 - firebase-messaging-sw.js의 push 이벤트에서 처리)
-    if (AppConfig.debugMode) {
-      print('📩 [FCM] 포그라운드 메시지 수신 (알림은 SW에서 표시)');
-      print('📩 [FCM] data: ${message.data}');
+    // 🎯 data-only 메시지: title/body를 message.data에서 가져옴
+    final title = message.data['title'] ?? '글나무';
+    final body = message.data['body'] ?? '';
+
+    if (kIsWeb) {
+      _showBrowserNotification(title, body, message.data);
     }
   }
 
@@ -412,7 +410,7 @@ class FcmService {
 
   /// 알림 클릭 처리 (Firebase 방식)
   void _handleNotificationClick(RemoteMessage message) {
-    if (AppRouter.navigatorKey.currentContext == null) {
+    if (navigatorKey.currentState == null) {
       Future.delayed(const Duration(milliseconds: 500), () {
         _navigateByNotificationData(message.data);
       });
@@ -456,13 +454,10 @@ class FcmService {
     if (meetingId == null) return;
 
     try {
-      // 🎯 GoRouter 방식으로 이동
-      final context = AppRouter.navigatorKey.currentContext;
-      if (context != null) {
-        GoRouter.of(context).push(
-          '/discussion-group?meetingId=$meetingId',
-        );
-      }
+      navigatorKey.currentState?.pushNamed(
+        '/discussion-group',
+        arguments: {'meetingId': meetingId, 'meetingTitle': null},
+      );
     } catch (e) {
       _log('화면 이동 실패: $e', isError: true);
     }
@@ -476,13 +471,10 @@ class FcmService {
     if (meetingId == null) return;
 
     try {
-      // 🎯 GoRouter 방식으로 이동
-      final context = AppRouter.navigatorKey.currentContext;
-      if (context != null) {
-        GoRouter.of(context).push(
-          '/attendance/status?meetingId=$meetingId',
-        );
-      }
+      navigatorKey.currentState?.pushNamed(
+        '/attendance/status',
+        arguments: {'meetingId': meetingId, 'meetingTitle': null},
+      );
     } catch (e) {
       _log('화면 이동 실패: $e', isError: true);
     }
@@ -491,11 +483,7 @@ class FcmService {
   /// 지정된 라우트로 이동
   void _navigateToRoute(String route) {
     try {
-      // 🎯 GoRouter 방식으로 이동
-      final context = AppRouter.navigatorKey.currentContext;
-      if (context != null) {
-        GoRouter.of(context).push(route);
-      }
+      navigatorKey.currentState?.pushNamed(route);
     } catch (e) {
       _log('화면 이동 실패: $e', isError: true);
     }

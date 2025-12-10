@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../providers/auth_provider.dart';
@@ -199,8 +198,7 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
       // 3초 후 자동으로 이전 화면으로 돌아가기
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted) {
-          // 🎯 GoRouter: pop으로 이전 화면으로 돌아가기
-          context.pop(true);
+          Navigator.of(context).pop(true);
         }
       });
     } catch (e) {
@@ -398,8 +396,7 @@ class _MeetingQrScannerScreenState extends State<MeetingQrScannerScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                // 🎯 GoRouter: pop으로 이전 화면으로 돌아가기
-                this.context.pop(false);
+                Navigator.pop(context, false);
               },
               child: Text(
                 '닫기',

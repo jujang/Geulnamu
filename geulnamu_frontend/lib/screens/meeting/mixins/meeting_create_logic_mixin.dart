@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/meeting/meeting_service.dart';
@@ -339,8 +338,7 @@ mixin MeetingCreateLogicMixin<T extends StatefulWidget> on State<T> {
       // 딜레이 후 뒤로가기
       await Future.delayed(const Duration(milliseconds: 1500));
       if (mounted) {
-        // 🎯 GoRouter: pop으로 이전 화면으로 돌아가기 (true: 새로고침 필요)
-        context.pop(true);
+        Navigator.pop(context, true); // true: 새로고침 필요함을 알림
       }
       
     } catch (e) {
