@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:js_util' as js_util;
+import 'dart:js_interop_unsafe';
 import 'package:flutter/foundation.dart';
 import 'package:web/web.dart' as web;
 
@@ -12,7 +12,7 @@ typedef BackPressCallback = Future<bool> Function();
 BackPressCallback? _backPressCallback;
 
 /// popstate 이벤트 리스너 참조 (해제용)
-EventListener? _popStateListener;
+JSFunction? _popStateListener;
 
 /// PWA 설치 상태 확인 (웹 전용 구현)
 bool isInstalledPWA() {
@@ -40,10 +40,13 @@ bool isInstalledPWA() {
 /// iOS Safari의 standalone 속성 확인
 bool _isIOSStandalone() {
   try {
-    // JavaScript의 navigator.standalone 속성 접근
-    final navigator = web.window.navigator;
-    final standalone = js_util.getProperty<bool?>(navigator, 'standalone');
-    return standalone ?? false;
+    // JavaScript의 navigator.standalone 속성 접근 (dart:js_interop_unsafe 방식)
+    final navigator = web.window.navigator as JSObject;
+    final standaloneValue = navigator['standalone'];
+    if (standaloneValue.isA<JSBoolean>()) {
+      return (standaloneValue as JSBoolean).toDart;
+    }
+    return false;
   } catch (e) {
     return false;
   }

@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:go_router/go_router.dart';
 
 import '../core/config/app_config.dart';
-import '../core/services/auth_service.dart';  // 🆕 인증 서비스
 import '../services/navigation/pending_navigation_service.dart';
 
 // Screen imports
@@ -33,9 +32,9 @@ import '../screens/app_info/app_info_screen.dart';
 import '../screens/push_notification/push_notification_screen.dart';
 
 /// 글나무 앱 라우터 설정
-/// 
+///
 /// GoRouter를 사용하여 PWA 브라우저 히스토리와 완벽하게 연동
-/// 
+///
 /// 주요 특징:
 /// - URL 기반 라우팅 (딥링크, URL 공유 지원)
 /// - 브라우저 뒤로/앞으로 버튼 완벽 지원
@@ -43,16 +42,17 @@ import '../screens/push_notification/push_notification_screen.dart';
 /// - 리다이렉트를 통한 인증 처리
 class AppRouter {
   AppRouter._();
-  
+
   /// 🎯 Global Navigator Key
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   /// 🎯 GoRouter 인스턴스 (싱글톤)
   static GoRouter? _router;
-  
+
   /// 🎯 앱 초기화 완료 여부 (SplashScreen에서 설정)
   static bool _isInitialized = false;
-  
+
   /// 앱 초기화 완료 표시 (SplashScreen에서 호출)
   static void markInitialized() {
     _isInitialized = true;
@@ -60,27 +60,27 @@ class AppRouter {
       print('✅ [AppRouter] 앱 초기화 완료 표시');
     }
   }
-  
+
   /// 앱 초기화 상태 확인
   static bool get isInitialized => _isInitialized;
-  
+
   /// GoRouter 인스턴스 가져오기
   static GoRouter get router {
     _router ??= _createRouter();
     return _router!;
   }
-  
+
   /// 라우터 생성
   static GoRouter _createRouter() {
     // 🎯 핵심 설정: 명령형 API (push, pop 등) 호출 시 URL이 브라우저 주소창에 반영되도록!
     // 이 옵션이 없으면 context.push() 호출해도 URL이 안 바뀜!
     GoRouter.optionURLReflectsImperativeAPIs = true;
-    
+
     return GoRouter(
       navigatorKey: navigatorKey,
       initialLocation: _getInitialLocation(),
       debugLogDiagnostics: AppConfig.debugMode,
-      
+
       // 🎯 글로벌 redirect - 보호된 라우트 인증 확인 (단순화됨)
       // 💡 Service Worker가 /splash?pending=... 형식으로 열기 때문에
       //    이 redirect는 주로 URL 직접 입력/공유 링크 대응용
@@ -89,58 +89,55 @@ class AppRouter {
         if (!_isInitialized) {
           return null;
         }
-        
+
         // 공개 라우트는 redirect 하지 않음
         if (_isPublicRoute(state.uri.path)) {
           return null;
         }
-        
+
         // 보호된 라우트는 현재는 그냥 통과 (이미 splash에서 인증 확인 완료)
         // 필요시 여기에 추가 보안 로직 구현 가능
         return null;
       },
-      
+
       // 🎯 라우트 정의
       routes: [
         // ==================== 기본 라우트 ====================
-        GoRoute(
-          path: '/',
-          redirect: (context, state) => '/splash',
-        ),
-        
+        GoRoute(path: '/', redirect: (context, state) => '/splash'),
+
         GoRoute(
           path: '/splash',
           name: 'splash',
           builder: (context, state) {
             // 🎯 Service Worker가 전달한 pending URL 추출
             final pendingUrl = state.uri.queryParameters['pending'];
-            
+
             if (AppConfig.debugMode && pendingUrl != null) {
               print('📩 [GoRouter] /splash에 pending 파라미터 있음: $pendingUrl');
             }
-            
+
             return SplashScreen(pendingUrl: pendingUrl);
           },
         ),
-        
+
         GoRoute(
           path: '/login',
           name: 'login',
           builder: (context, state) => const LoginScreen(),
         ),
-        
+
         GoRoute(
           path: '/auth/callback',
           name: 'oauth-callback',
           builder: (context, state) => const OAuthCallbackScreen(),
         ),
-        
+
         GoRoute(
           path: '/home',
           name: 'home',
           builder: (context, state) => const HomeScreen(),
         ),
-        
+
         // ==================== 프로필 ====================
         GoRoute(
           path: '/profile',
@@ -149,7 +146,7 @@ class AppRouter {
             final memberId = state.uri.queryParameters['memberId'];
             final mode = state.uri.queryParameters['mode'] ?? 'self';
             final returnPage = state.uri.queryParameters['returnPage'];
-            
+
             return ProfileScreen(
               memberId: memberId != null ? int.tryParse(memberId) : null,
               mode: mode,
@@ -157,20 +154,20 @@ class AppRouter {
             );
           },
         ),
-        
+
         // ==================== 정보 화면들 ====================
         GoRoute(
           path: '/introduction',
           name: 'introduction',
           builder: (context, state) => const IntroductionScreen(),
         ),
-        
+
         GoRoute(
           path: '/member-list',
           name: 'member-list',
           builder: (context, state) => const MemberListScreen(),
         ),
-        
+
         // ==================== 모임 관련 ====================
         GoRoute(
           path: '/meeting-list',
@@ -180,7 +177,7 @@ class AppRouter {
             return MeetingListScreen(initialFilterType: filterType);
           },
         ),
-        
+
         GoRoute(
           path: '/meeting-list-staff',
           name: 'meeting-list-staff',
@@ -189,19 +186,21 @@ class AppRouter {
             return MeetingListStaffScreen(initialFilterType: filterType);
           },
         ),
-        
+
         GoRoute(
           path: '/meeting-create',
           name: 'meeting-create',
           builder: (context, state) => const MeetingCreateScreen(),
         ),
-        
+
         // 🎯 동적 경로: 모임 상세
         GoRoute(
           path: '/meeting/:meetingId',
           name: 'meeting-detail',
           builder: (context, state) {
-            final meetingId = int.tryParse(state.pathParameters['meetingId'] ?? '');
+            final meetingId = int.tryParse(
+              state.pathParameters['meetingId'] ?? '',
+            );
             if (meetingId == null) {
               return const HomeScreen(); // 잘못된 ID면 홈으로
             }
@@ -213,7 +212,9 @@ class AppRouter {
               path: 'staff',
               name: 'meeting-detail-staff',
               builder: (context, state) {
-                final meetingId = int.tryParse(state.pathParameters['meetingId'] ?? '');
+                final meetingId = int.tryParse(
+                  state.pathParameters['meetingId'] ?? '',
+                );
                 if (meetingId == null) {
                   return const HomeScreen();
                 }
@@ -225,13 +226,16 @@ class AppRouter {
               path: 'qr-display',
               name: 'meeting-qr-display',
               builder: (context, state) {
-                final meetingId = int.tryParse(state.pathParameters['meetingId'] ?? '');
+                final meetingId = int.tryParse(
+                  state.pathParameters['meetingId'] ?? '',
+                );
                 if (meetingId == null) {
                   return const HomeScreen();
                 }
                 // meetingTitle은 extra로 전달받거나 기본값 사용
                 final extra = state.extra as Map<String, dynamic>?;
-                final meetingTitle = extra?['meetingTitle'] as String? ?? '모임 $meetingId';
+                final meetingTitle =
+                    extra?['meetingTitle'] as String? ?? '모임 $meetingId';
                 return MeetingQrDisplayScreen(
                   meetingId: meetingId,
                   meetingTitle: meetingTitle,
@@ -240,14 +244,14 @@ class AppRouter {
             ),
           ],
         ),
-        
+
         // ==================== 출석 관련 ====================
         GoRoute(
           path: '/qr-scanner',
           name: 'qr-scanner',
           builder: (context, state) => const MeetingQrScannerScreen(),
         ),
-        
+
         GoRoute(
           path: '/attendance/status',
           name: 'attendance-status',
@@ -255,26 +259,26 @@ class AppRouter {
             // 쿼리 파라미터에서 가져오기
             final meetingIdStr = state.uri.queryParameters['meetingId'];
             final meetingTitle = state.uri.queryParameters['meetingTitle'];
-            
+
             // extra에서 가져오기 (push로 전달된 경우)
             final extra = state.extra as Map<String, dynamic>?;
-            
-            final meetingId = meetingIdStr != null 
-                ? int.tryParse(meetingIdStr) 
+
+            final meetingId = meetingIdStr != null
+                ? int.tryParse(meetingIdStr)
                 : extra?['meetingId'] as int?;
             final title = meetingTitle ?? extra?['meetingTitle'] as String?;
-            
+
             if (meetingId == null) {
               return const HomeScreen(); // meetingId 없으면 홈으로
             }
-            
+
             return AttendanceStatusScreen(
               meetingId: meetingId,
               meetingTitle: title,
             );
           },
         ),
-        
+
         // ==================== 토론 관련 ====================
         GoRoute(
           path: '/discussion-group',
@@ -283,84 +287,88 @@ class AppRouter {
             // 쿼리 파라미터에서 가져오기
             final meetingIdStr = state.uri.queryParameters['meetingId'];
             final meetingTitle = state.uri.queryParameters['meetingTitle'];
-            
+
             // extra에서 가져오기 (push로 전달된 경우)
             final extra = state.extra as Map<String, dynamic>?;
-            
-            final meetingId = meetingIdStr != null 
-                ? int.tryParse(meetingIdStr) 
+
+            final meetingId = meetingIdStr != null
+                ? int.tryParse(meetingIdStr)
                 : extra?['meetingId'] as int?;
             final title = meetingTitle ?? extra?['meetingTitle'] as String?;
-            
+
             if (meetingId == null) {
               return const HomeScreen();
             }
-            
+
             return DiscussionGroupScreen(
               meetingId: meetingId,
               meetingTitle: title,
             );
           },
         ),
-        
+
         // ==================== 발제문 ====================
         GoRoute(
           path: '/presentation-list',
           name: 'presentation-list',
           builder: (context, state) => const PresentationListScreen(),
         ),
-        
+
         // 🎯 동적 경로: 발제문 상세
         GoRoute(
           path: '/book-question/:meetingId',
           name: 'book-question-detail',
           builder: (context, state) {
-            final meetingId = int.tryParse(state.pathParameters['meetingId'] ?? '');
+            final meetingId = int.tryParse(
+              state.pathParameters['meetingId'] ?? '',
+            );
             if (meetingId == null) {
               return const HomeScreen();
             }
             // meetingTitle은 extra 또는 쿼리 파라미터에서 가져오기
             final extra = state.extra as Map<String, dynamic>?;
-            final meetingTitle = state.uri.queryParameters['title'] ?? extra?['meetingTitle'] as String?;
+            final meetingTitle =
+                state.uri.queryParameters['title'] ??
+                extra?['meetingTitle'] as String?;
             return BookQuestionDetailScreen(
               meetingId: meetingId,
               meetingTitle: meetingTitle,
             );
           },
         ),
-        
+
         // ==================== 기타 ====================
         GoRoute(
           path: '/contact',
           name: 'contact',
           builder: (context, state) => const ContactScreen(),
         ),
-        
+
         GoRoute(
           path: '/voc-management',
           name: 'voc-management',
           builder: (context, state) => const VoCManagementScreen(),
         ),
-        
+
         GoRoute(
           path: '/settings',
           name: 'settings',
           builder: (context, state) => const SettingsScreen(),
         ),
-        
+
         GoRoute(
           path: '/app-info',
           name: 'app-info',
           builder: (context, state) => const AppInfoScreen(),
         ),
-        
+
         GoRoute(
           path: '/push-notification',
           name: 'push-notification',
           builder: (context, state) => const PushNotificationScreen(),
         ),
       ],
-      
+
       // 🎯 에러 처리 (404)
       errorBuilder: (context, state) {
         if (AppConfig.debugMode) {
@@ -370,19 +378,19 @@ class AppRouter {
       },
     );
   }
-  
+
   /// 🎯 초기 위치 결정 (OAuth 콜백, 알림 딜링크 지원)
   static String _getInitialLocation() {
     if (kIsWeb) {
       try {
         final uri = Uri.base;
         final path = uri.path;
-        
+
         if (AppConfig.debugMode) {
           print('🌐 [GoRouter] 초기 URL path: $path');
           print('🌐 [GoRouter] 쿼리 파라미터: ${uri.queryParameters}');
         }
-        
+
         // OAuth 콜백 URL인 경우
         if (path == '/auth/callback' || path.contains('auth/callback')) {
           if (AppConfig.debugMode) {
@@ -390,7 +398,7 @@ class AppRouter {
           }
           return '/auth/callback';
         }
-        
+
         // 알림 딜링크 URL 처리
         if (_isNotificationDeepLink(path)) {
           if (AppConfig.debugMode) {
@@ -407,7 +415,7 @@ class AppRouter {
     }
     return '/splash';
   }
-  
+
   /// 알림 딜링크 URL인지 확인
   static bool _isNotificationDeepLink(String path) {
     final notificationPaths = [
@@ -415,7 +423,7 @@ class AppRouter {
       '/attendance/status',
       '/meeting/',
     ];
-    
+
     for (final notificationPath in notificationPaths) {
       if (path.startsWith(notificationPath)) {
         return true;
@@ -423,30 +431,31 @@ class AppRouter {
     }
     return false;
   }
-  
+
   /// URL에서 Pending Navigation 저장
   static void _savePendingNavigationFromUrl(Uri uri) {
     Future.microtask(() async {
       try {
         final pendingService = PendingNavigationService();
-        
+
         Map<String, dynamic>? arguments;
         if (uri.queryParameters.isNotEmpty) {
           arguments = Map<String, dynamic>.from(uri.queryParameters);
-          
+
           if (arguments.containsKey('meetingId')) {
             final meetingIdStr = arguments['meetingId'] as String?;
             if (meetingIdStr != null) {
-              arguments['meetingId'] = int.tryParse(meetingIdStr) ?? meetingIdStr;
+              arguments['meetingId'] =
+                  int.tryParse(meetingIdStr) ?? meetingIdStr;
             }
           }
         }
-        
+
         await pendingService.savePendingNavigation(
           route: uri.path,
           arguments: arguments,
         );
-        
+
         if (AppConfig.debugMode) {
           print('✅ [GoRouter] Pending Navigation 저장 완료!');
         }
@@ -457,7 +466,7 @@ class AppRouter {
       }
     });
   }
-  
+
   /// 🆕 공개 라우트인지 확인 (로그인 불필요)
   static bool _isPublicRoute(String path) {
     final publicRoutes = [
@@ -469,19 +478,21 @@ class AppRouter {
       '/introduction',
       '/app-info',
     ];
-    
+
     return publicRoutes.contains(path);
   }
-  
+
   /// 🆕 GoRouterState에서 Pending Navigation 저장
-  static Future<void> _savePendingNavigationFromState(GoRouterState state) async {
+  static Future<void> _savePendingNavigationFromState(
+    GoRouterState state,
+  ) async {
     try {
       final pendingService = PendingNavigationService();
-      
+
       Map<String, dynamic>? arguments;
       if (state.uri.queryParameters.isNotEmpty) {
         arguments = Map<String, dynamic>.from(state.uri.queryParameters);
-        
+
         // meetingId를 int로 변환
         if (arguments.containsKey('meetingId')) {
           final meetingIdStr = arguments['meetingId'] as String?;
@@ -490,14 +501,16 @@ class AppRouter {
           }
         }
       }
-      
+
       await pendingService.savePendingNavigation(
         route: state.uri.path,
         arguments: arguments,
       );
-      
+
       if (AppConfig.debugMode) {
-        print('📌 [GoRouter redirect] Pending Navigation 저장: ${state.uri.path}');
+        print(
+          '📌 [GoRouter redirect] Pending Navigation 저장: ${state.uri.path}',
+        );
       }
     } catch (e) {
       if (AppConfig.debugMode) {
@@ -513,50 +526,50 @@ extension GoRouterExtension on BuildContext {
   void goHome() {
     GoRouter.of(this).go('/home');
   }
-  
+
   /// 로그인 화면으로 이동
   void goLogin() {
     GoRouter.of(this).push('/login');
   }
-  
+
   /// 로그인 성공 후 홈으로 이동 (히스토리 정리)
   void goHomeAfterLogin() {
     // 🎯 PWA에서 뒤로가기로 로그인 화면 안 나오게 하려면
     // go를 사용하여 현재 URL을 /home으로 대체
     GoRouter.of(this).go('/home');
   }
-  
+
   /// 모임 상세로 이동
   void goMeetingDetail(int meetingId) {
     GoRouter.of(this).push('/meeting/$meetingId');
   }
-  
+
   /// 운영진용 모임 상세로 이동
   void goMeetingDetailStaff(int meetingId) {
     GoRouter.of(this).push('/meeting/$meetingId/staff');
   }
-  
+
   /// 출석 현황으로 이동
   void goAttendanceStatus(int meetingId, {String? meetingTitle}) {
     GoRouter.of(this).push(
       '/attendance/status?meetingId=$meetingId${meetingTitle != null ? '&meetingTitle=$meetingTitle' : ''}',
     );
   }
-  
+
   /// 토론 조 화면으로 이동
   void goDiscussionGroup(int meetingId, {String? meetingTitle}) {
     GoRouter.of(this).push(
       '/discussion-group?meetingId=$meetingId${meetingTitle != null ? '&meetingTitle=$meetingTitle' : ''}',
     );
   }
-  
+
   /// 프로필 화면으로 이동
   void goProfile({int? memberId, String mode = 'self', int? returnPage}) {
     final params = <String>[];
     if (memberId != null) params.add('memberId=$memberId');
     params.add('mode=$mode');
     if (returnPage != null) params.add('returnPage=$returnPage');
-    
+
     GoRouter.of(this).push('/profile?${params.join('&')}');
   }
 }
@@ -565,19 +578,16 @@ extension GoRouterExtension on BuildContext {
 /// 홈 화면에서 사용
 class AppExitScope extends StatelessWidget {
   final Widget child;
-  
-  const AppExitScope({
-    super.key,
-    required this.child,
-  });
-  
+
+  const AppExitScope({super.key, required this.child});
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        
+
         final shouldExit = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
@@ -595,7 +605,7 @@ class AppExitScope extends StatelessWidget {
             ],
           ),
         );
-        
+
         if (shouldExit == true) {
           SystemNavigator.pop();
         }
