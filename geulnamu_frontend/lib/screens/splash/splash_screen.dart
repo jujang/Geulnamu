@@ -63,15 +63,16 @@ class _SplashScreenState extends State<SplashScreen>
 
     try {
       // 🎯 전체 초기화에 타임아웃 적용 (최대 10초)
-      await Future.any([
-        _initializeApp(),
-        Future.delayed(const Duration(seconds: 10), () {
+      await _initializeApp().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
           if (AppConfig.debugMode) {
             print('⏰ [Splash] 초기화 타임아웃! 강제로 홈 이동');
           }
-          throw TimeoutException('Splash 초기화 타임아웃');
-        }),
-      ]);
+          // 타임아웃 시 홈으로 이동
+          _safeNavigateToHome();
+        },
+      );
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ [Splash] 초기화 중 오류 발생: $e');
