@@ -41,7 +41,7 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
     // 🎯 이미 로그인된 상태에서 뒤로가기로 다시 이 화면에 온 경우 처리
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      if (authProvider.isLoggedIn) {
+      if (authProvider.isAuthenticated) {
         if (AppConfig.debugMode) {
           print('🎯 [OAuth] 이미 로그인됨 - 홈으로 리다이렉트');
         }
@@ -244,21 +244,17 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
           print('🏠 홈 화면으로 이동 중...');
         }
         
-        // 🎯 PWA: 브라우저 히스토리에서 로그인 관련 URL 정리
-        // OAuth 콜백 URL을 홈 URL로 교체하여 뒤로가기 시 콜백으로 돌아가지 않도록
-        try {
-          html.window.history.replaceState(null, '', '/home');
-          if (AppConfig.debugMode) {
-            print('🎯 [OAuth] 브라우저 히스토리 정리 완료');
-          }
-        } catch (e) {
-          if (AppConfig.debugMode) {
-            print('⚠️ [OAuth] 히스토리 정리 실패: $e');
-          }
+        // 🎯 PWA 히스토리 완전 초기화
+        // location.replace로 홈으로 이동하면 히스토리에서 현재 항목이 교체됨
+        // 따라서 뒤로가기로 OAuth 콜백으로 돌아갈 수 없음
+        // 홈 화면이 히스토리의 "시작점"이 됨
+        if (AppConfig.debugMode) {
+          print('🎯 [OAuth] 히스토리 초기화 후 홈으로 이동 (location.replace)');
         }
         
-        // 🎯 GoRouter: go로 홈 화면으로 이동 (히스토리 대체)
-        context.go('/home');
+        // 페이지 새로고침이 발생하지만, 저장된 토큰으로 로그인 상태 유지됨
+        html.window.location.replace('/home');
+        return; // 이후 코드 실행 방지
       }
     } catch (error) {
       if (AppConfig.debugMode) {
