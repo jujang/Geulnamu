@@ -1,7 +1,7 @@
-// 글나무 PWA 서비스 워커 v2.0
-// ✨ 최적화된 캐싱 전략 + 선택적 캐시 정리 지원
+// 글나무 PWA 서비스 워커 v2.1
+// ✨ 최적화된 캐싱 전략 + 안전한 에러 처리
 
-const CACHE_VERSION = 'v1.0.3';
+const CACHE_VERSION = 'v1.1.0';
 const CACHE_NAME = `geulnamu-${CACHE_VERSION}`;
 const API_CACHE_NAME = `geulnamu-api-${CACHE_VERSION}`;
 
@@ -81,24 +81,16 @@ self.addEventListener('activate', (event) => {
 // 네트워크 요청 가로채기
 // ===========================================
 self.addEventListener('fetch', (event) => {
-  // 🚨 디버깅용: Service Worker 무력화
-  // 모든 요청을 네트워크로 바로 전달
-  // 문제 해결 후 원본 코드로 복원 필요!
-  return; // 아무것도 하지 않음 = 브라우저 기본 동작
-  
-  // === 아래는 원본 코드 (나중에 복원) ===
   const url = new URL(event.request.url);
   
   // 🚫 GET 요청이 아니면 Service Worker 개입 없이 바로 네트워크로 전달
-  // POST, PATCH, DELETE 등은 캐시할 수 없으므로 조기 차단
   if (event.request.method !== 'GET') {
-    return; // event.respondWith를 호출하지 않으면 브라우저가 기본 처리
+    return;
   }
   
   // 캐시 블랙리스트 체크
   if (shouldSkipCache(url)) {
-    event.respondWith(fetch(event.request));
-    return;
+    return; // 🎯 수정: fetch 호출 없이 바로 return (브라우저 기본 동작)
   }
   
   // API 요청 처리 (네트워크 우선 + 만료 체크)
@@ -119,29 +111,24 @@ self.addEventListener('message', async (event) => {
   
   switch (type) {
     case 'SKIP_WAITING':
-      // 새 버전 즉시 활성화
       self.skipWaiting();
       break;
       
     case 'GET_VERSION':
-      // 현재 버전 반환
       event.ports[0].postMessage({ version: CACHE_VERSION });
       break;
       
     case 'CLEAR_USER_CACHE':
-      // 🧹 사용자 데이터 캐시만 삭제 (로그아웃 시 호출)
       console.log('🧹 [로그아웃] 사용자 데이터 캐시 정리 시작...');
       await clearUserCache();
       event.ports[0]?.postMessage({ success: true });
       break;
       
     case 'GET_CACHE_STATS':
-      // 캐시 통계 반환
       event.ports[0].postMessage(cacheStats);
       break;
       
     case 'CLEAR_ALL_CACHE':
-      // 모든 캐시 삭제 (설정 화면 등에서 호출)
       await clearAllCaches();
       event.ports[0]?.postMessage({ success: true });
       break;
@@ -169,22 +156,26 @@ async function handleApiRequest(request) {
     console.log('⚠️ API 네트워크 오류, 캐시 확인:', request.url);
     
     // 3️⃣ 네트워크 실패 시 캐시 확인
-    const cache = await caches.open(API_CACHE_NAME);
-    const cachedResponse = await cache.match(cacheKey);
-    
-    if (cachedResponse) {
-      // 4️⃣ 캐시 만료 확인
-      const cacheTime = await getCacheTime(cacheKey);
-      const isExpired = Date.now() - cacheTime > API_CACHE_EXPIRATION;
+    try {
+      const cache = await caches.open(API_CACHE_NAME);
+      const cachedResponse = await cache.match(cacheKey);
       
-      if (!isExpired) {
-        console.log('✅ 유효한 캐시 반환:', request.url);
-        cacheStats.hits++;
-        return cachedResponse;
-      } else {
-        console.log('⏰ 만료된 캐시 삭제:', request.url);
-        await cache.delete(cacheKey);
+      if (cachedResponse) {
+        // 4️⃣ 캐시 만료 확인
+        const cacheTime = await getCacheTime(cacheKey);
+        const isExpired = Date.now() - cacheTime > API_CACHE_EXPIRATION;
+        
+        if (!isExpired) {
+          console.log('✅ 유효한 캐시 반환:', request.url);
+          cacheStats.hits++;
+          return cachedResponse;
+        } else {
+          console.log('⏰ 만료된 캐시 삭제:', request.url);
+          await cache.delete(cacheKey);
+        }
       }
+    } catch (cacheError) {
+      console.log('⚠️ 캐시 접근 실패:', cacheError.message);
     }
     
     // 5️⃣ 캐시도 없거나 만료됨 → 오류 응답
@@ -203,60 +194,67 @@ async function handleApiRequest(request) {
 }
 
 // ===========================================
-// 정적 리소스 처리 (캐시 우선)
+// 정적 리소스 처리 (캐시 우선) - 🎯 안전하게 수정됨
 // ===========================================
 async function handleStaticRequest(request) {
-  try {
-    // 🌐 HTML 요청 (SPA 라우팅)
-    if (request.destination === 'document') {
-      // 🎯 안전한 HTML 처리: 어떤 상황에서도 응답 보장
+  // 🌐 HTML 요청 (SPA 라우팅) - 네트워크 우선
+  if (request.destination === 'document') {
+    try {
+      const networkResponse = await fetchWithTimeout(request, 5000);
+      
+      if (networkResponse && networkResponse.ok) {
+        // 성공 시 캐시하고 반환
+        cacheStaticResource(request, networkResponse.clone()).catch(() => {});
+        cacheStats.misses++;
+        return networkResponse;
+      }
+      
+      // 🎯 네트워크 응답이 ok가 아닌 경우 → 캐시 시도
+      console.log('⚠️ HTML 응답 실패, 캐시된 index.html 시도');
+      const cachedIndex = await caches.match('/');
+      if (cachedIndex) {
+        cacheStats.hits++;
+        return cachedIndex;
+      }
+      
+      // 캐시도 없고 networkResponse가 있으면 그거라도 반환
+      if (networkResponse) {
+        return networkResponse;
+      }
+      
+      // 🎯 최후의 수단: 네트워크 직접 재시도
+      return fetch(request);
+    } catch (error) {
+      console.log('⚠️ HTML 네트워크 실패:', error.message);
+      
+      // 네트워크 실패 시 캐시된 index.html 반환
       try {
-        const networkResponse = await fetchWithTimeout(request, 5000); // 5초 타임아웃
-        
-        // ✅ 성공 시 캐시하고 반환
-        if (networkResponse && networkResponse.ok) {
-          cacheStaticResource(request, networkResponse.clone()).catch(() => {});
-          cacheStats.misses++;
-          return networkResponse;
-        }
-        
-        // ⚠️ 네트워크 응답이 ok가 아닌 경우 → 캐시 시도
-        console.log('⚠️ HTML 응답 실패, 캐시된 index.html 시도');
         const cachedIndex = await caches.match('/');
         if (cachedIndex) {
+          console.log('✅ 캐시된 index.html 반환');
           cacheStats.hits++;
           return cachedIndex;
         }
-        
-        // 캐시도 없으면 네트워크 응답 반환 (있으면)
-        if (networkResponse) {
-          return networkResponse;
-        }
-        
-        // 🚨 최후의 수단: 네트워크로 직접 요청
-        return fetch(request);
-      } catch (networkError) {
-        console.log('⚠️ 네트워크 실패:', networkError.message);
-        
-        // 캐시된 index.html 반환 시도
-        try {
-          const cachedIndex = await caches.match('/');
-          if (cachedIndex) {
-            console.log('✅ 캐시된 index.html 반환');
-            cacheStats.hits++;
-            return cachedIndex;
-          }
-        } catch (cacheError) {
-          console.log('❌ 캐시 접근 실패:', cacheError.message);
-        }
-        
-        // 🚨 캐시도 없으면 네트워크로 직접 재시도
-        console.log('🔄 네트워크 직접 재시도...');
-        return fetch(request);
+      } catch (cacheError) {
+        console.log('⚠️ 캐시 접근 실패:', cacheError.message);
+      }
+      
+      // 🎯 수정: 404 대신 네트워크 직접 재시도 (브라우저에게 맡김)
+      console.log('🔄 네트워크 직접 재시도...');
+      try {
+        return await fetch(request);
+      } catch (e) {
+        // 정말 아무것도 안 되면 기본 오프라인 페이지
+        return new Response(
+          '<!DOCTYPE html><html><head><meta charset="utf-8"><title>글나무</title></head><body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;"><div style="text-align:center;"><h1>오프라인</h1><p>네트워크 연결을 확인해주세요.</p></div></body></html>',
+          { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+        );
       }
     }
-    
-    // 📷 정적 리소스 (이미지, CSS, JS 등) - 캐시 우선
+  }
+  
+  // 📷 정적 리소스 (이미지, CSS, JS 등) - 캐시 우선
+  try {
     // 1️⃣ 캐시에서 먼저 찾기
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
@@ -269,14 +267,15 @@ async function handleStaticRequest(request) {
     
     // 3️⃣ 성공 시 캐시에 저장
     if (response.ok) {
-      await cacheStaticResource(request, response.clone());
+      cacheStaticResource(request, response.clone()).catch(() => {});
     }
     
     cacheStats.misses++;
     return response;
   } catch (error) {
-    console.log('❌ 리소스 로드 실패:', request.url);
+    console.log('⚠️ 리소스 로드 실패:', request.url);
     
+    // 🎯 수정: 정적 리소스 실패 시에만 404 반환 (HTML 아님)
     return new Response('리소스를 찾을 수 없습니다', {
       status: 404,
       statusText: 'Not Found',
@@ -293,14 +292,25 @@ function shouldSkipCache(url) {
   return CACHE_BLACKLIST.some(pattern => pattern.test(url.href));
 }
 
-// ⏱️ 타임아웃이 있는 fetch
+// ⏱️ 타임아웃이 있는 fetch - 🎯 안전하게 수정됨
 function fetchWithTimeout(request, timeout) {
-  return Promise.race([
-    fetch(request),
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout')), timeout)
-    ),
-  ]);
+  return new Promise((resolve, reject) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+      reject(new Error('Timeout'));
+    }, timeout);
+    
+    fetch(request, { signal: controller.signal })
+      .then(response => {
+        clearTimeout(timeoutId);
+        resolve(response);
+      })
+      .catch(error => {
+        clearTimeout(timeoutId);
+        reject(error);
+      });
+  });
 }
 
 // 💾 API 응답 캐시 (용량 체크 + 메타데이터 저장)
@@ -407,10 +417,7 @@ async function cleanOldCaches() {
 // 🧹 사용자 데이터 캐시만 삭제 (로그아웃 시)
 async function clearUserCache() {
   try {
-    // API 캐시만 삭제 (사용자 데이터 포함)
     const apiCacheDeleted = await caches.delete(API_CACHE_NAME);
-    
-    // 새 API 캐시 생성
     await caches.open(API_CACHE_NAME);
     
     console.log(
@@ -419,7 +426,6 @@ async function clearUserCache() {
         : '⚠️ API 캐시가 존재하지 않음'
     );
     
-    // 통계 초기화
     cacheStats.size = 0;
   } catch (error) {
     console.error('❌ 사용자 캐시 삭제 실패:', error);
@@ -432,7 +438,6 @@ async function clearAllCaches() {
     const cacheNames = await caches.keys();
     await Promise.all(cacheNames.map(name => caches.delete(name)));
     
-    // 필수 캐시 재생성
     const cache = await caches.open(CACHE_NAME);
     await cache.addAll(ESSENTIAL_RESOURCES);
     
@@ -491,18 +496,21 @@ async function saveCacheMetadata(metadata) {
 setInterval(async () => {
   console.log('🔄 주기적 캐시 정리 실행...');
   
-  // API 캐시 만료 항목 정리
-  const cache = await caches.open(API_CACHE_NAME);
-  const requests = await cache.keys();
-  
-  for (const request of requests) {
-    const cacheTime = await getCacheTime(request.url);
-    const isExpired = Date.now() - cacheTime > API_CACHE_EXPIRATION;
+  try {
+    const cache = await caches.open(API_CACHE_NAME);
+    const requests = await cache.keys();
     
-    if (isExpired) {
-      await cache.delete(request);
-      console.log('🗑️ 만료된 캐시 삭제:', request.url);
+    for (const request of requests) {
+      const cacheTime = await getCacheTime(request.url);
+      const isExpired = Date.now() - cacheTime > API_CACHE_EXPIRATION;
+      
+      if (isExpired) {
+        await cache.delete(request);
+        console.log('🗑️ 만료된 캐시 삭제:', request.url);
+      }
     }
+  } catch (error) {
+    console.log('⚠️ 주기적 캐시 정리 실패:', error.message);
   }
 }, 60 * 60 * 1000); // 1시간
 

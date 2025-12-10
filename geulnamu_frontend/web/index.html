@@ -475,6 +475,62 @@
     });
   </script>
   
+  <!-- 🎯 Service Worker 캐시 삭제 함수 (Flutter에서 호출) -->
+  <script>
+    // API 캐시만 삭제 (사용자 데이터)
+    window.clearUserCache = async function() {
+      console.log('🧹 [Web] clearUserCache 호출됨');
+      
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        return new Promise((resolve) => {
+          const messageChannel = new MessageChannel();
+          messageChannel.port1.onmessage = (event) => {
+            console.log('✅ [Web] Service Worker 응답:', event.data);
+            resolve(event.data?.success || false);
+          };
+          
+          // 타임아웃 (3초)
+          setTimeout(() => {
+            console.log('⚠️ [Web] Service Worker 응답 타임아웃');
+            resolve(false);
+          }, 3000);
+          
+          navigator.serviceWorker.controller.postMessage(
+            { type: 'CLEAR_USER_CACHE' },
+            [messageChannel.port2]
+          );
+        });
+      }
+      
+      console.log('⚠️ [Web] Service Worker 없음');
+      return false;
+    };
+    
+    // 모든 캐시 삭제 (정적 + API)
+    window.clearAllCache = async function() {
+      console.log('🧹 [Web] clearAllCache 호출됨');
+      
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        return new Promise((resolve) => {
+          const messageChannel = new MessageChannel();
+          messageChannel.port1.onmessage = (event) => {
+            console.log('✅ [Web] Service Worker 응답:', event.data);
+            resolve(event.data?.success || false);
+          };
+          
+          setTimeout(() => resolve(false), 3000);
+          
+          navigator.serviceWorker.controller.postMessage(
+            { type: 'CLEAR_ALL_CACHE' },
+            [messageChannel.port2]
+          );
+        });
+      }
+      
+      return false;
+    };
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
