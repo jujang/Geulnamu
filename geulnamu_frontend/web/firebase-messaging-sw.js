@@ -1,5 +1,6 @@
 // Firebase Messaging Service Worker for PWA Push Notifications
-// 글나무 앱 - 푸시 알림 서비스 워커
+// 글나무 앱 - 푸시 알림 서비스 워커 v2.0
+// 🎯 개선: 안전한 창 열기 + 상세 로깅
 
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
@@ -16,6 +17,8 @@ firebase.initializeApp({
 });
 
 const messaging = firebase.messaging();
+
+console.log('🔔 [FCM-SW] Firebase Messaging Service Worker 로드됨');
 
 // 알림 타입별 URL 생성
 function getNotificationUrl(data) {
@@ -72,6 +75,8 @@ function selectBestClient(clients) {
 
 // 백그라운드 메시지 처리 (data-only 메시지 방식)
 messaging.onBackgroundMessage((payload) => {
+  console.log('📨 [FCM-SW] 백그라운드 메시지 수신:', payload);
+  
   // 🎯 data-only 메시지: title/body를 payload.data에서 가져옴
   const notificationTitle = payload.data?.title || '글나무 알림';
   const notificationOptions = {
@@ -87,63 +92,161 @@ messaging.onBackgroundMessage((payload) => {
   return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 알림 클릭 처리
+// ===========================================
+// 🎯 알림 클릭 처리 (핵심 로직)
+// ===========================================
 self.addEventListener('notificationclick', (event) => {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('🔔 [FCM-SW] 알림 클릭 이벤트 시작!');
+  console.log('🔔 [FCM-SW] 시간:', new Date().toISOString());
+  
   event.notification.close();
 
-  // 🔍 디버그 로그
-  console.log('[글나무 SW] 알림 클릭!');
-  console.log('[글나무 SW] notification.data:', event.notification.data);
+  const notificationData = event.notification.data;
+  console.log('🔔 [FCM-SW] notification.data:', JSON.stringify(notificationData));
 
-  const urlToOpen = getNotificationUrl(event.notification.data);
-  const fullUrl = new URL(urlToOpen, self.location.origin).href;
-  
-  console.log('[글나무 SW] 이동할 URL:', urlToOpen);
-  console.log('[글나무 SW] 전체 URL:', fullUrl);
+  const urlToOpen = getNotificationUrl(notificationData);
+  console.log('🔔 [FCM-SW] 이동할 URL:', urlToOpen);
 
+  // 🎯 핵심: waitUntil로 Promise 완료까지 Service Worker 유지
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((windowClients) => {
-        console.log('[글나무 SW] 열린 창 수:', windowClients.length);
-        
-        const targetClient = selectBestClient(windowClients);
-        console.log('[글나무 SW] 대상 클라이언트:', targetClient ? '찾음' : '없음');
-
-        if (targetClient) {
-          // 기존 창으로 이동
-          console.log('[글나무 SW] 기존 창에 postMessage 전송...');
-          targetClient.postMessage({
-            type: 'NOTIFICATION_CLICK',
-            url: urlToOpen,
-            data: event.notification.data
-          });
-          console.log('[글나무 SW] postMessage 전송 완료!');
-
-          targetClient.focus().catch(() => {});
-          return;
-        } else {
-          // 🆕 새 창 열기: /splash?pending=... 형식으로 리다이렉트
-          const splashUrl = `/splash?pending=${encodeURIComponent(urlToOpen)}`;
-          const splashFullUrl = new URL(splashUrl, self.location.origin).href;
-          console.log('[글나무 SW] 새 창 열기 (splash 경유):', splashFullUrl);
-          return clients.openWindow(splashFullUrl);
-        }
-      })
-      .catch((error) => {
-        console.error('[글나무 SW] 알림 처리 실패:', error);
-        // 🆕 에러 시에도 splash 경유
-        const splashUrl = `/splash?pending=${encodeURIComponent(urlToOpen)}`;
-        return clients.openWindow(new URL(splashUrl, self.location.origin).href);
-      })
+    handleNotificationClick(urlToOpen, notificationData)
   );
 });
 
+// 🎯 알림 클릭 처리 로직 (분리)
+async function handleNotificationClick(urlToOpen, notificationData) {
+  try {
+    console.log('🔍 [FCM-SW] 열린 창 검색 중...');
+    
+    // 1️⃣ 열린 창 확인
+    const windowClients = await clients.matchAll({ 
+      type: 'window', 
+      includeUncontrolled: true 
+    });
+    
+    console.log('🔍 [FCM-SW] 열린 창 수:', windowClients.length);
+    windowClients.forEach((client, index) => {
+      console.log(`  [${index}] URL: ${client.url}, focused: ${client.focused}`);
+    });
+
+    const targetClient = selectBestClient(windowClients);
+
+    // 2️⃣ 기존 창이 있으면 postMessage
+    if (targetClient) {
+      console.log('✅ [FCM-SW] 기존 창 발견! postMessage 전송...');
+      
+      targetClient.postMessage({
+        type: 'NOTIFICATION_CLICK',
+        url: urlToOpen,
+        data: notificationData
+      });
+      
+      try {
+        await targetClient.focus();
+        console.log('✅ [FCM-SW] 창 포커스 성공!');
+      } catch (focusError) {
+        console.log('⚠️ [FCM-SW] 창 포커스 실패 (무시):', focusError.message);
+      }
+      
+      return;
+    }
+
+    // 3️⃣ 기존 창 없음 → 새 창 열기
+    console.log('📭 [FCM-SW] 기존 창 없음, 새 창 열기 시도...');
+    
+    // 🎯 splash 경유 URL
+    const splashUrl = `/splash?pending=${encodeURIComponent(urlToOpen)}`;
+    const fullUrl = new URL(splashUrl, self.location.origin).href;
+    
+    console.log('🔗 [FCM-SW] 새 창 URL:', fullUrl);
+    
+    // 🎯 openWindow 시도 (타임아웃 5초)
+    const newWindow = await openWindowWithTimeout(fullUrl, 5000);
+    
+    if (newWindow) {
+      console.log('✅ [FCM-SW] 새 창 열기 성공!');
+      console.log('✅ [FCM-SW] 새 창 URL:', newWindow.url);
+    } else {
+      console.log('⚠️ [FCM-SW] 새 창 열기 실패, fallback 시도...');
+      
+      // Fallback: 기본 URL로 시도
+      await openWindowFallback();
+    }
+    
+  } catch (error) {
+    console.error('❌ [FCM-SW] 알림 처리 실패:', error);
+    console.error('❌ [FCM-SW] 에러 스택:', error.stack);
+    
+    // 최후의 수단: 기본 URL 열기
+    await openWindowFallback();
+  }
+  
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+}
+
+// 🎯 타임아웃이 있는 openWindow
+async function openWindowWithTimeout(url, timeout) {
+  return new Promise((resolve) => {
+    const timeoutId = setTimeout(() => {
+      console.log('⏰ [FCM-SW] openWindow 타임아웃!');
+      resolve(null);
+    }, timeout);
+    
+    clients.openWindow(url)
+      .then((windowClient) => {
+        clearTimeout(timeoutId);
+        resolve(windowClient);
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        console.error('❌ [FCM-SW] openWindow 에러:', error);
+        resolve(null);
+      });
+  });
+}
+
+// 🎯 Fallback: 기본 URL로 창 열기
+async function openWindowFallback() {
+  console.log('🔄 [FCM-SW] Fallback: 기본 URL로 시도...');
+  
+  try {
+    // 방법 1: /home으로 직접 시도
+    const homeUrl = new URL('/home', self.location.origin).href;
+    const window1 = await clients.openWindow(homeUrl);
+    
+    if (window1) {
+      console.log('✅ [FCM-SW] Fallback 성공 (/home)');
+      return;
+    }
+  } catch (e) {
+    console.log('⚠️ [FCM-SW] Fallback /home 실패:', e.message);
+  }
+  
+  try {
+    // 방법 2: 루트 URL로 시도
+    const rootUrl = new URL('/', self.location.origin).href;
+    const window2 = await clients.openWindow(rootUrl);
+    
+    if (window2) {
+      console.log('✅ [FCM-SW] Fallback 성공 (/)');
+      return;
+    }
+  } catch (e) {
+    console.log('⚠️ [FCM-SW] Fallback / 실패:', e.message);
+  }
+  
+  console.log('❌ [FCM-SW] 모든 Fallback 실패!');
+}
+
 // 알림 닫기 이벤트
 self.addEventListener('notificationclose', (event) => {
-  // 필요시 분석용 로깅 추가
+  console.log('🔕 [FCM-SW] 알림 닫힘');
 });
 
 // 푸시 이벤트
 self.addEventListener('push', (event) => {
-  // 필요시 분석용 로깅 추가
+  console.log('📥 [FCM-SW] Push 이벤트 수신');
 });
+
+console.log('✅ [FCM-SW] Firebase Messaging Service Worker 초기화 완료');
