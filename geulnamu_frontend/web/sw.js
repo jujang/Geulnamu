@@ -1,7 +1,8 @@
-// 글나무 PWA 서비스 워커 v2.1
+// 글나무 PWA 서비스 워커 v2.2
 // ✨ 최적화된 캐싱 전략 + 안전한 에러 처리
+// 💡 푸시 알림은 firebase-messaging-sw.js에서 처리
 
-const CACHE_VERSION = 'v1.1.0';
+const CACHE_VERSION = 'v1.2.0';
 const CACHE_NAME = `geulnamu-${CACHE_VERSION}`;
 const API_CACHE_NAME = `geulnamu-api-${CACHE_VERSION}`;
 
@@ -515,118 +516,10 @@ setInterval(async () => {
 }, 60 * 60 * 1000); // 1시간
 
 // ===========================================
-// 🔔 푸시 알림 클릭 처리 (FCM 연동)
-// ===========================================
-
-// 알림 타입별 URL 생성
-function getNotificationUrl(data) {
-  if (!data) return '/home';
-
-  const type = data.type;
-  const meetingId = data.meetingId;
-
-  switch (type) {
-    case 'DISCUSSION_GROUP':
-      return meetingId ? `/discussion-group?meetingId=${meetingId}` : '/home';
-
-    case 'ATTENDANCE':
-      return meetingId ? `/attendance/status?meetingId=${meetingId}` : '/home';
-
-    case 'NEW_MEETING':
-      return meetingId ? `/meeting/${meetingId}` : '/meeting-list';
-
-    case 'ANNOUNCEMENT':
-      return '/home';
-
-    default:
-      if (meetingId) return `/discussion-group?meetingId=${meetingId}`;
-      if (data.route) return data.route;
-      if (data.url) return data.url;
-      return '/home';
-  }
-}
-
-// PWA 창인지 확인
-function isPwaClient(client) {
-  return client.url.includes('source=pwa');
-}
-
-// 열린 창들 중에서 최적의 창 선택 (PWA 우선)
-function selectBestClient(windowClients) {
-  if (!windowClients || windowClients.length === 0) return null;
-
-  let pwaClient = null;
-  let browserClient = null;
-
-  for (const client of windowClients) {
-    if (client.url.includes(self.location.origin)) {
-      if (isPwaClient(client)) {
-        if (!pwaClient) pwaClient = client;
-      } else {
-        if (!browserClient) browserClient = client;
-      }
-    }
-  }
-
-  return pwaClient || browserClient || null;
-}
-
-// 알림 클릭 처리
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-
-  // 🔍 디버그 로그
-  console.log('[글나무 SW-PWA] 알림 클릭!');
-  console.log('[글나무 SW-PWA] notification.data:', event.notification.data);
-
-  const urlToOpen = getNotificationUrl(event.notification.data);
-  const fullUrl = new URL(urlToOpen, self.location.origin).href;
-  
-  console.log('[글나무 SW-PWA] 이동할 URL:', urlToOpen);
-  console.log('[글나무 SW-PWA] 전체 URL:', fullUrl);
-
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((windowClients) => {
-        console.log('[글나무 SW-PWA] 열린 창 수:', windowClients.length);
-        
-        const targetClient = selectBestClient(windowClients);
-        console.log('[글나무 SW-PWA] 대상 클라이언트:', targetClient ? '찾음' : '없음');
-
-        if (targetClient) {
-          // 기존 창으로 이동
-          console.log('[글나무 SW-PWA] 기존 창에 postMessage 전송...');
-          targetClient.postMessage({
-            type: 'NOTIFICATION_CLICK',
-            url: urlToOpen,
-            data: event.notification.data
-          });
-          console.log('[글나무 SW-PWA] postMessage 전송 완료!');
-
-          targetClient.focus().catch(() => {});
-          return;
-        } else {
-          // 🆕 새 창 열기: /splash?pending=... 형식으로 리다이렉트
-          const splashUrl = `/splash?pending=${encodeURIComponent(urlToOpen)}`;
-          const splashFullUrl = new URL(splashUrl, self.location.origin).href;
-          console.log('[글나무 SW-PWA] 새 창 열기 (splash 경유):', splashFullUrl);
-          return clients.openWindow(splashFullUrl);
-        }
-      })
-      .catch((error) => {
-        console.error('[글나무 SW-PWA] 알림 처리 실패:', error);
-        // 🆕 에러 시에도 splash 경유
-        const splashUrl = `/splash?pending=${encodeURIComponent(urlToOpen)}`;
-        return clients.openWindow(new URL(splashUrl, self.location.origin).href);
-      })
-  );
-});
-
-// ===========================================
 // 초기화 완료
 // ===========================================
 console.log('✅ 글나무 서비스 워커 ' + CACHE_VERSION + ' 로드 완료');
 console.log('📦 캐시 전략: 정적 리소스 우선, API 네트워크 우선');
 console.log('💾 최대 캐시: 정적 50MB, API 10MB');
 console.log('⏰ API 캐시 만료: 1시간');
-console.log('🔔 푸시 알림 클릭 핸들러 등록됨');
+console.log('💡 푸시 알림은 firebase-messaging-sw.js에서 처리');
