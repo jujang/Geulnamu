@@ -111,7 +111,16 @@ class AppRouter {
         GoRoute(
           path: '/splash',
           name: 'splash',
-          builder: (context, state) => const SplashScreen(),
+          builder: (context, state) {
+            // 🎯 Service Worker가 전달한 pending URL 추출
+            final pendingUrl = state.uri.queryParameters['pending'];
+            
+            if (AppConfig.debugMode && pendingUrl != null) {
+              print('📩 [GoRouter] /splash에 pending 파라미터 있음: $pendingUrl');
+            }
+            
+            return SplashScreen(pendingUrl: pendingUrl);
+          },
         ),
         
         GoRoute(

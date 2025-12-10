@@ -351,12 +351,11 @@ class FcmService {
 
   /// 포그라운드 메시지 처리 (data-only 메시지 방식)
   void _handleForegroundMessage(RemoteMessage message) {
-    // 🎯 data-only 메시지: title/body를 message.data에서 가져옴
-    final title = message.data['title'] ?? '글나무';
-    final body = message.data['body'] ?? '';
-
-    if (kIsWeb) {
-      _showBrowserNotification(title, body, message.data);
+    // 🎯 Service Worker에서 알림을 표시하므로 여기서는 표시 안 함
+    // (중복 알림 방지 - firebase-messaging-sw.js의 push 이벤트에서 처리)
+    if (AppConfig.debugMode) {
+      print('📩 [FCM] 포그라운드 메시지 수신 (알림은 SW에서 표시)');
+      print('📩 [FCM] data: ${message.data}');
     }
   }
 

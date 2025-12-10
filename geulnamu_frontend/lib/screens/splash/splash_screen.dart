@@ -10,7 +10,9 @@ import '../../core/config/app_config.dart';
 import '../../routes/app_router.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final String? pendingUrl;  // 🎯 GoRouter에서 전달받은 pending URL
+  
+  const SplashScreen({super.key, this.pendingUrl});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -26,6 +28,17 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+    
+    // 🎯 최초 로그: 앱이 로드되었는지 확인
+    print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    print('🚀 [Splash] initState 실행됨!');
+    print('🚀 [Splash] widget.pendingUrl: ${widget.pendingUrl}');
+    if (kIsWeb) {
+      print('🚀 [Splash] Uri.base: ${Uri.base}');
+      print('🚀 [Splash] Uri.base.queryParameters: ${Uri.base.queryParameters}');
+    }
+    print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
     _setupAnimations();
     _navigateToHome();
   }
@@ -270,6 +283,15 @@ class _SplashScreenState extends State<SplashScreen>
   /// 🆕 URL 쿼리 파라미터에서 pending URL 추출
   /// Service Worker가 /splash?pending=/discussion-group?meetingId=33 형식으로 전달
   String? _getPendingUrlFromQueryParams() {
+    // 🎯 1순위: GoRouter에서 전달받은 pendingUrl (가장 신뢰)
+    if (widget.pendingUrl != null && widget.pendingUrl!.isNotEmpty) {
+      if (AppConfig.debugMode) {
+        print('🔗 [Splash] GoRouter에서 전달받은 pendingUrl: ${widget.pendingUrl}');
+      }
+      return widget.pendingUrl;
+    }
+    
+    // 🎯 2순위: Uri.base에서 직접 추출 (웹 환경)
     if (!kIsWeb) return null;
     
     try {
@@ -281,7 +303,7 @@ class _SplashScreenState extends State<SplashScreen>
         final decodedUrl = Uri.decodeComponent(pendingParam);
         
         if (AppConfig.debugMode) {
-          print('🔗 [Splash] pending 파라미터 발견: $pendingParam');
+          print('🔗 [Splash] Uri.base에서 pending 발견: $pendingParam');
           print('🔗 [Splash] 디코딩된 URL: $decodedUrl');
         }
         
