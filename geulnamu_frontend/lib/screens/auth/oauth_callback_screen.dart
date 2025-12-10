@@ -30,6 +30,38 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
       print('🌐 팡업 여부: ${_isPopup()}');
     }
 
+    // 🎯 PostFrameCallback으로 처리하여 Provider 접근 가능하도록
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _processCallback();
+    });
+  }
+
+  /// 콜백 처리 (이미 로그인 상태 체크 포함)
+  Future<void> _processCallback() async {
+    // 🎯 이미 로그인된 상태에서 뒤로가기로 다시 이 화면에 온 경우 처리
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      if (authProvider.isLoggedIn) {
+        if (AppConfig.debugMode) {
+          print('🎯 [OAuth] 이미 로그인됨 - 홈으로 리다이렉트');
+        }
+        // 히스토리 정리 후 홈으로
+        try {
+          html.window.history.replaceState(null, '', '/home');
+        } catch (e) {
+          // 무시
+        }
+        if (mounted) {
+          context.go('/home');
+        }
+        return;
+      }
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [OAuth] 로그인 상태 체크 실패: $e');
+      }
+    }
+
     // 팡업인 경우 PostMessage 전송 후 종료
     if (_isPopup()) {
       _handlePopupCallback();
@@ -211,6 +243,20 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
         if (AppConfig.debugMode) {
           print('🏠 홈 화면으로 이동 중...');
         }
+        
+        // 🎯 PWA: 브라우저 히스토리에서 로그인 관련 URL 정리
+        // OAuth 콜백 URL을 홈 URL로 교체하여 뒤로가기 시 콜백으로 돌아가지 않도록
+        try {
+          html.window.history.replaceState(null, '', '/home');
+          if (AppConfig.debugMode) {
+            print('🎯 [OAuth] 브라우저 히스토리 정리 완료');
+          }
+        } catch (e) {
+          if (AppConfig.debugMode) {
+            print('⚠️ [OAuth] 히스토리 정리 실패: $e');
+          }
+        }
+        
         // 🎯 GoRouter: go로 홈 화면으로 이동 (히스토리 대체)
         context.go('/home');
       }
