@@ -52,6 +52,24 @@ class _HomeScreenState extends State<HomeScreen>
     });
   }
 
+  // 🎯 RouteAware override - 다른 화면으로 이동할 때 핸들러 해제
+  @override
+  void didPushNext() {
+    super.didPushNext(); // RouteAwareMixin의 로직 실행
+    // 🎯 다른 화면으로 이동 시 PWA 뒤로가기 핸들러 해제
+    PWAUtils.unregisterBackPressHandler();
+    debugPrint('🎯 [HomeScreen] 다른 화면 이동 - PWA 핸들러 해제');
+  }
+
+  // 🎯 RouteAware override - 홈 화면으로 복귀할 때 핸들러 재등록
+  @override
+  void didPopNext() {
+    super.didPopNext(); // RouteAwareMixin의 로직 실행
+    // 🎯 홈 화면 복귀 시 PWA 뒤로가기 핸들러 재등록
+    _registerPWABackHandler();
+    debugPrint('🎯 [HomeScreen] 홈 화면 복귀 - PWA 핸들러 재등록');
+  }
+
   /// 🎯 PWA 뒤로가기 핸들러 등록
   void _registerPWABackHandler() {
     PWAUtils.registerBackPressHandler(() async {

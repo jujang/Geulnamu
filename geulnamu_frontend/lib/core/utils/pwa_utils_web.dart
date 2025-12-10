@@ -129,21 +129,24 @@ void registerBackPressHandler(BackPressCallback callback) {
     _handlePopState(event);
   }.toJS;
 
-  // 이벤트 리스너 등록
-  web.window.addEventListener('popstate', _popStateListener);
+  // 🎯 capture: true로 등록하여 GoRouter보다 먼저 이벤트 처리
+  final options = web.AddEventListenerOptions(capture: true);
+  web.window.addEventListener('popstate', _popStateListener, options);
 
   // 히스토리에 더미 항목 추가 (뒤로가기 감지용)
   _ensureHistoryForBackPress();
 
   if (kDebugMode) {
-    print('🎯 [PWAUtils] PWA 뒤로가기 핸들러 등록 완료');
+    print('🎯 [PWAUtils] PWA 뒤로가기 핸들러 등록 완료 (capture: true)');
   }
 }
 
 /// 🎯 PWA 뒤로가기 핸들러 해제
 void unregisterBackPressHandler() {
   if (_popStateListener != null) {
-    web.window.removeEventListener('popstate', _popStateListener);
+    // capture: true로 등록했으므로 해제할 때도 동일하게
+    final options = web.EventListenerOptions(capture: true);
+    web.window.removeEventListener('popstate', _popStateListener, options);
     _popStateListener = null;
     if (kDebugMode) {
       print('🎯 [PWAUtils] PWA 뒤로가기 핸들러 해제 완료');
@@ -157,11 +160,18 @@ void _handlePopState(web.Event event) async {
   if (_backPressCallback == null) return;
 
   if (kDebugMode) {
-    print('🎯 [PWAUtils] popstate 이벤트 감지');
+    print('🎯 [PWAUtils] popstate 이벤트 감지 (capture 단계)');
   }
 
+  // 🎯 이벤트 전파 차단 - GoRouter에게 전달되지 않음
+  event.stopImmediatePropagation();
+  event.preventDefault();
+
+  // 🎯 즉시 앞으로 이동하여 뒤로가기 취소
+  web.window.history.forward();
+
   try {
-    // 콜백 호출하여 뒤로가기 허용 여부 확인
+    // 콜백 호출하여 뒤로가기 허용 여부 확인 (다이얼로그 표시)
     final shouldExit = await _backPressCallback!();
 
     if (shouldExit) {
@@ -172,18 +182,16 @@ void _handlePopState(web.Event event) async {
       unregisterBackPressHandler();
       web.window.history.back();
     } else {
-      // 뒤로가기 차단 - 히스토리 복구
+      // 뒤로가기 차단 - 현재 화면 유지
       if (kDebugMode) {
-        print('🎯 [PWAUtils] 뒤로가기 차단 - 히스토리 복구');
+        print('🎯 [PWAUtils] 뒤로가기 차단 - 현재 화면 유지');
       }
-      _ensureHistoryForBackPress();
+      // 히스토리는 이미 forward()로 복구됨
     }
   } catch (e) {
     if (kDebugMode) {
       print('⚠️ [PWAUtils] 뒤로가기 핸들러 오류: $e');
     }
-    // 오류 시 히스토리 복구
-    _ensureHistoryForBackPress();
   }
 }
 
