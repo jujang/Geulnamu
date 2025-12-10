@@ -1,3 +1,4 @@
+import 'dart:async';  // 🆕 TimeoutException
 import 'package:flutter/foundation.dart' show kIsWeb;  // 🆕 웹 플랫폼 확인
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -60,28 +61,74 @@ class _SplashScreenState extends State<SplashScreen>
       print('🚀 [Splash] _navigateToHome 시작...');
     }
 
-    // 🎯 폰트 프리로딩 (플래시 방지) - 완료 후 즉시 이동
+    try {
+      // 🎯 전체 초기화에 타임아웃 적용 (최대 10초)
+      await Future.any([
+        _initializeApp(),
+        Future.delayed(const Duration(seconds: 10), () {
+          if (AppConfig.debugMode) {
+            print('⏰ [Splash] 초기화 타임아웃! 강제로 홈 이동');
+          }
+          throw TimeoutException('Splash 초기화 타임아웃');
+        }),
+      ]);
+    } catch (e) {
+      if (AppConfig.debugMode) {
+        print('❌ [Splash] 초기화 중 오류 발생: $e');
+      }
+      // 오류 발생 시에도 홈으로 이동
+      _safeNavigateToHome();
+    }
+  }
+
+  /// 🎯 앱 초기화 로직 (타임아웃에서 분리)
+  Future<void> _initializeApp() async {
+    // 🎯 폰트 프리로딩 (타임아웃 2초)
     await _preloadFonts();
 
+    if (!mounted) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [Splash] 폰트 로딩 후 mounted=false, 종료');
+      }
+      return;
+    }
+
+    if (AppConfig.debugMode) {
+      print('🔐 [Splash] checkAuthStatus 호출 전...');
+    }
+
+    // 🔐 로그인 상태 확인
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.checkAuthStatus();
+
+    if (AppConfig.debugMode) {
+      print('🔐 [Splash] checkAuthStatus 완료!');
+      print('🔐 [Splash] 로그인 상태: ${authProvider.isAuthenticated}');
+      print('🔐 [Splash] AuthStatus: ${authProvider.status}');
+    }
+
+    if (!mounted) {
+      if (AppConfig.debugMode) {
+        print('⚠️ [Splash] checkAuthStatus 후 mounted=false, 종료');
+      }
+      return;
+    }
+
+    // 📩 Pending Navigation 처리
+    await _handlePendingNavigation(authProvider);
+  }
+
+  /// 🎯 안전하게 홈으로 이동 (mounted 체크 + fallback)
+  void _safeNavigateToHome() {
     if (mounted) {
       if (AppConfig.debugMode) {
-        print('🔐 [Splash] checkAuthStatus 호출 전...');
+        print('🏠 [Splash] 안전하게 홈으로 이동');
       }
-
-      // 🔐 로그인 상태 확인 (await로 완료 대기)
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      await authProvider.checkAuthStatus();
-
+      AppRouter.markInitialized();
+      context.go('/home');
+    } else {
       if (AppConfig.debugMode) {
-        print('🔐 [Splash] checkAuthStatus 완료!');
-        print('🔐 [Splash] 로그인 상태: ${authProvider.isAuthenticated}');
-        print('🔐 [Splash] AuthStatus: ${authProvider.status}');
-        print('🔐 [Splash] 사용자 정보: ${authProvider.userInfo}');
-      }
-
-      if (mounted) {
-        // 📩 Pending Navigation 처리 (알림 클릭으로 앱 시작 시)
-        await _handlePendingNavigation(authProvider);
+        print('⚠️ [Splash] mounted=false, 이동 불가');
       }
     }
   }
@@ -91,8 +138,11 @@ class _SplashScreenState extends State<SplashScreen>
   /// 알림 클릭으로 앱이 시작된 경우, 저장된 목적지로 이동
   /// - 로그인 상태: 해당 페이지로 바로 이동
   /// - 비로그인 상태: 홈으로 이동 (Pending 유지, 로그인 후 처리)
+  /// 
+  /// 🚨 중요: 모든 분기에서 반드시 이동이 되어야 함!
   Future<void> _handlePendingNavigation(AuthProvider authProvider) async {
     final pendingService = PendingNavigationService();
+    bool navigationCompleted = false;  // 🆕 이동 완료 플래그
     
     try {
       // 🆕 1. URL 쿼리 파라미터에서 pending URL 확인 (Service Worker에서 전달)
@@ -105,7 +155,6 @@ class _SplashScreenState extends State<SplashScreen>
         }
         
         if (authProvider.isAuthenticated) {
-          // ✅ 로그인 상태: 해당 페이지로 바로 이동
           if (AppConfig.debugMode) {
             print('🚀 [Splash] 로그인됨 → Pending URL로 이동: $pendingUrl');
           }
@@ -113,23 +162,24 @@ class _SplashScreenState extends State<SplashScreen>
           if (mounted) {
             AppRouter.markInitialized();
             context.go(pendingUrl);
+            navigationCompleted = true;
           }
-          return;
         } else {
-          // ⏳ 비로그인 상태: Pending 저장 후 홈으로 이동
           if (AppConfig.debugMode) {
             print('⏳ [Splash] 비로그인 → Pending 저장 후 홈으로 이동');
           }
           
-          // Pending Navigation 저장 (로그인 후 처리용)
           await _savePendingFromUrl(pendingUrl);
           
           if (mounted) {
             AppRouter.markInitialized();
             context.go('/home');
+            navigationCompleted = true;
           }
-          return;
         }
+        
+        // 🆕 이동 완료되면 여기서 종료
+        if (navigationCompleted) return;
       }
       
       // 2. 기존 PendingNavigationService에서 확인
@@ -139,37 +189,35 @@ class _SplashScreenState extends State<SplashScreen>
         if (AppConfig.debugMode) {
           print('📩 [Splash] Pending Navigation 발견!');
           print('📩 [Splash] route: ${pending.route}');
-          print('📩 [Splash] arguments: ${pending.arguments}');
           print('📩 [Splash] 로그인 상태: ${authProvider.isAuthenticated}');
         }
         
         if (authProvider.isAuthenticated) {
-          // ✅ 로그인 상태: Pending Navigation 삭제 후 해당 페이지로 이동
           await pendingService.clearPendingNavigation();
           
           if (mounted) {
-            // 🎯 URL 형식으로 이동 (쿼리 파라미터 포함)
             final url = _buildUrlWithArguments(pending.route, pending.arguments);
-            
             if (AppConfig.debugMode) {
               print('🚀 [Splash] 로그인됨 → Pending 페이지로 이동: $url');
             }
-            
-            AppRouter.markInitialized();  // 🆕 초기화 완료 표시
+            AppRouter.markInitialized();
             context.go(url);
+            navigationCompleted = true;
           }
         } else {
-          // ⏳ 비로그인 상태: Pending 유지하고 홈으로 이동
-          // (로그인 후 HomeScreen 또는 다른 곳에서 처리 가능)
           if (AppConfig.debugMode) {
             print('⏳ [Splash] 비로그인 → 홈으로 이동 (Pending 유지)');
           }
           
           if (mounted) {
-            AppRouter.markInitialized();  // 🆕 초기화 완료 표시
+            AppRouter.markInitialized();
             context.go('/home');
+            navigationCompleted = true;
           }
         }
+        
+        // 🆕 이동 완료되면 여기서 종료
+        if (navigationCompleted) return;
       } else {
         // 📭 Pending Navigation 없음: 일반 홈 화면 이동
         if (AppConfig.debugMode) {
@@ -177,20 +225,24 @@ class _SplashScreenState extends State<SplashScreen>
         }
         
         if (mounted) {
-          AppRouter.markInitialized();  // 🆕 초기화 완료 표시
+          AppRouter.markInitialized();
           context.go('/home');
+          navigationCompleted = true;
         }
       }
     } catch (e) {
       if (AppConfig.debugMode) {
         print('❌ [Splash] Pending Navigation 처리 오류: $e');
       }
-      
-      // 오류 발생 시 안전하게 홈으로 이동
-      if (mounted) {
-        AppRouter.markInitialized();  // 🆕 초기화 완료 표시
-        context.go('/home');
+    }
+    
+    // 🆕 홈 Fallback: 어떤 이유로든 이동이 안 되었으면 홈으로 강제 이동
+    if (!navigationCompleted && mounted) {
+      if (AppConfig.debugMode) {
+        print('🚨 [Splash] 이동 실패! Fallback으로 홈 이동');
       }
+      AppRouter.markInitialized();
+      context.go('/home');
     }
   }
 
@@ -278,17 +330,38 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   /// 🎯 폰트 프리로딩 - 앱에서 사용하는 모든 폰트 weight 미리 로드
+  /// 타임아웃 2초 적용 - 네트워크 불안정 시 무한 대기 방지
   Future<void> _preloadFonts() async {
+    if (AppConfig.debugMode) {
+      print('🔤 [Splash] 폰트 프리로딩 시작...');
+    }
+    
     try {
+      // 🎯 폰트 로딩에 2초 타임아웃 적용
       await GoogleFonts.pendingFonts([
         GoogleFonts.notoSans(fontWeight: FontWeight.w400), // Regular
         GoogleFonts.notoSans(fontWeight: FontWeight.w500), // Medium
         GoogleFonts.notoSans(fontWeight: FontWeight.w600), // SemiBold
         GoogleFonts.notoSans(fontWeight: FontWeight.w700), // Bold
-      ]);
+      ]).timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          if (AppConfig.debugMode) {
+            print('⏰ [Splash] 폰트 로딩 타임아웃, 건너뜀');
+          }
+          // 타임아웃 시 빈 리스트 반환 (시스템 폰트로 대체)
+          return <TextStyle>[];
+        },
+      );
+      
+      if (AppConfig.debugMode) {
+        print('✅ [Splash] 폰트 프리로딩 완료');
+      }
     } catch (e) {
       // 폰트 로드 실패해도 앱은 계속 진행 (시스템 폰트로 대체)
-      debugPrint('⚠️ [폰트] 프리로딩 실패: $e');
+      if (AppConfig.debugMode) {
+        print('⚠️ [Splash] 폰트 프리로딩 실패: $e');
+      }
     }
   }
 
