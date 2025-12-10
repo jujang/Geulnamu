@@ -1,7 +1,7 @@
 // 글나무 PWA 서비스 워커 v2.0
 // ✨ 최적화된 캐싱 전략 + 선택적 캐시 정리 지원
 
-const CACHE_VERSION = 'v1.0.1';
+const CACHE_VERSION = 'v1.0.3';
 const CACHE_NAME = `geulnamu-${CACHE_VERSION}`;
 const API_CACHE_NAME = `geulnamu-api-${CACHE_VERSION}`;
 
@@ -81,6 +81,12 @@ self.addEventListener('activate', (event) => {
 // 네트워크 요청 가로채기
 // ===========================================
 self.addEventListener('fetch', (event) => {
+  // 🚨 디버깅용: Service Worker 무력화
+  // 모든 요청을 네트워크로 바로 전달
+  // 문제 해결 후 원본 코드로 복원 필요!
+  return; // 아무것도 하지 않음 = 브라우저 기본 동작
+  
+  // === 아래는 원본 코드 (나중에 복원) ===
   const url = new URL(event.request.url);
   
   // 🚫 GET 요청이 아니면 Service Worker 개입 없이 바로 네트워크로 전달
@@ -203,37 +209,50 @@ async function handleStaticRequest(request) {
   try {
     // 🌐 HTML 요청 (SPA 라우팅)
     if (request.destination === 'document') {
-      // HTML 요청은 항상 네트워크에서 가져와서 Vercel rewrites 가 작동하도록 함
+      // 🎯 안전한 HTML 처리: 어떤 상황에서도 응답 보장
       try {
-        const networkResponse = await fetch(request);
+        const networkResponse = await fetchWithTimeout(request, 5000); // 5초 타임아웃
         
         // ✅ 성공 시 캐시하고 반환
-        if (networkResponse.ok) {
-          await cacheStaticResource(request, networkResponse.clone());
+        if (networkResponse && networkResponse.ok) {
+          cacheStaticResource(request, networkResponse.clone()).catch(() => {});
           cacheStats.misses++;
           return networkResponse;
         }
         
-        // ⚠️ 네트워크 응답이 ok가 아닌 경우 (404, 500 등)
-        // 캐시된 index.html 반환 시도
-        console.log('⚠️ HTML 응답 실패 (status:', networkResponse.status, '), 캐시된 index.html 시도');
+        // ⚠️ 네트워크 응답이 ok가 아닌 경우 → 캐시 시도
+        console.log('⚠️ HTML 응답 실패, 캐시된 index.html 시도');
         const cachedIndex = await caches.match('/');
         if (cachedIndex) {
           cacheStats.hits++;
           return cachedIndex;
         }
         
-        // 캐시도 없으면 원본 응답 반환
-        return networkResponse;
-      } catch (networkError) {
-        // 네트워크 실패 시 캐시된 index.html 반환 (오프라인 지원)
-        console.log('⚠️ 네트워크 실패, 캐시된 index.html 반환');
-        const cachedIndex = await caches.match('/');
-        if (cachedIndex) {
-          cacheStats.hits++;
-          return cachedIndex;
+        // 캐시도 없으면 네트워크 응답 반환 (있으면)
+        if (networkResponse) {
+          return networkResponse;
         }
-        throw networkError;
+        
+        // 🚨 최후의 수단: 네트워크로 직접 요청
+        return fetch(request);
+      } catch (networkError) {
+        console.log('⚠️ 네트워크 실패:', networkError.message);
+        
+        // 캐시된 index.html 반환 시도
+        try {
+          const cachedIndex = await caches.match('/');
+          if (cachedIndex) {
+            console.log('✅ 캐시된 index.html 반환');
+            cacheStats.hits++;
+            return cachedIndex;
+          }
+        } catch (cacheError) {
+          console.log('❌ 캐시 접근 실패:', cacheError.message);
+        }
+        
+        // 🚨 캐시도 없으면 네트워크로 직접 재시도
+        console.log('🔄 네트워크 직접 재시도...');
+        return fetch(request);
       }
     }
     
