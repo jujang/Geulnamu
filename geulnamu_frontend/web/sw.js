@@ -1,7 +1,7 @@
 // 글나무 PWA 서비스 워커 v2.0
 // ✨ 최적화된 캐싱 전략 + 선택적 캐시 정리 지원
 
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.0.1';
 const CACHE_NAME = `geulnamu-${CACHE_VERSION}`;
 const API_CACHE_NAME = `geulnamu-api-${CACHE_VERSION}`;
 
@@ -206,11 +206,25 @@ async function handleStaticRequest(request) {
       // HTML 요청은 항상 네트워크에서 가져와서 Vercel rewrites 가 작동하도록 함
       try {
         const networkResponse = await fetch(request);
+        
+        // ✅ 성공 시 캐시하고 반환
         if (networkResponse.ok) {
           await cacheStaticResource(request, networkResponse.clone());
           cacheStats.misses++;
           return networkResponse;
         }
+        
+        // ⚠️ 네트워크 응답이 ok가 아닌 경우 (404, 500 등)
+        // 캐시된 index.html 반환 시도
+        console.log('⚠️ HTML 응답 실패 (status:', networkResponse.status, '), 캐시된 index.html 시도');
+        const cachedIndex = await caches.match('/');
+        if (cachedIndex) {
+          cacheStats.hits++;
+          return cachedIndex;
+        }
+        
+        // 캐시도 없으면 원본 응답 반환
+        return networkResponse;
       } catch (networkError) {
         // 네트워크 실패 시 캐시된 index.html 반환 (오프라인 지원)
         console.log('⚠️ 네트워크 실패, 캐시된 index.html 반환');
