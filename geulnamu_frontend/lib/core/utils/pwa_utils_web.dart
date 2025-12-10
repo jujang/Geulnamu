@@ -167,8 +167,18 @@ void _handlePopState(web.Event event) async {
   event.stopImmediatePropagation();
   event.preventDefault();
 
-  // 🎯 즉시 앞으로 이동하여 뒤로가기 취소
-  web.window.history.forward();
+  // 🎯 현재 URL로 pushState하여 뒤로가기 취소 (히스토리에 현재 위치 다시 추가)
+  // forward() 대신 pushState 사용 - 더 안정적
+  try {
+    web.window.history.pushState(null, '', '/home');
+    if (kDebugMode) {
+      print('🎯 [PWAUtils] pushState로 현재 위치 유지');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('⚠️ [PWAUtils] pushState 실패: $e');
+    }
+  }
 
   try {
     // 콜백 호출하여 뒤로가기 허용 여부 확인 (다이얼로그 표시)
@@ -180,13 +190,14 @@ void _handlePopState(web.Event event) async {
         print('🎯 [PWAUtils] 뒤로가기 허용 - 앱 종료');
       }
       unregisterBackPressHandler();
-      web.window.history.back();
+      // pushState로 추가한 항목 + 원래 항목을 넘어서 실제 종료
+      web.window.history.go(-2);
     } else {
       // 뒤로가기 차단 - 현재 화면 유지
       if (kDebugMode) {
         print('🎯 [PWAUtils] 뒤로가기 차단 - 현재 화면 유지');
       }
-      // 히스토리는 이미 forward()로 복구됨
+      // pushState로 이미 현재 위치 유지됨
     }
   } catch (e) {
     if (kDebugMode) {

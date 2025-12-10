@@ -244,17 +244,20 @@ class _OAuthCallbackScreenState extends State<OAuthCallbackScreen> {
           print('🏠 홈 화면으로 이동 중...');
         }
         
-        // 🎯 PWA 히스토리 완전 초기화
-        // location.replace로 홈으로 이동하면 히스토리에서 현재 항목이 교체됨
-        // 따라서 뒤로가기로 OAuth 콜백으로 돌아갈 수 없음
-        // 홈 화면이 히스토리의 "시작점"이 됨
-        if (AppConfig.debugMode) {
-          print('🎯 [OAuth] 히스토리 초기화 후 홈으로 이동 (location.replace)');
+        // 🎯 현재 URL을 /home으로 교체 (히스토리에서 OAuth 콜백 URL 제거)
+        try {
+          html.window.history.replaceState(null, '', '/home');
+          if (AppConfig.debugMode) {
+            print('🎯 [OAuth] 히스토리 URL 교체 완료');
+          }
+        } catch (e) {
+          if (AppConfig.debugMode) {
+            print('⚠️ [OAuth] 히스토리 URL 교체 실패: $e');
+          }
         }
         
-        // 페이지 새로고침이 발생하지만, 저장된 토큰으로 로그인 상태 유지됨
-        html.window.location.replace('/home');
-        return; // 이후 코드 실행 방지
+        // 🎯 GoRouter: go로 홈 화면으로 이동
+        context.go('/home');
       }
     } catch (error) {
       if (AppConfig.debugMode) {
