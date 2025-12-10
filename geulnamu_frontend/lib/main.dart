@@ -25,6 +25,7 @@ import 'services/member/member_service.dart';
 import 'services/profile/profile_service.dart';
 import 'services/presentation/presentation_service.dart';
 import 'services/notification/fcm_service.dart';
+import 'services/navigation/web_navigation_service.dart';  // 🎯 웹 네비게이션 서비스
 
 // PWA Utils
 import 'core/utils/pwa_utils.dart';
@@ -48,6 +49,13 @@ void main() async {
 
     // 🎯 PWA 히스토리 초기화 (뒤로가기 문제 해결)
     PWAUtils.initializePWAHistory();
+    
+    // 🎯 웹 네비게이션 콜백 등록 (Service Worker postMessage 처리)
+    WebNavigationService.registerNavigationCallback((url) {
+      print('📩 [Main] Service Worker에서 네비게이션 요청: $url');
+      // GoRouter로 이동
+      AppRouter.router.go(url);
+    });
 
     MeetingService();
     AttendanceService();
