@@ -52,28 +52,30 @@ bool _isIOSStandalone() {
   }
 }
 
-/// 🎯 PWA 히스토리 초기화
-/// PWA 시작 시 브라우저 히스토리가 비어있으면 Flutter PopScope가 동작하지 않음
+/// 🎯 히스토리 초기화
+/// 브라우저 히스토리가 비어있으면 뒤로가기 감지가 안됨
 /// 더미 히스토리 항목을 추가하여 뒤로가기가 앱 내에서 처리되도록 함
 void initializePWAHistory() {
   try {
-    // PWA가 아니면 실행하지 않음
-    if (!isInstalledPWA()) return;
-    
+    // 🎯 PWA 체크 제거 - 모든 웹 환경에서 동작하도록
     final history = web.window.history;
     
-    // 현재 히스토리 길이 확인
-    if (history.length <= 1) {
+    if (kDebugMode) {
+      print('🎯 [PWAUtils] 히스토리 초기화 시작 (현재 length: ${history.length})');
+    }
+    
+    // 히스토리가 부족하면 더미 항목 추가 (뒤로가기 감지용)
+    if (history.length <= 2) {
       // 더미 히스토리 항목 추가 (현재 URL 유지)
       history.pushState(null, '', web.window.location.href);
       
       if (kDebugMode) {
-        print('🎯 [PWAUtils] PWA 히스토리 초기화 완료 (length: ${history.length})');
+        print('🎯 [PWAUtils] 히스토리 초기화 완료 (length: ${history.length})');
       }
     }
   } catch (e) {
     if (kDebugMode) {
-      print('⚠️ [PWAUtils] PWA 히스토리 초기화 실패: $e');
+      print('⚠️ [PWAUtils] 히스토리 초기화 실패: $e');
     }
   }
 }
@@ -111,14 +113,9 @@ void ensureHistoryEntry() {
 /// - 반환값이 true면 실제로 뒤로가기 수행
 /// - 반환값이 false면 뒤로가기 차단 (현재 화면 유지)
 void registerBackPressHandler(BackPressCallback callback) {
-  // PWA가 아니면 등록하지 않음
-  if (!isInstalledPWA()) {
-    if (kDebugMode) {
-      print('🎯 [PWAUtils] PWA가 아니므로 뒤로가기 핸들러 등록 스킵');
-    }
-    return;
-  }
-
+  // 🎯 PWA 체크 제거 - 브라우저에서도 동작하도록
+  // 웹 환경이 아니면 등록하지 않음 (Flutter Web만 대상)
+  
   // 기존 리스너가 있으면 먼저 해제
   unregisterBackPressHandler();
 
@@ -137,7 +134,7 @@ void registerBackPressHandler(BackPressCallback callback) {
   _ensureHistoryForBackPress();
 
   if (kDebugMode) {
-    print('🎯 [PWAUtils] PWA 뒤로가기 핸들러 등록 완료 (capture: true)');
+    print('🎯 [PWAUtils] 뒤로가기 핸들러 등록 완료');
   }
 }
 
@@ -160,7 +157,7 @@ void _handlePopState(web.Event event) async {
   if (_backPressCallback == null) return;
 
   if (kDebugMode) {
-    print('🎯 [PWAUtils] popstate 이벤트 감지 (capture 단계)');
+    print('🎯 [PWAUtils] popstate 이벤트 감지');
   }
 
   // 🎯 이벤트 전파 차단 - GoRouter에게 전달되지 않음
@@ -168,7 +165,6 @@ void _handlePopState(web.Event event) async {
   event.preventDefault();
 
   // 🎯 현재 URL로 pushState하여 뒤로가기 취소 (히스토리에 현재 위치 다시 추가)
-  // forward() 대신 pushState 사용 - 더 안정적
   try {
     web.window.history.pushState(null, '', '/home');
     if (kDebugMode) {
@@ -185,13 +181,18 @@ void _handlePopState(web.Event event) async {
     final shouldExit = await _backPressCallback!();
 
     if (shouldExit) {
-      // 뒤로가기 허용 - 핸들러 해제 후 실제 뒤로가기 수행
+      // 🎯 뒤로가기 허용 - 원래 뒤로가기 동작 재개
       if (kDebugMode) {
-        print('🎯 [PWAUtils] 뒤로가기 허용 - 앱 종료');
+        print('🎯 [PWAUtils] 뒤로가기 허용 - 원래 동작 재개');
       }
+      
+      // 핸들러 해제하여 다음 popstate가 정상 처리되도록
       unregisterBackPressHandler();
-      // pushState로 추가한 항목 + 원래 항목을 넘어서 실제 종료
-      web.window.history.go(-2);
+      
+      // 🎯 원래 뒤로가기 동작 재개 (pushState로 추가한 항목 제거)
+      // history.back()을 호출하면 다시 popstate가 발생하지만
+      // 핸들러가 해제되었으므로 브라우저 기본 동작(앱 종료)이 수행됨
+      web.window.history.back();
     } else {
       // 뒤로가기 차단 - 현재 화면 유지
       if (kDebugMode) {
