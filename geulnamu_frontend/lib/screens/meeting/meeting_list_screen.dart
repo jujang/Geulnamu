@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/main_layout.dart';
@@ -7,12 +8,12 @@ import '../../core/theme.dart';
 import '../../models/meeting/meeting_model.dart';
 import '../../services/home/home_service.dart';
 import '../../services/home/home_route_service.dart'; // RouteObserver
+import '../../routes/app_router.dart'; // 🎯 GoRouter 확장 메서드
 import 'mixins/meeting_logic_mixin.dart';
 import 'widgets/meeting_widgets.dart';
 import 'widgets/meeting_list_widgets.dart';
 import 'widgets/meeting_speed_dial.dart'; // 🆕 SpeedDial 위젯
-import 'meeting_qr_scanner_screen.dart'; // 🆕 QR 스캔 화면
-import '../discussion/discussion_group_screen.dart'; // 🆕 조 구성 화면
+// QR 스캔, 조 구성 화면은 GoRouter로 이동
 import '../../core/enums/permission_level.dart';
 import '../../core/constants/permission_constants.dart';
 
@@ -251,14 +252,14 @@ class _MeetingListScreenState extends State<MeetingListScreen>
 
   /// 모임 카드 탭 처리 - 상세 페이지로 이동
   void _handleMeetingTap(MeetingInfo meeting) {
-    Navigator.pushNamed(context, '/meeting/${meeting.meetingId}');
+    // 🎯 GoRouter: push로 상세 페이지 이동
+    context.push('/meeting/${meeting.meetingId}');
   }
 
   /// 🆕 QR 출석 버튼 처리 - QR 스캔 화면으로 직접 이동
   void _handleAttendance(int meetingId) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const MeetingQrScannerScreen()),
-    );
+    // 🎯 GoRouter: push로 QR 스캔 화면 이동
+    context.push('/qr-scanner');
   }
 
   /// 출석현황 확인 버튼 처리 (MeetingLogicMixin에서 처리)
@@ -268,14 +269,8 @@ class _MeetingListScreenState extends State<MeetingListScreen>
 
   /// 🆕 조 구성 버튼 처리 - 조 구성 화면으로 이동
   void _handleDiscussionGroup(MeetingInfo meeting) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => DiscussionGroupScreen(
-          meetingId: meeting.meetingId,
-          meetingTitle: meeting.meetingName,
-        ),
-      ),
-    );
+    // 🎯 GoRouter: push로 조 구성 화면 이동
+    context.goDiscussionGroup(meeting.meetingId, meetingTitle: meeting.meetingName);
   }
 
   /// 🆕 모임 만들기 권한 체크
@@ -296,6 +291,7 @@ class _MeetingListScreenState extends State<MeetingListScreen>
 
   /// 🆕 모임 만들기 버튼 처리
   void _handleCreateMeeting() {
-    Navigator.pushNamed(context, '/meeting-create'); // 정확한 라우트로 수정
+    // 🎯 GoRouter: push로 모임 만들기 화면 이동
+    context.push('/meeting-create');
   }
 }

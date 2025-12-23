@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';  // 🎯 SystemNavigator 추가
-import 'package:flutter/foundation.dart';  // 🎯 kIsWeb 추가
 import 'package:provider/provider.dart';
+import '../../core/utils/pwa_utils.dart';  // 🎯 PWA 유틸리티 추가
 import '../../providers/auth_provider.dart';
 import '../../services/home/home_service.dart';
 import '../../widgets/common/app_header.dart';
@@ -42,10 +41,61 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
     _setupAnimations();
 
+    // 🎯 PWA 히스토리 초기화 (뒤로가기 문제 해결)
+    PWAUtils.initializePWAHistory();
+
     // 🎯 RouteObserver 등록을 위해 다음 프레임에서 실행
     WidgetsBinding.instance.addPostFrameCallback((_) {
       registerRouteObserver();
       _checkAuthStatus(); // 초기 인증 상태 확인
+      _registerPWABackHandler(); // 🎯 PWA 뒤로가기 핸들러 등록
+    });
+  }
+
+  // 🎯 RouteAware override - 다른 화면으로 이동할 때 핸들러 해제
+  @override
+  void didPushNext() {
+    super.didPushNext(); // RouteAwareMixin의 로직 실행
+    // 🎯 다른 화면으로 이동 시 PWA 뒤로가기 핸들러 해제
+    PWAUtils.unregisterBackPressHandler();
+    debugPrint('🎯 [HomeScreen] 다른 화면 이동 - PWA 핸들러 해제');
+  }
+
+  // 🎯 RouteAware override - 홈 화면으로 복귀할 때 핸들러 재등록
+  @override
+  void didPopNext() {
+    super.didPopNext(); // RouteAwareMixin의 로직 실행
+    // 🎯 홈 화면 복귀 시 PWA 뒤로가기 핸들러 재등록
+    _registerPWABackHandler();
+    debugPrint('🎯 [HomeScreen] 홈 화면 복귀 - PWA 핸들러 재등록');
+  }
+
+  /// 🎯 PWA 뒤로가기 핸들러 등록
+  void _registerPWABackHandler() {
+    PWAUtils.registerBackPressHandler(() async {
+      // 종료 확인 다이얼로그 표시
+      final shouldExit = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false, // 외부 클릭으로 닫기 방지
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('앱 종료'),
+          content: const Text('앱을 종료하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: const Text('종료'),
+            ),
+          ],
+        ),
+      );
+      return shouldExit ?? false;
     });
   }
 
@@ -65,6 +115,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     unregisterRouteObserver(); // 🎯 RouteObserver 구독 해제
+    PWAUtils.unregisterBackPressHandler(); // 🎯 PWA 뒤로가기 핸들러 해제
     _fadeController.dispose();
     super.dispose();
   }
@@ -266,79 +317,50 @@ class _HomeScreenState extends State<HomeScreen>
                 onLoginTap: navigateToLogin,
                 onLogoutTap: handleLogout,
               ),
-              // 🎯 PopScope: 홈 화면에서 시스템 뒤로가기 시 종료 확인
-              body: PopScope(
-                canPop: false, // 홈 화면에서는 시스템 뒤로가기 차단
-                onPopInvokedWithResult: (didPop, result) async {
-                  if (didPop) return;
-                  // 🎯 앱 종료 확인 다이얼로그
-                  final shouldExit = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('앱 종료'),
-                      content: const Text('앱을 종료하시겠습니까?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('취소'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text('종료'),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (shouldExit == true) {
-                    // 🎯 PWA/웹 환경에서는 SystemNavigator.pop() 사용
-                    // Android PWA에서 앱을 최소화/종료함
-                    SystemNavigator.pop();
-                  }
-                },
-                child: SafeArea(
-                  child: ResponsiveContainer(
-                    // 🎯 패딩 제거 - 스크롤바가 화면 끝에 위치하도록
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        // 콘텐츠에만 패딩 적용
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 동적 환영 카드 (Static Method 사용)
-                            HomeWidgets.buildDynamicWelcomeCard(
-                              context,
-                              authProvider,
-                              onProfileInputTap:
-                                  navigateToProfileInput, // 개인정보 입력 버튼 핸들러
+              // 🎯 PWA 뒤로가기는 PWAUtils.registerBackPressHandler에서 처리
+              body: SafeArea(
+                child: ResponsiveContainer(
+                  // 🎯 패딩 제거 - 스크롤바가 화면 끝에 위치하도록
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      // 콘텐츠에만 패딩 적용
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 동적 환영 카드 (Static Method 사용)
+                          HomeWidgets.buildDynamicWelcomeCard(
+                            context,
+                            authProvider,
+                            onProfileInputTap:
+                                navigateToProfileInput, // 개인정보 입력 버튼 핸들러
+                          ),
+                          const SizedBox(height: 24),
+
+                          // 통일된 빠른 메뉴 (Static Method 사용)
+                          HomeWidgets.buildQuickMenuGrid(
+                            context,
+                            authProvider,
+                            handleMenuTap, // mixin 메서드 사용
+                          ),
+                          const SizedBox(height: 24),
+
+                          // 로그인 상태에 따른 추가 콘텐츠
+                          if (authProvider.isAuthenticated) ...[
+                            // HomeWidgets.buildRecentMeetingsSection(context),
+                            // const SizedBox(height: 24),
+                          ] else ...[
+                            // PWA 설치 안내 (로그인 전에만 표시)
+                            PWAInstallCard(
+                              onInstallPressed:
+                                  showInstallInstructions, // mixin 메서드 사용
                             ),
                             const SizedBox(height: 24),
-
-                            // 통일된 빠른 메뉴 (Static Method 사용)
-                            HomeWidgets.buildQuickMenuGrid(
-                              context,
-                              authProvider,
-                              handleMenuTap, // mixin 메서드 사용
-                            ),
-                            const SizedBox(height: 24),
-
-                            // 로그인 상태에 따른 추가 콘텐츠
-                            if (authProvider.isAuthenticated) ...[
-                              // HomeWidgets.buildRecentMeetingsSection(context),
-                              // const SizedBox(height: 24),
-                            ] else ...[
-                              // PWA 설치 안내 (로그인 전에만 표시)
-                              PWAInstallCard(
-                                onInstallPressed:
-                                    showInstallInstructions, // mixin 메서드 사용
-                              ),
-                              const SizedBox(height: 24),
-                            ],
-
-                            // 추가 여백
-                            const SizedBox(height: 32),
                           ],
-                        ),
+
+                          // 추가 여백
+                          const SizedBox(height: 32),
+                        ],
                       ),
                     ),
                   ),

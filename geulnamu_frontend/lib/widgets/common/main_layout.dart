@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/home/home_service.dart';
@@ -141,7 +142,8 @@ class MainLayout extends StatelessWidget {
             
             // 📱 일반 화면: 스택이 비어있으면 홈으로 이동
             if (!Navigator.of(context).canPop()) {
-              Navigator.pushReplacementNamed(context, '/home');
+              // 🎯 GoRouter: go로 홈 화면으로 이동
+              GoRouter.of(context).go('/home');
             }
           },
           child: Scaffold(
@@ -346,10 +348,12 @@ class MainLayout extends StatelessWidget {
   void _handleProfileMenuSelection(BuildContext context, String value) {
     switch (value) {
       case 'profile':
-        Navigator.pushNamed(context, '/profile');
+        // 🎯 GoRouter: push로 프로필 화면 이동
+        context.push('/profile');
         break;
       case 'settings':
-        Navigator.pushNamed(context, '/settings');
+        // 🎯 GoRouter: push로 설정 화면 이동
+        context.push('/settings');
         break;
       case 'logout':
         onLogoutTap?.call();
