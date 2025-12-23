@@ -27,7 +27,7 @@ public class MemberController {
 
     @ErrorLogAction(value = ActionType.MEMBER_CREATE, actionDomain = DomainType.MEMBER)
     @AccessLevel(Level.PUBLIC)
-    @PostMapping(value = "register", name = "모임원 생성 (OAuth 토큰 발행 대안 기능)")
+    @PostMapping(value = "/register", name = "모임원 생성 (OAuth 토큰 발행 대안 기능)")
     public BaseResponse<Void> createMember(@Valid @RequestBody MemberCreateRequest request) {
         memberService.createMember(request.getKakaoMemberId());
         return BaseResponse.ofSuccess();
@@ -67,7 +67,7 @@ public class MemberController {
 
     @LogAction(value = ActionType.MEMBER_PUSH_SETTING_VIEW, actionDomain = DomainType.MEMBER)
     @AccessLevel(Level.MEMBER)
-    @GetMapping(value = "/me/push-setting", name = "앱 푸시 수신 여부 수정")
+    @GetMapping(value = "/me/push-setting", name = "앱 푸시 수신 여부 조회")
     public BaseResponse<Boolean> getPushSetting(@AuthMemberId Long memberId) {
         Boolean response = memberService.getPushSetting(memberId);
         return BaseResponse.ofSuccess(response);

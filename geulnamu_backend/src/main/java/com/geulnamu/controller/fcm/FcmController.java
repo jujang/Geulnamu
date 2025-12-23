@@ -25,7 +25,7 @@ public class FcmController {
 
     @LogAction(value = ActionType.FCM_TOKEN_REGISTER, actionDomain = DomainType.FCM)
     @AccessLevel(Level.MEMBER)
-    @PostMapping("/token")
+    @PostMapping(value = "/token", name = "FCM 토큰 등록")
     public BaseResponse<Void> registerToken(@AuthMemberId Long memberId,
                                             @Valid @RequestBody FcmTokenRequest request) {
         fcmService.registerToken(memberId, request.getToken(), request.getDeviceType());
@@ -34,7 +34,7 @@ public class FcmController {
 
     @LogAction(value = ActionType.FCM_NOTIFICATION, actionDomain = DomainType.FCM)
     @AccessLevel(Level.ADMIN)
-    @PostMapping("/notification")
+    @PostMapping(value = "/notification", name = "앱푸시 알림 전송")
     public BaseResponse<FcmSendResult> sendNotification(@Valid @RequestBody NotificationRequest request) {
         FcmSendResult result = fcmService.sendNotification(request.getTitle(), request.getBody(), request.getMemberList());
         return BaseResponse.ofSuccess(result);

@@ -2,6 +2,7 @@ package com.geulnamu.controller.member;
 
 import com.geulnamu.controller.member.dto.request.MemberInfoRequest;
 import com.geulnamu.controller.member.dto.request.MemberNameUpdateRequest;
+import com.geulnamu.controller.member.dto.request.MemberPushSettingRequest;
 import com.geulnamu.controller.member.dto.request.MemberRoleUpdateRequest;
 import com.geulnamu.controller.member.dto.response.MemberInfoResponse;
 import com.geulnamu.controller.member.dto.response.MemberListResponse;
@@ -261,6 +262,87 @@ public class MemberControllerTest extends ControllerTest {
                     fieldWithPath("data.memberList[].nickname").type(JsonFieldType.STRING).description("닉네임(카카오 닉네임)"),
                     fieldWithPath("data.memberList[].role").type(JsonFieldType.STRING).description("권한 등급"),
                     fieldWithPath("data.memberList[].deletedAt").type(JsonFieldType.STRING).optional().description("삭제일자 (삭제되지 않은 경우 null)")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "MEMBER")
+    public void getPushSettingTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+        Boolean response = true;
+
+        given(memberService.getPushSetting(any())).willReturn(response);
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                get("/members/me/push-setting")
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andDo(document(
+                "/members/my/push-setting/view",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.BOOLEAN).description("앱 푸시 수신 여부")
+                )
+            ));
+    }
+
+    @Test
+    @WithMockUser(roles = "MEMBER")
+    public void updatePushSettingTest() throws Exception {
+        // given
+        String accessToken = "Bearer access_token";
+        MemberPushSettingRequest request = new MemberPushSettingRequest("true");
+
+        doNothing().when(memberService).updatePushSetting(any(), any(Boolean.class));
+
+        // when
+        ResultActions actions =
+            mockMvc.perform(
+                patch("/members/me/push-setting")
+                    .header("Authorization", accessToken)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            );
+
+        // then
+        actions
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("code").value(200))
+            .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
+            .andExpect(jsonPath("data").value((Object) null))
+            .andDo(document(
+                "/members/my/push-setting/modify",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("액세스 토큰")
+                ),
+                requestFields(
+                    fieldWithPath("isPushEnabled").type(JsonFieldType.BOOLEAN).attributes(key("format").value("'true', 'false' 중 하나의 값")).description("앱 푸시 수신 여부")
+                ),
+                responseFields(
+                    fieldWithPath("code").type(JsonFieldType.NUMBER).description("결과 코드"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("결과 메세지"),
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("-")
                 )
             ));
     }

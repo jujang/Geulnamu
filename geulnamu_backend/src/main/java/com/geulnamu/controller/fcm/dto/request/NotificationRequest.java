@@ -2,11 +2,13 @@ package com.geulnamu.controller.fcm.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.List;
 
 @Getter
+@AllArgsConstructor
 public class NotificationRequest {
 
     @NotBlank(message = "제목 필수 입력")

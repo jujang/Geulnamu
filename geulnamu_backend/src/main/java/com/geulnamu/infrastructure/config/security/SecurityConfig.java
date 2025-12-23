@@ -31,10 +31,12 @@ public class SecurityConfig {
     private static final String[] AUTH_OPEN = {
         "/actuator/health",
         "/login/oauth/kakao",
-        "/login/{memberId}/direct", // TODO: 임시 기능 -> 실 운영시 삭제 예정
+        "/login/{memberId}/direct", // TODO: 임시 기능
         "/login/re-issue/accessToken",
-        "/members/register", // TODO: 임시 기능 -> 실 운영시 삭제 예정
+        "/members/register", // TODO: 임시 기능
         "/hello/health-check",
+        "/docs/**",  // api 문서 조회 경로
+        "/favicon.ico",
         "/error" // 향후 개발 완료 후 해당 코드 지워주고 요청들 잘 받아지는지 확인해 볼 것
     };
 
@@ -95,7 +97,8 @@ public class SecurityConfig {
 
         config.setAllowedOriginPatterns(Arrays.asList(
             "http://localhost:3030",
-            "https://geulnamu-five.vercel.app"
+            "https://geulnamu-five.vercel.app",
+            "https://geulnamu.com"
         ));
         config.setAllowedMethods(Arrays.asList(
             "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
@@ -123,7 +126,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(corsConfigurer -> corsConfigurer.configurationSource(configurationSource()))
-            .csrf(AbstractHttpConfigurer::disable)  // TODO: 추후 토큰을 사용하는 빙식으로 사용할 것이라면 이대로 두면 됨
+            .csrf(AbstractHttpConfigurer::disable)
             .exceptionHandling(exceptionHandling -> exceptionHandling
                 .accessDeniedHandler(jwtAccessDeniedHandler)
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
