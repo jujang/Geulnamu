@@ -56,9 +56,6 @@ class AppRouter {
   /// 앱 초기화 완료 표시 (SplashScreen에서 호출)
   static void markInitialized() {
     _isInitialized = true;
-    if (AppConfig.debugMode) {
-      print('✅ [AppRouter] 앱 초기화 완료 표시');
-    }
   }
 
   /// 앱 초기화 상태 확인
@@ -109,13 +106,7 @@ class AppRouter {
           path: '/splash',
           name: 'splash',
           builder: (context, state) {
-            // 🎯 Service Worker가 전달한 pending URL 추출
             final pendingUrl = state.uri.queryParameters['pending'];
-
-            if (AppConfig.debugMode && pendingUrl != null) {
-              print('📩 [GoRouter] /splash에 pending 파라미터 있음: $pendingUrl');
-            }
-
             return SplashScreen(pendingUrl: pendingUrl);
           },
         ),
@@ -386,24 +377,13 @@ class AppRouter {
         final uri = Uri.base;
         final path = uri.path;
 
-        if (AppConfig.debugMode) {
-          print('🌐 [GoRouter] 초기 URL path: $path');
-          print('🌐 [GoRouter] 쿼리 파라미터: ${uri.queryParameters}');
-        }
-
         // OAuth 콜백 URL인 경우
         if (path == '/auth/callback' || path.contains('auth/callback')) {
-          if (AppConfig.debugMode) {
-            print('🎯 [GoRouter] OAuth 콜백 감지 → /auth/callback');
-          }
           return '/auth/callback';
         }
 
         // 알림 딜링크 URL 처리
         if (_isNotificationDeepLink(path)) {
-          if (AppConfig.debugMode) {
-            print('📩 [GoRouter] 알림 딜링크 감지: $path');
-          }
           _savePendingNavigationFromUrl(uri);
           return '/splash';
         }
@@ -455,13 +435,9 @@ class AppRouter {
           route: uri.path,
           arguments: arguments,
         );
-
-        if (AppConfig.debugMode) {
-          print('✅ [GoRouter] Pending Navigation 저장 완료!');
-        }
       } catch (e) {
         if (AppConfig.debugMode) {
-          print('❌ [GoRouter] Pending Navigation 저장 실패: $e');
+          print('❌ [GoRouter] Pending 저장 실패: $e');
         }
       }
     });
@@ -493,7 +469,6 @@ class AppRouter {
       if (state.uri.queryParameters.isNotEmpty) {
         arguments = Map<String, dynamic>.from(state.uri.queryParameters);
 
-        // meetingId를 int로 변환
         if (arguments.containsKey('meetingId')) {
           final meetingIdStr = arguments['meetingId'] as String?;
           if (meetingIdStr != null) {
@@ -506,15 +481,9 @@ class AppRouter {
         route: state.uri.path,
         arguments: arguments,
       );
-
-      if (AppConfig.debugMode) {
-        print(
-          '📌 [GoRouter redirect] Pending Navigation 저장: ${state.uri.path}',
-        );
-      }
     } catch (e) {
       if (AppConfig.debugMode) {
-        print('❌ [GoRouter redirect] Pending 저장 실패: $e');
+        print('❌ [GoRouter] Pending 저장 실패: $e');
       }
     }
   }

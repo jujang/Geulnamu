@@ -28,16 +28,10 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
   // 🎯 RouteObserver 등록/해제 메서드들
   
   void registerRouteObserver() {
-    if (AppConfig.debugMode) {
-      debugPrint('🔄 [RouteAwareMixin] RouteObserver 등록 시도');
-    }
     _routeService.registerRouteObserver(context, this);
   }
 
   void unregisterRouteObserver() {
-    if (AppConfig.debugMode) {
-      debugPrint('🔄 [RouteAwareMixin] RouteObserver 구독 해제');
-    }
     _routeService.unregisterRouteObserver(this);
   }
 
@@ -46,42 +40,26 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
   @override
   void didPush() {
     super.didPush();
-    if (AppConfig.debugMode) {
-      debugPrint('🏠 [RouteAwareMixin] 화면 진입 감지');
-    }
     _routeService.onPush();
-    
-    // 개인정보 상태 확인 (로그인 상태에서만)
     _checkProfileStatusOnScreenEnter();
   }
 
   @override
   void didPushNext() {
     super.didPushNext();
-    if (AppConfig.debugMode) {
-      debugPrint('🚪 [RouteAwareMixin] 다른 화면으로 이동 감지');
-    }
     _routeService.onPushNext();
   }
 
   @override
   void didPopNext() {
     super.didPopNext();
-    if (AppConfig.debugMode) {
-      debugPrint('🔄 [RouteAwareMixin] 화면 복귀 감지');
-    }
     _routeService.onPopNext(context);
-    
-    // 개인정보 상태 확인 (로그인 상태에서만)
     _checkProfileStatusOnScreenEnter();
   }
 
   @override
   void didPop() {
     super.didPop();
-    if (AppConfig.debugMode) {
-      debugPrint('🚪 [RouteAwareMixin] 화면 종료 감지');
-    }
     _routeService.onPop();
   }
 
@@ -122,107 +100,61 @@ mixin RouteAwareMixin<T extends StatefulWidget> on State<T>, RouteAware {
   }
 
   /// 🚀 Pending Navigation 처리
-  /// 
-  /// 로그인 완료 후 저장된 목적지로 이동
   Future<void> _processPendingNavigation() async {
-    // 중복 처리 방지
-    if (_isProcessingPendingNavigation) {
-      if (AppConfig.debugMode) {
-        print('⚠️ [RouteAwareMixin] Pending Navigation 이미 처리 중 - 건너뜀');
-      }
-      return;
-    }
+    if (_isProcessingPendingNavigation) return;
 
     try {
       _isProcessingPendingNavigation = true;
-
       final pending = await _pendingNavigationService.getPendingNavigation();
       
-      if (pending == null) {
-        if (AppConfig.debugMode) {
-          print('📭 [RouteAwareMixin] Pending Navigation 없음');
-        }
-        return;
-      }
+      if (pending == null) return;
 
       if (AppConfig.debugMode) {
-        print('🚀 [RouteAwareMixin] Pending Navigation 발견!');
-        print('🚀 route: ${pending.route}');
-        print('🚀 arguments: ${pending.arguments}');
+        print('🚀 [RouteAware] Pending 처리: ${pending.route}');
       }
 
-      // 목적지로 이동
       if (AppRouter.navigatorKey.currentContext != null) {
-        // 먼저 Pending Navigation 삭제 (중복 이동 방지)
         await _pendingNavigationService.clearPendingNavigation();
-        
-        // 약간의 지연 후 이동 (화면 렌더링 완료 대기)
         await Future.delayed(const Duration(milliseconds: 300));
         
-        if (AppConfig.debugMode) {
-          print('🚀 [RouteAwareMixin] 목적지로 이동: ${pending.route}');
-        }
-        
-        // 🎯 GoRouter를 사용하여 이동
         final routerContext = AppRouter.navigatorKey.currentContext!;
         GoRouter.of(routerContext).push(
           pending.route,
           extra: pending.arguments,
         );
-      } else {
-        if (AppConfig.debugMode) {
-          print('⚠️ [RouteAwareMixin] Navigator가 아직 준비되지 않음');
-        }
       }
     } catch (e) {
       if (AppConfig.debugMode) {
-        print('❌ [RouteAwareMixin] Pending Navigation 처리 오류: $e');
+        print('❌ [RouteAware] Pending 오류: $e');
       }
     } finally {
       _isProcessingPendingNavigation = false;
     }
   }
 
-  /// 🔍 인증 에러 여부 정확히 감지
-  /// 
-  /// 백엔드 응답 구조를 기반으로 인증 에러를 판단
-  /// 예상 응답: {code: 401, message: '리프레시 토큰이 유효하지 않습니다...', data: null}
+  /// 🔍 인증 에러 여부 감지
   bool _isAuthenticationError(dynamic error) {
     try {
       final errorString = error.toString();
       
-      // 🎯 ApiUtils에서 던진 Exception 메시지 파싱
-      // 예: "Exception: [개인정보 상태 확인] 백엔드 오류 (401): 리프레시 토큰이 유효하지 않습니다..."
+      // ApiUtils에서 던진 Exception 메시지 파싱
       final backendErrorPattern = RegExp(r'백엔드 오류 \((\d+)\):');
       final match = backendErrorPattern.firstMatch(errorString);
       
       if (match != null) {
         final errorCode = int.tryParse(match.group(1) ?? '');
-        if (errorCode == 401) {
-          if (AppConfig.debugMode) {
-            print('🔍 [RouteAwareMixin] 백엔드 인증 에러 감지: 코드 $errorCode');
-          }
-          return true;
-        }
+        if (errorCode == 401) return true;
       }
       
-      // 🔄 기존 방식: 문자열 검색 (폴백)
+      // 폴백: 문자열 검색
       final lowerError = errorString.toLowerCase();
-      if (lowerError.contains('백엔드 오류 (401)') ||
+      return lowerError.contains('백엔드 오류 (401)') ||
           lowerError.contains('인증') ||
           lowerError.contains('토큰') ||
           lowerError.contains('만료') ||
           lowerError.contains('unauthorized') ||
-          lowerError.contains('token')) {
-        if (AppConfig.debugMode) {
-          print('🔍 [RouteAwareMixin] 인증 관련 키워드 감지');
-        }
-        return true;
-      }
-      
-      return false;
+          lowerError.contains('token');
     } catch (e) {
-      // 파싱 오류 시 안전하게 false 반환
       return false;
     }
   }

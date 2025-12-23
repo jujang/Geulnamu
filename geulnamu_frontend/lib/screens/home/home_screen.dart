@@ -48,56 +48,22 @@ class _HomeScreenState extends State<HomeScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       registerRouteObserver();
       _checkAuthStatus(); // 초기 인증 상태 확인
-      _registerPWABackHandler(); // 🎯 PWA 뒤로가기 핸들러 등록
+
     });
   }
 
-  // 🎯 RouteAware override - 다른 화면으로 이동할 때 핸들러 해제
+  // 🎯 RouteAware override - 다른 화면으로 이동할 때
   @override
   void didPushNext() {
     super.didPushNext(); // RouteAwareMixin의 로직 실행
-    // 🎯 다른 화면으로 이동 시 PWA 뒤로가기 핸들러 해제
-    PWAUtils.unregisterBackPressHandler();
-    debugPrint('🎯 [HomeScreen] 다른 화면 이동 - PWA 핸들러 해제');
   }
 
-  // 🎯 RouteAware override - 홈 화면으로 복귀할 때 핸들러 재등록
+  // 🎯 RouteAware override - 홈 화면으로 복귀할 때
   @override
   void didPopNext() {
     super.didPopNext(); // RouteAwareMixin의 로직 실행
-    // 🎯 홈 화면 복귀 시 PWA 뒤로가기 핸들러 재등록
-    _registerPWABackHandler();
-    debugPrint('🎯 [HomeScreen] 홈 화면 복귀 - PWA 핸들러 재등록');
   }
 
-  /// 🎯 PWA 뒤로가기 핸들러 등록
-  void _registerPWABackHandler() {
-    PWAUtils.registerBackPressHandler(() async {
-      // 종료 확인 다이얼로그 표시
-      final shouldExit = await showDialog<bool>(
-        context: context,
-        barrierDismissible: false, // 외부 클릭으로 닫기 방지
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('앱 종료'),
-          content: const Text('앱을 종료하시겠습니까?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.error,
-              ),
-              child: const Text('종료'),
-            ),
-          ],
-        ),
-      );
-      return shouldExit ?? false;
-    });
-  }
 
   void _setupAnimations() {
     _fadeController = AnimationController(
@@ -115,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     unregisterRouteObserver(); // 🎯 RouteObserver 구독 해제
-    PWAUtils.unregisterBackPressHandler(); // 🎯 PWA 뒤로가기 핸들러 해제
     _fadeController.dispose();
     super.dispose();
   }

@@ -42,7 +42,9 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print('✅ Firebase 초기화 완료');
+    if (AppConfig.debugMode) {
+      print('✅ Firebase 초기화 완료');
+    }
 
     await AppConfig.initialize();
     KakaoConfig.initialize();
@@ -52,8 +54,9 @@ void main() async {
     
     // 🎯 웹 네비게이션 콜백 등록 (Service Worker postMessage 처리)
     WebNavigationService.registerNavigationCallback((url) {
-      print('📩 [Main] Service Worker에서 네비게이션 요청: $url');
-      // GoRouter로 이동
+      if (AppConfig.debugMode) {
+        print('📩 [Main] Service Worker 네비게이션: $url');
+      }
       AppRouter.router.go(url);
     });
 
