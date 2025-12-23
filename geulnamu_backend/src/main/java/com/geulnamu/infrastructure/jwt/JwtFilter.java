@@ -30,7 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         
-        // 공개 경로 체크
+        // 공개 경로 체크 (해당 경로 리스트는 Security Config 클래스의 AUTH_OPEN 리스트와 동기화 시킬 것
         return path.equals("/actuator/health") ||
                path.startsWith("/login/oauth/kakao") ||
                path.matches("/login/\\d+/direct") ||  // /login/{memberId}/direct
