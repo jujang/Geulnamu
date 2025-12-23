@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>📚 글나무 출석부 시스템 API 문서</title>
+<title>글나무 서비스 API 문서</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -437,10 +437,66 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+
+<style>
+    /* 기본 폰트 설정 */
+    body, .body, #content, #header, #toc, #toctitle,
+    h1, h2, h3, h4, h5, h6,
+    p, td, th, li, dt, dd,
+    .title, .paragraph, .listingblock,
+    code, pre, .literal {
+        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+
+    /* 제목 스타일 개선 */
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+
+    /* 본문 가독성 향상 */
+    #content {
+        font-size: 16px;
+        line-height: 1.7;
+        color: #333;
+    }
+
+    /* 코드 블록 폰트 */
+    code, pre, .listingblock code {
+        font-family: 'Pretendard', 'D2Coding', 'Consolas', monospace !important;
+        font-size: 14px;
+    }
+
+    /* 테이블 스타일 개선 */
+    table.tableblock {
+        font-size: 15px;
+    }
+
+    /* 링크 스타일 */
+    a {
+        color: #7DD3C0;
+    }
+
+    a:hover {
+        color: #5BB5A3;
+    }
+
+    /* TOC(목차) 스타일 */
+    #toc {
+        font-size: 14px;
+    }
+
+    #toctitle {
+        font-weight: 700;
+        font-size: 18px;
+    }
+</style>
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
-<h1>📚 글나무 출석부 시스템 API 문서</h1>
+<h1>글나무 서비스 API 문서</h1>
 <div class="details">
 <span id="revnumber">version 0.0.1-SNAPSHOT</span>
 </div>
@@ -449,7 +505,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#_문서_개요">1. 📖 문서 개요</a>
 <ul class="sectlevel2">
-<li><a href="#_시스템_소개">1.1. 시스템 소개</a></li>
+<li><a href="#_서비스_소개">1.1. 서비스 소개</a></li>
 <li><a href="#_버전_정보">1.2. 버전 정보</a></li>
 <li><a href="#_핵심_기능">1.3. 핵심 기능</a></li>
 </ul>
@@ -468,16 +524,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_api_목록">4. 📋 API 목록</a>
 <ul class="sectlevel2">
-<li><a href="#_로그인_로그인_api">4.1. 🔑 로그인: 로그인 API</a></li>
-<li><a href="#_모임원_모임원_api">4.2. 👤 모임원: 모임원 API</a></li>
-<li><a href="#_모임_모임_api">4.3. 📅 모임: 모임 API</a></li>
-<li><a href="#_출석_출석_api">4.4. ✅ 출석: 출석 API</a></li>
-<li><a href="#_️_토론_그룹_토론_그룹_api">4.5. 🗣️ 토론 그룹: 토론 그룹 API</a></li>
-<li><a href="#_발제문_발제_api">4.6. 📝 발제문: 발제 API</a></li>
-<li><a href="#_fcm_fcm_api">4.7. 🔘 FCM: FCM API</a></li>
-<li><a href="#_voc모임원의_소리_voc_api">4.8. 💬 VoC(모임원의 소리): VoC API</a></li>
-<li><a href="#_로깅_활동_내역_api">4.9. 📊 로깅: 활동 내역 API</a></li>
-<li><a href="#_헬스_체크_헬스_체크_api">4.10. 📈 헬스 체크: 헬스 체크 API</a></li>
+<li><a href="#_로그인_api">4.1. 🔑 로그인 API</a></li>
+<li><a href="#_모임원_api">4.2. 👤 모임원 API</a></li>
+<li><a href="#_모임_api">4.3. 📅 모임 API</a></li>
+<li><a href="#_출석_api">4.4. ✅ 출석 API</a></li>
+<li><a href="#_️_토론_그룹_api">4.5. 🗣️ 토론 그룹 API</a></li>
+<li><a href="#_발제_api">4.6. 📝 발제 API</a></li>
+<li><a href="#_fcm_api">4.7. 🔘 FCM API</a></li>
+<li><a href="#_voc모임원의_소리_api">4.8. 💬 VoC(모임원의 소리) API</a></li>
+<li><a href="#_활동_내역_api">4.9. 📊 활동 내역 API</a></li>
+<li><a href="#_헬스_체크_api">4.10. 📈 헬스 체크 API</a></li>
 </ul>
 </li>
 <li><a href="#_시작하기">5. 🚀 시작하기</a>
@@ -509,10 +565,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_문서_개요"><a class="link" href="#_문서_개요">1. 📖 문서 개요</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_시스템_소개"><a class="link" href="#_시스템_소개">1.1. 시스템 소개</a></h3>
+<h3 id="_서비스_소개"><a class="link" href="#_서비스_소개">1.1. 서비스 소개</a></h3>
 <div class="paragraph">
-<p>글나무 출석부 시스템은 모임 출석을 효율적으로 관리하기 위한 웹 기반 시스템입니다.<br>
-사용자 권한에 따라 다양한 출석 관리 기능을 제공하며, 토론 그룹 관리, 발제 작성, 액션 히스토리 추적 등의 기능을 포함합니다.</p>
+<p>글나무 앱 서비스는 독서토론 모임(글나무) 활동을 효율적으로 관리하기 위한 웹 기반 서비스입니다.<br>
+사용자 권한에 따라 다양한 기능을 제공하며, 모임 출석, 출석 현황 조회, 모임 토론 그룹 관리, 발제 작성, 앱 푸시 알림, 액션 히스토리 추적 등의 기능을 포함합니다.</p>
 </div>
 </div>
 <div class="sect2">
@@ -523,10 +579,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p><strong>문서 버전</strong>: v1.0.0</p>
 </li>
 <li>
-<p><strong>베이스 URL</strong>: <code><a href="https://api.geulnamu.com" class="bare">https://api.geulnamu.com</a></code></p>
-</li>
-<li>
-<p><strong>API 버전</strong>: v1</p>
+<p><strong>베이스 URL</strong>: <a href="https://api.geulnamu.com" class="bare">https://api.geulnamu.com</a></p>
 </li>
 </ul>
 </div>
@@ -709,43 +762,43 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_api_목록"><a class="link" href="#_api_목록">4. 📋 API 목록</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_로그인_로그인_api"><a class="link" href="#_로그인_로그인_api">4.1. 🔑 로그인: <a href="login-api-guide.html">로그인 API</a></a></h3>
+<h3 id="_로그인_api"><a class="link" href="#_로그인_api">4.1. 🔑 <a href="login-api-guide.html">로그인 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_모임원_모임원_api"><a class="link" href="#_모임원_모임원_api">4.2. 👤 모임원: <a href="member-api-guide.html">모임원 API</a></a></h3>
+<h3 id="_모임원_api"><a class="link" href="#_모임원_api">4.2. 👤 <a href="member-api-guide.html">모임원 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_모임_모임_api"><a class="link" href="#_모임_모임_api">4.3. 📅 모임: <a href="meeting-api-guide.html">모임 API</a></a></h3>
+<h3 id="_모임_api"><a class="link" href="#_모임_api">4.3. 📅 <a href="meeting-api-guide.html">모임 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_출석_출석_api"><a class="link" href="#_출석_출석_api">4.4. ✅ 출석: <a href="attendance-api-guide.html">출석 API</a></a></h3>
+<h3 id="_출석_api"><a class="link" href="#_출석_api">4.4. ✅ <a href="attendance-api-guide.html">출석 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_️_토론_그룹_토론_그룹_api"><a class="link" href="#_️_토론_그룹_토론_그룹_api">4.5. 🗣️ 토론 그룹: <a href="discussion-api-guide.html">토론 그룹 API</a></a></h3>
+<h3 id="_️_토론_그룹_api"><a class="link" href="#_️_토론_그룹_api">4.5. 🗣️ <a href="discussion-api-guide.html">토론 그룹 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_발제문_발제_api"><a class="link" href="#_발제문_발제_api">4.6. 📝 발제문: <a href="book-question-api-guide.html">발제 API</a></a></h3>
+<h3 id="_발제_api"><a class="link" href="#_발제_api">4.6. 📝 <a href="book-question-api-guide.html">발제 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_fcm_fcm_api"><a class="link" href="#_fcm_fcm_api">4.7. 🔘 FCM: <a href="fcm-api-guide.html">FCM API</a></a></h3>
+<h3 id="_fcm_api"><a class="link" href="#_fcm_api">4.7. 🔘 <a href="fcm-api-guide.html">FCM API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_voc모임원의_소리_voc_api"><a class="link" href="#_voc모임원의_소리_voc_api">4.8. 💬 VoC(모임원의 소리): <a href="voc-api-guide.html">VoC API</a></a></h3>
+<h3 id="_voc모임원의_소리_api"><a class="link" href="#_voc모임원의_소리_api">4.8. 💬 <a href="voc-api-guide.html">VoC(모임원의 소리) API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_로깅_활동_내역_api"><a class="link" href="#_로깅_활동_내역_api">4.9. 📊 로깅: <a href="action-history-api-guide.html">활동 내역 API</a></a></h3>
+<h3 id="_활동_내역_api"><a class="link" href="#_활동_내역_api">4.9. 📊 <a href="action-history-api-guide.html">활동 내역 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_헬스_체크_헬스_체크_api"><a class="link" href="#_헬스_체크_헬스_체크_api">4.10. 📈 헬스 체크: <a href="health-check-api-guide.html">헬스 체크 API</a></a></h3>
+<h3 id="_헬스_체크_api"><a class="link" href="#_헬스_체크_api">4.10. 📈 <a href="health-check-api-guide.html">헬스 체크 API</a></a></h3>
 
 </div>
 </div>
@@ -758,13 +811,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p><strong>카카오 로그인</strong>: <a href="login-api-guide.html#카카오-oauth-로그인">GET /login/oauth/kakao</a> 호출</p>
+<p><strong>카카오 로그인</strong>: <a href="login-api-guide.html">GET /login/oauth/kakao</a> 호출</p>
 </li>
 <li>
 <p><strong>토큰 저장</strong>: 응답에서 받은 액세스 토큰을 Authorization 헤더에 포함</p>
 </li>
 <li>
-<p><strong>토큰 갱신</strong>: 토큰 만료 시 <a href="login-api-guide.html#액세스-토큰-재발급">POST /login/re-issue/accessToken</a> 호출</p>
+<p><strong>토큰 갱신</strong>: 토큰 만료 시 <a href="login-api-guide.html">POST /login/re-issue/accessToken</a> 호출</p>
 </li>
 </ol>
 </div>
@@ -774,10 +827,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p><strong>정보 입력 여부 확인</strong>: <a href="member-api-guide.html#모임원-정보-입력-여부-확인">GET /member/info</a></p>
+<p><strong>정보 입력 여부 확인</strong>: <a href="member-api-guide.html">GET /member/info</a></p>
 </li>
 <li>
-<p><strong>정보 미입력 시</strong>: <a href="member-api-guide.html#모임원-정보-수정">PATCH /member/info</a>로 개인정보 등록</p>
+<p><strong>정보 미입력 시</strong>: <a href="member-api-guide.html">PATCH /member/info</a>로 개인정보 등록</p>
 </li>
 </ol>
 </div>
@@ -790,10 +843,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p><strong>출석</strong>: QR 코드 스캔을 통한 모임 출석 처리</p>
 </li>
 <li>
-<p><strong>모임 조회</strong>: 개설되었던 모임 조회 및 모임 상세내용 확인</p>
+<p><strong>출석 이력 조회</strong>: 개인 출석 현황 및 참여 이력 확인</p>
 </li>
 <li>
-<p><strong>출석 이력 조회</strong>: 개인 출석 현황 및 참여 이력 확인</p>
+<p><strong>모임 조회</strong>: 개설되었던 모임 조회 및 모임 상세내용 확인</p>
 </li>
 <li>
 <p><strong>토론 그룹</strong>: 배정된 토론 그룹 확인</p>
@@ -943,7 +996,7 @@ User-Agent: GeulnamuApp/1.0</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-12-23 19:08:13 +0900
+Last updated 2025-12-24 02:40:32 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

@@ -35,6 +35,8 @@ public class SecurityConfig {
         "/login/re-issue/accessToken",
         "/members/register", // TODO: 임시 기능
         "/hello/health-check",
+        "/docs/**",  // api 문서 조회 경로
+        "/favicon.ico",
         "/error" // 향후 개발 완료 후 해당 코드 지워주고 요청들 잘 받아지는지 확인해 볼 것
     };
 

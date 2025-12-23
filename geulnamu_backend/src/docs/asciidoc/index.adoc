@@ -1,4 +1,4 @@
-= 📚 글나무 출석부 시스템 API 문서
+= 글나무 서비스 API 문서
 :doctype: book
 :icons: font
 :source-highlighter: highlightjs
@@ -6,17 +6,17 @@
 :toclevels: 3
 :sectlinks:
 :sectnums:
+:docinfo: shared
 
 == 📖 문서 개요
 
-=== 시스템 소개
-글나무 출석부 시스템은 모임 출석을 효율적으로 관리하기 위한 웹 기반 시스템입니다. +
-사용자 권한에 따라 다양한 출석 관리 기능을 제공하며, 토론 그룹 관리, 발제 작성, 액션 히스토리 추적 등의 기능을 포함합니다.
+=== 서비스 소개
+글나무 앱 서비스는 독서토론 모임(글나무) 활동을 효율적으로 관리하기 위한 웹 기반 서비스입니다. +
+사용자 권한에 따라 다양한 기능을 제공하며, 모임 출석, 출석 현황 조회, 모임 토론 그룹 관리, 발제 작성, 앱 푸시 알림, 액션 히스토리 추적 등의 기능을 포함합니다.
 
 === 버전 정보
 - **문서 버전**: v1.0.0
-- **베이스 URL**: `https://api.geulnamu.com`
-- **API 버전**: v1
+- **베이스 URL**: https://api.geulnamu.com
 
 === 핵심 기능
 - **출석 관리**: QR 코드 기반 출석 처리 및 이력 관리
@@ -74,33 +74,33 @@
 
 == 📋 API 목록
 
-=== 🔑 로그인: link:login-api-guide.html[로그인 API]
-=== 👤 모임원: link:member-api-guide.html[모임원 API]
-=== 📅 모임: link:meeting-api-guide.html[모임 API]
-=== ✅ 출석: link:attendance-api-guide.html[출석 API]
-=== 🗣️ 토론 그룹: link:discussion-api-guide.html[토론 그룹 API]
-=== 📝 발제문: link:book-question-api-guide.html[발제 API]
-=== 🔘 FCM: link:fcm-api-guide.html[FCM API]
-=== 💬 VoC(모임원의 소리): link:voc-api-guide.html[VoC API]
-=== 📊 로깅: link:action-history-api-guide.html[활동 내역 API]
-=== 📈 헬스 체크: link:health-check-api-guide.html[헬스 체크 API]
+=== 🔑 link:login-api-guide.html[로그인 API]
+=== 👤 link:member-api-guide.html[모임원 API]
+=== 📅 link:meeting-api-guide.html[모임 API]
+=== ✅ link:attendance-api-guide.html[출석 API]
+=== 🗣️ link:discussion-api-guide.html[토론 그룹 API]
+=== 📝 link:book-question-api-guide.html[발제 API]
+=== 🔘 link:fcm-api-guide.html[FCM API]
+=== 💬 link:voc-api-guide.html[VoC(모임원의 소리) API]
+=== 📊 link:action-history-api-guide.html[활동 내역 API]
+=== 📈 link:health-check-api-guide.html[헬스 체크 API]
 
 
 == 🚀 시작하기
 
 === 1단계: 인증
-1. **카카오 로그인**: link:login-api-guide.html#카카오-oauth-로그인[GET /login/oauth/kakao] 호출
+1. **카카오 로그인**: link:login-api-guide.html[GET /login/oauth/kakao] 호출
 2. **토큰 저장**: 응답에서 받은 액세스 토큰을 Authorization 헤더에 포함
-3. **토큰 갱신**: 토큰 만료 시 link:login-api-guide.html#액세스-토큰-재발급[POST /login/re-issue/accessToken] 호출
+3. **토큰 갱신**: 토큰 만료 시 link:login-api-guide.html[POST /login/re-issue/accessToken] 호출
 
 === 2단계: 기본 정보 입력
-1. **정보 입력 여부 확인**: link:member-api-guide.html#모임원-정보-입력-여부-확인[GET /member/info]
-2. **정보 미입력 시**: link:member-api-guide.html#모임원-정보-수정[PATCH /member/info]로 개인정보 등록
+1. **정보 입력 여부 확인**: link:member-api-guide.html[GET /member/info]
+2. **정보 미입력 시**: link:member-api-guide.html[PATCH /member/info]로 개인정보 등록
 
 === 3단계: 기능 이용(모임원 등급 기준)
 - **출석**: QR 코드 스캔을 통한 모임 출석 처리
-- **모임 조회**: 개설되었던 모임 조회 및 모임 상세내용 확인
 - **출석 이력 조회**: 개인 출석 현황 및 참여 이력 확인
+- **모임 조회**: 개설되었던 모임 조회 및 모임 상세내용 확인
 - **토론 그룹**: 배정된 토론 그룹 확인
 - **발제문 작성**: 참여한 모임에서 발제문 작성
 - **의견 제시**: 모임원의 소리를 통한 건의사항 등록
