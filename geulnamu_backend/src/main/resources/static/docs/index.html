@@ -468,21 +468,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_api_목록">4. 📋 API 목록</a>
 <ul class="sectlevel2">
-<li><a href="#_인증_관리_로그인_api">4.1. 🔑 인증 관리: 로그인 API</a></li>
-<li><a href="#_모임원_관리_모임원_api">4.2. 👤 모임원 관리: 모임원 API</a></li>
-<li><a href="#_모임_관리_모임_api">4.3. 📅 모임 관리: 모임 API</a></li>
-<li><a href="#_출석_관리_출석_api">4.4. ✅ 출석 관리: 출석 API</a></li>
-<li><a href="#_️_토론_그룹_관리_토론_그룹_api">4.5. 🗣️ 토론 그룹 관리: 토론 그룹 API</a></li>
-<li><a href="#_발제_관리_발제_api">4.6. 📝 발제 관리: 발제 API</a></li>
-<li><a href="#_voc모임원의_소리_voc_api">4.7. 💬 VoC(모임원의 소리): VoC API</a></li>
-<li><a href="#_로깅_관리_활동_내역_api">4.8. 📊 로깅 관리: 활동 내역 API</a></li>
+<li><a href="#_로그인_로그인_api">4.1. 🔑 로그인: 로그인 API</a></li>
+<li><a href="#_모임원_모임원_api">4.2. 👤 모임원: 모임원 API</a></li>
+<li><a href="#_모임_모임_api">4.3. 📅 모임: 모임 API</a></li>
+<li><a href="#_출석_출석_api">4.4. ✅ 출석: 출석 API</a></li>
+<li><a href="#_️_토론_그룹_토론_그룹_api">4.5. 🗣️ 토론 그룹: 토론 그룹 API</a></li>
+<li><a href="#_발제문_발제_api">4.6. 📝 발제문: 발제 API</a></li>
+<li><a href="#_fcm_fcm_api">4.7. 🔘 FCM: FCM API</a></li>
+<li><a href="#_voc모임원의_소리_voc_api">4.8. 💬 VoC(모임원의 소리): VoC API</a></li>
+<li><a href="#_로깅_활동_내역_api">4.9. 📊 로깅: 활동 내역 API</a></li>
+<li><a href="#_헬스_체크_헬스_체크_api">4.10. 📈 헬스 체크: 헬스 체크 API</a></li>
 </ul>
 </li>
 <li><a href="#_시작하기">5. 🚀 시작하기</a>
 <ul class="sectlevel2">
 <li><a href="#_1단계_인증">5.1. 1단계: 인증</a></li>
 <li><a href="#_2단계_기본_정보_입력">5.2. 2단계: 기본 정보 입력</a></li>
-<li><a href="#_3단계_기능_이용">5.3. 3단계: 기능 이용</a></li>
+<li><a href="#_3단계_기능_이용모임원_등급_기준">5.3. 3단계: 기능 이용(모임원 등급 기준)</a></li>
 </ul>
 </li>
 <li><a href="#_개발자_참고사항">6. 🔧 개발자 참고사항</a>
@@ -497,7 +499,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_지원_및_문의">7. 📞 지원 및 문의</a>
 <ul class="sectlevel2">
 <li><a href="#_개발팀_연락처">7.1. 개발팀 연락처</a></li>
-<li><a href="#_변경_이력">7.2. 변경 이력</a></li>
 </ul>
 </li>
 </ul>
@@ -519,10 +520,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><strong>문서 버전</strong>: v0.3.0</p>
+<p><strong>문서 버전</strong>: v1.0.0</p>
 </li>
 <li>
-<p><strong>베이스 URL</strong>: <code><a href="https://api.geulnamu.com" class="bare">https://api.geulnamu.com</a></code> (개발 중)</p>
+<p><strong>베이스 URL</strong>: <code><a href="https://api.geulnamu.com" class="bare">https://api.geulnamu.com</a></code></p>
 </li>
 <li>
 <p><strong>API 버전</strong>: v1</p>
@@ -535,13 +536,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><strong>출석 관리</strong>: QR 코드/GPS 기반 출석 처리 및 이력 관리</p>
+<p><strong>출석 관리</strong>: QR 코드 기반 출석 처리 및 이력 관리</p>
 </li>
 <li>
 <p><strong>토론 그룹</strong>: 자동/수동 그룹 편성 및 관리</p>
 </li>
 <li>
-<p><strong>발제 시스템</strong>: 조별 발제 작성 및 승인 프로세스</p>
+<p><strong>발제 관리</strong>: 조별 발제 작성 및 열람</p>
+</li>
+<li>
+<p><strong>앱푸시 기능</strong>: 스케쥴러/수동 앱 푸시 기능</p>
 </li>
 <li>
 <p><strong>액션 로깅</strong>: 시스템 사용 이력 자동 추적</p>
@@ -610,7 +614,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><strong>ADMIN</strong></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">모임장/부모임장/관리자</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">운영진 기능 + 회원 권한 관리, 모임원 이름 변경, 시스템 관리</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">운영진 기능 + 회원 권한 관리, 모임원 이름 변경, 시스템 관리, 앱푸시 알람 전송</p></td>
 </tr>
 </tbody>
 </table>
@@ -705,35 +709,43 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_api_목록"><a class="link" href="#_api_목록">4. 📋 API 목록</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_인증_관리_로그인_api"><a class="link" href="#_인증_관리_로그인_api">4.1. 🔑 인증 관리: <a href="login-api-guide.html">로그인 API</a></a></h3>
+<h3 id="_로그인_로그인_api"><a class="link" href="#_로그인_로그인_api">4.1. 🔑 로그인: <a href="login-api-guide.html">로그인 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_모임원_관리_모임원_api"><a class="link" href="#_모임원_관리_모임원_api">4.2. 👤 모임원 관리: <a href="member-api-guide.html">모임원 API</a></a></h3>
+<h3 id="_모임원_모임원_api"><a class="link" href="#_모임원_모임원_api">4.2. 👤 모임원: <a href="member-api-guide.html">모임원 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_모임_관리_모임_api"><a class="link" href="#_모임_관리_모임_api">4.3. 📅 모임 관리: <a href="meeting-api-guide.html">모임 API</a></a></h3>
+<h3 id="_모임_모임_api"><a class="link" href="#_모임_모임_api">4.3. 📅 모임: <a href="meeting-api-guide.html">모임 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_출석_관리_출석_api"><a class="link" href="#_출석_관리_출석_api">4.4. ✅ 출석 관리: <a href="attendance-api-guide.html">출석 API</a></a></h3>
+<h3 id="_출석_출석_api"><a class="link" href="#_출석_출석_api">4.4. ✅ 출석: <a href="attendance-api-guide.html">출석 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_️_토론_그룹_관리_토론_그룹_api"><a class="link" href="#_️_토론_그룹_관리_토론_그룹_api">4.5. 🗣️ 토론 그룹 관리: <a href="discussion-api-guide.html">토론 그룹 API</a></a></h3>
+<h3 id="_️_토론_그룹_토론_그룹_api"><a class="link" href="#_️_토론_그룹_토론_그룹_api">4.5. 🗣️ 토론 그룹: <a href="discussion-api-guide.html">토론 그룹 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_발제_관리_발제_api"><a class="link" href="#_발제_관리_발제_api">4.6. 📝 발제 관리: <a href="book-question-api-guide.html">발제 API</a></a></h3>
+<h3 id="_발제문_발제_api"><a class="link" href="#_발제문_발제_api">4.6. 📝 발제문: <a href="book-question-api-guide.html">발제 API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_voc모임원의_소리_voc_api"><a class="link" href="#_voc모임원의_소리_voc_api">4.7. 💬 VoC(모임원의 소리): <a href="voc-api-guide.html">VoC API</a></a></h3>
+<h3 id="_fcm_fcm_api"><a class="link" href="#_fcm_fcm_api">4.7. 🔘 FCM: <a href="fcm-api-guide.html">FCM API</a></a></h3>
 
 </div>
 <div class="sect2">
-<h3 id="_로깅_관리_활동_내역_api"><a class="link" href="#_로깅_관리_활동_내역_api">4.8. 📊 로깅 관리: <a href="action-history-api-guide.html">활동 내역 API</a></a></h3>
+<h3 id="_voc모임원의_소리_voc_api"><a class="link" href="#_voc모임원의_소리_voc_api">4.8. 💬 VoC(모임원의 소리): <a href="voc-api-guide.html">VoC API</a></a></h3>
+
+</div>
+<div class="sect2">
+<h3 id="_로깅_활동_내역_api"><a class="link" href="#_로깅_활동_내역_api">4.9. 📊 로깅: <a href="action-history-api-guide.html">활동 내역 API</a></a></h3>
+
+</div>
+<div class="sect2">
+<h3 id="_헬스_체크_헬스_체크_api"><a class="link" href="#_헬스_체크_헬스_체크_api">4.10. 📈 헬스 체크: <a href="health-check-api-guide.html">헬스 체크 API</a></a></h3>
 
 </div>
 </div>
@@ -771,20 +783,26 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
-<h3 id="_3단계_기능_이용"><a class="link" href="#_3단계_기능_이용">5.3. 3단계: 기능 이용</a></h3>
+<h3 id="_3단계_기능_이용모임원_등급_기준"><a class="link" href="#_3단계_기능_이용모임원_등급_기준">5.3. 3단계: 기능 이용(모임원 등급 기준)</a></h3>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>출석</strong>: QR 코드 스캔을 통한 출석 처리</p>
+<p><strong>출석</strong>: QR 코드 스캔을 통한 모임 출석 처리</p>
 </li>
 <li>
-<p><strong>이력 조회</strong>: 개인 출석 현황 및 참여 이력 확인</p>
+<p><strong>모임 조회</strong>: 개설되었던 모임 조회 및 모임 상세내용 확인</p>
 </li>
 <li>
-<p><strong>토론 그룹</strong>: 배정된 토론 그룹 확인 및 발제 작성</p>
+<p><strong>출석 이력 조회</strong>: 개인 출석 현황 및 참여 이력 확인</p>
 </li>
 <li>
-<p><strong>의견 제시</strong>: VoC를 통한 건의사항 등록</p>
+<p><strong>토론 그룹</strong>: 배정된 토론 그룹 확인</p>
+</li>
+<li>
+<p><strong>발제문 작성</strong>: 참여한 모임에서 발제문 작성</p>
+</li>
+<li>
+<p><strong>의견 제시</strong>: 모임원의 소리를 통한 건의사항 등록</p>
 </li>
 </ul>
 </div>
@@ -883,7 +901,7 @@ User-Agent: GeulnamuApp/1.0</code></pre>
 <p><strong>입력 검증</strong>: 모든 사용자 입력에 대한 서버 측 검증 수행</p>
 </li>
 <li>
-<p><strong>액션 로깅</strong>: 중요한 작업은 자동으로 기록되어 감사 추적 가능</p>
+<p><strong>액션 로깅</strong>: 중요한 작업은 자동으로 기록되어 추적 가능</p>
 </li>
 </ul>
 </div>
@@ -908,40 +926,6 @@ User-Agent: GeulnamuApp/1.0</code></pre>
 </li>
 </ul>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_변경_이력"><a class="link" href="#_변경_이력">7.2. 변경 이력</a></h3>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">버전</th>
-<th class="tableblock halign-left valign-top">날짜</th>
-<th class="tableblock halign-left valign-top">변경 내용</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">v0.3.0</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">2025-06-27</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">토론 그룹 API, 액션 히스토리 API, VoC API 추가</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">v0.2.0</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">2025-06-15</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">출석 관리 기능 확장 (비고 작성, 토론 참여 의사 등)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">v0.1.0</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">2025-05-30</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">초기 버전 출시 (로그인, 회원, 모임, 출석, 발제 API)</p></td>
-</tr>
-</tbody>
-</table>
 <hr>
 <div class="paragraph">
 <p><strong>💡 팁</strong>: 각 API 문서 페이지에서는 실제 요청/응답 예시와 함께 더 자세한 정보를 확인할 수 있습니다.</p>
@@ -950,7 +934,7 @@ User-Agent: GeulnamuApp/1.0</code></pre>
 <p><strong>🔒 보안</strong>: 모든 민감한 작업은 자동으로 로깅되며, 시스템 관리자가 모니터링합니다.</p>
 </div>
 <div class="paragraph">
-<p><strong>🚧 개발 중</strong>: GPS 기반 출석, 맞춤법 검사, 모임 알림 등의 기능이 추가 개발 예정입니다.</p>
+<p><strong>🚧 개발 중</strong>: GPS 기반 출석, 맞춤법 검사 등의 기능이 추가 개발 예정입니다.</p>
 </div>
 </div>
 </div>
@@ -959,7 +943,7 @@ User-Agent: GeulnamuApp/1.0</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-07-18 19:29:05 +0900
+Last updated 2025-12-23 19:08:13 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

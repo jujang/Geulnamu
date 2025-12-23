@@ -1,0 +1,35 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+// 코드 하이라이팅
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+
+[[title]]
+= Health Check API Guide
+
+== link:index.html[Index 페이지로 이동]
+
+== GET
+
+=== 헬스 체크
+* 접근 가능 권한 레벨: PUBLIC
+
+==== request
+include::{snippets}/hello/health-check/view/http-request.adoc[]
+
+==== response
+include::{snippets}/hello/health-check/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/hello/health-check/view/response-fields.adoc[]
+
+//==== Error case
+//
+
+//---

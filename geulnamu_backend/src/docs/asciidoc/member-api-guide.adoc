@@ -101,9 +101,53 @@ include::{snippets}/members/list/view/response-fields.adoc[]
 
 ==== Error case
 
+---
+
+
+=== 앱 푸시 수신 여부 조회
+* 접근 가능 권한 레벨: MEMBER / 에러 로그만 생성
+* 모임원이 앱 푸시 수신 여부 설정을 조회하기 위해 사용되는 API
+
+==== request
+include::{snippets}/members/my/push-setting/view/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/members/my/push-setting/view/request-headers.adoc[]
+
+==== response
+include::{snippets}/members/my/push-setting/view/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/members/my/push-setting/view/response-fields.adoc[]
+
+==== Error case
+
 
 
 == PATCH
+
+=== 앱 푸시 수신 여부 수정
+* 접근 가능 권한 레벨: MEMBER / 로그 생성
+* 모임원이 앱 푸시 수신 여부 설정을 변경하기 위해 사용되는 API
+
+==== request
+include::{snippets}/members/my/push-setting/modify/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/members/my/push-setting/modify/request-headers.adoc[]
+
+==== request-fields
+include::{snippets}/members/my/push-setting/modify/request-fields.adoc[]
+
+==== response
+include::{snippets}/members/my/push-setting/modify/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/members/my/push-setting/modify/response-fields.adoc[]
+
+==== Error case
+
+---
 
 === 개인 정보 수정
 * 접근 가능 권한 레벨: MEMBER / 로그 생성

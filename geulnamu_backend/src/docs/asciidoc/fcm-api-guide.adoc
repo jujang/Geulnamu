@@ -1,0 +1,63 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+// 코드 하이라이팅
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+[[title]]
+= FCM API Guide
+
+== link:index.html[Index 페이지로 이동]
+
+== POST
+
+=== FCM 토큰 등록
+* 접근 가능 권한 레벨: MEMBER / 로그 생성
+* 앱에 들어있는 FCM 토큰 값을 서버에 저장하기 위한 용도의 API
+* 사용자가 앱 실행 시, 또는 로그인 시 자동으로 해당 요청을 보냄
+
+==== request
+include::{snippets}/fcm/token/register/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/fcm/token/register/request-headers.adoc[]
+
+==== request-fields
+include::{snippets}/fcm/token/register/request-fields.adoc[]
+
+==== response
+include::{snippets}/fcm/token/register/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/fcm/token/register/response-fields.adoc[]
+
+==== Error case
+
+
+---
+
+=== 앱푸시 알림 전송
+* 접근 가능 권한 레벨: ADMIN / 로그 생성
+* 앱푸시 알림을 보내는 용도의 API
+
+==== request
+include::{snippets}/fcm/notification/send/http-request.adoc[]
+
+==== request-headers
+include::{snippets}/fcm/notification/send/request-headers.adoc[]
+
+==== request-fields
+include::{snippets}/fcm/notification/send/request-fields.adoc[]
+
+==== response
+include::{snippets}/fcm/notification/send/http-response.adoc[]
+
+==== response-fields
+include::{snippets}/fcm/notification/send/response-fields.adoc[]
+
+==== Error case
