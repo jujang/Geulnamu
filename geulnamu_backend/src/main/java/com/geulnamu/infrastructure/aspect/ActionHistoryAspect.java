@@ -8,6 +8,7 @@ import com.geulnamu.infrastructure.annotation.ErrorLogAction;
 import com.geulnamu.infrastructure.annotation.LogAction;
 import com.geulnamu.infrastructure.aspect.dto.ActionLogContext;
 import com.geulnamu.infrastructure.exception.GlobalExceptionHandler;
+import com.geulnamu.infrastructure.exception.ServerException;
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.service.actionHistory.ActionHistoryLoggingService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -262,20 +263,11 @@ public class ActionHistoryAspect {
      * 예외를 BaseResponse 형태로 변환
      */
     private BaseResponse<?> createErrorResponse(Exception exception) {
-        try {
-            if (exception instanceof com.geulnamu.infrastructure.exception.ServerException) {
-                com.geulnamu.infrastructure.exception.ServerException serverException = 
-                    (com.geulnamu.infrastructure.exception.ServerException) exception;
-                return BaseResponse.ofFail(serverException.getCode(), serverException.getMessage(), serverException.getField());
-            } else {
-                // 기타 예외는 GlobalExceptionHandler의 로직을 따라 처리
-                return globalExceptionHandler.handleException(exception);
-            }
-        } catch (Exception e) {
-            // 예외 처리 중 에러가 발생하면 기본 에러 응답 반환
-            log.warn("에러 응답 생성 중 예외 발생", e);
-            return BaseResponse.ofFail(500, exception.getMessage(), null);
+        if (exception instanceof ServerException) {
+            ServerException serverException = (ServerException) exception;
+            return BaseResponse.ofFail(serverException.getCode(), serverException.getMessage(), serverException.getField());
         }
+        return BaseResponse.ofFail(500, exception.getMessage(), null);
     }
 
     /**

@@ -2,10 +2,14 @@ package com.geulnamu.infrastructure.exception;
 
 import com.geulnamu.infrastructure.response.BaseResponse;
 import com.geulnamu.infrastructure.response.ResponseMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,13 +17,26 @@ import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
+
+    @Value("${slack.webhook.url}")
+    private String slackUrl;
+
 
     // 커스텀 에러 핸들러
     @ExceptionHandler(ServerException.class)
@@ -109,21 +126,58 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 다뤄주지 않은 에러 발생 시, TODO: slack 채널로 에러 전송
+     * 다뤄주지 않은 에러 발생 시, slack 채널로 에러 전송
      */
     @ExceptionHandler(Exception.class)
     public BaseResponse handleException(Exception exception) {
         log.error("message : {}", exception.getClass());
         log.error("message : {}", exception.getMessage());
 
-//        slackSendMessage(exception);
+        slackSendMessage(exception);
 
-//        if(activeProfile.equals("dev")){
-//            exception.printStackTrace();
-//        }
+        if(activeProfile.equals("dev")){
+            exception.printStackTrace();
+        }
 
-        return BaseResponse.ofFail(500, ResponseMessage.INTERNAL_SERVER_ERROR, exception.getClass() + ": " + exception.getMessage());
+        return BaseResponse.ofFail(500, ResponseMessage.INTERNAL_SERVER_ERROR,
+            exception.getClass() + ": " + exception.getMessage()
+        );
     }
 
+    /**
+     *  Slack Error Message Send
+     *  channel:
+     */
+    private void slackSendMessage(Exception e) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+
+        Map<String, Object> restTemplateRequest = new HashMap<>();
+        restTemplateRequest.put("username", "geulnamu-error");
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("```");
+        stringBuilder.append("profile: ");
+        stringBuilder.append(activeProfile);
+        stringBuilder.append("```");
+        stringBuilder.append("\n");
+        stringBuilder.append("```");
+        stringBuilder.append("API: ");
+        stringBuilder.append(request.getRequestURL());
+        stringBuilder.append("```");
+        stringBuilder.append("\n");
+        stringBuilder.append("```");
+        stringBuilder.append("content: ");
+        stringBuilder.append(e.getMessage());
+        stringBuilder.append("```");
+
+        restTemplateRequest.put("text", stringBuilder);
+        restTemplateRequest.put("icon_emoji", ":rotating_light:");
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(restTemplateRequest);
+
+        restTemplate.exchange(slackUrl, HttpMethod.POST, entity, String.class);
+    }
 
 }
