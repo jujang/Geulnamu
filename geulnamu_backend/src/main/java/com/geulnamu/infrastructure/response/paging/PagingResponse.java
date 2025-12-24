@@ -3,10 +3,12 @@ package com.geulnamu.infrastructure.response.paging;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
 @Builder
 @Getter
+@NoArgsConstructor  // Redis 역직렬화용 기본 생성자
 @AllArgsConstructor
 public class PagingResponse {
 

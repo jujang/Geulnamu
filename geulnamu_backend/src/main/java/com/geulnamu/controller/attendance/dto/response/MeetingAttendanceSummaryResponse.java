@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class MeetingAttendanceSummaryResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     private LocalDateTime meetingDate;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
     private LocalDateTime lateThresholdTime;
     private Long totalAttendCount;
     private Long attendCount;
