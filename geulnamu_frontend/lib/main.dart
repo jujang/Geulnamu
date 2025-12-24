@@ -42,9 +42,7 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    if (AppConfig.debugMode) {
-      print('✅ Firebase 초기화 완료');
-    }
+    print('✅ Firebase 초기화 완료');  // 🎯 AppConfig 초기화 전이므로 무조건 출력
 
     await AppConfig.initialize();
     KakaoConfig.initialize();
