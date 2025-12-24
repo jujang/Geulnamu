@@ -6,11 +6,13 @@ import com.geulnamu.domain.attendance.DiscussionGroup;
 import com.geulnamu.domain.meeting.MeetingType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
+@NoArgsConstructor  // Redis 역직렬화용 기본 생성자
 @AllArgsConstructor
 public class MeetingDetailResponse {
 

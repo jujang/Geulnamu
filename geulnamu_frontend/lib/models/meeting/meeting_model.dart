@@ -242,17 +242,22 @@ class MeetingInfo {
 
     try {
       if (timeValue is String) {
-        // 시간만 오는 경우 ("11:13", "12:34")
+        // 🆕 백엔드 새 날짜 형식: "2025.06.26 11:12" 처리
+        if (timeValue.contains('.') && timeValue.contains(' ')) {
+          // "2025.06.26 11:12" -> "2025-06-26 11:12:00"
+          final formatted = '${timeValue.replaceAll('.', '-').trim()}:00';
+          return DateTime.parse(formatted);
+        }
+
+        // 🔧 시간만 오는 경우 ("11:13", "12:34") - 하위 호환성 유지
         if (timeValue.contains(':') && !timeValue.contains(' ')) {
-          // 모임일시에서 날짜 부분 추출
           final meetingDateTime = _parseDateTimeSafely(dateValue, '모임일시');
           final dateStr = DateFormat('yyyy-MM-dd').format(meetingDateTime);
-          final fullTimeStr = '$dateStr $timeValue:00'; // 초 추가
-
+          final fullTimeStr = '$dateStr $timeValue:00';
           return DateTime.parse(fullTimeStr);
         }
 
-        // 전체 날짜 시간 문자열인 경우
+        // 표준 ISO 형식인 경우
         return DateTime.parse(timeValue);
       }
 

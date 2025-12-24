@@ -17,6 +17,7 @@ import com.geulnamu.repository.meeting.MeetingQueryRepository;
 import com.geulnamu.repository.meeting.MeetingCommandRepository;
 import com.geulnamu.repository.member.MemberQueryRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +50,19 @@ public class MeetingService {
         return meetingQueryRepository.findStaffList();
     }
 
+    @Cacheable(
+        value = "meeting:list",
+        key = "(#request.meetingType ?: 'ALL') + ':' + " +
+            "(#request.isTodayMeeting ?: 'ALL') + ':' + " +
+            "(#request.attendanceStatus ?: 'ALL') + ':' + " +
+            "(#request.isPrivate ?: 'ALL') + ':' + " +
+            "(#request.sortBy ?: 'id') + ':' + " +
+            "(#request.isAsc ?: 'true') + ':' + " +
+            "'page=' + #request.page + ':' + " +
+            "'size=' + #request.size + ':' + " +
+            "'member=' + #myMemberId",
+        unless = "#result == null || #result.meetingList.isEmpty()"
+    )
     @Transactional(readOnly = true)
     public MeetingListResponse getMeetingList(Long myMemberId, MeetingListRequest request) {
         Page<MeetingInfoResponse> meetingDslList = meetingQueryRepository.findMeetingsWithPaging(request, myMemberId);
@@ -58,13 +72,12 @@ public class MeetingService {
         return new MeetingListResponse(pagingResponse, meetingList);
     }
 
-    @Transactional(readOnly = true)
-    public MeetingDetailResponse getMeeting_original(Long meetingId, Long memberId) {
-        Meeting meeting = findMeetingOrThrow(meetingId);
-        return meetingQueryRepository.findMeeting(meeting.getId(), memberId);
-    }
-
     // TODO: 추후 쿼리 하나로 다 뽑아내도록 개선할 것!
+    @Cacheable(
+        value = "meeting:detail",
+        key = "#meetingId + ':' + #memberId",
+        unless = "#result == null"
+    )
     @Transactional(readOnly = true)
     public MeetingDetailResponse getMeeting(Long meetingId, Long memberId) {
         Meeting meeting = findMeetingOrThrow(meetingId);
