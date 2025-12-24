@@ -7,7 +7,7 @@
 ### ✅ 완료된 작업들
 
 1. **PWA Manifest 설정** (`web/manifest.json`)
-2. **HTML 메타 태그 최적화** (`web/index.html`)  
+2. **HTML 메타 태그 최적화** (`web/index.html`)
 3. **기본 서비스 워커** (`web/sw.js`)
 4. **글나무 브랜딩 테마** (`lib/core/`)
 5. **의존성 패키지 추가** (`pubspec.yaml`)
@@ -19,39 +19,43 @@
 ## 📍 앱 이름 변경 위치
 
 ### 1. 앱 제목 (브라우저 탭, 앱 이름)
+
 ```json
 // web/manifest.json
 {
-  "name": "글나무 - 독서 토론 모임 관리 서비스",    // ← 여기 수정
-  "short_name": "글나무",                        // ← 여기 수정
-  "description": "독서 토론 모임을 위한..."       // ← 여기 수정
+  "name": "글나무",
+  "short_name": "글나무",
+  "description": "독서 토론 모임을 위한..."
 }
 ```
 
 ### 2. HTML 페이지 제목
+
 ```html
 <!-- web/index.html -->
-<title>글나무 - 독서 토론 모임 관리 서비스</title>  <!-- ← 여기 수정 -->
-<meta name="description" content="독서 토론 모임을..."> <!-- ← 여기 수정 -->
+<title>글나무</title>
+<meta name="description" content="독서 토론 모임을..." />
 ```
 
 ### 3. 앱 내부 제목
+
 ```dart
 // lib/main.dart
 MaterialApp(
-  title: '글나무',  // ← 여기 수정
+  title: '글나무',
   ...
 )
 ```
 
 ### 4. 앱바 제목
+
 ```dart
 // lib/main.dart의 GeulnamuHomePage
 AppBar(
   title: Row(
     children: [
       Icon(...),
-      Text('글나무'),  // ← 여기 수정
+      Text('글나무'),
     ],
   ),
 )
@@ -64,8 +68,9 @@ AppBar(
 ### 준비해야 할 파일들
 
 **필수 아이콘 사이즈:**
+
 - `Icon-192.png` (192x192px)
-- `Icon-512.png` (512x512px)  
+- `Icon-512.png` (512x512px)
 - `Icon-maskable-192.png` (192x192px, 마스케이블 버전)
 - `Icon-maskable-512.png` (512x512px, 마스케이블 버전)
 - `favicon.png` (32x32px 또는 16x16px)
@@ -73,10 +78,11 @@ AppBar(
 ### 파일 교체 위치
 
 1. **PWA 아이콘들**
+
    ```
    web/icons/
    ├── Icon-192.png           ← 교체
-   ├── Icon-512.png           ← 교체  
+   ├── Icon-512.png           ← 교체
    ├── Icon-maskable-192.png  ← 교체
    └── Icon-maskable-512.png  ← 교체
    ```
@@ -104,6 +110,7 @@ AppBar(
 ## 🎨 브랜딩 색상 변경
 
 ### 메인 색상 변경
+
 ```dart
 // lib/core/colors.dart
 class GeulnamuColors {
@@ -113,11 +120,12 @@ class GeulnamuColors {
 ```
 
 ### 마니페스트 테마 색상 동기화
+
 ```json
 // web/manifest.json
 {
-  "theme_color": "#7DD3C0",      // ← 메인 색상과 맞춤
-  "background_color": "#F8F8F8"  // ← 배경 색상과 맞춤
+  "theme_color": "#7DD3C0", // ← 메인 색상과 맞춤
+  "background_color": "#F8F8F8" // ← 배경 색상과 맞춤
 }
 ```
 
@@ -126,18 +134,21 @@ class GeulnamuColors {
 ## 🚀 테스트 방법
 
 ### 1. 개발 서버 실행
+
 ```bash
 flutter pub get
 flutter run -d chrome --web-port 8080
 ```
 
 ### 2. PWA 기능 확인
+
 1. 크롬 개발자 도구 열기 (F12)
 2. `Application` 탭 → `Manifest` 확인
 3. `Service Workers` 확인
 4. 주소창 오른쪽 "설치" 버튼 확인
 
 ### 3. 모바일 테스트
+
 - 크롬 개발자 도구에서 모바일 뷰 확인
 - 실제 모바일 기기에서 테스트
 
@@ -148,13 +159,15 @@ flutter run -d chrome --web-port 8080
 현재는 기본 PWA 설정만 완료되었습니다. 추후 추가할 수 있는 기능들:
 
 ### 2단계 기능들
+
 - [ ] 오프라인 모드
-- [ ] 백그라운드 동기화  
+- [ ] 백그라운드 동기화
 - [ ] 푸시 알림
 - [ ] GPS 출석 체크
 - [ ] 고급 캐싱 전략
 
-### 3단계 기능들  
+### 3단계 기능들
+
 - [ ] 업데이트 알림 시스템
 - [ ] A/B 테스트
 - [ ] 성능 모니터링
@@ -165,11 +178,13 @@ flutter run -d chrome --web-port 8080
 ## 🛠️ 빌드 및 배포
 
 ### 웹 빌드
+
 ```bash
 flutter build web --release
 ```
 
 ### 배포 (geulnamu.com)
+
 ```bash
 # 빌드 결과물이 build/web/ 폴더에 생성됨
 # 이 폴더 내용을 geulnamu.com 서버에 업로드
@@ -182,11 +197,13 @@ flutter build web --release
 ### 자주 발생하는 문제들
 
 1. **아이콘이 표시되지 않을 때**
+
    - 파일 경로 확인
    - 파일 이름 정확히 일치하는지 확인
    - 브라우저 캐시 삭제 후 재시도
 
 2. **PWA 설치 버튼이 안 보일 때**
+
    - HTTPS 환경에서 테스트
    - manifest.json 문법 오류 확인
    - 서비스 워커 정상 등록 확인
@@ -202,7 +219,7 @@ flutter build web --release
 이 설정으로도 궁금한 점이나 문제가 있으면 언제든 문의해 주세요!
 
 - 로고 파일 준비 도움
-- 색상 조정  
+- 색상 조정
 - 고급 PWA 기능 추가
 - 배포 관련 문의
 

@@ -1,5 +1,5 @@
 {
-    "name": "글나무 - 독서 토론 모임 관리 서비스",
+    "name": "글나무",
     "short_name": "글나무",
     "start_url": "/?source=pwa",
     "display": "standalone",
