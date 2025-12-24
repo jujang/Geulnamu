@@ -73,18 +73,31 @@ class AttendanceSummary {
     }
   }
 
-  /// HH:mm 형식의 시간을 meetingDate와 결합하여 DateTime으로 변환 (null 안전)
+  /// HH:mm 또는 yyyy.MM.dd HH:mm 형식의 시간을 DateTime으로 변환 (null 안전)
   static DateTime _parseTimeAsDateTime(String? timeStr, String? dateStr) {
     if (timeStr == null || dateStr == null) {
       return DateTime.now(); // null인 경우 현재 시간 반환
     }
     
     try {
-      // dateStr: "yyyy.MM.dd HH:mm" -> yyyy-MM-dd 추출
-      final datePart = dateStr.split(' ')[0].replaceAll('.', '-');
-      // timeStr: "HH:mm"
-      final fullDateTimeStr = '${datePart}T$timeStr:00';
-      return DateTime.parse(fullDateTimeStr);
+      // 🆕 백엔드 새 날짜 형식: "yyyy.MM.dd HH:mm" 처리
+      if (timeStr.contains('.') && timeStr.contains(' ')) {
+        // "yyyy.MM.dd HH:mm" -> "yyyy-MM-ddTHH:mm:00"
+        final formatted = timeStr.replaceAll('.', '-').replaceAll(' ', 'T') + ':00';
+        return DateTime.parse(formatted);
+      }
+      
+      // 🔧 시간만 오는 경우 ("HH:mm") - 하위 호환성 유지
+      if (timeStr.contains(':') && !timeStr.contains(' ')) {
+        // dateStr: "yyyy.MM.dd HH:mm" -> yyyy-MM-dd 추출
+        final datePart = dateStr.split(' ')[0].replaceAll('.', '-');
+        // timeStr: "HH:mm"
+        final fullDateTimeStr = '${datePart}T$timeStr:00';
+        return DateTime.parse(fullDateTimeStr);
+      }
+      
+      // 표준 ISO 형식인 경우
+      return DateTime.parse(timeStr);
     } catch (e) {
       return DateTime.now(); // 파싱 실패 시 현재 시간 반환
     }
