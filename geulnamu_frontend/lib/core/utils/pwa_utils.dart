@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'pwa_utils_web.dart' if (dart.library.io) 'pwa_utils_stub.dart'
+import 'pwa_utils_web.dart'
+    if (dart.library.io) 'pwa_utils_stub.dart'
     as platform;
 
 /// 🎯 PWA 뒤로가기 핸들러 콜백 타입
@@ -56,32 +57,6 @@ class PWAUtils {
     platform.ensureHistoryEntry();
   }
 
-  /// 🎯 PWA 뒤로가기 핸들러 등록
-  ///
-  /// PWA 환경에서 시스템 뒤로가기 버튼을 가로채고
-  /// 커스텀 동작을 수행할 수 있게 함
-  ///
-  /// [callback]: 뒤로가기 시 호출될 콜백
-  /// - 반환값이 true면 실제로 뒤로가기 수행 (앱 종료)
-  /// - 반환값이 false면 뒤로가기 차단 (현재 화면 유지)
-  ///
-  /// 사용 예시:
-  /// ```dart
-  /// PWAUtils.registerBackPressHandler(() async {
-  ///   final shouldExit = await showDialog<bool>(
-  ///     context: context,
-  ///     builder: (context) => AlertDialog(
-  ///       title: Text('앱 종료'),
-  ///       content: Text('앱을 종료하시겠습니까?'),
-  ///       actions: [
-  ///         TextButton(onPressed: () => Navigator.pop(context, false), child: Text('취소')),
-  ///         TextButton(onPressed: () => Navigator.pop(context, true), child: Text('종료')),
-  ///       ],
-  ///     ),
-  ///   );
-  ///   return shouldExit ?? false;
-  /// });
-  /// ```
   static void registerBackPressHandler(BackPressCallback callback) {
     if (!kIsWeb) return;
     platform.registerBackPressHandler(callback);

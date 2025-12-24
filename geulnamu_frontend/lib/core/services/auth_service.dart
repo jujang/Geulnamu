@@ -570,13 +570,9 @@ class AuthService {
 
           // 🏠 메인 화면으로 리다이렉트 후 다이얼로그 표시
           if (context != null) {
-            Future.microtask(() {
-              // 메인 화면으로 이동 (로그인 화면 닫기)
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/home',
-                (route) => false,
-              );
+          Future.microtask(() {
+          // 🎯 GoRouter: 메인 화면으로 이동 (로그인 화면 히스토리 제거)
+          context.go('/home');
 
               // 짧은 딜레이 후 다이얼로그 표시 (화면 전환 완료 대기)
               Future.delayed(const Duration(milliseconds: 300), () {

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';  // 🎯 GoRouter import 추가
 import 'dart:html' as html show document;
 import '../config/app_config.dart';
 import '../../widgets/common/error_dialog.dart';
@@ -98,12 +99,8 @@ class ApiUtils {
           // 🏠 메인 화면으로 리다이렉트 후 다이얼로그 표시
           if (context != null) {
             Future.microtask(() {
-              // 메인 화면으로 이동 (로그인 화면 닫기)
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/home',
-                (route) => false,
-              );
+              // 🎯 GoRouter: 메인 화면으로 이동 (로그인 화면 히스토리 제거)
+              context.go('/home');
 
               // 짧은 딸레이 후 다이얼로그 표시 (화면 전환 완료 대기)
               Future.delayed(const Duration(milliseconds: 300), () {
@@ -124,11 +121,8 @@ class ApiUtils {
           if (apiName.contains('모임원') && context != null && showDialog) {
             // 비동기로 홈으로 리다이렉트
             Future.microtask(() {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/home',
-                (route) => false,
-              );
+              // 🎯 GoRouter: 메인 화면으로 이동 (권한 없음 경고)
+              context.go('/home');
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
