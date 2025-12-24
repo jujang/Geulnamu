@@ -1,20 +1,20 @@
 spring:
-#  cache:
-#    type: redis
-#    redis:
-#      time-to-live: 300000 # 5분 (밀리초)
-#      cache-null-values: false # null 값 캐싱 안 함
-#  data:
-#    redis:
-#      host: localhost
-#      port: 6379
-#      timeout: 3000ms
-#      lettuce:
-#        pool:
-#          max-active: 10  # 최대 커넥션 수
-#          max-idle: 10    # 최대 idle 커넥션
-#          min-idle: 2     # 최소 idle 커넥션
-#          max-wait: -1ms  # 커넥션 대기 시간 (-1은 무제한)
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300000 # 5분 (밀리초)
+      cache-null-values: false # null 값 캐싱 안 함
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 10  # 최대 커넥션 수
+          max-idle: 10    # 최대 idle 커넥션
+          min-idle: 2     # 최소 idle 커넥션
+          max-wait: -1ms  # 커넥션 대기 시간 (-1은 무제한)
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ${DB_USERNAME}

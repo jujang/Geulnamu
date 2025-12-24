@@ -41,3 +41,6 @@ server:
       charset: UTF-8
       enabled: true
       force: true
+
+slack:
+  webhook-url: ${SLACK_WEBHOOK_URL}

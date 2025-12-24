@@ -18,8 +18,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
 
-//@Configuration
-//@EnableCaching
+@Configuration
+@EnableCaching
 public class CacheConfig {
 
     /**
