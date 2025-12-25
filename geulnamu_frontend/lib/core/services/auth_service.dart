@@ -2,6 +2,7 @@ import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';  // 🎯 GoRouter import 추가
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -568,16 +569,21 @@ class AuthService {
             print('🚫 [카카오 로그인] 460 에러 감지 - 메인으로 리다이렉트');
           }
 
-          // 🏠 메인 화면으로 리다이렉트 후 다이얼로그 표시
+          // 🎯 메인 화면으로 리다이렉트 후 다이얼로그 표시
           if (context != null) {
-          Future.microtask(() {
-          // 🎯 GoRouter: 메인 화면으로 이동 (로그인 화면 히스토리 제거)
-          context.go('/home');
-
-              // 짧은 딜레이 후 다이얼로그 표시 (화면 전환 완료 대기)
-              Future.delayed(const Duration(milliseconds: 300), () {
+            // 🎯 GoRouter: 홈으로 즉시 이동
+            context.go('/home');
+            
+            // 다이얼로그는 화면 전환 완료 후 표시
+            Future.delayed(const Duration(milliseconds: 300), () {
+              // 🛡️ 안전하게 context 사용
+              try {
                 ErrorDialog.showAccountDeactivatedError(context);
-              });
+              } catch (e) {
+                if (AppConfig.debugMode) {
+                  print('⚠️ [카카오 로그인] 다이얼로그 표시 실패 (무시): $e');
+                }
+              }
             });
           }
         }

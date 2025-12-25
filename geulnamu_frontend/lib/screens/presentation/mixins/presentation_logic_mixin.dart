@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/presentation/presentation_service.dart';
@@ -188,8 +189,8 @@ mixin PresentationLogicMixin<T extends StatefulWidget> on State<T> {
       );
     }
 
-    // 임시: 모임 상세 페이지로 이동
-    Navigator.pushNamed(context, '/meeting/${presentation.meetingId}');
+    // 🎯 GoRouter: push로 모임 상세 페이지로 이동
+    context.push('/meeting/${presentation.meetingId}');
   }
 
   // Private methods
