@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../providers/auth_provider.dart';
@@ -96,8 +97,8 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
         print('❌ [ProfileAdminLogicMixin] 관리자 모드 접근 권한 없음 - 홈으로 리다이렉트');
       }
 
-      // 권한 없음 - 홈으로 리다이렉트
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      // 🎯 GoRouter: 권한 없음 - 홈으로 리다이렉트
+      context.go('/home');
 
       // 에러 메시지 표시
       ScaffoldMessenger.of(context).showSnackBar(
@@ -128,7 +129,8 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
     } else {
       // targetMemberId가 null이면 잘못된 접근
       if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+        // 🎯 GoRouter: 잘못된 접근 - 홈으로 리다이렉트
+        context.go('/home');
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -436,7 +438,8 @@ mixin ProfileAdminLogicMixin<T extends StatefulWidget> on State<T> {
   void handleLogout() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     authProvider.logout();
-    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    // 🎯 GoRouter: go로 로그인 화면으로 이동 (히스토리 초기화)
+    context.go('/login');
   }
 
   // 🎯 관리자 모드 전용 메서드들

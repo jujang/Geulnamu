@@ -478,12 +478,4 @@ class MeetingService {
       rethrow;
     }
   }
-
-  /// 출석현황 확인 처리 (향후 구현 예정)
-  ///
-  /// [meetingId] 모임 ID
-  void handleAttendanceCheck(int meetingId) {
-    // TODO: 향후 출석현황 페이지 구현 시 아래 코드 활성화
-    // Navigator.pushNamed(context, '/meeting/$meetingId/attendance');
-  }
 }

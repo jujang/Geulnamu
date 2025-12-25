@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../providers/auth_provider.dart';
@@ -392,7 +393,8 @@ mixin ProfileSelfLogicMixin<T extends StatefulWidget> on State<T> {
   void handleLogout() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     authProvider.logout();
-    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    // 🎯 GoRouter: go로 로그인 화면으로 이동 (히스토리 초기화)
+    context.go('/login');
   }
 
   // ==================== 🎯 툴팁 가이드 시스템 ====================

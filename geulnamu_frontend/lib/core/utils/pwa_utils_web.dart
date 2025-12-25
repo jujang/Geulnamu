@@ -40,7 +40,6 @@ bool isInstalledPWA() {
 /// iOS Safari의 standalone 속성 확인
 bool _isIOSStandalone() {
   try {
-    // JavaScript의 navigator.standalone 속성 접근 (dart:js_interop_unsafe 방식)
     final navigator = web.window.navigator as JSObject;
     final standaloneValue = navigator['standalone'];
     if (standaloneValue.isA<JSBoolean>()) {
@@ -59,16 +58,16 @@ void initializePWAHistory() {
   try {
     // 🎯 PWA 체크 제거 - 모든 웹 환경에서 동작하도록
     final history = web.window.history;
-    
+
     if (kDebugMode) {
       print('🎯 [PWAUtils] 히스토리 초기화 시작 (현재 length: ${history.length})');
     }
-    
+
     // 히스토리가 부족하면 더미 항목 추가 (뒤로가기 감지용)
     if (history.length <= 2) {
       // 더미 히스토리 항목 추가 (현재 URL 유지)
       history.pushState(null, '', web.window.location.href);
-      
+
       if (kDebugMode) {
         print('🎯 [PWAUtils] 히스토리 초기화 완료 (length: ${history.length})');
       }
@@ -108,14 +107,14 @@ void ensureHistoryEntry() {
 }
 
 /// 🎯 PWA 뒤로가기 핸들러 등록
-/// 
+///
 /// [callback]: 뒤로가기 시 호출될 콜백
 /// - 반환값이 true면 실제로 뒤로가기 수행
 /// - 반환값이 false면 뒤로가기 차단 (현재 화면 유지)
 void registerBackPressHandler(BackPressCallback callback) {
   // 🎯 PWA 체크 제거 - 브라우저에서도 동작하도록
   // 웹 환경이 아니면 등록하지 않음 (Flutter Web만 대상)
-  
+
   // 기존 리스너가 있으면 먼저 해제
   unregisterBackPressHandler();
 
@@ -185,10 +184,10 @@ void _handlePopState(web.Event event) async {
       if (kDebugMode) {
         print('🎯 [PWAUtils] 뒤로가기 허용 - 원래 동작 재개');
       }
-      
+
       // 핸들러 해제하여 다음 popstate가 정상 처리되도록
       unregisterBackPressHandler();
-      
+
       // 🎯 원래 뒤로가기 동작 재개 (pushState로 추가한 항목 제거)
       // history.back()을 호출하면 다시 popstate가 발생하지만
       // 핸들러가 해제되었으므로 브라우저 기본 동작(앱 종료)이 수행됨
@@ -213,7 +212,9 @@ void _ensureHistoryForBackPress() {
     // 현재 URL로 히스토리 항목 추가
     web.window.history.pushState(null, '', web.window.location.href);
     if (kDebugMode) {
-      print('🎯 [PWAUtils] 뒤로가기 감지용 히스토리 추가 (length: ${web.window.history.length})');
+      print(
+        '🎯 [PWAUtils] 뒤로가기 감지용 히스토리 추가 (length: ${web.window.history.length})',
+      );
     }
   } catch (e) {
     if (kDebugMode) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme.dart';
 import '../../../models/meeting/meeting_detail_model.dart';
 import '../../../models/meeting/group_member_model.dart';
@@ -70,13 +71,13 @@ class MeetingDetailWidgets {
                 // 인증 에러: 로그인 버튼 / 일반 에러: 홈으로 버튼
                 if (isAuthError)
                   OutlinedButton.icon(
-                    onPressed: () => Navigator.of(context).pushReplacementNamed('/login'),
+                    onPressed: () => context.go('/login'),
                     icon: const Icon(Icons.login),
                     label: const Text('로그인하기', style: TextStyle(fontSize: 16)),
                   )
                 else
                   OutlinedButton.icon(
-                    onPressed: () => Navigator.of(context).pushReplacementNamed('/home'),
+                    onPressed: () => context.go('/home'),
                     icon: const Icon(Icons.home),
                     label: const Text('홈으로', style: TextStyle(fontSize: 16)),
                   ),

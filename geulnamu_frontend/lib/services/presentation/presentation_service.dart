@@ -31,7 +31,7 @@ class PresentationService {
       if (AppConfig.debugMode) {
         print('🚀 [발제문 목록 조회] API 요청 시작...');
       }
-      
+
       // 🔥 강제 캐시 버스트 추가
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final queryParams = filter.toQueryParameters();
@@ -40,7 +40,9 @@ class PresentationService {
       queryParams['_refresh'] = 'true';
 
       if (AppConfig.debugMode) {
-        print('📅 [캐시 무효화] GET /meetings/list?${queryParams.entries.map((e) => '${e.key}=${e.value}').join('&')}');
+        print(
+          '📅 [캐시 무효화] GET /meetings/list?${queryParams.entries.map((e) => '${e.key}=${e.value}').join('&')}',
+        );
       }
 
       final response = await _dio.get(
@@ -71,7 +73,9 @@ class PresentationService {
         );
 
         if (AppConfig.debugMode) {
-          print('✅ [발제문 목록 조회] 성공 - 총 ${presentationListResponse.presentationList.length}개 발제문, 페이지: ${presentationListResponse.pagingResponse.pageNumber}/${presentationListResponse.pagingResponse.totalPages}');
+          print(
+            '✅ [발제문 목록 조회] 성공 - 총 ${presentationListResponse.presentationList.length}개 발제문, 페이지: ${presentationListResponse.pagingResponse.pageNumber}/${presentationListResponse.pagingResponse.totalPages}',
+          );
         }
 
         return presentationListResponse;
@@ -84,73 +88,5 @@ class PresentationService {
       }
       rethrow;
     }
-  }
-
-  /// 발제문 상세 조회 (향후 구현)
-  ///
-  /// API: GET /meetings/{meetingId}/presentation (가상 API)
-  /// 권한: MEMBER 이상
-  Future<void> getPresentationDetail({
-    required int meetingId,
-    required String accessToken,
-  }) async {
-    // TODO: 향후 발제문 상세 API 구현 시 활용
-    if (AppConfig.debugMode) {
-      print('🔮 [발제문 상세 조회] 향후 구현 예정 - meetingId: $meetingId');
-    }
-  }
-
-  /// 발제문 작성 (향후 구현)
-  ///
-  /// API: POST /meetings/{meetingId}/presentation (가상 API)
-  /// 권한: MEMBER 이상
-  Future<void> createPresentation({
-    required int meetingId,
-    required String content,
-    required String accessToken,
-  }) async {
-    // TODO: 향후 발제문 작성 API 구현 시 활용
-    if (AppConfig.debugMode) {
-      print('🔮 [발제문 작성] 향후 구현 예정 - meetingId: $meetingId');
-    }
-  }
-
-  /// 발제문 수정 (향후 구현)
-  ///
-  /// API: PATCH /meetings/{meetingId}/presentation (가상 API)
-  /// 권한: MEMBER 이상 (본인 작성 발제문만)
-  Future<void> updatePresentation({
-    required int meetingId,
-    required String content,
-    required String accessToken,
-  }) async {
-    // TODO: 향후 발제문 수정 API 구현 시 활용
-    if (AppConfig.debugMode) {
-      print('🔮 [발제문 수정] 향후 구현 예정 - meetingId: $meetingId');
-    }
-  }
-
-  /// 발제문 삭제 (향후 구현)
-  ///
-  /// API: DELETE /meetings/{meetingId}/presentation (가상 API)
-  /// 권한: MEMBER 이상 (본인 작성 발제문만)
-  Future<void> deletePresentation({
-    required int meetingId,
-    required String accessToken,
-  }) async {
-    // TODO: 향후 발제문 삭제 API 구현 시 활용
-    if (AppConfig.debugMode) {
-      print('🔮 [발제문 삭제] 향후 구현 예정 - meetingId: $meetingId');
-    }
-  }
-
-  /// 발제문 상세 페이지 이동 처리
-  void handlePresentationDetail(int meetingId) {
-    if (AppConfig.debugMode) {
-      print('🎯 [PresentationService] 발제문 상세 페이지 이동: meetingId=$meetingId');
-    }
-
-    // TODO: 향후 발제문 상세 페이지 구현 시 아래 코드 활성화
-    // Navigator.pushNamed(context, '/presentation/$meetingId');
   }
 }
