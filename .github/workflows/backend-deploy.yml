@@ -1,13 +1,13 @@
 name: Backend Auto Build & Deploy
 
-# 🎯 트리거 설정
+# 🎯 트리거 설정: dev 브랜치로의 push만 감지 (배포)
 on:
   push:
     branches:
-      - dev  # 현재: dev 브랜치로 merge 시 배포
+      - dev  # dev 브랜치로 PR merge 또는 직접 commit 시 배포
       # - prod  # 향후: prod 브랜치로 변경 시 주석 해제
     paths:
-      - 'geulnamu_backend/src/**'                    # Java 소스 코드
+      - 'geulnamu_backend/src/**'                    # Java 소스 코드 + 리소스 파일
       - 'geulnamu_backend/build.gradle'              # 빌드 설정
       - 'geulnamu_backend/settings.gradle'           # 프로젝트 설정
       - 'geulnamu_backend/gradle.properties'         # Gradle 속성
@@ -83,8 +83,8 @@ jobs:
         run: |
           echo "📤 배포 스크립트 생성 및 전송 중..."
           
-          # 배포 스크립트 생성 (환경 변수 사용)
-          cat > deploy.sh << EOF
+          # 배포 스크립트 생성
+          cat > deploy.sh << 'DEPLOY_SCRIPT'
 #!/bin/bash
 
 echo "🚀 ============================================"
@@ -93,17 +93,17 @@ echo "============================================ 🚀"
 
 # 1️⃣ 구버전 프로세스 종료
 echo "1️⃣ 구버전 애플리케이션 종료 중..."
-PID=\$(ps aux | grep 'geulnamu-0.0.1-SNAPSHOT.jar' | grep -v grep | awk '{print \$2}')
+PID=$(ps aux | grep 'geulnamu-0.0.1-SNAPSHOT.jar' | grep -v grep | awk '{print $2}')
 
-if [ -n "\$PID" ]; then
-  echo "   찾은 PID: \$PID"
-  kill -15 \$PID  # SIGTERM으로 graceful shutdown 시도
+if [ -n "$PID" ]; then
+  echo "   찾은 PID: $PID"
+  kill -15 $PID  # SIGTERM으로 graceful shutdown 시도
   sleep 5
   
   # 프로세스가 아직 살아있으면 강제 종료
-  if ps -p \$PID > /dev/null; then
+  if ps -p $PID > /dev/null; then
     echo "   Graceful shutdown 실패, 강제 종료..."
-    kill -9 \$PID
+    kill -9 $PID
   fi
   
   echo "   ✅ 구버전 애플리케이션 종료 완료!"
@@ -113,13 +113,13 @@ fi
 
 # 2️⃣ 오래된 로그 파일 정리 (30일 이전)
 echo "2️⃣ 오래된 로그 파일 정리 중..."
-cd $ORACLE_DEPLOY_PATH
+cd DEPLOY_PATH_PLACEHOLDER
 
 # 30일 이전 로그 파일 개수 확인
-OLD_LOG_COUNT=\$(find . -maxdepth 1 -name "geulnamu_*.log" -mtime +30 2>/dev/null | wc -l)
+OLD_LOG_COUNT=$(find . -maxdepth 1 -name "geulnamu_*.log" -mtime +30 2>/dev/null | wc -l)
 
-if [ "\$OLD_LOG_COUNT" -gt 0 ]; then
-  echo "   🗑️ 30일 이전 로그 파일 \$OLD_LOG_COUNT 개 발견"
+if [ "$OLD_LOG_COUNT" -gt 0 ]; then
+  echo "   🗑️ 30일 이전 로그 파일 $OLD_LOG_COUNT 개 발견"
   find . -maxdepth 1 -name "geulnamu_*.log" -mtime +30 -delete
   echo "   ✅ 오래된 로그 파일 삭제 완료!"
 else
@@ -127,38 +127,38 @@ else
 fi
 
 # 현재 남아있는 로그 파일 개수
-CURRENT_LOG_COUNT=\$(ls -1 geulnamu_*.log 2>/dev/null | wc -l)
-echo "   📁 현재 로그 파일 개수: \$CURRENT_LOG_COUNT 개"
+CURRENT_LOG_COUNT=$(ls -1 geulnamu_*.log 2>/dev/null | wc -l)
+echo "   📁 현재 로그 파일 개수: $CURRENT_LOG_COUNT 개"
 
 # 3️⃣ 새 애플리케이션 실행
 echo "3️⃣ 새 애플리케이션 실행 중..."
-cd $ORACLE_DEPLOY_PATH
+cd DEPLOY_PATH_PLACEHOLDER
 
 # 날짜와 시간이 포함된 로그 파일명 생성
-LOG_FILE="geulnamu_\$(date +%Y%m%d_%H%M%S).log"
-echo "   📋 로그 파일: \$LOG_FILE"
+LOG_FILE="geulnamu_$(date +%Y%m%d_%H%M%S).log"
+echo "   📋 로그 파일: $LOG_FILE"
 
-nohup java -Xms128m -Xmx384m -jar -Dspring.profiles.active=prod geulnamu-0.0.1-SNAPSHOT.jar > \$LOG_FILE 2>&1 &
+nohup java -Xms128m -Xmx384m -jar -Dspring.profiles.active=prod geulnamu-0.0.1-SNAPSHOT.jar > $LOG_FILE 2>&1 &
 
-NEW_PID=\$!
-echo "   ✅ 새 애플리케이션 실행 완료! (PID: \$NEW_PID)"
+NEW_PID=$!
+echo "   ✅ 새 애플리케이션 실행 완료! (PID: $NEW_PID)"
 
 # 4️⃣ 프로세스 상태 확인 (10초 대기)
 echo "4️⃣ 애플리케이션 시작 확인 중... (10초 대기)"
 sleep 10
 
 # 프로세스 상태 확인
-if ps -p \$NEW_PID > /dev/null; then
+if ps -p $NEW_PID > /dev/null; then
   echo "   ✅ 애플리케이션이 정상적으로 실행 중입니다!"
 else
   echo "   ❌ 애플리케이션 실행 실패!"
   echo "   📋 최근 로그:"
   
   # 가장 최근 로그 파일 찾기
-  LATEST_LOG=\$(ls -t geulnamu_*.log 2>/dev/null | head -n 1)
-  if [ -n "\$LATEST_LOG" ]; then
-    echo "   로그 파일: \$LATEST_LOG"
-    tail -n 20 \$LATEST_LOG
+  LATEST_LOG=$(ls -t geulnamu_*.log 2>/dev/null | head -n 1)
+  if [ -n "$LATEST_LOG" ]; then
+    echo "   로그 파일: $LATEST_LOG"
+    tail -n 20 $LATEST_LOG
   else
     echo "   로그 파일을 찾을 수 없습니다."
   fi
@@ -169,7 +169,10 @@ fi
 echo "🎉 ============================================"
 echo "✅ 백엔드 배포 완료!"
 echo "============================================ 🎉"
-EOF
+DEPLOY_SCRIPT
+          
+          # 환경 변수로 경로 치환
+          sed -i "s|DEPLOY_PATH_PLACEHOLDER|$ORACLE_DEPLOY_PATH|g" deploy.sh
           
           # 스크립트 전송
           scp -i ~/.ssh/oracle_key -P $ORACLE_PORT -o StrictHostKeyChecking=no \
