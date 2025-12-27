@@ -1,0 +1,269 @@
+name: Backend Auto Build & Deploy
+
+# 🎯 트리거 설정
+on:
+  push:
+    branches:
+      - dev  # 현재: dev 브랜치로 merge 시 배포
+      # - prod  # 향후: prod 브랜치로 변경 시 주석 해제
+    paths:
+      - 'geulnamu_backend/src/**'                    # Java 소스 코드
+      - 'geulnamu_backend/build.gradle'              # 빌드 설정
+      - 'geulnamu_backend/settings.gradle'           # 프로젝트 설정
+      - 'geulnamu_backend/gradle.properties'         # Gradle 속성
+
+# 🚀 빌드 및 배포 작업
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1️⃣ 저장소 체크아웃
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      # 2️⃣ JDK 17 설치
+      - name: ☕ Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'  # Gradle 의존성 캐싱
+      
+      # 3️⃣ Gradle 실행 권한 부여
+      - name: 🔓 Grant execute permission for gradlew
+        working-directory: geulnamu_backend
+        run: chmod +x gradlew
+      
+      # 4️⃣ Gradle 빌드 (테스트 포함)
+      - name: 🔨 Build with Gradle
+        working-directory: geulnamu_backend
+        run: |
+          echo "🔨 Gradle 빌드 시작..."
+          ./gradlew clean build
+          echo "✅ 빌드 완료!"
+      
+      # 5️⃣ 빌드 결과물 확인
+      - name: 📦 Verify JAR file
+        working-directory: geulnamu_backend
+        run: |
+          echo "📦 빌드된 JAR 파일 확인..."
+          ls -lh build/libs/
+          
+          if [ -f "build/libs/geulnamu-0.0.1-SNAPSHOT.jar" ]; then
+            echo "✅ JAR 파일 생성 성공!"
+            echo "📊 파일 크기: $(du -h build/libs/geulnamu-0.0.1-SNAPSHOT.jar | cut -f1)"
+          else
+            echo "❌ JAR 파일이 생성되지 않았습니다!"
+            exit 1
+          fi
+      
+      # 6️⃣ SSH 키 설정
+      - name: 🔐 Setup SSH Key
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+        run: |
+          echo "🔐 SSH 키 설정 중..."
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ORACLE_SSH_KEY }}" > ~/.ssh/oracle_key
+          chmod 600 ~/.ssh/oracle_key
+          
+          # known_hosts에 서버 추가 (SSH 핑거프린트 확인 스킵)
+          ssh-keyscan -H $ORACLE_HOST >> ~/.ssh/known_hosts
+          
+          echo "✅ SSH 키 설정 완료!"
+      
+      # 7️⃣ 서버에 배포 스크립트 전송
+      - name: 📤 Upload deploy script to server
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_PORT: ${{ secrets.ORACLE_PORT }}
+          ORACLE_USER: ${{ secrets.ORACLE_USER }}
+          ORACLE_DEPLOY_PATH: ${{ secrets.ORACLE_DEPLOY_PATH }}
+        run: |
+          echo "📤 배포 스크립트 생성 및 전송 중..."
+          
+          # 배포 스크립트 생성 (환경 변수 사용)
+          cat > deploy.sh << EOF
+#!/bin/bash
+
+echo "🚀 ============================================"
+echo "📦 백엔드 배포 시작..."
+echo "============================================ 🚀"
+
+# 1️⃣ 구버전 프로세스 종료
+echo "1️⃣ 구버전 애플리케이션 종료 중..."
+PID=\$(ps aux | grep 'geulnamu-0.0.1-SNAPSHOT.jar' | grep -v grep | awk '{print \$2}')
+
+if [ -n "\$PID" ]; then
+  echo "   찾은 PID: \$PID"
+  kill -15 \$PID  # SIGTERM으로 graceful shutdown 시도
+  sleep 5
+  
+  # 프로세스가 아직 살아있으면 강제 종료
+  if ps -p \$PID > /dev/null; then
+    echo "   Graceful shutdown 실패, 강제 종료..."
+    kill -9 \$PID
+  fi
+  
+  echo "   ✅ 구버전 애플리케이션 종료 완료!"
+else
+  echo "   ℹ️ 실행 중인 애플리케이션이 없습니다."
+fi
+
+# 2️⃣ 오래된 로그 파일 정리 (30일 이전)
+echo "2️⃣ 오래된 로그 파일 정리 중..."
+cd $ORACLE_DEPLOY_PATH
+
+# 30일 이전 로그 파일 개수 확인
+OLD_LOG_COUNT=\$(find . -maxdepth 1 -name "geulnamu_*.log" -mtime +30 2>/dev/null | wc -l)
+
+if [ "\$OLD_LOG_COUNT" -gt 0 ]; then
+  echo "   🗑️ 30일 이전 로그 파일 \$OLD_LOG_COUNT 개 발견"
+  find . -maxdepth 1 -name "geulnamu_*.log" -mtime +30 -delete
+  echo "   ✅ 오래된 로그 파일 삭제 완료!"
+else
+  echo "   ℹ️ 삭제할 오래된 로그 파일이 없습니다."
+fi
+
+# 현재 남아있는 로그 파일 개수
+CURRENT_LOG_COUNT=\$(ls -1 geulnamu_*.log 2>/dev/null | wc -l)
+echo "   📁 현재 로그 파일 개수: \$CURRENT_LOG_COUNT 개"
+
+# 3️⃣ 새 애플리케이션 실행
+echo "3️⃣ 새 애플리케이션 실행 중..."
+cd $ORACLE_DEPLOY_PATH
+
+# 날짜와 시간이 포함된 로그 파일명 생성
+LOG_FILE="geulnamu_\$(date +%Y%m%d_%H%M%S).log"
+echo "   📋 로그 파일: \$LOG_FILE"
+
+nohup java -Xms128m -Xmx384m -jar -Dspring.profiles.active=prod geulnamu-0.0.1-SNAPSHOT.jar > \$LOG_FILE 2>&1 &
+
+NEW_PID=\$!
+echo "   ✅ 새 애플리케이션 실행 완료! (PID: \$NEW_PID)"
+
+# 4️⃣ 프로세스 상태 확인 (10초 대기)
+echo "4️⃣ 애플리케이션 시작 확인 중... (10초 대기)"
+sleep 10
+
+# 프로세스 상태 확인
+if ps -p \$NEW_PID > /dev/null; then
+  echo "   ✅ 애플리케이션이 정상적으로 실행 중입니다!"
+else
+  echo "   ❌ 애플리케이션 실행 실패!"
+  echo "   📋 최근 로그:"
+  
+  # 가장 최근 로그 파일 찾기
+  LATEST_LOG=\$(ls -t geulnamu_*.log 2>/dev/null | head -n 1)
+  if [ -n "\$LATEST_LOG" ]; then
+    echo "   로그 파일: \$LATEST_LOG"
+    tail -n 20 \$LATEST_LOG
+  else
+    echo "   로그 파일을 찾을 수 없습니다."
+  fi
+  
+  exit 1
+fi
+
+echo "🎉 ============================================"
+echo "✅ 백엔드 배포 완료!"
+echo "============================================ 🎉"
+EOF
+          
+          # 스크립트 전송
+          scp -i ~/.ssh/oracle_key -P $ORACLE_PORT -o StrictHostKeyChecking=no \
+            deploy.sh $ORACLE_USER@$ORACLE_HOST:$ORACLE_DEPLOY_PATH/
+          
+          echo "✅ 배포 스크립트 전송 완료!"
+      
+      # 8️⃣ JAR 파일을 서버로 전송 및 무결성 검증
+      - name: 📤 Upload JAR to Oracle Cloud
+        working-directory: geulnamu_backend
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_PORT: ${{ secrets.ORACLE_PORT }}
+          ORACLE_USER: ${{ secrets.ORACLE_USER }}
+          ORACLE_DEPLOY_PATH: ${{ secrets.ORACLE_DEPLOY_PATH }}
+        run: |
+          echo "📤 JAR 파일 전송 시작..."
+          
+          # 1️⃣ 로컬 JAR 파일의 MD5 체크섬 계산
+          echo "📊 로컬 JAR 파일 체크섬 계산 중..."
+          LOCAL_MD5=$(md5sum build/libs/geulnamu-0.0.1-SNAPSHOT.jar | awk '{print $1}')
+          echo "📊 로컬 JAR MD5: $LOCAL_MD5"
+          
+          # 2️⃣ JAR 파일 전송
+          echo "🚀 JAR 파일 전송 중..."
+          scp -i ~/.ssh/oracle_key -P $ORACLE_PORT -o StrictHostKeyChecking=no \
+            build/libs/geulnamu-0.0.1-SNAPSHOT.jar \
+            $ORACLE_USER@$ORACLE_HOST:$ORACLE_DEPLOY_PATH/
+          echo "✅ JAR 파일 전송 완료!"
+          
+          # 3️⃣ 서버의 JAR 파일 MD5 체크섬 계산
+          echo "📊 서버 JAR 파일 체크섬 확인 중..."
+          REMOTE_MD5=$(ssh -i ~/.ssh/oracle_key -p $ORACLE_PORT -o StrictHostKeyChecking=no \
+            $ORACLE_USER@$ORACLE_HOST \
+            "md5sum $ORACLE_DEPLOY_PATH/geulnamu-0.0.1-SNAPSHOT.jar | awk '{print \$1}'")
+          echo "📊 서버 JAR MD5: $REMOTE_MD5"
+          
+          # 4️⃣ 무결성 검증
+          echo "🔍 무결성 검증 중..."
+          if [ "$LOCAL_MD5" != "$REMOTE_MD5" ]; then
+            echo "❌ ============================================"
+            echo "❌ JAR 파일 전송 실패!"
+            echo "❌ 로컬 MD5:  $LOCAL_MD5"
+            echo "❌ 서버 MD5:  $REMOTE_MD5"
+            echo "❌ 체크섬이 일치하지 않습니다."
+            echo "❌ 배포를 중단합니다."
+            echo "❌ ============================================"
+            exit 1
+          fi
+          
+          echo "✅ ============================================"
+          echo "✅ JAR 파일 무결성 확인 완료!"
+          echo "✅ 체크섬: $LOCAL_MD5"
+          echo "✅ 파일이 정상적으로 전송되었습니다."
+          echo "✅ ============================================"
+      
+      # 9️⃣ 서버에서 배포 스크립트 실행
+      - name: 🚀 Execute deploy script on server
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_PORT: ${{ secrets.ORACLE_PORT }}
+          ORACLE_USER: ${{ secrets.ORACLE_USER }}
+          ORACLE_DEPLOY_PATH: ${{ secrets.ORACLE_DEPLOY_PATH }}
+        run: |
+          echo "🚀 서버에서 배포 스크립트 실행 중..."
+          
+          ssh -i ~/.ssh/oracle_key -p $ORACLE_PORT -o StrictHostKeyChecking=no \
+            $ORACLE_USER@$ORACLE_HOST \
+            "chmod +x $ORACLE_DEPLOY_PATH/deploy.sh && $ORACLE_DEPLOY_PATH/deploy.sh"
+          
+          echo "✅ 배포 스크립트 실행 완료!"
+      
+      # 🔟 배포 결과 요약
+      - name: 📊 Deploy Summary
+        if: success()
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+        run: |
+          echo "🎉 ============================================"
+          echo "✅ Backend 자동 빌드 및 배포가 완료되었습니다!"
+          echo "📦 빌드 브랜치: ${{ github.ref_name }}"
+          echo "🔨 빌드 커밋: ${{ github.sha }}"
+          echo "📂 JAR 파일: geulnamu-0.0.1-SNAPSHOT.jar"
+          echo "🌐 배포 서버: $ORACLE_HOST"
+          echo "🔧 프로파일: prod"
+          echo "============================================ 🎉"
+      
+      # ❌ 배포 실패 시 정보 출력
+      - name: ❌ Deploy Failed
+        if: failure()
+        run: |
+          echo "❌ ============================================"
+          echo "⚠️ Backend 배포에 실패했습니다!"
+          echo "📦 실패한 브랜치: ${{ github.ref_name }}"
+          echo "🔨 실패한 커밋: ${{ github.sha }}"
+          echo "💡 GitHub Actions 로그를 확인하세요."
+          echo "============================================ ❌"
