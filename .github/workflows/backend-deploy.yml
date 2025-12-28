@@ -76,6 +76,41 @@ jobs:
           
           echo "✅ SSH 키 설정 완료!"
       
+      # 🔍 디버깅: 환경변수 확인
+      - name: 🔍 Debug Environment Variables
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_PORT: ${{ secrets.ORACLE_PORT }}
+          ORACLE_USER: ${{ secrets.ORACLE_USER }}
+          ORACLE_DEPLOY_PATH: ${{ secrets.ORACLE_DEPLOY_PATH }}
+        run: |
+          echo "🔍 환경변수 확인..."
+          echo "-------------------------------------------"
+          echo "ORACLE_HOST 설정: $([[ -n "$ORACLE_HOST" ]] && echo 'YES' || echo 'NO')"
+          echo "ORACLE_HOST 길이: ${#ORACLE_HOST}"
+          echo "ORACLE_PORT 설정: $([[ -n "$ORACLE_PORT" ]] && echo 'YES' || echo 'NO')"
+          echo "ORACLE_PORT 값: ${ORACLE_PORT:-'(empty)'}"
+          echo "ORACLE_USER 설정: $([[ -n "$ORACLE_USER" ]] && echo 'YES' || echo 'NO')"
+          echo "ORACLE_USER 길이: ${#ORACLE_USER}"
+          echo "ORACLE_DEPLOY_PATH 설정: $([[ -n "$ORACLE_DEPLOY_PATH" ]] && echo 'YES' || echo 'NO')"
+          echo "ORACLE_DEPLOY_PATH 값: ${ORACLE_DEPLOY_PATH:-'(empty)'}"
+          echo "-------------------------------------------"
+          
+          # 호스트명 첫 3글자만 출력 (보안)
+          if [[ -n "$ORACLE_HOST" ]]; then
+            echo "ORACLE_HOST 시작: ${ORACLE_HOST:0:3}..."
+          fi
+          
+          # DNS 해석 테스트
+          echo ""
+          echo "🌐 DNS 해석 테스트..."
+          if getent hosts "$ORACLE_HOST" >/dev/null 2>&1; then
+            echo "✅ DNS 해석 성공: $ORACLE_HOST"
+          else
+            echo "❌ DNS 해석 실패: $ORACLE_HOST"
+            echo "⚠️ ORACLE_HOST Secret 값을 확인하세요!"
+          fi
+      
       # 7️⃣ 서버에 배포 스크립트 전송
       - name: 📤 Upload deploy script to server
         env:
