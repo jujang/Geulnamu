@@ -76,7 +76,6 @@ jobs:
           
           echo "✅ SSH 키 설정 완료!"
       
-      
       # 7️⃣ 서버에 배포 스크립트 전송
       - name: 📤 Upload deploy script to server
         env:
@@ -92,27 +91,6 @@ jobs:
             .github/scripts/deploy.sh "$ORACLE_USER@$ORACLE_HOST:$ORACLE_DEPLOY_PATH/"
           
           echo "✅ 배포 스크립트 전송 완료!"
-      
-      # 7️⃣-1️⃣ .env 파일 생성 (환경변수) - 현재 미사용
-      # 서버에 /etc/bash.bashrc로 환경변수 설정됨
-      # 향후 .env 파일로 변경 시 주석 해제
-      # - name: 🔧 Create .env file on server
-      #   env:
-      #     ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
-      #     ORACLE_PORT: ${{ secrets.ORACLE_PORT }}
-      #     ORACLE_USER: ${{ secrets.ORACLE_USER }}
-      #     ORACLE_DEPLOY_PATH: ${{ secrets.ORACLE_DEPLOY_PATH }}
-      #   run: |
-      #     echo "🔧 서버에 .env 파일 생성 중..."
-      #     
-      #     if [ -n "${{ secrets.ENV_FILE_CONTENT }}" ]; then
-      #       echo "${{ secrets.ENV_FILE_CONTENT }}" | ssh -i ~/.ssh/oracle_key -p "$ORACLE_PORT" -o StrictHostKeyChecking=no \
-      #         "$ORACLE_USER@$ORACLE_HOST" "cat > $ORACLE_DEPLOY_PATH/.env && chmod 600 $ORACLE_DEPLOY_PATH/.env"
-      #       echo "✅ .env 파일 생성 완료!"
-      #     else
-      #       echo "⚠️ ENV_FILE_CONTENT Secret이 설정되지 않았습니다."
-      #       echo "🚨 서버에 수동으로 .env 파일을 생성하세요!"
-      #     fi
       
       # 8️⃣ JAR 파일을 서버로 전송 및 무결성 검증
       - name: 📤 Upload JAR to Oracle Cloud
