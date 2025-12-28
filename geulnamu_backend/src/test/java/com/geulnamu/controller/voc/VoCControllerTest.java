@@ -73,7 +73,7 @@ public class VoCControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/voc/error-report/create",
+                "voc/error-report/create",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -118,7 +118,7 @@ public class VoCControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/voc/feature-request/create",
+                "voc/feature-request/create",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -186,7 +186,7 @@ public class VoCControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/voc/list/view",
+                "voc/list/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -249,7 +249,7 @@ public class VoCControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/voc/status/modify",
+                "voc/status/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(

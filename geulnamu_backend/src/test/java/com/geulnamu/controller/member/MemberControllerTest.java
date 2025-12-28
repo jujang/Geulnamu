@@ -75,7 +75,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value(response))
             .andDo(document(
-                "/members/check/status/my",
+                "members/check/status/my",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -116,7 +116,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/members/my/view",
+                "members/my/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -163,7 +163,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/members/view",
+                "members/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -232,7 +232,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/members/list/view",
+                "members/list/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -290,7 +290,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/members/my/push-setting/view",
+                "members/my/push-setting/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -330,7 +330,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/members/my/push-setting/modify",
+                "members/my/push-setting/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -373,7 +373,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/members/info/modify/my",
+                "members/info/modify/my",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -418,7 +418,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/members/role/modify",
+                "members/role/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -464,7 +464,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/members/name/modify",
+                "members/name/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -508,7 +508,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/members/activate",
+                "members/activate",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -549,7 +549,7 @@ public class MemberControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/members/deactivate",
+                "members/deactivate",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(

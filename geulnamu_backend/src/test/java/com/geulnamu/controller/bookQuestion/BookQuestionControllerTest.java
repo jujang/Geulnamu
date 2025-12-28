@@ -69,7 +69,7 @@ public class BookQuestionControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value(bookQuestionId))
             .andDo(document(
-                "/book-questions/create",
+                "book-questions/create",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -119,7 +119,7 @@ public class BookQuestionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/book-questions/me/view",
+                "book-questions/me/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -170,7 +170,7 @@ public class BookQuestionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/book-questions/my-group/origin/view",
+                "book-questions/my-group/origin/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -221,7 +221,7 @@ public class BookQuestionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/book-questions/my-group/view",
+                "book-questions/my-group/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -278,7 +278,7 @@ public class BookQuestionControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/book-questions/meeting/view",
+                "book-questions/meeting/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -325,7 +325,7 @@ public class BookQuestionControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/book-questions/modify",
+                "book-questions/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -369,7 +369,7 @@ public class BookQuestionControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/book-questions/remove",
+                "book-questions/remove",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
