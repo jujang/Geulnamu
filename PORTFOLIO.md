@@ -1,4 +1,4 @@
-# 프로젝트 포트폴리오_원본
+# 프로젝트 포트폴리오
 
 # 프로젝트 개요
 
@@ -55,111 +55,71 @@
 
 # 시스템 아키텍쳐
 
-- 텍스트 모드 (구버전)
-    
-    ┌──────────────────────────────────────┐
-    │  Client (PWA)                        │
-    │  Mobile / Desktop / Tablet           │
-    └─────────────┬────────────────────────┘
-    │ HTTPS
-    ┌─────────────▼────────────────────────┐
-    │  Frontend (Vercel)                   │
-    │  Flutter PWA                         │
-    │  [https://geulnamu.com](https://geulnamu.com/)                │
-    └─────────────┬────────────────────────┘
-    │ REST API (JWT)
-    ┌─────────────▼────────────────────────┐
-    │  Backend (Oracle Cloud)              │
-    │  ┌────────────────────────────────┐  │
-    │  │ Nginx + Let's Encrypt          │  │
-    │  └────────┬───────────────────────┘  │
-    │  ┌────────▼───────────────────────┐  │
-    │  │ Spring Boot 3.4                │  │
-    │  │ - JWT + OAuth 2.0              │  │
-    │  │ - AOP Logging                  │  │
-    │  │ - FCM Push                     │  │
-    │  └────────┬───────────────────────┘  │
-    │  ┌────────▼───────────────────────┐  │
-    │  │ MySQL 8.0                      │  │
-    │  └────────────────────────────────┘  │
-    └───────────────┬──────────────────────┘
-    │
-    ┌───────────────▼──────────────────────┐
-    │  External Services                   │
-    │  - Kakao OAuth 2.0                   │
-    │  - Firebase FCM                      │
-    └──────────────────────────────────────┘
-    
-- mermaid
-    
-    ```markdown
-    ```mermaid
-    graph TB
-        subgraph Client["🖥️ Client Layer"]
-            A[📱 Mobile PWA]
-            B[💻 Desktop Browser]
-            C[📱 Tablet PWA]
-        end
-        
-        subgraph CICD["🤖 CI/CD Pipeline - GitHub"]
-            D1["⚙️ Frontend Actions 
-    - Auto Build 
-    - Auto Deploy to Vercel"]
-            D2["⚙️ Backend Actions 
-    - Auto Build 
-    - Auto Deploy to Oracle 
-    - Profile Switch (dev/prod)"]
-        end
-        
-        subgraph Frontend["☁️ Frontend - Vercel"]
-            D["📦 Flutter PWA 
-    https://geulnamu.com"]
-        end
-        
-        subgraph Oracle["🏢 Oracle Cloud Infrastructure"]
-            E["🔒 Nginx Reverse Proxy 
-    - Let's Encrypt SSL 
-    - HTTPS 443"]
-            F["⚙️ Spring Boot 3.4 
-    - JWT + OAuth 2.0 
-    - AOP Logging 
-    - FCM Push Service 
-    - Error Handling"]
-            G["🚀 Redis Cache 
-    - Profile Status 
-    - API Response"]
-            H[🗄️ MySQL 8.0]
-        end
-        
-        subgraph External["🌐 External Services"]
-            I[🔑 Kakao OAuth 2.0]
-            J[🔔 Firebase FCM]
-            K["📢 Slack Webhook 
-    - Error Alert"]
-        end
-        
-        A & B & C -->|HTTPS| D
-        D -->|REST API + JWT| E
-        E --> F
-        F --> G
-        F --> H
-        F -.->|인증| I
-        F -.->|푸시 알림| J
-        F -.->|에러 알림| K
-        
-        D1 -.->|자동 배포| D
-        D2 -.->|자동 배포| F
-        
-        style Client fill:#e1f5ff
-        style CICD fill:#e0f2f1
-        style Frontend fill:#e8f5e9
-        style Oracle fill:#fff4e1
-        style External fill:#f3e5f5
-        style G fill:#ffebee
-        style K fill:#fff9c4
-    ```
-    ```
-    
+```mermaid
+graph TB
+    subgraph Client["🖥️ Client Layer"]
+        A[📱 Mobile PWA]
+        B[💻 Desktop Browser]
+        C[📱 Tablet PWA]
+    end
+
+    subgraph CICD["🤖 CI/CD Pipeline - GitHub"]
+        D1["⚙️ Frontend Actions
+- Auto Build
+- Auto Deploy to Vercel"]
+        D2["⚙️ Backend Actions
+- Auto Build
+- Auto Deploy to Oracle
+- Profile Switch (dev/prod)"]
+    end
+
+    subgraph Frontend["☁️ Frontend - Vercel"]
+        D["📦 Flutter PWA
+https://geulnamu.com"]
+    end
+
+    subgraph Oracle["🏢 Oracle Cloud Infrastructure"]
+        E["🔒 Nginx Reverse Proxy
+- Let's Encrypt SSL
+- HTTPS 443"]
+        F["⚙️ Spring Boot 3.4
+- JWT + OAuth 2.0
+- AOP Logging
+- FCM Push Service
+- Error Handling"]
+        G["🚀 Redis Cache
+- Profile Status
+- API Response"]
+        H[🗄️ MySQL 8.0]
+    end
+
+    subgraph External["🌐 External Services"]
+        I[🔑 Kakao OAuth 2.0]
+        J[🔔 Firebase FCM]
+        K["📢 Slack Webhook
+- Error Alert"]
+    end
+
+    A & B & C -->|HTTPS| D
+    D -->|REST API + JWT| E
+    E --> F
+    F --> G
+    F --> H
+    F -.->|인증| I
+    F -.->|푸시 알림| J
+    F -.->|에러 알림| K
+
+    D1 -.->|자동 배포| D
+    D2 -.->|자동 배포| F
+
+    style Client fill:#e1f5ff
+    style CICD fill:#e0f2f1
+    style Frontend fill:#e8f5e9
+    style Oracle fill:#fff4e1
+    style External fill:#f3e5f5
+    style G fill:#ffebee
+    style K fill:#fff9c4
+```
 
 # 주요 기능
 
@@ -217,254 +177,119 @@
 ### AOP 기반 액션 로깅 시스템
 
 - 문제
-    - 장애 분석을 위한 로그 필요
+  - 장애 분석을 위한 로그 필요
 - 해결법
-    - Spring AOP + 커스텀 어노테이션(`@LogAction`, `@ErrorLogAction`) 활용
-    - 비동기 처리(`@Async`)로 메인 로직 성능 영향 최소화
-    - GET 요청은 에러만, POST/PATCH/DELETE는 전체 액션 로깅하여 DB 부하 균형
+  - Spring AOP + 커스텀 어노테이션(`@LogAction`, `@ErrorLogAction`) 활용
+  - 비동기 처리(`@Async`)로 메인 로직 성능 영향 최소화
+  - GET 요청은 에러만, POST/PATCH/DELETE는 전체 액션 로깅하여 DB 부하 균형
 - 결과
-    - 비동기 처리로 메인 로직 성능 영향 최소화
-    - 로그 서버 비용 0$ (자체 DB 저장)
+  - 비동기 처리로 메인 로직 성능 영향 최소화
+  - 로그 서버 비용 0$ (자체 DB 저장)
 
 ### Redis 캐싱을 통한 성능 최적화
 
 - 문제
-    - 모임 목록/상세 조회 API가 전체 요청의 많은 비중을 차지
-    - 변경 빈도가 낮은 데이터를 반복 조회하여 DB 부하 발생
+  - 모임 목록/상세 조회 API가 전체 요청의 많은 비중을 차지
+  - 변경 빈도가 낮은 데이터를 반복 조회하여 DB 부하 발생
 - 해결법
-    - Spring Cache + Redis 연동하여 자주 조회되는 API에 캐싱 적용
-    - TTL 5분 설정으로 데이터 신선도와 캐시 효율 균형 유지
+  - Spring Cache + Redis 연동하여 자주 조회되는 API에 캐싱 적용
+  - TTL 5분 설정으로 데이터 신선도와 캐시 효율 균형 유지
 - 결과
-    - API 응답 속도 50% 개선 (100ms → 50ms)
-    - 서버 부하 감소로 안정적인 서비스 제공
+  - API 응답 속도 50% 개선 (100ms → 50ms)
+  - 서버 부하 감소로 안정적인 서비스 제공
 
 ### GitHub Actions CI/CD 자동 배포 파이프라인
 
 - 문제
-    - 수동 배포 시, 빌드, 업로드, 재시작 등 반복 작업으로 시간 소요 및 실수 가능성 존재
-    - 배포 작업 중 다른 개발 작업에 집중 불가
+  - 수동 배포 시, 빌드, 업로드, 재시작 등 반복 작업으로 시간 소요 및 실수 가능성 존재
+  - 배포 작업 중 다른 개발 작업에 집중 불가
 - 해결법
-    - GitHub Actions로 main 브랜치 push시 자동 빌드 및 배포
-    - Frontend: Flutter 빌드 → Vervel 배포 (2분)
-    - Backend: Gradle 빌드 → Oracle Cloud 배포 (3분)
+  - GitHub Actions로 main 브랜치 push시 자동 빌드 및 배포
+  - Frontend: Flutter 빌드 → Vervel 배포 (2분)
+  - Backend: Gradle 빌드 → Oracle Cloud 배포 (3분)
 - 결과
-    - 배포 완전 자동화로 개발 집중력 향상
-    - 휴먼 에러 제거 및 배포 안정성 향상
+  - 배포 완전 자동화로 개발 집중력 향상
+  - 휴먼 에러 제거 및 배포 안정성 향상
 
 # 개발 방식 및 특이사항
 
 ### AI 협업 기반 풀스택 개발
 
 - **백엔드**: Spring Boot 3.4 기반 직접 설계 및 구현
-    - CQRS 패턴, QueryDSL, Redis 캐싱 등 기술 활용
+  - CQRS 패턴, QueryDSL, Redis 캐싱 등 기술 활용
 - **프론트엔드**: Claude AI와 협업하여 Flutter 구현
-    - 디자인 시스템 가이드라인 작성 → AI 활용 개발
-    - 일관된 UI/UX 유지 및 빠른 프로토타이핑
-    - PWA 네비게이션 패턴 등 복잡한 문제 해결
+  - 디자인 시스템 가이드라인 작성 → AI 활용 개발
+  - 일관된 UI/UX 유지 및 빠른 프로토타이핑
+  - PWA 네비게이션 패턴 등 복잡한 문제 해결
 - **배운 점**
-    - 명확한 가이드라인 작성의 중요성
-    - AI를 도구로 활용한 개발 생산성 향상
+  - 명확한 가이드라인 작성의 중요성
+  - AI를 도구로 활용한 개발 생산성 향상
 
-# 프로젝트 구조
+# 프로젝트 구조 (간단 버전)
 
 ### 백엔드(Spring boot) (기본 구조)
 
 geulnamu_backend/
-├── controller/              # REST API 엔드포인트
-│   ├── login/              # 카카오 OAuth 로그인
-│   ├── member/             # 회원 관리
-│   ├── meeting/            # 모임 관리
-│   ├── attendance/         # 출석 관리
-│   ├── bookQuestion/       # 발제문 관리
-│   ├── voc/                # 모임원의 소리
-│   ├── fcm/                # 푸시 알림
-│   └── actionHistory/      # 액션 로그
-├── service/                 # 비즈니스 로직
-├── repository/              # 데이터 접근 (CQRS 패턴)
-│   └── {domain}/
-│       ├── CommandRepository      # CUD 작업
-│       ├── QueryRepository        # 조회 작업
-│       └── QueryRepositoryImpl    # QueryDSL 구현
-├── domain/                  # 엔티티 + 도메인 로직
-│   └── {domain}/
-│       ├── Entity.java           # JPA 엔티티
-│       └── Enum.java             # 도메인 Enum
-└── infrastructure/          # 횡단 관심사
-├── annotation/         # @LogAction, @AccessLevel
-├── aspect/             # AOP (로깅)
-├── config/             # Security, Firebase, Async
-├── jwt/                # JWT 인증/인가
-├── exception/          # 통합 예외 처리
-└── response/           # 통일된 응답 구조
-
-- 
+├── controller/ # REST API 엔드포인트
+│ ├── login/ # 카카오 OAuth 로그인
+│ ├── member/ # 회원 관리
+│ ├── meeting/ # 모임 관리
+│ ├── attendance/ # 출석 관리
+│ ├── bookQuestion/ # 발제문 관리
+│ ├── voc/ # 모임원의 소리
+│ ├── fcm/ # 푸시 알림
+│ └── actionHistory/ # 액션 로그
+├── service/ # 비즈니스 로직
+├── repository/ # 데이터 접근 (CQRS 패턴)
+│ └── {domain}/
+│ ├── CommandRepository # CUD 작업
+│ ├── QueryRepository # 조회 작업
+│ └── QueryRepositoryImpl # QueryDSL 구현
+├── domain/ # 엔티티 + 도메인 로직
+│ └── {domain}/
+│ ├── Entity.java # JPA 엔티티
+│ └── Enum.java # 도메인 Enum
+└── infrastructure/ # 횡단 관심사
+├── annotation/ # @LogAction, @AccessLevel
+├── aspect/ # AOP (로깅)
+├── config/ # Security, Firebase, Async
+├── jwt/ # JWT 인증/인가
+├── exception/ # 통합 예외 처리
+└── response/ # 통일된 응답 구조
 
 ### 프론트엔드(Flutter PWA) (기본 구조)
 
 geulnamu_frontend/lib/
-├── core/                    # 핵심 시스템
-│   ├── config/             # 환경 설정 (API, 카카오)
-│   ├── theme/              # 색상, 테마 (라이트/다크)
-│   ├── utils/              # 유틸리티 (API, 날짜, PWA)
-│   └── services/           # 코어 서비스 (인증, 설정)
-├── services/                # 비즈니스 로직 (Singleton)
-│   ├── home/               # 홈 서비스
-│   ├── meeting/            # 모임 서비스
-│   ├── attendance/         # 출석 서비스
-│   ├── discussion/         # 토론 서비스
-│   └── notification/       # FCM 알림
-├── providers/               # 전역 상태 관리
-│   ├── auth_provider       # 인증 상태
-│   └── theme_provider      # 테마 상태
-├── screens/                 # 화면별 구조
-│   └── {screen}/
-│       ├── {screen}_screen.dart
-│       ├── mixins/         # 로직 Mixin
-│       └── widgets/        # UI 위젯 (Static)
-├── widgets/                 # 공통 위젯
-│   └── common/             # MainLayout, AppHeader
-├── models/                  # 데이터 모델
-└── routes/                  # GoRouter 네비게이션
+├── core/ # 핵심 시스템
+│ ├── config/ # 환경 설정 (API, 카카오)
+│ ├── theme/ # 색상, 테마 (라이트/다크)
+│ ├── utils/ # 유틸리티 (API, 날짜, PWA)
+│ └── services/ # 코어 서비스 (인증, 설정)
+├── services/ # 비즈니스 로직 (Singleton)
+│ ├── home/ # 홈 서비스
+│ ├── meeting/ # 모임 서비스
+│ ├── attendance/ # 출석 서비스
+│ ├── discussion/ # 토론 서비스
+│ └── notification/ # FCM 알림
+├── providers/ # 전역 상태 관리
+│ ├── auth_provider # 인증 상태
+│ └── theme_provider # 테마 상태
+├── screens/ # 화면별 구조
+│ └── {screen}/
+│ ├── {screen}\_screen.dart
+│ ├── mixins/ # 로직 Mixin
+│ └── widgets/ # UI 위젯 (Static)
+├── widgets/ # 공통 위젯
+│ └── common/ # MainLayout, AppHeader
+├── models/ # 데이터 모델
+└── routes/ # GoRouter 네비게이션
 
-- 아키텍쳐 특징
-    - **Backend**: 계층형 아키텍처 + CQRS + DDD 스타일
-    - **Frontend**: 하이브리드 (Service Singleton + Mixin + Static Widgets)
+### 아키텍쳐 특징
 
-## 백엔드(Spring boot) (상세 구조)
+- **Backend**: 계층형 아키텍처 + CQRS + DDD 스타일
+- **Frontend**: 하이브리드 (Service Singleton + Mixin + Static Widgets)
 
-geulnamu_backend/src/main/java/com/geulnamu/
-├── 📂 controller/                    # REST API 계층
-│   ├── login/                       # 인증 API
-│   ├── member/                      # 회원 관리 API
-│   ├── meeting/                     # 모임 CRUD API
-│   ├── attendance/                  # 출석 관리 API
-│   ├── bookQuestion/                # 발제문 API
-│   ├── voc/                         # VoC(모임원의 소리) API
-│   ├── fcm/                         # 푸시 알림 API
-│   └── actionHistory/               # 액션 로그 조회 API
-│
-├── 📂 service/                       # 비즈니스 로직 계층
-│   ├── login/
-│   │   ├── LoginFacade              # 로그인 통합 처리
-│   │   ├── KakaoOAuthService        # 카카오 OAuth
-│   │   └── AuthTokenService         # JWT 토큰 관리
-│   ├── meeting/
-│   ├── attendance/
-│   └── ...                          # 도메인별 서비스
-│
-├── 📂 repository/                    # 데이터 접근 계층 (CQRS)
-│   └── {domain}/
-│       ├── CommandRepository        # CUD 작업 (JPA)
-│       ├── QueryRepository          # R 작업 (JPA)
-│       ├── QueryRepositoryCustom    # QueryDSL 인터페이스
-│       └── QueryRepositoryImpl      # QueryDSL 구현
-│
-├── 📂 domain/                        # 도메인 모델 계층
-│   ├── member/
-│   │   ├── Member                   # 회원 엔티티
-│   │   ├── Gender                   # 성별 Enum
-│   │   └── MemberStatus             # 회원 상태 Enum
-│   ├── meeting/
-│   │   ├── Meeting                  # 모임 엔티티
-│   │   └── MeetingType              # 모임 유형 Enum
-│   └── shared/
-│       └── enums/                   # 공통 Enum
-│           ├── Role                 # 역할 (6단계)
-│           ├── Level                # 권한 레벨
-│           └── ActionType           # 액션 타입
-│
-└── 📂 infrastructure/                # 횡단 관심사
-├── annotation/                  # 커스텀 어노테이션
-│   ├── @LogAction               # 액션 로깅
-│   ├── @AccessLevel             # 권한 제어
-│   └── @AuthMemberId            # 인증 사용자 ID
-├── aspect/
-│   └── ActionHistoryAspect      # AOP 로깅 처리
-├── config/
-│   ├── security/                # Spring Security 설정
-│   ├── firebase/                # FCM 설정
-│   └── async/                   # 비동기 처리 설정
-├── jwt/                         # JWT 인증/인가
-│   ├── JwtFilter                # JWT 필터
-│   └── JwtUtil                  # JWT 유틸리티
-├── exception/                   # 통합 예외 처리
-│   └── GlobalExceptionHandler   # 전역 예외 핸들러
-└── response/                    # 통일된 응답 구조
-└── BaseResponse             # 공통 응답 래퍼
-
-## 프론트엔드(Flutter PWA) (상세 구조)
-
-geulnamu_frontend/lib/
-├── 📂 core/                          # 핵심 시스템
-│   ├── config/
-│   │   ├── app_config               # 환경별 API URL
-│   │   └── kakao_config             # 카카오 SDK 설정
-│   ├── theme/
-│   │   ├── colors                   # 색상 정의
-│   │   └── theme                    # Material Theme
-│   ├── utils/
-│   │   ├── api_utils                # API 공통 처리
-│   │   ├── date_utils               # 날짜 유틸
-│   │   └── pwa_utils                # PWA 유틸
-│   └── services/
-│       ├── auth_service             # 인증 서비스
-│       └── settings_service         # 설정 서비스
-│
-├── 📂 services/                      # 비즈니스 로직 (Singleton)
-│   ├── home/
-│   │   ├── home_service             # 홈 로직
-│   │   └── home_route_service       # RouteAware 관리
-│   ├── meeting/
-│   │   └── meeting_service          # 모임 CRUD
-│   ├── attendance/
-│   │   ├── attendance_service       # 출석 관리
-│   │   └── qr_service               # QR 처리
-│   ├── discussion/
-│   │   └── discussion_service       # 토론 그룹
-│   └── notification/
-│       └── fcm_service              # FCM 알림
-│
-├── 📂 providers/                     # 전역 상태 관리
-│   ├── auth_provider                # 인증 상태 (Provider)
-│   └── theme_provider               # 테마 상태 (Provider)
-│
-├── 📂 screens/                       # 화면별 구조
-│   └── {screen}/
-│       ├── {screen}_screen.dart     # UI + Mixin 조합
-│       ├── mixins/                  # 화면별 로직 Mixin
-│       │   └── {screen}_logic_mixin.dart
-│       └── widgets/                 # 화면별 UI 위젯
-│           └── {screen}_widgets.dart (Static)
-│
-├── 📂 widgets/                       # 공통 위젯
-│   └── common/
-│       ├── main_layout              # 공통 레이아웃
-│       ├── app_header               # 상단바
-│       └── app_drawer               # 사이드바
-│
-├── 📂 models/                        # 데이터 모델
-│   └── {domain}/
-│       ├── {domain}_model           # 도메인 모델
-│       └── request/                 # API 요청 모델
-│
-└── 📂 routes/                        # 네비게이션
-└── app_router                   # GoRouter 설정
-
-## 아키텍쳐 특징
-
-### Backend
-
-- **계층형 아키텍처**: Controller → Service → Repository → Domain
-- **CQRS 패턴**: Command/Query Repository 분리
-- **DDD 스타일**: 비즈니스 로직을 Entity에 캡슐화
-- **AOP 활용**: `@LogAction` 어노테이션으로 횡단 관심사 처리
-
-### Frontend
-
-- **하이브리드 아키텍처**: Service(Singleton) + Mixin + Static Widgets
-- **중앙집중화 디자인**: 색상/테마 한 곳에서 관리
-- **PWA 친화적**: GoRouter 기반 URL 동기화
-- **완전 화면 분리**: 각 화면이 독립적인 폴더 구조
+- 프로젝트 구조 (상세버전) [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)
 
 # CI/CD 파이프라인
 
@@ -472,8 +297,8 @@ geulnamu_frontend/lib/
 - 메인 브랜치 push 시 자동 빌드 및 배포
 - 빌드 시간: 약 3분 (Backend) / 약 2분 (Frontend)
 - 배포 URL
-    - Frontend: https://geulnamu.com
-    - Backend: https://api.geulnamu.com
+  - Frontend: https://geulnamu.com
+  - Backend: https://api.geulnamu.com
 
 # 주요 테이블 관계도(ERD)
 
