@@ -38,6 +38,7 @@ dependencies {
 
 	// 데이터베이스
 	runtimeOnly 'com.mysql:mysql-connector-j'
+	testRuntimeOnly 'com.h2database:h2'  // 테스트용 H2 In-Memory DB
 
 	// QueryDSL
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
