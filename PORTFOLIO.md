@@ -226,7 +226,7 @@ https://geulnamu.com"]
   - 명확한 가이드라인 작성의 중요성
   - AI를 도구로 활용한 개발 생산성 향상
 
-## 프로젝트 구조 (간단 버전)
+## 프로젝트 구조 (간단 버전) ([상세버전](./PROJECT_STRUCTURE.md))
 
 ### 백엔드(Spring boot) (기본 구조)
 
@@ -293,8 +293,6 @@ geulnamu_frontend/lib/
 
 - **Backend**: 계층형 아키텍처 + CQRS + DDD 스타일
 - **Frontend**: 하이브리드 (Service Singleton + Mixin + Static Widgets)
-
-### 프로젝트 구조 (상세버전) [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)
 
 ## CI/CD 파이프라인
 

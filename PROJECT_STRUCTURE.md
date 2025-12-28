@@ -1,4 +1,24 @@
-## 백엔드(Spring boot) (상세 구조)
+# 프로젝트 구조 (상세버전)
+
+## 아키텍쳐 특징
+
+### Backend
+
+- **계층형 아키텍처**: Controller → Service → Repository → Domain
+- **CQRS 패턴**: Command/Query Repository 분리
+- **DDD 스타일**: 비즈니스 로직을 Entity에 캡슐화
+- **AOP 활용**: `@LogAction`,`@ErrorLogAction` 어노테이션으로 횡단 관심사 처리
+
+### Frontend
+
+- **하이브리드 아키텍처**: Service(Singleton) + Mixin + Static Widgets
+- **중앙집중화 디자인**: 색상/테마 한 곳에서 관리
+- **PWA 친화적**: GoRouter 기반 URL 동기화
+- **완전 화면 분리**: 각 화면이 독립적인 폴더 구조
+
+## 프로젝트 구조
+
+### 백엔드(Spring boot)
 
 ```
 geulnamu_backend/src/main/java/com/geulnamu/
@@ -62,7 +82,7 @@ geulnamu_backend/src/main/java/com/geulnamu/
 └── BaseResponse             # 공통 응답 래퍼
 ```
 
-## 프론트엔드(Flutter PWA) (상세 구조)
+### 프론트엔드(Flutter PWA)
 
 ```
 geulnamu_frontend/lib/
@@ -121,19 +141,3 @@ geulnamu_frontend/lib/
 └── 📂 routes/                        # 네비게이션
 └── app_router                   # GoRouter 설정
 ```
-
-## 아키텍쳐 특징
-
-### Backend
-
-- **계층형 아키텍처**: Controller → Service → Repository → Domain
-- **CQRS 패턴**: Command/Query Repository 분리
-- **DDD 스타일**: 비즈니스 로직을 Entity에 캡슐화
-- **AOP 활용**: `@LogAction` 어노테이션으로 횡단 관심사 처리
-
-### Frontend
-
-- **하이브리드 아키텍처**: Service(Singleton) + Mixin + Static Widgets
-- **중앙집중화 디자인**: 색상/테마 한 곳에서 관리
-- **PWA 친화적**: GoRouter 기반 URL 동기화
-- **완전 화면 분리**: 각 화면이 독립적인 폴더 구조
