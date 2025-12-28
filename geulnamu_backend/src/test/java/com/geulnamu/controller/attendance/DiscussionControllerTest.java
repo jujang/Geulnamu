@@ -106,7 +106,7 @@ public class DiscussionControllerTest extends ControllerTest {
         // when
         ResultActions actions =
             mockMvc.perform(
-                get("discussions/{attendanceId}/my-group", 1)
+                get("/discussions/{attendanceId}/my-group", 1)
                     .header("Authorization", accessToken)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
