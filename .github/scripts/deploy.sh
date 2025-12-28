@@ -50,6 +50,47 @@ echo "   📁 현재 로그 파일 개수: $CURRENT_LOG_COUNT 개"
 echo "3️⃣ 새 애플리케이션 실행 중..."
 cd $DEPLOY_PATH
 
+# 환경변수 설정 (중요!)
+echo "   🔧 환경변수 설정 중..."
+
+# 1순위: 시스템 전역 bashrc (/etc/bash.bashrc)
+if [ -f "/etc/bash.bashrc" ]; then
+  echo "   📂 /etc/bash.bashrc에서 환경변수 로드 중..."
+  source /etc/bash.bashrc
+  echo "   ✅ /etc/bash.bashrc 로드 완료!"
+fi
+
+# 2순위: 사용자 환경변수 로드 (.bashrc, .profile 등)
+if [ -f "$HOME/.bashrc" ]; then
+  echo "   📂 ~/.bashrc에서 환경변수 로드 중..."
+  source $HOME/.bashrc
+  echo "   ✅ ~/.bashrc 로드 완료!"
+elif [ -f "$HOME/.profile" ]; then
+  echo "   📂 ~/.profile에서 환경변수 로드 중..."
+  source $HOME/.profile
+  echo "   ✅ ~/.profile 로드 완료!"
+fi
+
+# 3순위: /etc/environment (시스템 전역)
+if [ -f "/etc/environment" ]; then
+  echo "   📂 /etc/environment에서 환경변수 로드 중..."
+  export $(cat /etc/environment | grep -v '^#' | xargs)
+  echo "   ✅ /etc/environment 로드 완료!"
+fi
+
+# 2순위: .env 파일이 있으면 추가로 로드 (덮어쓰기)
+if [ -f "$DEPLOY_PATH/.env" ]; then
+  echo "   📂 .env 파일에서 환경변수 로드 중..."
+  export $(cat $DEPLOY_PATH/.env | grep -v '^#' | xargs)
+  echo "   ✅ .env 파일 로드 완료!"
+fi
+
+# 환경변수 확인 (디버깅)
+echo "   🔍 주요 환경변수 확인:"
+echo "      DB_HOST: ${DB_HOST:-(미설정)}"
+echo "      DB_PORT: ${DB_PORT:-(미설정)}"
+echo "      JWT_ACCESS_TOKEN_KEY: ${JWT_ACCESS_TOKEN_KEY:0:10}... (${#JWT_ACCESS_TOKEN_KEY}자)"
+
 # 날짜와 시간이 포함된 로그 파일명 생성
 LOG_FILE="geulnamu_$(date +%Y%m%d_%H%M%S).log"
 echo "   📋 로그 파일: $LOG_FILE"
