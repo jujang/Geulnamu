@@ -40,7 +40,7 @@ jobs:
         working-directory: geulnamu_backend
         run: |
           echo "🔨 Gradle 빌드 시작..."
-          ./gradlew clean build --stacktrace --info
+          ./gradlew clean build --stacktrace
           echo "✅ 빌드 완료!"
       
       # 5️⃣ 빌드 결과물 확인
@@ -73,7 +73,7 @@ jobs:
           chmod 600 ~/.ssh/oracle_key
           
           # DNS 해석 가능 여부만 체크(값은 마스킹되니 노출 걱정 없음)
-          getent hosts "$ORACLE_HOST_CLEAN" >/dev/null
+          getent hosts "$ORACLE_HOST" >/dev/null
           
           # known_hosts에 서버 추가 (SSH 핑거프린트 확인 스킵)
           ssh-keyscan -p "${ORACLE_PORT:-22}" -H $ORACLE_HOST >> ~/.ssh/known_hosts 2>/dev/null
