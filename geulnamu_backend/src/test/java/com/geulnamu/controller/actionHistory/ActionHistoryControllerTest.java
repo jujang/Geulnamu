@@ -96,7 +96,7 @@ public class ActionHistoryControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/action-histories/list/view",
+                "action-histories/list/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(

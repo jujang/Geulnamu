@@ -41,7 +41,7 @@ public class HelloControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value(response))
             .andDo(document(
-                "/hello/health-check/view",
+                "hello/health-check/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 responseFields(

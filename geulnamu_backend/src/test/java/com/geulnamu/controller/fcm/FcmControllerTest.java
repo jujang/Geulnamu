@@ -63,7 +63,7 @@ public class FcmControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/fcm/token/register",
+                "fcm/token/register",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -111,7 +111,7 @@ public class FcmControllerTest extends ControllerTest {
             .andExpect(jsonPath("data.allSuccess").value(result.isAllSuccess()))
             .andExpect(jsonPath("data.allFailed").value(result.isAllFailed()))
             .andDo(document(
-                "/fcm/notification/send",
+                "fcm/notification/send",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(

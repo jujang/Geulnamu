@@ -68,7 +68,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value(attendanceId))
             .andDo(document(
-                "/attendances/check-in/create",
+                "attendances/check-in/create",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -119,7 +119,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/attendances/my-info/view",
+                "attendances/my-info/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -189,7 +189,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("code").value(200))
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andDo(document(
-                "/attendances/list/view",
+                "attendances/list/view",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
@@ -245,7 +245,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/attendances/note/modify",
+                "attendances/note/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -289,7 +289,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/attendances/just-read/modify",
+                "attendances/just-read/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -330,7 +330,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/attendances/want-discussion/modify",
+                "attendances/want-discussion/modify",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
@@ -371,7 +371,7 @@ public class AttendanceControllerTest extends ControllerTest {
             .andExpect(jsonPath("message").value(ResponseMessage.SUCCESS))
             .andExpect(jsonPath("data").value((Object) null))
             .andDo(document(
-                "/attendances/delete",
+                "attendances/delete",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
