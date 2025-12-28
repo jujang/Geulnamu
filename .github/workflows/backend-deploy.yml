@@ -62,14 +62,21 @@ jobs:
       - name: 🔐 Setup SSH Key
         env:
           ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_PORT: ${{ secrets.ORACLE_PORT }}
         run: |
+          set -euo pipefail
           echo "🔐 SSH 키 설정 중..."
           mkdir -p ~/.ssh
-          echo "${{ secrets.ORACLE_SSH_KEY }}" > ~/.ssh/oracle_key
+          
+          # 멀티라인 키 안전 저장
+          printf '%s' "${{ secrets.ORACLE_SSH_KEY }}" > ~/.ssh/oracle_key
           chmod 600 ~/.ssh/oracle_key
           
+          # DNS 해석 가능 여부만 체크(값은 마스킹되니 노출 걱정 없음)
+          getent hosts "$ORACLE_HOST_CLEAN" >/dev/null
+          
           # known_hosts에 서버 추가 (SSH 핑거프린트 확인 스킵)
-          ssh-keyscan -H $ORACLE_HOST >> ~/.ssh/known_hosts
+          ssh-keyscan -p "${ORACLE_PORT:-22}" -H $ORACLE_HOST >> ~/.ssh/known_hosts 2>/dev/null
           
           echo "✅ SSH 키 설정 완료!"
       
