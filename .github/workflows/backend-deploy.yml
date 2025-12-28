@@ -40,7 +40,7 @@ jobs:
         working-directory: geulnamu_backend
         run: |
           echo "🔨 Gradle 빌드 시작..."
-          ./gradlew clean build
+          ./gradlew clean build --stacktrace --info
           echo "✅ 빌드 완료!"
       
       # 5️⃣ 빌드 결과물 확인
