@@ -31,19 +31,25 @@ fi
 echo "2️⃣ 오래된 로그 파일 정리 중..."
 cd $DEPLOY_PATH
 
+# 로그 디렉토리 생성 (없으면)
+if [ ! -d "geulnamu_log" ]; then
+  echo "   📁 geulnamu_log 디렉토리 생성..."
+  mkdir -p geulnamu_log
+fi
+
 # 30일 이전 로그 파일 개수 확인
-OLD_LOG_COUNT=$(find . -maxdepth 1 -name "geulnamu_*.log" -mtime +30 2>/dev/null | wc -l)
+OLD_LOG_COUNT=$(find geulnamu_log -maxdepth 1 -name "geulnamu_*.log" -mtime +30 2>/dev/null | wc -l)
 
 if [ "$OLD_LOG_COUNT" -gt 0 ]; then
   echo "   🗑️ 30일 이전 로그 파일 $OLD_LOG_COUNT 개 발견"
-  find . -maxdepth 1 -name "geulnamu_*.log" -mtime +30 -delete
+  find geulnamu_log -maxdepth 1 -name "geulnamu_*.log" -mtime +30 -delete
   echo "   ✅ 오래된 로그 파일 삭제 완료!"
 else
   echo "   ℹ️ 삭제할 오래된 로그 파일이 없습니다."
 fi
 
 # 현재 남아있는 로그 파일 개수
-CURRENT_LOG_COUNT=$(ls -1 geulnamu_*.log 2>/dev/null | wc -l)
+CURRENT_LOG_COUNT=$(ls -1 geulnamu_log/geulnamu_*.log 2>/dev/null | wc -l)
 echo "   📁 현재 로그 파일 개수: $CURRENT_LOG_COUNT 개"
 
 # 3️⃣ 새 애플리케이션 실행
@@ -92,7 +98,7 @@ echo "      DB_PORT: ${DB_PORT:-(미설정)}"
 echo "      JWT_ACCESS_TOKEN_KEY: ${JWT_ACCESS_TOKEN_KEY:0:10}... (${#JWT_ACCESS_TOKEN_KEY}자)"
 
 # 날짜와 시간이 포함된 로그 파일명 생성
-LOG_FILE="geulnamu_$(date +%Y%m%d_%H%M%S).log"
+LOG_FILE="geulnamu_log/geulnamu_$(date +%Y%m%d_%H%M%S).log"
 echo "   📋 로그 파일: $LOG_FILE"
 
 nohup java -Xms128m -Xmx384m -jar -Dspring.profiles.active=prod geulnamu-0.0.1-SNAPSHOT.jar > $LOG_FILE 2>&1 &
@@ -112,7 +118,7 @@ else
   echo "   📋 최근 로그:"
   
   # 가장 최근 로그 파일 찾기
-  LATEST_LOG=$(ls -t geulnamu_*.log 2>/dev/null | head -n 1)
+  LATEST_LOG=$(ls -t geulnamu_log/geulnamu_*.log 2>/dev/null | head -n 1)
   if [ -n "$LATEST_LOG" ]; then
     echo "   로그 파일: $LATEST_LOG"
     tail -n 20 $LATEST_LOG
