@@ -26,8 +26,8 @@ public class NormalNotificationScheduler {
 
 
     // 토론 시작 시간에 해당 모임에 참여한 (토론을 희망하는) 인원들의 조를 APP PUSH 하기
-    @Transactional(readOnly = true)
     @Scheduled(cron = "0 * * * * *") // 초 분 시 일 월 요일
+    @Transactional(readOnly = true)
     public void discussionGroupNotification() {
         // 현재 시간에 토론 참여하는 참석자 명단 조회
         LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
@@ -74,5 +74,18 @@ public class NormalNotificationScheduler {
         }
         // TODO: 누구(+FCM token값)한테, 어떤 알림 보냈는지를 모아서, slack 메세지로 남기고 싶은데 가능하려나
     }
+
+    @Scheduled(cron = "0 1 0 * * *") // 매일 오전 0시 1분마다
+    @Transactional(rollbackFor = Exception.class)
+    public void clearAttendanceFcmToken() {
+        // attendance 테이블에서 생성된지 일주일 안의 값 중, fcm 토큰을 가지고 있는 경우를 뽑아서
+        List<Attendance> attendances = attendanceQueryRepository.findAllByCreatedAtAfter(LocalDateTime.now().minusDays(7));
+
+        // 모두 fcm 토큰 값을 clear 함 (이후 조회 방지용)
+        for(Attendance attendance: attendances) {
+            attendance.clearFcmToken();
+        }
+    }
+
 
 }

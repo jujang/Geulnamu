@@ -98,4 +98,8 @@ public class Attendance extends DateColumn {
         this.discussionGroup = discussionGroup;
     }
 
+    public void clearFcmToken() {
+        this.fcmToken = null;
+    }
+
 }

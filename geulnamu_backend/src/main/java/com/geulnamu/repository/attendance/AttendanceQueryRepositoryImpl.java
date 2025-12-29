@@ -133,6 +133,17 @@ public class AttendanceQueryRepositoryImpl implements AttendanceQueryRepositoryC
             .fetch();
     }
 
+    @Override
+    public List<Attendance> findAllByCreatedAtAfter(LocalDateTime from) {
+        return queryFactory
+            .selectFrom(attendance)
+            .where(
+                attendance.createdAt.goe(from),
+                attendance.fcmToken.isNotNull()
+            )
+            .fetch();
+    }
+
 
     private NumberExpression<Long> normalAttendanceCount() {
         return new CaseBuilder()

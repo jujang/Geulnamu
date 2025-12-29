@@ -18,4 +18,5 @@ public interface AttendanceQueryRepositoryCustom {
     List<MeetingAttendanceStatusResponse> findMeetingAttendanceStatus(Long meetingId);
     long countValidAttendanceIds(List<Long> attendanceIds, Long meetingId);
     List<Attendance> findAllForDiscussionNotification(LocalDateTime discussionTime);
+    List<Attendance> findAllByCreatedAtAfter(LocalDateTime from);
 }
