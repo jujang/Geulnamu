@@ -169,11 +169,16 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen>
     if (meetingDetail == null) return;
     
     if (AppConfig.debugMode) {
-      print('📱 [QR 표시] 화면 이동: meetingId=${widget.meetingId}');
+      print('📱 [QR 표시] 화면 이동: meetingId=${widget.meetingId}, title=${meetingDetail!.meetingName}');
     }
     
-    // 🎯 GoRouter: push로 QR 표시 화면 이동
-    context.push('/meeting/${widget.meetingId}/qr-display');
+    // 🎯 GoRouter: push로 QR 표시 화면 이동 (meetingTitle 전달)
+    context.push(
+      '/meeting/${widget.meetingId}/qr-display',
+      extra: {
+        'meetingTitle': meetingDetail!.meetingName,
+      },
+    );
   }
 
   /// QR 스캔 화면으로 이동 (일반 사용자용)
