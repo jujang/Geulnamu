@@ -17,6 +17,7 @@ import com.geulnamu.repository.member.MemberQueryRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,6 +89,10 @@ public class LoginFacade {
     /**
      * 로그아웃 플로우
      */
+    @CacheEvict(
+        value = "member:infoRegisterStatus",
+        key = "#memberId"
+    )
     @Transactional(rollbackFor = Exception.class)
     public void logout(Long memberId, HttpServletResponse response) {
         // 1. 멤버 조회

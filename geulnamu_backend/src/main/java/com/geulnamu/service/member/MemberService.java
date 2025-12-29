@@ -13,6 +13,8 @@ import com.geulnamu.infrastructure.exception.NotFoundDataException;
 import com.geulnamu.repository.member.MemberQueryRepository;
 import com.geulnamu.repository.member.MemberCommandRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,11 @@ public class MemberService {
         memberCommandRepository.save(member);
     }
 
+    @Cacheable(
+        value = "member:infoRegisterStatus",
+        key = "#memberId",
+        unless = "#result == false"
+    )
     @Transactional(readOnly = true)
     public Boolean isMemberInfoRegistered(Long memberId) {
         Member member = findMemberOrThrow(memberId);
@@ -76,6 +83,10 @@ public class MemberService {
         member.updatePushSetting(pushEnabled);
     }
 
+    @CacheEvict(
+        value = "member:infoRegisterStatus",
+        key = "#memberId"
+    )
     @Transactional(rollbackFor = Exception.class)
     public void updateMemberRole(Long memberId, Role targetRole) {
         Member member = findMemberOrThrow(memberId);
@@ -95,6 +106,10 @@ public class MemberService {
         member.activate();
     }
 
+    @CacheEvict(
+        value = "member:infoRegisterStatus",
+        key = "#memberId"
+    )
     @Transactional(rollbackFor = Exception.class)
     public void deactivateMember(Long memberId) {
         Member member = findMemberOrThrow(memberId);

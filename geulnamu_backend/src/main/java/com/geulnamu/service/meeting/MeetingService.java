@@ -17,6 +17,7 @@ import com.geulnamu.repository.meeting.MeetingQueryRepository;
 import com.geulnamu.repository.meeting.MeetingCommandRepository;
 import com.geulnamu.repository.member.MemberQueryRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -96,6 +97,10 @@ public class MeetingService {
         return MeetingDetailResponseForStaff.of(meeting);
     }
 
+    @CacheEvict(
+        value = {"meeting:detail", "meeting:list"},
+        allEntries = true
+    )
     @Transactional(rollbackFor = Exception.class)
     public void updateMeeting(Long meetingId, Long memberId, Role role, MeetingUpdateRequest request){
         // 모임 정보 수정 가능 권한 검사
@@ -120,6 +125,10 @@ public class MeetingService {
         if(request.getDescription() != null) meeting.updateMeetingDescription(request.getDescription());
     }
 
+    @CacheEvict(
+        value = {"meeting:detail", "meeting:list"},
+        allEntries = true
+    )
     @Transactional(rollbackFor = Exception.class)
     public void updateMeetingForDiscussion(Long meetingId, Long memberId, Role role, MeetingGroupUpdateRequest request) {
         // 모임 정보 수정 가능 권한 검사
@@ -155,6 +164,10 @@ public class MeetingService {
     }
 
     // 모임 시작 6시간 전까지만 삭제 가능
+    @CacheEvict(
+        value = {"meeting:detail", "meeting:list"},
+        allEntries = true
+    )
     @Transactional(rollbackFor = Exception.class)
     public void removeMeeting(Long meetingId, Long memberId, Role role) {
         // 모임 삭제 가능 여부 검사

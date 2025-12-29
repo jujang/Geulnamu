@@ -19,6 +19,7 @@ import com.geulnamu.repository.attendance.AttendanceQueryRepository;
 import com.geulnamu.repository.meeting.MeetingQueryRepository;
 import com.geulnamu.repository.member.MemberQueryRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,10 @@ public class AttendanceService {
 
 
     // TODO: 추후 lock을 걸지 고민해 볼 것
+    @CacheEvict(
+        value = {"meeting:detail", "meeting:list"},
+        allEntries = true
+    )
     @Transactional(rollbackFor = Exception.class)
     public Long createAttendanceByQR(Long memberId, Long meetingId, String fcmToken) {
         Member member =  memberQueryRepository.findById(memberId)
@@ -90,12 +95,20 @@ public class AttendanceService {
         return convertToDiscussionGroupResponse(memberAttendanceInfoWithGroupList);
     }
 
+    @CacheEvict(
+        value = {"meeting:detail", "meeting:list"},
+        allEntries = true
+    )
     @Transactional(rollbackFor = Exception.class)
     public void writeNote(Long attendanceId, Long memberId, String note) {
         Attendance attendance = getValidateAttendance(attendanceId, memberId);
         attendance.updateNote(note);
     }
 
+    @CacheEvict(
+        value = {"meeting:detail", "meeting:list"},
+        allEntries = true
+    )
     @Transactional(rollbackFor = Exception.class)
     public void notWantDiscussion(Long attendanceId, Long memberId) {
         Attendance attendance = getValidateAttendance(attendanceId, memberId);
@@ -107,6 +120,10 @@ public class AttendanceService {
         attendance.updateNotWantDiscussion();
     }
 
+    @CacheEvict(
+        value = {"meeting:detail", "meeting:list"},
+        allEntries = true
+    )
     @Transactional(rollbackFor = Exception.class)
     public void wantDiscussion(Long attendanceId, Long memberId) {
         Attendance attendance = getValidateAttendance(attendanceId, memberId);
@@ -118,6 +135,10 @@ public class AttendanceService {
         attendance.updateWantDiscussion();
     }
 
+    @CacheEvict(
+        value = {"meeting:detail", "meeting:list"},
+        allEntries = true
+    )
     @Transactional(rollbackFor = Exception.class)
     public void manuallyAssignDiscussionGroups(Long meetingId, AssignDiscussionGroupsRequest request) {
         meetingQueryRepository.findById(meetingId).orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
@@ -128,6 +149,10 @@ public class AttendanceService {
         assignGroupsToMembers(request, meetingId); // 토론 그룹 할당
     }
 
+    @CacheEvict(
+        value = {"meeting:detail", "meeting:list"},
+        allEntries = true
+    )
     @Transactional(rollbackFor = Exception.class)
     public void assignMemberToDiscussionGroup(Long meetingId, Long attendanceId, Integer optimizedGroupNumber) {
         meetingQueryRepository.findById(meetingId).orElseThrow(() -> new NotFoundDataException(DomainType.MEETING.getDescription()));
@@ -137,6 +162,10 @@ public class AttendanceService {
         attendance.updateDiscussionGroup(DiscussionGroup.values()[optimizedGroupNumber]);
     }
 
+    @CacheEvict(
+        value = {"meeting:detail", "meeting:list"},
+        allEntries = true
+    )
     @Transactional(rollbackFor = Exception.class)
     public void deleteAttendance(Long attendanceId) {
         Attendance attendance = attendanceQueryRepository.findById(attendanceId)
