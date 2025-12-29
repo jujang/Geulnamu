@@ -152,6 +152,10 @@ public class GlobalExceptionHandler {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        String clientIp = request.getHeader("X-Forwarded-For");
+        if(clientIp == null || clientIp.isEmpty()) {
+            clientIp = request.getRemoteAddr();
+        }
 
         Map<String, Object> restTemplateRequest = new HashMap<>();
         restTemplateRequest.put("username", "geulnamu-error");
@@ -160,6 +164,16 @@ public class GlobalExceptionHandler {
         stringBuilder.append("```");
         stringBuilder.append("profile: ");
         stringBuilder.append(activeProfile);
+        stringBuilder.append("```");
+        stringBuilder.append("\n");
+        stringBuilder.append("```");
+        stringBuilder.append("Exception: ");
+        stringBuilder.append(e.getClass().getSimpleName());
+        stringBuilder.append("```");
+        stringBuilder.append("\n");
+        stringBuilder.append("```");
+        stringBuilder.append("ClientIP: ");
+        stringBuilder.append(clientIp);
         stringBuilder.append("```");
         stringBuilder.append("\n");
         stringBuilder.append("```");
