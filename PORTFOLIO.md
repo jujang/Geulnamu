@@ -137,41 +137,93 @@ https://geulnamu.com"]
 
 ### 인증 및 계정
 
-- 로그인
-- 홈 화면
-- 프로필 관리
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/인증및계정_로그인.jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/인증및계정_홈화면.jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/인증및계정_프로필관리.jpg" width="200"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>로그인</td><td>홈 화면</td><td>프로필 관리</td>
+  </tr>
+</table>
 
 ### 모임 관리
 
-- 모임 목록
-- 모임 목록 (필터 화면)
-- 모임 생성/수정 (운영진용)
-- 모임 상세 (운영진용)
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/모임관리_모임목록.jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/모임관리_모임목록(필터).jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/모임관리_모임상세.jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/모임관리_모임생성(운영진용).jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/모임관리_모임상세(운영진용).jpg" width="200"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>모임목록</td><td>모임목록(필터)</td><td>모임상세</td><td>모임생성(운영진용)</td><td>모임상세(운영진용)</td>
+  </tr>
+</table>
 
 ### 출석 관리
 
-- QR 출석
-- 출석 현황
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/출석관리_QR출석.jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/출석관리_출석현황.jpg" width="200"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>QR출석</td><td>출석현황</td>
+  </tr>
+</table>
 
 ### 토론 및 발제
 
-- 토론 그룹 편성
-- 발제문 작성
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/토론및발제_토론그룹편성.jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/토론및발제_발제문작성.jpg" width="200"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>토론그룹편성</td><td>발제문작성</td>
+  </tr>
+</table>
 
 ### 회원 관리 (관리자)
 
-- 회원 목록
-- 권한 관리
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/회원관리(관리자)_회원목록.jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/회원관리(관리자)_권한관리.jpg" width="200"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>회원관리</td><td>권한관리</td>
+  </tr>
+</table>
 
 ### 운영 및 모니터링 (관리자)
 
-- 모임원의 소리
-- 푸시 알림 설정
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/운영및모니터링(관리자)_모임원의소리.jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/운영및모니터링(관리자)_푸시알림.jpg" width="200"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>모임원의소리</td><td>푸시알림</td>
+  </tr>
+</table>
 
 ### UI/UX
 
-- 다크모드
-- 반응형 (데스크톱 뷰)
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/UIUX_라이트모드.jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/UIUX_다크모드.jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/UIUX_반응형화면(모바일뷰).jpg" width="200"></td>
+    <td style="text-align:center"><img src="./screenshot/UIUX_반응형화면(데스크톱뷰).png" width="300"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>라이트모드</td><td>다크모드</td><td>반응형화면(모바일뷰)</td><td>반응형화면(데스크톱뷰)</td>
+  </tr>
+</table>
 
 ## 기술적 챌린지
 
