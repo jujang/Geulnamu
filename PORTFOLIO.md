@@ -24,10 +24,12 @@
 ### 성능 최적화
 
 - **Redis 캐싱**: API 응답속도 **50% 개선** (100ms → 50ms)
+- **QueryDSL 동적 쿼리**: 복잡한 조회 조건 처리, N+1 문제 해결
 
-### 보안
+### 보안 및 인증
 
 - **인증/인가**: Kakao OAuth 2.0 + JWT 토큰 기반 인증, 6단계 RBAC
+- **AOP 액션 로깅**: 모든 중요 작업 자동 로깅
 
 ### 운영 효율화
 
@@ -38,6 +40,7 @@
 ### 개발 생산성
 
 - **CI/CD 자동화**: 배포 작업 자동화로 개발 집중력 향상
+- **AI 협업 개발**: AI Agent를 활용한 프론트엔드 개발
 
 ## 기술 스택
 
@@ -130,100 +133,8 @@ https://geulnamu.com"]
 - 토론 그룹 관리: 토론 참여 의사 선택, 참여 희망자 대상으로 조 편성, 토론 그룹 드래그 앤 드롭 관리
 - 발제문 시스템: 그룹별 토론 주제 작성/조회, 시간 기반 수정 제한
 - 회원 관리: 6단계 역할 기반 권한(MEMBER~ADMIN), 회원 활성화/비활성화
-- 모임원의 소리: 에러 보고/기능 요청 작성, 이슈 상태 관리 (관리자)
+- 문의하기: 에러 보고/기능 요청 작성, 이슈 상태 관리 (관리자)
 - 푸시 알림: FCM 기반 타겟팅 알림, 모임 공지, 개인별 수신 설정
-
-## 화면 구성
-
-### 인증 및 계정
-
-<table>
-  <tr>
-    <td style="text-align:center"><img src="./screenshot/인증및계정_로그인.jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/인증및계정_홈화면.jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/인증및계정_프로필관리.jpg" width="200"></td>
-  </tr>
-  <tr style="text-align:center">
-    <td>로그인</td><td>홈 화면</td><td>프로필 관리</td>
-  </tr>
-</table>
-
-### 모임 관리
-
-<table>
-  <tr>
-    <td style="text-align:center"><img src="./screenshot/모임관리_모임목록.jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/모임관리_모임목록(필터).jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/모임관리_모임상세.jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/모임관리_모임생성(운영진용).jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/모임관리_모임상세(운영진용).jpg" width="200"></td>
-  </tr>
-  <tr style="text-align:center">
-    <td>모임목록</td><td>모임목록(필터)</td><td>모임상세</td><td>모임생성(운영진용)</td><td>모임상세(운영진용)</td>
-  </tr>
-</table>
-
-### 출석 관리
-
-<table>
-  <tr>
-    <td style="text-align:center"><img src="./screenshot/출석관리_QR출석.jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/출석관리_출석현황.jpg" width="200"></td>
-  </tr>
-  <tr style="text-align:center">
-    <td>QR출석</td><td>출석현황</td>
-  </tr>
-</table>
-
-### 토론 및 발제
-
-<table>
-  <tr>
-    <td style="text-align:center"><img src="./screenshot/토론및발제_토론그룹편성.jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/토론및발제_발제문작성.jpg" width="200"></td>
-  </tr>
-  <tr style="text-align:center">
-    <td>토론그룹편성</td><td>발제문작성</td>
-  </tr>
-</table>
-
-### 회원 관리 (관리자)
-
-<table>
-  <tr>
-    <td style="text-align:center"><img src="./screenshot/회원관리(관리자)_회원목록.jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/회원관리(관리자)_권한관리.jpg" width="200"></td>
-  </tr>
-  <tr style="text-align:center">
-    <td>회원관리</td><td>권한관리</td>
-  </tr>
-</table>
-
-### 운영 및 모니터링 (관리자)
-
-<table>
-  <tr>
-    <td style="text-align:center"><img src="./screenshot/운영및모니터링(관리자)_모임원의소리.jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/운영및모니터링(관리자)_푸시알림.jpg" width="200"></td>
-  </tr>
-  <tr style="text-align:center">
-    <td>모임원의소리</td><td>푸시알림</td>
-  </tr>
-</table>
-
-### UI/UX
-
-<table>
-  <tr>
-    <td style="text-align:center"><img src="./screenshot/UIUX_라이트모드.jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/UIUX_다크모드.jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/UIUX_반응형화면(모바일뷰).jpg" width="200"></td>
-    <td style="text-align:center"><img src="./screenshot/UIUX_반응형화면(데스크톱뷰).png" width="300"></td>
-  </tr>
-  <tr style="text-align:center">
-    <td>라이트모드</td><td>다크모드</td><td>반응형화면(모바일뷰)</td><td>반응형화면(데스크톱뷰)</td>
-  </tr>
-</table>
 
 ## 기술적 챌린지
 
@@ -278,7 +189,99 @@ https://geulnamu.com"]
   - 명확한 가이드라인 작성의 중요성
   - AI를 도구로 활용한 개발 생산성 향상
 
-## 프로젝트 구조 (간단 버전) ([상세버전](./PROJECT_STRUCTURE.md))
+## 주요 화면 구성
+
+### 인증 및 계정
+
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/인증및계정_로그인.jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/인증및계정_홈화면.jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/인증및계정_프로필관리.jpg" width="200" height="352" style="object-fit:contain;"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>로그인</td><td>홈 화면</td><td>프로필 관리</td>
+  </tr>
+</table>
+
+### 모임 관리
+
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/모임관리_모임목록.jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/모임관리_모임목록(필터).jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/모임관리_모임상세.jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/모임관리_모임생성(운영진용).jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/모임관리_모임상세(운영진용).jpg" width="200" height="352" style="object-fit:contain;"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>모임 목록</td><td>모임 목록 (필터)</td><td>모임 상세</td><td>모임 생성 (운영진용)</td><td>모임 상세 (운영진용)</td>
+  </tr>
+</table>
+
+### 출석 관리
+
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/출석관리_QR출석.jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/출석관리_출석현황.jpg" width="200" height="352" style="object-fit:contain;"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>QR 출석</td><td>출석 현황</td>
+  </tr>
+</table>
+
+### 토론 및 발제
+
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/토론및발제_토론그룹편성.jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/토론및발제_발제문작성.jpg" width="200" height="352" style="object-fit:contain;"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>토론그룹 편성</td><td>발제문 작성</td>
+  </tr>
+</table>
+
+### 회원 관리 (관리자)
+
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/회원관리(관리자)_회원목록.jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/회원관리(관리자)_권한관리.jpg" width="200" height="352" style="object-fit:contain;"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>회원 관리</td><td>권한 관리</td>
+  </tr>
+</table>
+
+### 운영 및 모니터링 (관리자)
+
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/운영및모니터링(관리자)_모임원의소리.jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/운영및모니터링(관리자)_푸시알림.jpg" width="200" height="352" style="object-fit:contain;"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>문의하기</td><td>푸시 알림</td>
+  </tr>
+</table>
+
+### UI/UX
+
+<table>
+  <tr>
+    <td style="text-align:center"><img src="./screenshot/UIUX_라이트모드.jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/UIUX_다크모드.jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/UIUX_반응형화면(모바일뷰).jpg" width="200" height="352" style="object-fit:contain;"></td>
+    <td style="text-align:center"><img src="./screenshot/UIUX_반응형화면(데스크톱뷰).png" width="260" height="352" style="object-fit:contain;"></td>
+  </tr>
+  <tr style="text-align:center">
+    <td>라이트 모드</td><td>다크 모드</td><td>반응형 화면 (모바일 뷰)</td><td>반응형 화면(데스크톱 뷰)</td>
+  </tr>
+</table>
+
+## 프로젝트 구조 (간단 버전) ([상세버전은 여기로](./PROJECT_STRUCTURE.md))
 
 ### 백엔드(Spring boot) (기본 구조)
 
@@ -350,7 +353,7 @@ geulnamu_frontend/lib/
 
 - **GitHub Actions + Oracle Cloud/Vercel**
 - 메인 브랜치 push 시 자동 빌드 및 배포
-- 빌드 시간: 약 3분 (Backend) / 약 2분 (Frontend)
+- 빌드 시간: 3분 (Backend) / 2분 (Frontend)
 - 배포 URL
   - Frontend: https://geulnamu.com
   - Backend: https://api.geulnamu.com
