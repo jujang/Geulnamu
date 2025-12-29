@@ -362,7 +362,7 @@ geulnamu_frontend/lib/
 
 ![image.png](image.png)
 
-링크: https://www.erdcloud.com/d/mgGNCamYYs28DYphr
+[링크](https://www.erdcloud.com/d/mgGNCamYYs28DYphr)
 
 ## 향후 계획
 
