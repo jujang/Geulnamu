@@ -3,7 +3,7 @@
 **글나무 서비스**는 독서 토론 모임인 '글나무'의 모임 활동을 효율적으로 관리하기 위한 웹 기반 서비스입니다.  
 운영진, 관리자, 일반 사용자 등 사용자 권한에 따라 다양한 모임 관련 기능과 관리 기능을 제공합니다.
 
-> **다른 문서**: [프로젝트 소개](../README.md) | [포트폴리오](../PORTFOLIO.md) | [API 문서](https://api.geulnamu.com/docs/index.html)
+> **다른 문서**: [프로젝트 소개](../README.md) | [포트폴리오](./PORTFOLIO.md) | [API 문서](https://api.geulnamu.com/docs/index.html)
 
 ---
 
@@ -317,17 +317,17 @@ KAKAO_CLIENT_ID=your_kakao_oauth_client_id
 
 ### 📋 주요 API 문서
 
-| 기능              | 문서                                                                                                  | 설명                       |
-| ----------------- | ----------------------------------------------------------------------------------------------------- | -------------------------- |
-| **통합 가이드**   | [index.html](../geulnamu_backend/build/docs/asciidoc/index.html)                                       | 전체 API 개요 및 인증 방식 |
-| **로그인 API**    | [login-api-guide.html](../geulnamu_backend/build/docs/asciidoc/login-api-guide.html)                   | 카카오 OAuth, 토큰 관리    |
-| **모임원 API**    | [member-api-guide.html](../geulnamu_backend/build/docs/asciidoc/member-api-guide.html)                 | 회원 정보 관리, 권한 설정  |
-| **모임 API**      | [meeting-api-guide.html](../geulnamu_backend/build/docs/asciidoc/meeting-api-guide.html)               | 모임 생성/조회/수정/삭제   |
-| **출석 API**      | [attendance-api-guide.html](../geulnamu_backend/build/docs/asciidoc/attendance-api-guide.html)         | QR 출석, 출석 현황 관리    |
-| **토론 그룹 API** | [discussion-api-guide.html](../geulnamu_backend/build/docs/asciidoc/discussion-api-guide.html)         | 토론 그룹 편성 및 관리     |
-| **발제 API**      | [book-question-api-guide.html](../geulnamu_backend/build/docs/asciidoc/book-question-api-guide.html)   | 발제문 작성/조회/수정/삭제 |
-| **VoC API**       | [voc-api-guide.html](../geulnamu_backend/build/docs/asciidoc/voc-api-guide.html)                       | 건의사항 및 이슈 관리      |
-| **활동 내역 API** | [action-history-api-guide.html](../geulnamu_backend/build/docs/asciidoc/action-history-api-guide.html) | 시스템 로그 조회           |
+| 기능              | 문서                                                                                         | 설명                       |
+| ----------------- | -------------------------------------------------------------------------------------------- | -------------------------- |
+| **통합 가이드**   | [index.html](https://api.geulnamu.com/docs/index.html)                                       | 전체 API 개요 및 인증 방식 |
+| **로그인 API**    | [login-api-guide.html](https://api.geulnamu.com/docs/login-api-guide.html)                   | 카카오 OAuth, 토큰 관리    |
+| **모임원 API**    | [member-api-guide.html](https://api.geulnamu.com/docs/member-api-guide.html)                 | 회원 정보 관리, 권한 설정  |
+| **모임 API**      | [meeting-api-guide.html](https://api.geulnamu.com/docs/meeting-api-guide.html)               | 모임 생성/조회/수정/삭제   |
+| **출석 API**      | [attendance-api-guide.html](https://api.geulnamu.com/docs/attendance-api-guide.html)         | QR 출석, 출석 현황 관리    |
+| **토론 그룹 API** | [discussion-api-guide.html](https://api.geulnamu.com/docs/discussion-api-guide.html)         | 토론 그룹 편성 및 관리     |
+| **발제 API**      | [book-question-api-guide.html](https://api.geulnamu.com/docs/book-question-api-guide.html)   | 발제문 작성/조회/수정/삭제 |
+| **VoC API**       | [voc-api-guide.html](https://api.geulnamu.com/docs/voc-api-guide.html)                       | 건의사항 및 이슈 관리      |
+| **활동 내역 API** | [action-history-api-guide.html](https://api.geulnamu.com/docs/action-history-api-guide.html) | 시스템 로그 조회           |
 
 ### 🛠️ 로컬에서 문서 확인하기
 

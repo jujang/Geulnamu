@@ -2,19 +2,14 @@
 
 > 독서 토론 모임 관리 플랫폼
 
-[![Service](https://img.shields.io/badge/Service-Live-brightgreen)](https://geulnamu.com)
-[![API](https://img.shields.io/badge/API-Docs-blue)](https://api.geulnamu.com/docs/index.html)
-[![Stack](https://img.shields.io/badge/Stack-Spring_Boot_3.4-green)]()
-
----
-
 ## 🎯 프로젝트 소개
 
 독서 모임 '글나무'의 운영 효율화 및 자동화를 위한 웹 기반 서비스입니다.
 
 **주요 성과**
+
 - 📈 API 응답 속도 **50% 개선** (Redis 캐싱)
-- 🔔 **실시간 에러 모니터링** (Slack 웹훅)
+- 🔔 **실시간 에러 모니터링** (Slack 웹훅, AOP 로깅)
 - 🚀 **3분 내 자동 배포** (GitHub Actions)
 - 💰 월 운영 비용 **$0**
 
@@ -22,22 +17,24 @@
 
 ## 📚 문서
 
-| 문서 | 설명 | 링크 |
-|------|------|------|
-| **🎨 포트폴리오** | 기술적 챌린지, 성과, 아키텍처 | [PORTFOLIO.md](./PORTFOLIO.md) |
-| **🛠️ 기술 문서** | 설치, 실행, 개발 가이드 | [TECHNICAL_DETAILS.md](./docs/TECHNICAL_DETAILS.md) |
-| **📖 API 문서** | REST API 명세 | [api.geulnamu.com/docs](https://api.geulnamu.com/docs/index.html) |
-| **🗄️ ERD** | 데이터베이스 구조 | [ERDCloud](https://www.erdcloud.com/d/mgGNCamYYs28DYphr) |
+| 문서              | 설명                          | 링크                                                              |
+| ----------------- | ----------------------------- | ----------------------------------------------------------------- |
+| **🎨 포트폴리오** | 기술적 챌린지, 성과, 아키텍처 | [PORTFOLIO.md](./docs/PORTFOLIO.md)                               |
+| **🛠️ 기술 문서**  | 설치, 실행, 개발 가이드       | [DEVELOPMENT_GUIDE.md](./docs/DEVELOPMENT_GUIDE.md.md)            |
+| **📖 API 문서**   | REST API 명세                 | [api.geulnamu.com/docs](https://api.geulnamu.com/docs/index.html) |
+| **🗄️ ERD**        | 데이터베이스 구조             | [ERDCloud](https://www.erdcloud.com/d/mgGNCamYYs28DYphr)          |
 
 ---
 
 ## 🚀 Quick Start
 
 ### 서비스 체험
+
 - 🌐 **웹 서비스**: https://geulnamu.com
 - 📱 **모바일 PWA**: 홈 화면에 추가 가능
 
 ### 로컬 실행
+
 ```bash
 # 1. 환경 변수 설정 (필수)
 export MYSQL_SERVER_PASSWORD=your_password
@@ -52,22 +49,25 @@ cd geulnamu_backend
 # http://localhost:8080/docs/index.html
 ```
 
-**상세 설치 가이드**: [TECHNICAL_DETAILS.md](./docs/TECHNICAL_DETAILS.md)
+**상세 설치 가이드**: [DEVELOPMENT_GUIDE.md](./docs/DEVELOPMENT_GUIDE.md)
 
 ---
 
 ## 🛠️ 기술 스택
 
 **Backend**
+
 - Spring Boot 3.4, Java 17
 - MySQL 8.0, QueryDSL, Redis
 - OAuth 2.0, JWT, FCM
 
 **Frontend**
+
 - Flutter PWA (반응형)
 - AI-assisted (Claude)
 
 **Infrastructure**
+
 - Oracle Cloud (Backend)
 - Vercel (Frontend)
 - GitHub Actions (CI/CD)
@@ -84,4 +84,4 @@ cd geulnamu_backend
 
 ---
 
-**더 자세한 내용은 [포트폴리오 문서](./PORTFOLIO.md)를 확인해주세요!** 🎨
+**더 자세한 내용은 [포트폴리오 문서](./docs/PORTFOLIO.md)를 확인해주세요!** 🎨
