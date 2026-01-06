@@ -78,12 +78,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 
 	// Firebase Admin SDK
-	implementation ('com.google.firebase:firebase-admin:9.2.0') {
+	implementation ('com.google.firebase:firebase-admin:9.4.3') {
 		exclude group: 'commons-logging', module: 'commons-logging'
 		exclude group: 'io.grpc', module: 'grpc-xds'
 		exclude group: 'io.grpc', module: 'grpc-services'
-		exclude group: 'io.opencensus', module: 'opencensus-api'
-		exclude group: 'io.opencensus', module: 'opencensus-contrib-http-util'
 	}
 }
 
