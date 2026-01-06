@@ -46,13 +46,8 @@ public class FcmService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public FcmSendResult sendNotification(String title, String body, List<Long> memberId) {
-        List<String> tokens = fcmQueryRepository.findByMemberIdIn(memberId)
-            .stream()
-            .filter(token -> token.getMember().isPushEnabled())
-            .map(FcmToken::getToken)
-            .toList();
-
+    public FcmSendResult sendNotification(String title, String body, List<Long> memberIds) {
+        List<String> tokens = fcmQueryRepository.findEnabledTokensByMemberIds(memberIds);
         if(tokens.isEmpty()) {
             return new FcmSendResult(0, 0);
         }

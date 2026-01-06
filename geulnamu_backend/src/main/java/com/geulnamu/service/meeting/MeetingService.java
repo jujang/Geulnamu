@@ -81,8 +81,10 @@ public class MeetingService {
     )
     @Transactional(readOnly = true)
     public MeetingDetailResponse getMeeting(Long meetingId, Long memberId) {
-        Meeting meeting = findMeetingOrThrow(meetingId);
-        MeetingDetailResponse meetingDetailResponse = meetingQueryRepository.findMeeting(meeting.getId(), memberId);
+        MeetingDetailResponse meetingDetailResponse = meetingQueryRepository.findMeeting(meetingId, memberId);
+        if(meetingDetailResponse == null) {
+            throw new NotFoundDataException(DomainType.MEETING.getDescription());
+        }
         if(meetingDetailResponse.getDiscussionGroup() != null) {
             List<AttendanceIdAndNameResponse> groupMemberList = attendanceQueryRepository.findMyDiscussionMemberList(
                 meetingDetailResponse.getMeetingId(), meetingDetailResponse.getDiscussionGroup());
