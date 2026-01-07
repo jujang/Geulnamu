@@ -15,46 +15,32 @@
 
 ## 주요 성과
 
-### 핵심 기능
-
-- **QR 출석**: QR 코드 기반 간편 출석 체크
-- **토론 그룹**: 조건별 토론 그룹 편성
-- **실시간 알림**: Firebase FCM 푸시 알림
-
 ### 성능 최적화
 
-- **Redis 캐싱**: API 응답속도 **50% 개선** (100ms → 50ms)
-- **QueryDSL 동적 쿼리**: 복잡한 조회 조건 처리, N+1 문제 해결
+- **데이터 조회 성능 50% 향상**: 반복적 조회 API에 대해서 **Redis 캐싱**을 적용하여 **응답 속도 개선(100ms → 50ms)** 및 DB 부하 감소
+- **DB I/O 효율화 및 N+1 문제 해결**: JPA 지연 로딩으로 인한 성능 저하를 막기 위해 **QueryDSL의 fetchJoin 사용**하여 객체 그래프 탐색 시 발생하는 **N+1 문제를 단일 쿼리로 해결**, 대량 데이터 조회 성능 최적화
 
-### 보안 및 인증
+### 보안
 
-- **인증/인가**: Kakao OAuth 2.0 + JWT 토큰 기반 인증, 6단계 RBAC
-- **AOP 액션 로깅**: 모든 중요 작업 자동 로깅
+- **사용자 신뢰도 확보**: **Kakao OAuth 2.0**연동으로 가입 절차 간소화 및 **검증된 사용자 유입**으로 **더미 계정 생성 차단**
+- **효율적 인증 구조**: **JWT를 활용한 Stateless 인증**으로 서버 세션 관리 부담 제거
+- **정교한 권한 제어(RBAC)**: Spring Security를 활용하여 **6단계 역할 기반 권한 제어**를 구현, 운영진과 일반 회원의 리소스 접근 권한을 분리하여 데이터 보안 강화
 
 ### 운영 효율화
 
-- **실시간 모니터링**: Slack 웹훅으로 500 에러 즉시 알림
-- **자동 배포**: GitHub Actions로 **3분 내 배포**
-- **월 운영 비용**: **0$** (Oracle Cloud, Vercel, Slack Free)
+- **AOP 기반 통합 로깅:** 비즈니스 로직과 분리된 공통 로깅 체계를 구축하고, 에러 로그를 DB에 구조화하여 저장함으로 장애 발생 시의 상세 컨텍트스 추적성 확보
+- **실시간 장애 대응**: Slack 웹훅 연동을 통해 시스템 예외 발생 즉시 알림 수신, 인지부터 원인 분석까지의 시간 최소화
+- **인프라 비용 최적화**: Oracle Cloud 및 Vercel 프리티어 전략적 활용으로 **운영 비용 0원**으로 서비스 환경 구축
 
-### 개발 생산성
+### 개발 생산성 및 품질
 
-- **CI/CD 자동화**: 배포 작업 자동화로 개발 집중력 향상
-- **AI 협업 개발**: AI Agent를 활용한 프론트엔드 개발
+- **QueryDSL 기반 동적 조회 시스템 구축**: 다중 필터 조건 조회를 **타입 세이프**한 코드로 구현하여 **런타임 에러 0건** 달성 및 쿼리 재사용성 극대화
+- **배포 프로세스 자동화**: **GitHub Actions** 기반 **CI/CD 파이프라인** 구축, 코드 푸시부터 배포 완료까지 **3분 이내로 자동화**하여 개발 생산성 향상
+- **테스트 기반 문서 자동화**: **Spring Rest Docs**를 사용하여 테스트 통과 시에만 API 문서가 갱신되도록 강제하여 **구현-명세간의 정합성을 100% 유지**하여 프론트엔드와의 협업 효율 향상
 
-## 기술 스택
+### 서비스 핵심 경험 (운영진 관점)
 
-### Backend
-
-- Spring Boot 3.4 / JAVA 17 / Spring Data JPA / QueryDSL / MySQL / OAuth 2.0 / JWT / FCM
-
-### Frontend
-
-- Flutter PWA (반응형) / GoRouter / AI-assisted(Claude)
-
-### Infrastructure
-
-- Oracle Cloud(Ubuntu) / Vercel / Nginx / Let’s Encrypt / Github Actions
+- **모임 관리 및 출석 자동화**: 수동으로 진행하던 출석 체크를 **QR 코드 기반 출석 시스템**으로 전환하고, 복잡한 **토론 그룹 편성 로직을 자동화**하여 **운영진 업무 공수 최소화**
 
 ## 시스템 아키텍쳐
 
@@ -109,6 +95,8 @@ https://geulnamu.com"]
     F --> G
     F --> H
 
+    H ~~~ External
+
     D1 -.->|자동 배포| D
     D2 -.->|자동 배포| F
 
@@ -125,30 +113,42 @@ https://geulnamu.com"]
     style K fill:#fff9c4,stroke:#333
 ```
 
-## 주요 기능
+### Backend 아키텍쳐 특징
 
-- 카카오 로그인: 소셜 로그인 기반 회원 인증 (JWT + OAuth 2.0 + 6단계 역할 RBAC)
-- 모임 관리: 정기/번개/특수 모임 생성, 일정·장소 설정, 시간 기반 수정 제한
-- QR 코드 출석: 모임별 고유 QR 생성/스캔, 실시간 출석 처리, 현황 페이지에서 모임원별 출석 현황 확인
-- 토론 그룹 관리: 토론 참여 의사 선택, 참여 희망자 대상으로 조 편성, 토론 그룹 드래그 앤 드롭 관리
-- 발제문 시스템: 그룹별 토론 주제 작성/조회, 시간 기반 수정 제한
-- 회원 관리: 6단계 역할 기반 권한(MEMBER~ADMIN), 회원 활성화/비활성화
-- 문의하기: 에러 보고/기능 요청 작성, 이슈 상태 관리 (관리자)
-- 푸시 알림: FCM 기반 타겟팅 알림, 모임 공지, 개인별 수신 설정
+- **계층형 아키텍처**: Controller → Service → Repository → Domain
+- **CQRS 패턴**: Command/Query Repository 분리
+- **DDD 스타일**: 비즈니스 로직을 Entity에 캡슐화
+- **AOP 활용**: `@LogAction` 어노테이션으로 횡단 관심사 처리
+- **보안**: JWT + OAuth 2.0 (Kakao)기반의 RBAC 설계
+- **배포 환경**: GitHub Actions를 활용한 배포 자동화
+
+## 기술 스택
+
+### Backend
+
+- Spring Boot 3.4 / JAVA 17 / Spring Data JPA / QueryDSL / MySQL / OAuth 2.0 / JWT / FCM
+
+### Frontend
+
+- Flutter PWA (반응형) / GoRouter / AI-assisted(Claude)
+
+### Infrastructure
+
+- Oracle Cloud(Ubuntu) / Vercel / Nginx / Let’s Encrypt / Github Actions
 
 ## 기술적 챌린지
 
-### AOP 기반 액션 로깅 시스템
+### 어노테이션 기반 AOP 로깅 시스템
 
 - 문제
-  - 장애 분석을 위한 로그 필요
+  - 장애 발생 시, 분석을 위한 로그 필요
 - 해결법
   - Spring AOP + 커스텀 어노테이션(`@LogAction`, `@ErrorLogAction`) 활용
   - 비동기 처리(`@Async`)로 메인 로직 성능 영향 최소화
-  - GET 요청은 에러만, POST/PATCH/DELETE는 전체 액션 로깅하여 DB 부하 균형
+  - GET 요청은 에러만, POST/PATCH/DELETE는 전체 로깅하여 DB 부하 조절
 - 결과
   - 비동기 처리로 메인 로직 성능 영향 최소화
-  - 로그 서버 비용 0$ (자체 DB 저장)
+  - 로그 서버 비용 0$ (DB 저장)
 
 ### Redis 캐싱을 통한 성능 최적화
 
@@ -158,6 +158,7 @@ https://geulnamu.com"]
 - 해결법
   - Spring Cache + Redis 연동하여 자주 조회되는 API에 캐싱 적용
   - TTL 5분 설정으로 데이터 신선도와 캐시 효율 균형 유지
+  - 수정/삭제 시 Cache Evict 전략을 사용해 DB와 캐시간 정합성 유지
 - 결과
   - API 응답 속도 50% 개선 (100ms → 50ms)
   - 서버 부하 감소로 안정적인 서비스 제공
@@ -169,11 +170,37 @@ https://geulnamu.com"]
   - 배포 작업 중 다른 개발 작업에 집중 불가
 - 해결법
   - GitHub Actions로 main 브랜치 push시 자동 빌드 및 배포
-  - Frontend: Flutter 빌드 → Vervel 배포 (2분)
   - Backend: Gradle 빌드 → Oracle Cloud 배포 (3분)
+  - Frontend: Flutter 빌드 → Vervel 배포 (2분)
 - 결과
   - 배포 완전 자동화로 개발 집중력 향상
   - 휴먼 에러 제거 및 배포 안정성 향상
+
+## CI/CD 파이프라인
+
+- **GitHub Actions + Oracle Cloud/Vercel**
+- 메인 브랜치 push 시 자동 빌드 및 배포
+- 빌드 시간: 3분 (Backend) / 2분 (Frontend)
+- 배포 URL
+  - Frontend: https://geulnamu.com
+  - Backend: https://api.geulnamu.com
+
+## 주요 테이블 관계도(ERD)
+
+![image.png](image.png)
+
+[링크](https://www.erdcloud.com/d/mgGNCamYYs28DYphr)
+
+## 주요 기능
+
+- 카카오 로그인: 소셜 로그인 기반 회원 인증 (JWT + OAuth 2.0 + 6단계 역할 RBAC)
+- 모임 관리: 정기/번개/특수 모임 생성, 일정·장소 설정, 시간 기반 수정 제한
+- QR 코드 출석: 모임별 고유 QR 생성/스캔, 실시간 출석 처리, 현황 페이지에서 모임원별 출석 현황 확인
+- 토론 그룹 관리: 토론 참여 의사 선택, 참여 희망자 대상으로 조 편성, 토론 그룹 드래그 앤 드롭 관리
+- 발제문 시스템: 그룹별 토론 주제 작성/조회, 시간 기반 수정 제한
+- 회원 관리: 6단계 역할 기반 권한(MEMBER~ADMIN), 회원 활성화/비활성화
+- 문의하기: 에러 보고/기능 요청 작성, 이슈 상태 관리 (관리자)
+- 푸시 알림: FCM 기반 타겟팅 알림, 모임 공지, 개인별 수신 설정
 
 ## 개발 방식 및 특이사항
 
@@ -280,89 +307,6 @@ https://geulnamu.com"]
     <td>라이트 모드</td><td>다크 모드</td><td>반응형 화면 (모바일 뷰)</td><td>반응형 화면(데스크톱 뷰)</td>
   </tr>
 </table>
-
-## 프로젝트 구조 (간단 버전) ([상세버전은 여기로](./PROJECT_STRUCTURE.md))
-
-### 백엔드(Spring boot) (기본 구조)
-
-```
-geulnamu_backend/
-├── controller/              # REST API 엔드포인트
-│   ├── login/              # 카카오 OAuth 로그인
-│   ├── member/             # 회원 관리
-│   ├── meeting/            # 모임 관리
-│   ├── attendance/         # 출석 관리
-│   ├── bookQuestion/       # 발제문 관리
-│   ├── voc/                # 모임원의 소리
-│   ├── fcm/                # 푸시 알림
-│   └── actionHistory/      # 액션 로그
-├── service/                 # 비즈니스 로직
-├── repository/              # 데이터 접근 (CQRS 패턴)
-│   └── {domain}/
-│       ├── CommandRepository      # CUD 작업
-│       ├── QueryRepository        # 조회 작업
-│       └── QueryRepositoryImpl    # QueryDSL 구현
-├── domain/                  # 엔티티 + 도메인 로직
-│   └── {domain}/
-│       ├── Entity.java           # JPA 엔티티
-│       └── Enum.java             # 도메인 Enum
-└── infrastructure/          # 횡단 관심사
-├── annotation/         # @LogAction, @AccessLevel
-├── aspect/             # AOP (로깅)
-├── config/             # Security, Firebase, Async
-├── jwt/                # JWT 인증/인가
-├── exception/          # 통합 예외 처리
-└── response/           # 통일된 응답 구조
-```
-
-### 프론트엔드(Flutter PWA) (기본 구조)
-
-```
-geulnamu_frontend/lib/
-├── core/                    # 핵심 시스템
-│   ├── config/             # 환경 설정 (API, 카카오)
-│   ├── theme/              # 색상, 테마 (라이트/다크)
-│   ├── utils/              # 유틸리티 (API, 날짜, PWA)
-│   └── services/           # 코어 서비스 (인증, 설정)
-├── services/                # 비즈니스 로직 (Singleton)
-│   ├── home/               # 홈 서비스
-│   ├── meeting/            # 모임 서비스
-│   ├── attendance/         # 출석 서비스
-│   ├── discussion/         # 토론 서비스
-│   └── notification/       # FCM 알림
-├── providers/               # 전역 상태 관리
-│   ├── auth_provider       # 인증 상태
-│   └── theme_provider      # 테마 상태
-├── screens/                 # 화면별 구조
-│   └── {screen}/
-│       ├── {screen}_screen.dart
-│       ├── mixins/         # 로직 Mixin
-│       └── widgets/        # UI 위젯 (Static)
-├── widgets/                 # 공통 위젯
-│   └── common/             # MainLayout, AppHeader
-├── models/                  # 데이터 모델
-└── routes/                  # GoRouter 네비게이션
-```
-
-### 아키텍쳐 특징
-
-- **Backend**: 계층형 아키텍처 + CQRS + DDD 스타일
-- **Frontend**: 하이브리드 (Service Singleton + Mixin + Static Widgets)
-
-## CI/CD 파이프라인
-
-- **GitHub Actions + Oracle Cloud/Vercel**
-- 메인 브랜치 push 시 자동 빌드 및 배포
-- 빌드 시간: 3분 (Backend) / 2분 (Frontend)
-- 배포 URL
-  - Frontend: https://geulnamu.com
-  - Backend: https://api.geulnamu.com
-
-## 주요 테이블 관계도(ERD)
-
-![image.png](image.png)
-
-[링크](https://www.erdcloud.com/d/mgGNCamYYs28DYphr)
 
 ## 향후 계획
 
