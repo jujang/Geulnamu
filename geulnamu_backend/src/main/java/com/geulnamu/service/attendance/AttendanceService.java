@@ -170,7 +170,7 @@ public class AttendanceService {
     public void deleteAttendance(Long attendanceId) {
         Attendance attendance = attendanceQueryRepository.findById(attendanceId)
             .orElseThrow(() -> new NotFoundDataException(DomainType.ATTENDANCE.getDescription()));
-        attendanceQueryRepository.delete(attendance);
+        attendanceCommandRepository.delete(attendance);
     }
 
     private Attendance getValidateAttendance(Long attendanceId, Long memberId) {
